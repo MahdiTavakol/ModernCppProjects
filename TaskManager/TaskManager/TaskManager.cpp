@@ -3,6 +3,7 @@
 #include <sstream>
 #include <algorithm>
 #include <iostream>
+#include <array>
 
 
 TaskManager::TaskManager(const std::string& filename)
@@ -22,7 +23,7 @@ TaskManager::TaskManager(const std::string& filename, SortKey _sort_key) : sort_
 
 TaskManager::~TaskManager()
 {
-    saveToFile("Tasks.txt");
+    saveToFile("Tasks-desructor.txt");
 }
 
 
@@ -35,7 +36,11 @@ void TaskManager::sortTasks()
 {
 	SortKey sort_key_ = this->sort_key;
     auto sortLambda = [&sort_key_](const std::unique_ptr<Task>& a, const std::unique_ptr<Task>& b) -> bool {
-            if (b->getCompleted()) return true;
+            // Completed tasks always come after incomplete ones
+            if (a->getCompleted() != b->getCompleted()) {
+                return !a->getCompleted(); // incomplete < complete
+            }
+            
             switch (sort_key_)
             {
                 case SortKey::PRIORITY:
@@ -98,13 +103,16 @@ void TaskManager::listTasks() const
 		return;
     }
 
+	std::array<std::string, 4> headers = {
+		"Task Name", "Priority", "Due Date", "Progress"
+	};
     std::cout << "Tasks List:" << std::endl;
 	std::cout << "----------------------------------------" << std::endl;
-	std::cout << "Task Name\tPriority\tDue Date\tProgress" << std::endl;
+	std::cout << std::format("{:<20}\t{:^10}\t{:^15}\t{:^8}(%)\n",headers[0],headers[1],headers[2],headers[3]) << std::endl;
 
     for (auto& task : Tasks)
     {
-		std::cout << std::format("{}\t{}\t{}\t{}%\n",
+		std::cout << std::format("{:<20}\t{:^10}\t{:^15}\t{:^8.1f}\n",
 			task->getName(),
 			task->getPriority(),
 			task->getDueDate().ymd(),
@@ -139,6 +147,7 @@ void TaskManager::loadFromFile(const std::string& filename)
 	std::getline(file, line); // Skip header line
 
     int task_number = -1;
+    std::cout << std::endl << std::endl << std::endl;
     while (std::getline(file, line))
     {
         task_number++;
@@ -151,11 +160,12 @@ void TaskManager::loadFromFile(const std::string& filename)
               std::getline(ss, priority_str,',') &&
               std::getline(ss,due_date_str,',')))
             throw std::runtime_error("Error reading the task number " + std::to_string(task_number) + "from the file : " + filename + ". Please check the file format");
-		priority = std::stoi(priority_str);
+        priority = std::stoi(priority_str);
 		std::stringstream ss2(due_date_str);
 		ss2 >> due_date;
         std::unique_ptr<Task> newTask = std::make_unique<Task>(std::move(name), priority, std::move(due_date));
         Tasks.push_back(std::move(newTask));
+        const ChronoDate due_date_from_task = Tasks[Tasks.size() - 1]->getDueDate();
     }
 }
 
