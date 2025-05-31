@@ -41,12 +41,17 @@ public:
     void addTask(std::string title, int priority, const std::string& due_date_str);
     void finishTaskByTitle(const std::string& title);
 
-    void listTasks() const;
+    void listTasks(const std::vector<std::unique_ptr<Task>> inputTasks,const std::string& description) const;
+	void listTasks() const {
+		listTasks(Tasks,"Tasks List");
+	}
     void saveToFile(const std::string& filename) const;
     void loadFromFile(const std::string& filename);
 
     template<DaysBehindAhead mode>
 	void printBehindAheadTasks(const ChronoDate& today) const;
+
+    void printHighPriorityTasks(const int& threshold = 500) const;
 
     
 

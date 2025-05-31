@@ -60,9 +60,9 @@ void TaskManager::completeTask()
 {
     if (currentTaskIterator != Tasks.end())
     {
-        currentTaskIterator->get()->finishTask();
+        (*currentTaskIterator)->finishTask();
+        sortTasks();
     }
-    sortTasks();
 }
 
 void TaskManager::addTask(std::unique_ptr<Task>&& newTask)
@@ -87,7 +87,7 @@ void TaskManager::finishTaskByTitle(const std::string& title)
         {return task->getName() == title; }
     );
     if (ip != Tasks.end()) {
-        ip->get()->finishTask();
+        (*ip)->finishTask();
     }
     else
     {
@@ -96,9 +96,10 @@ void TaskManager::finishTaskByTitle(const std::string& title)
     sortTasks();
 }
 
-void TaskManager::listTasks() const
+void TaskManager::listTasks(const std::vector<std::unique_ptr<Task>> inputTasks, const std::string& description) const
 {
-    if (Tasks.empty()) {
+    if (inputTasks.empty()) {
+        std::cout << description << " is empty." << std::endl;
 		std::cout << "No tasks available." << std::endl;
 		return;
     }
@@ -106,11 +107,11 @@ void TaskManager::listTasks() const
 	std::array<std::string, 4> headers = {
 		"Task Name", "Priority", "Due Date", "Progress"
 	};
-    std::cout << "Tasks List:" << std::endl;
+    std::cout << description << ":" << std::endl;
 	std::cout << "----------------------------------------" << std::endl;
 	std::cout << std::format("{:<20}\t{:^10}\t{:^15}\t{:^8}(%)\n",headers[0],headers[1],headers[2],headers[3]) << std::endl;
 
-    for (auto& task : Tasks)
+    for (auto& task : inputTasks)
     {
 		std::cout << std::format("{:<20}\t{:^10}\t{:^15}\t{:^8.1f}\n",
 			task->getName(),
@@ -200,5 +201,30 @@ void TaskManager::printBehindAheadTasks(const ChronoDate& today) const
 			std::cout << task->getName() << " is on time." << std::endl;
 		}
 	}
+}
+
+void TaskManager::printHighPriorityTasks(const int& threshold) const
+{
+    std::vector<std::unique_ptr<Task>> highPriorityTasks;
+	highPriorityTasks.reserve(Tasks.size()); // Reserve space to avoid multiple allocations
+    //std::for_each(Tasks.begin(), Tasks.end(), [&threshold, &highPriorityTasks](const std::unique_ptr<Task>& task)
+    //    {if (task->getPriority() >= threshold)  highPriorityTasks.push_back(std::make_unique<Task>(*task)); });
+
+    // a lighter implementation might look like this;
+	std::vector<TaskStruct> highPriorityTasksStructs;
+    highPriorityTasksStructs.reserve(highPriorityTasks.size());
+    
+    auto conditional_append = [&threshold, &highPriorityTasksStructs](const std::unique_ptr<Task>& task)
+		{
+			if (task->getPriority() >= threshold) {
+                TaskStruct taskStruct{ task->getName(), task->getPriority(), task->getDueDate(), task->getProgress() };
+				highPriorityTasksStructs.push_back(taskStruct);
+			}
+		};
+
+    //std::for_each(Tasks.begin(), Tasks.end(), conditional_append);
+    // End of the lighter version. 
+
+	this->listTasks(highPriorityTasks, "High Priority Tasks (Priority >= " + std::to_string(threshold) + ")");
 }
 

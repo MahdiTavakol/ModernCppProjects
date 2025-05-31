@@ -27,6 +27,6 @@ void Task::daysBehindAhead(int& days_behind_ahead, const ChronoDate& today) cons
 	else {
 		auto diff = today - start_date;
 		expected_progress = diff * progress_per_day;
-		days_behind_ahead = (expected_progress - progress) / progress_per_day;
+		days_behind_ahead = static_cast<int> ((expected_progress - progress) / progress_per_day);
 	}
 }

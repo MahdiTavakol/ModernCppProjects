@@ -75,7 +75,8 @@ void main()
 	std::cout << "Completing two tasks (c) ..." << std::endl;
 	taskManagerPtr->completeTask();
 	taskManagerPtr->completeTask();
-
+	std::cout << "Listing high priority tasks..." << std::endl;
+	taskManagerPtr->printHighPriorityTasks();
 
 	std::cout << "Saving tasks to file..." << std::endl;
 	taskManagerPtr->saveToFile("Tasks-saved.txt");

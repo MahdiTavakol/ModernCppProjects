@@ -3,6 +3,13 @@
 #include "ChronoDate.h"
 #include <string>
 
+struct TaskStruct
+{
+	std::string name;
+	int priority;
+	ChronoDate due_date;
+	float progress;
+};
 
 class Task
 {
@@ -12,6 +19,12 @@ public:
 		const ChronoDate& start_date_, const ChronoDate& end_date_, const ChronoDate& due_date_);
 	Task(const std::string& name_, int priority_, const std::string& description_, const ChronoDate& due_date_);
 	Task(const std::string& name_, int priority_, const ChronoDate& due_date_);
+
+
+	Task(const Task&) = default;
+	Task& operator=(const Task&) = default;
+	Task(Task&&) = default;
+	Task& operator=(Task&&) = default;
 	~Task() = default;
 
 
