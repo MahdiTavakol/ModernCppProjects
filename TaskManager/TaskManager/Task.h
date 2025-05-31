@@ -31,20 +31,21 @@ public:
 	void getStartDate(ChronoDate& start_date_) const { start_date_ = start_date; }
 	void getEndDate(ChronoDate& end_date_) const { end_date_ = end_date; }
 	const ChronoDate& getDueDate() const { return due_date; }
-	void setCompleted(bool& completed_) const { completed_ = completed; }
-	void setProgress(float& progress_) const { progress_ = progress; }
+	bool getCompleted() const { return completed; }
+	float getProgress() const { return progress; }
 
 	void finishTask() { completed = true; progress = 100.0f; }
 
+	void daysBehindAhead(int& days_behind_ahead, const ChronoDate& today) const;
 
 
 protected:
-	void daysBehindAhead(int& days_behind_ahead, const ChronoDate& today) const;
+	
 
 private:
 	std::string name;
 	int priority;
-	std::string description;
+	std::string description = "No descriptions yet!";
 	ChronoDate start_date, end_date, due_date;
 	bool completed = false;
 	float progress = 0.0f; // Progress percentage (0.0 to 100.0)

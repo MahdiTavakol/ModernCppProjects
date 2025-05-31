@@ -5,6 +5,7 @@
 #include <string>
 #include <set>
 #include <memory>
+#include <map>
 #include <iterator>
 #include <fstream>
 
@@ -14,10 +15,17 @@ enum class SortKey {
 	NAME = 1 << 2,
 };
 
+enum class DaysBehindAhead {
+	BEHIND = -1,
+	AHEAD = 1,
+	ON_TIME = 0
+};
+
 class TaskManager {
 public:
     TaskManager() = default;
     TaskManager(const std::string& filename);
+    TaskManager(const std::string& filename, SortKey _sort_key);
 
 
 	TaskManager(const TaskManager&) = delete;
@@ -27,20 +35,27 @@ public:
 	~TaskManager();
 
 
-    void Initialize();
-    void sortTasks(SortKey key = SortKey::PRIORITY);
+    
     void completeTask();
-    void addTask(std::string title, int priority, std::string due_date);
-    void removeTask(const std::string& title);
+    void addTask(std::unique_ptr<Task>&& newTask);
+    void addTask(std::string title, int priority, const std::string& due_date_str);
+    void finishTaskByTitle(const std::string& title);
 
     void listTasks() const;
     void saveToFile(const std::string& filename) const;
     void loadFromFile(const std::string& filename);
 
+    template<DaysBehindAhead mode>
+	void printBehindAheadTasks(const ChronoDate& today) const;
+
     
 
 private:
+    std::vector <std::unique_ptr<Task>> Tasks;
+    std::vector <std::unique_ptr<Task>>::iterator currentTaskIterator;
+    SortKey sort_key;
 
-    std::vector<std::unique_ptr<Task>> Taskset;
-    std::vector<std::unique_ptr<Task>>::iterator currentTaskIterator;
+
+    void Initialize();
+    void sortTasks();
 };
