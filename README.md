@@ -1,102 +1,126 @@
-# Modern C++ Project Series: From CLI to Concurrency 🚀
+# Modern C++ Project Portfolio
 
-Welcome to a multi-phase project series designed to demonstrate practical, real-world applications of **Modern C++ (C++17/20)**. Each phase builds on the previous, introducing more advanced concepts—from basic task management to concurrent simulation engines.
-
-This series is ideal for demonstrating **job-ready C++ skills**, including STL mastery, memory safety with smart pointers, modern idioms like lambdas and coroutines, and concurrent programming.
+This repository showcases a series of C++20/C++23 projects demonstrating modern C++ programming practices, including smart pointers, RAII, concurrency, coroutines, STL algorithms, and more. Each project is structured to highlight different advanced concepts, with real-world inspired use cases.
 
 ---
 
-## ✅ Phase 1: Modern Task Manager
+## ✅ 1. Modern Task Manager (Phase 1)
 
-**Goal:**  
-Build a CLI application to manage tasks with priorities and categories.
+**Goal:** Build a CLI app that manages tasks with priorities and categories.
 
 **Concepts Practiced:**
+
 - `std::map`, `std::vector`, `std::unique_ptr`
 - Lambda-based sorting and filtering
-- RAII for file/resource cleanup
+- RAII to manage file/resource cleanup
 
 **Features:**
-- Add, remove, and update tasks
-- Sort by priority, due date, or name
-- Save/load tasks from file
-- Filter tasks by priority or deadline
+
+- Add/Remove/Update tasks
+- Sort by priority or due date
+- Save/load tasks to file
+- Show completed, high-priority, and overdue tasks
 
 ---
 
-## ✅ Phase 2: Financial Data Analyzer
+## ✅ 2. Financial Data Analyzer (Phase 2)
 
-**Goal:**  
-Parse and analyze stock data from CSV files.
+**Goal:** Read stock data from CSV and compute statistics (mean, median, etc.).
 
 **Concepts Practiced:**
+
 - `std::ifstream`, `std::stringstream`
 - `std::transform`, `std::accumulate`, `ranges::views`
-- Custom aggregation and filtering
+- Aggregation and filtering
 
 **Features:**
-- Filter by ticker or date range
-- Compute average price, median, volatility, drawdown
-- Sort by volume, price, or date
+
+- Filter by date range or ticker
+- Output statistics like average price, max drawdown
+- Sort by volume or price
 
 ---
 
-## ✅ Phase 3: Multithreaded Log Parser
+## ✅ 3. Multithreaded Log Parser (Phase 3)
 
-**Goal:**  
-Parse large log files in parallel and extract key metrics.
+**Goal:** Parse large log files in parallel and summarize results (e.g., error counts).
 
 **Concepts Practiced:**
+
 - `std::thread`, `std::mutex`, `std::async`, `std::future`
-- Thread-safe containers, critical sections
-- String parsing and pattern matching
+- Thread-safe containers or locks
+- Log parsing using string utilities
 
 **Features:**
-- Count log levels (ERROR, WARN, INFO, etc.)
-- Multi-threaded chunk parsing for large files
+
+- Count lines with ERROR, WARN, etc.
+- Multi-threaded file chunk parsing
 - Real-time progress reporting
 
 ---
 
-## ✅ Phase 4: Async Task Scheduler
+## ✅ 4. Async Task Scheduler (Phase 4)
 
-**Goal:**  
-Simulate a system of asynchronous tasks (e.g., I/O fetches).
+**Goal:** Simulate tasks that wait or work asynchronously (e.g., fetching URLs or files).
 
 **Concepts Practiced:**
+
 - Coroutines (`co_await`, `co_return`)
-- `std::optional`, `std::variant` for task states
-- `std::future`, `std::async`, `std::stop_token`
+- `std::optional`, `std::variant` for task state
+- `std::future`, `std::async` for fallback
 
 **Features:**
-- Async execution queue
-- Task prioritization and cancellation
-- Simulated I/O delay and task completion
+
+- Queue of fake I/O tasks
+- Prioritized or delayed execution
+- Cancellable tasks using `stop_token` (C++20)
 
 ---
 
-## ✅ Phase 5: Concurrent Simulation Engine
+## ✅ 5. Concurrent Simulation Engine (Phase 5)
 
-**Goal:**  
-Build a grid-based simulation engine (e.g., traffic or agents).
+**Goal:** Simulate a grid of agents (e.g., traffic, particles) updating in parallel.
 
 **Concepts Practiced:**
-- STL + concurrency (threads, async)
-- RAII, strategy/factory design patterns
-- Performance monitoring and logging
+
+- STL + concurrency + modern C++ features
+- RAII + design patterns (`Factory`, `Strategy` via `std::variant`)
+- Logging, command-line config
 
 **Features:**
-- Agents move and act based on neighborhood
-- Configurable grid and behavior
-- Synchronous and asynchronous stepping
-- Benchmarking and profiling
+
+- Each cell has an agent (or is empty)
+- Agents decide next move based on neighbors
+- Step-based or async simulation loop
+- Performance metrics & structured logging
 
 ---
 
-## 🔧 Build & Run
+## ✅ 6. Mandelbrot Set Visualizer (Phase 6)
 
-Each phase lives in its own subfolder. Use `CMake` or your preferred compiler:
+**Goal:** Generate and visualize the Mandelbrot set using a custom complex number class and modular design.
+
+**Concepts Practiced:**
+
+- Custom math types (`complex`)
+- Header-based utilities (`array.h`, `definitions.h`)
+- Separation of interface and implementation (`mandelbrot.h/.cpp`)
+- Procedural image generation
+- Use of modern C++ features like RAII
+
+**Features:**
+
+- Generates Mandelbrot fractals using complex number arithmetic  
+- Flexible threading configuration support (`thread_config`)
+- User-definable resolution and bounds  
+- Modular file structure and extensibility for graphics or GPU acceleration
+
+---
+
+## 🔧 Build Instructions
+
+Each project is self-contained in its own folder. You can build any project using:
 
 ```bash
-g++ -std=c++20 -pthread -o task_manager main.cpp Task.cpp TaskManager.cpp ChronoDate.cpp
-./task_manager
+g++ -std=c++20 -O2 -o app main.cpp [other .cpp files]
+./app
