@@ -41,7 +41,7 @@ public:
     void addTask(std::string title, int priority, const std::string& due_date_str);
     void finishTaskByTitle(const std::string& title);
 
-    void listTasks(const std::vector<std::unique_ptr<Task>> inputTasks,const std::string& description) const;
+    void listTasks(const std::vector<std::unique_ptr<Task>>& inputTasks,const std::string& description) const;
 	void listTasks() const {
 		listTasks(Tasks,"Tasks List");
 	}

@@ -96,7 +96,7 @@ void TaskManager::finishTaskByTitle(const std::string& title)
     sortTasks();
 }
 
-void TaskManager::listTasks(const std::vector<std::unique_ptr<Task>> inputTasks, const std::string& description) const
+void TaskManager::listTasks(const std::vector<std::unique_ptr<Task>>& inputTasks, const std::string& description) const
 {
     if (inputTasks.empty()) {
         std::cout << description << " is empty." << std::endl;
@@ -207,8 +207,8 @@ void TaskManager::printHighPriorityTasks(const int& threshold) const
 {
     std::vector<std::unique_ptr<Task>> highPriorityTasks;
 	highPriorityTasks.reserve(Tasks.size()); // Reserve space to avoid multiple allocations
-    //std::for_each(Tasks.begin(), Tasks.end(), [&threshold, &highPriorityTasks](const std::unique_ptr<Task>& task)
-    //    {if (task->getPriority() >= threshold)  highPriorityTasks.push_back(std::make_unique<Task>(*task)); });
+    std::for_each(Tasks.begin(), Tasks.end(), [&threshold, &highPriorityTasks](const std::unique_ptr<Task>& task)
+        {if (task->getPriority() >= threshold)  highPriorityTasks.push_back(std::make_unique<Task>(*task)); });
 
     // a lighter implementation might look like this;
 	std::vector<TaskStruct> highPriorityTasksStructs;
