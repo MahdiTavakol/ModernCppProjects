@@ -19,6 +19,7 @@ public:
 		const ChronoDate& start_date_, const ChronoDate& end_date_, const ChronoDate& due_date_);
 	Task(const std::string& name_, int priority_, const std::string& description_, const ChronoDate& due_date_);
 	Task(const std::string& name_, int priority_, const ChronoDate& due_date_);
+	Task(const std::string& name_, int priority_, const std::string& description_,const ChronoDate& start_date_,  const ChronoDate& due_date_);
 
 
 	Task(const Task&) = default;
@@ -51,6 +52,7 @@ public:
 
 	void daysBehindAhead(int& days_behind_ahead, const ChronoDate& today) const;
 
+	bool start_date_set = false;
 
 protected:
 	
@@ -61,5 +63,6 @@ private:
 	std::string description = "No descriptions yet!";
 	ChronoDate start_date, end_date, due_date;
 	bool completed = false;
+	
 	float progress = 0.0f; // Progress percentage (0.0 to 100.0)
 };

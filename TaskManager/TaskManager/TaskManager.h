@@ -8,11 +8,12 @@
 #include <map>
 #include <iterator>
 #include <fstream>
+#include <iostream>
 
 enum class SortKey {
-    PRIORITY = 0,
-	DUEDATE = 1<<1,
-	NAME = 1 << 2,
+    PRIORITY,
+	DUEDATE,
+	NAME,
 };
 
 enum class DaysBehindAhead {
@@ -48,11 +49,42 @@ public:
     void saveToFile(const std::string& filename) const;
     void loadFromFile(const std::string& filename);
 
-    template<DaysBehindAhead mode>
-	void printBehindAheadTasks(const ChronoDate& today) const;
-
     void printHighPriorityTasks(const int& threshold = 500) const;
 
+
+    template<DaysBehindAhead mode>
+    void printBehindAheadTasks(const ChronoDate& today) const
+    {
+        switch (mode)
+        {
+        case DaysBehindAhead::BEHIND:
+            std::cout << "Tasks behind schedule:" << std::endl;
+            break;
+        case DaysBehindAhead::AHEAD:
+            std::cout << "Tasks ahead of schedule:" << std::endl;
+            break;
+        case DaysBehindAhead::ON_TIME:
+            std::cout << "Tasks on time:" << std::endl;
+            break;
+        }
+
+
+        for (const auto& task : Tasks)
+        {
+            if (!(task->start_date_set)) continue;
+            int days_behind_ahead;
+            task->daysBehindAhead(days_behind_ahead, today);
+            if (days_behind_ahead < 0 && mode == DaysBehindAhead::BEHIND) {
+                std::cout << task->getName() << " is " << -days_behind_ahead << " days behind." << std::endl;
+            }
+            else if (days_behind_ahead > 0 && mode == DaysBehindAhead::AHEAD) {
+                std::cout << task->getName() << " is " << days_behind_ahead << " days ahead." << std::endl;
+            }
+            else if (days_behind_ahead == 0 && mode == DaysBehindAhead::ON_TIME) {
+                std::cout << task->getName() << " is on time." << std::endl;
+            }
+        }
+    }
     
 
 private:

@@ -2,7 +2,6 @@
 
 #include <sstream>
 #include <algorithm>
-#include <iostream>
 #include <array>
 
 
@@ -168,39 +167,6 @@ void TaskManager::loadFromFile(const std::string& filename)
         Tasks.push_back(std::move(newTask));
         const ChronoDate due_date_from_task = Tasks[Tasks.size() - 1]->getDueDate();
     }
-}
-
-template<DaysBehindAhead mode>
-void TaskManager::printBehindAheadTasks(const ChronoDate& today) const
-{
-    switch (mode)
-    {
-    case DaysBehindAhead::BEHIND:
-		std::cout << "Tasks behind schedule:" << std::endl;
-		break;
-	case DaysBehindAhead::AHEAD:
-		std::cout << "Tasks ahead of schedule:" << std::endl;
-		break;
-	case DaysBehindAhead::ON_TIME:
-		std::cout << "Tasks on time:" << std::endl;
-		break;
-    }
-
-    
-	for (const auto& task : Tasks)
-	{
-		int days_behind_ahead;
-		task->daysBehindAhead(days_behind_ahead, today);
-		if (days_behind_ahead < 0 && mode == DaysBehindAhead::BEHIND) {
-			std::cout << task->getName() << " is " << -days_behind_ahead << " days behind." << std::endl;
-		}
-        else if (days_behind_ahead > 0 && mode == DaysBehindAhead::AHEAD) {
-            std::cout << task->getName() << " is " << days_behind_ahead << " days ahead." << std::endl;
-        }
-		else if (days_behind_ahead == 0 && mode == DaysBehindAhead::ON_TIME) {
-			std::cout << task->getName() << " is on time." << std::endl;
-		}
-	}
 }
 
 void TaskManager::printHighPriorityTasks(const int& threshold) const
