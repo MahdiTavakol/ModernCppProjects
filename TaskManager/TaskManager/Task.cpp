@@ -11,6 +11,13 @@ Task::Task(const std::string& name_, int priority_, const std::string& descripti
 Task::Task(const std::string& name_, int priority_, const ChronoDate& due_date_)
 	: name{ name_ }, priority{ priority_ }, due_date{ due_date_ } {}
 
+Task::Task(const std::string& name_, int priority_, const ChronoDate& due_date_, const Category& cat_)
+	: name{ name_ }, priority{ priority_ }, due_date{ due_date_ }, cat{ cat_ } {
+	if (cat == Category::ALL) {
+		throw std::runtime_error("Category 'ALL' is not valid for a task.");
+	}
+}
+
 Task::Task(const std::string& name_, int priority_, const std::string& description_, const ChronoDate& start_date_, const ChronoDate& due_date_)
 	: name{ name_ }, priority{ priority_ }, start_date{ start_date_ },
 	description{ description_ }, due_date {due_date_}, start_date_set{ true } {}

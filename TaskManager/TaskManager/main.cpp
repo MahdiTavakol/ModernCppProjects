@@ -13,6 +13,7 @@ void main()
 	std::uniform_int_distribution<> da(1, 27);
 	std::uniform_int_distribution<> mn(1, 12);
 	std::uniform_int_distribution<> yr(2020, 2027);
+	std::uniform_int_distribution<> ct(1, 3);
 
 	std::cout << "Starting Task Manager..." << std::endl;
 	std::unique_ptr<TaskManager> taskManagerPtr = std::make_unique<TaskManager>("Tasks.txt", SortKey::PRIORITY);
@@ -88,8 +89,38 @@ void main()
 		std::unique_ptr<Task> newTask = std::make_unique<Task>(title, priority, discription, start_date, due_date);
 		taskManagerPtr->addTask(std::move(newTask));
 	}
+
 	std::cout << "Listing tasks after adding 20 more random tasks..." << std::endl;
 	taskManagerPtr->listTasks();
+
+	std::cout << "Adding 20 more random tasks with random categories..." << std::endl;
+	for (int i = 0; i < 20; i++)
+	{
+		int priority = pr(gen);
+		unsigned day = static_cast<unsigned> (da(gen));
+		unsigned month = static_cast<unsigned> (mn(gen));
+		int year = yr(gen);
+		int cat_choice = ct(gen);
+		Category cat = static_cast<Category>(cat_choice);
+		ChronoDate due_date(year, month, day);
+		std::string title = "Task " + std::to_string(i + 1 + 60);
+		std::string discription = "This is a description for " + title;
+		std::unique_ptr<Task> newTask = std::make_unique<Task>(title, priority, due_date,cat);
+		taskManagerPtr->addTask(std::move(newTask));
+	}
+
+
+	std::cout << "Listing tasks after adding 20 more random tasks..." << std::endl;
+	taskManagerPtr->listTasks();
+
+	std::cout << "Listing tasks under the 'Work' category..." << std::endl;
+	taskManagerPtr->listTasks("Work Category Tasks", Category::WORK);
+	std::cout << "Listing tasks under the 'Personal' category..." << std::endl;
+	taskManagerPtr->listTasks("Personal Category Tasks", Category::PERSONAL);
+	std::cout << "Listing tasks under the 'Study' category..." << std::endl;
+	taskManagerPtr->listTasks("Study Category Tasks", Category::STUDY);
+
+
 	std::cout << "Completing two tasks (c) ..." << std::endl;
 	taskManagerPtr->completeTask();
 	taskManagerPtr->completeTask();

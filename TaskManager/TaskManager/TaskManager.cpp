@@ -95,7 +95,7 @@ void TaskManager::finishTaskByTitle(const std::string& title)
     sortTasks();
 }
 
-void TaskManager::listTasks(const std::vector<std::unique_ptr<Task>>& inputTasks, const std::string& description) const
+void TaskManager::listTasks(const std::vector<std::unique_ptr<Task>>& inputTasks, const std::string& description, const Category& cat) const
 {
     if (inputTasks.empty()) {
         std::cout << description << " is empty." << std::endl;
@@ -110,15 +110,38 @@ void TaskManager::listTasks(const std::vector<std::unique_ptr<Task>>& inputTasks
 	std::cout << "----------------------------------------" << std::endl;
 	std::cout << std::format("{:<20}\t{:^10}\t{:^15}\t{:^8}(%)\n",headers[0],headers[1],headers[2],headers[3]) << std::endl;
 
-    for (auto& task : inputTasks)
-    {
-		std::cout << std::format("{:<20}\t{:^10}\t{:^15}\t{:^8.1f}\n",
-			task->getName(),
-			task->getPriority(),
-			task->getDueDate().ymd(),
-			task->getProgress())
+    auto print_line = [](const std::unique_ptr<Task>& task) {
+        std::cout << std::format("{:<20}\t{:^10}\t{:^15}\t{:^8.1f}\n",
+            task->getName(),
+            task->getPriority(),
+            task->getDueDate().ymd(),
+            task->getProgress())
             << std::endl;
+        };
+
+    if (cat == Category::ALL) {
+        for (auto& task : inputTasks)
+        {
+            print_line(task);
+        }
+        return;
     }
+
+    std::for_each(inputTasks.begin(), inputTasks.end(), [&cat,&print_line](const std::unique_ptr<Task>& task) {
+        if (task->getCategory() == cat)
+            print_line(task);
+        });
+}
+
+std::vector<std::unique_ptr<Task>> TaskManager::filterTasks(const Category& cat) const
+{
+    std::vector<std::unique_ptr<Task>> filteredTasks;
+    std::for_each(Tasks.begin(), Tasks.end(), [&cat, &filteredTasks](const std::unique_ptr<Task>& task) {
+            if (task->getCategory() == cat) {
+			    filteredTasks.push_back(std::make_unique<Task>(*task));
+            }
+        });
+    return std::move(filteredTasks);
 }
 
 void TaskManager::saveToFile(const std::string& filename) const
@@ -128,11 +151,12 @@ void TaskManager::saveToFile(const std::string& filename) const
         throw std::runtime_error("Could not open file for writing: " + filename);
     }
 
-    file << "TaskName,Priority,DueDate" << std::endl;
+    std::array<std::string, 4> headers = {
+    "Task Name", "Priority", "Due Date", "Progress"
+    };
+	file << std::format("{:<20}, {:^10}, {:^15}, {:^8}\n", headers[0], headers[1], headers[2], headers[3]) << std::endl;
     for (const auto& task : Tasks) {
-        file << task->getName() << ","
-            << task->getPriority() << ","
-            << task->getDueDate() << std::endl;
+        file << std::format("{:<20} {:^10} {:^15} {:^8}\n", task->getName(),task->getPriority(),task->getDueDate());
     }
 }
 

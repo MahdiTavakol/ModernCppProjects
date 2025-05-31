@@ -3,6 +3,15 @@
 #include "ChronoDate.h"
 #include <string>
 
+enum class Category
+{
+	WORK,
+	PERSONAL,
+	STUDY,
+	OTHER,
+	ALL // Used for filtering tasks, should not have any tasks with that
+};
+
 struct TaskStruct
 {
 	std::string name;
@@ -19,6 +28,7 @@ public:
 		const ChronoDate& start_date_, const ChronoDate& end_date_, const ChronoDate& due_date_);
 	Task(const std::string& name_, int priority_, const std::string& description_, const ChronoDate& due_date_);
 	Task(const std::string& name_, int priority_, const ChronoDate& due_date_);
+	Task(const std::string& name_, int priority_, const ChronoDate& due_date_, const Category& cat_);
 	Task(const std::string& name_, int priority_, const std::string& description_,const ChronoDate& start_date_,  const ChronoDate& due_date_);
 
 
@@ -54,10 +64,16 @@ public:
 
 	bool start_date_set = false;
 
+	void setCategory(Category cat_) {	this->cat = cat_; }
+	Category getCategory() const { return cat; }
+
+	
+
 protected:
 	
 
 private:
+	Category cat = Category::OTHER; // Default category
 	std::string name;
 	int priority;
 	std::string description = "No descriptions yet!";
