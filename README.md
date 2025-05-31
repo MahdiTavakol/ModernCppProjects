@@ -1,124 +1,157 @@
-# Modern C++ Projects
+# 🧠 Modern C++ Projects Portfolio
 
-This repository contains a collection of C++ projects that progressively demonstrate modern C++ concepts, patterns, and concurrency techniques. Each project builds on the previous one to provide a comprehensive showcase of modern programming skills.
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)]()
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)]()
+[![C++](https://img.shields.io/badge/C%2B%2B-17/20-blue)]()
+
+Welcome to my collection of modern C++ projects, crafted to demonstrate practical software engineering skills using STL, RAII, concurrency, and modular design. These projects progress in difficulty and complexity, and are all built with clean, testable, and extensible architecture in mind.
 
 ---
 
 ## ✅ 1. Modern Task Manager (Phase 1)
 
-🎯 **Goal:** Build a CLI app that manages tasks with priorities and categories.
+**Goal:** Build a CLI app that manages tasks with priorities and categories.
 
-**Concepts Practiced:**
+### 🧩 Concepts Practiced:
 
 * `std::map`, `std::vector`, `std::unique_ptr`
 * Lambda-based sorting and filtering
-* RAII for resource management
+* RAII for file/resource cleanup
 
-**Features:**
+### 🎯 Features:
 
-* Add / Remove / Update tasks
-* Sort by priority or due date
-* Save and load tasks to/from a file
-* View overdue or upcoming tasks
-* Filter by high-priority tasks
+* Add/Remove/Update tasks
+* Sort by priority, name, or due date
+* Save/load tasks from file
+
+### 🔧 Build Instructions:
+
+```bash
+mkdir build && cd build
+cmake ..
+make
+./TaskManager
+```
 
 ---
 
 ## ✅ 2. Financial Data Analyzer (Phase 2)
 
-📈 **Goal:** Read stock data from CSV files and compute statistics (mean, median, etc).
+**Goal:** Read stock data from CSV and compute statistics (mean, median, etc.).
 
-**Concepts Practiced:**
+### 🧩 Concepts Practiced:
 
 * `std::ifstream`, `std::stringstream`
 * `std::transform`, `std::accumulate`, ranges
-* Data aggregation and filtering
+* Aggregation and filtering
 
-**Features:**
+### 🎯 Features:
 
-* Filter by date range or ticker
-* Output statistics: average price, max drawdown, etc.
+* Filter by date or ticker
+* Compute average price, max drawdown, etc.
 * Sort by volume or price
 
 ---
 
 ## ✅ 3. Multithreaded Log Parser (Phase 3)
 
-🧵 **Goal:** Parse large log files in parallel and summarize errors, warnings, etc.
+**Goal:** Parse large log files in parallel and summarize results.
 
-**Concepts Practiced:**
+### 🧩 Concepts Practiced:
 
-* `std::thread`, `std::mutex`, `std::future`, `std::async`
+* `std::thread`, `std::mutex`, `std::async`, `std::future`
 * Thread-safe containers
-* Log parsing using string utilities
+* Regex or substring-based parsing
 
-**Features:**
+### 🎯 Features:
 
-* Count lines with `ERROR`, `WARN`, etc.
-* Multi-threaded parsing of file chunks
+* Count ERROR, WARN lines
+* Chunk-based parallel parsing
 * Real-time progress reporting
 
 ---
 
 ## ✅ 4. Async Task Scheduler (Phase 4)
 
-⏱️ **Goal:** Simulate asynchronous tasks like fake I/O or background work.
+**Goal:** Simulate asynchronous I/O-like task execution.
 
-**Concepts Practiced:**
+### 🧩 Concepts Practiced:
 
-* C++20 coroutines: `co_await`, `co_return`
+* C++20 Coroutines (`co_await`, `co_return`)
 * `std::optional`, `std::variant`
-* `std::future`, `std::async`
+* `std::future`, cancellation with `stop_token`
 
-**Features:**
+### 🎯 Features:
 
-* Queue of fake I/O tasks
-* Prioritized / delayed execution
-* Cancellable tasks using `std::stop_token`
+* Queue of async tasks
+* Task prioritization and delay
+* Cancellation and progress monitoring
 
 ---
 
 ## ✅ 5. Concurrent Simulation Engine (Phase 5)
 
-🚦 **Goal:** Simulate a grid of agents updating in parallel (e.g., particles or traffic).
+**Goal:** Simulate a 2D agent-based system (e.g., particles or traffic) in parallel.
 
-**Concepts Practiced:**
+### 🧩 Concepts Practiced:
 
-* STL + concurrency + RAII
-* Design patterns: Factory, Strategy using `std::variant`
-* Logging and command-line configuration
+* STL with concurrency support
+* RAII + design patterns (Factory, Strategy)
+* `std::variant` for agent polymorphism
 
-**Features:**
+### 🎯 Features:
 
-* Each grid cell holds an agent or is empty
-* Agents react to neighbors and decide next move
-* Step-based or async simulation loop
-* Performance and logging tools
-
----
-
-## ✅ 6. Mandelbrot Set Visualizer (Phase 6)
-
-🎯 **Goal:** Launch a high-performance missile into the heart of parallel computing by rendering the Mandelbrot set using **OpenMP**.
-
-**Concepts Practiced:**
-
-* Custom numerical types (complex number class)
-* Header-based modular design (`array.h`, `definitions.h`)
-* Separation of interface/implementation (`mandelbrot.h/.cpp`)
-* **Parallel for-loops with OpenMP**
-* Procedural image generation with numerical stability
-
-**Features:**
-
-* Renders Mandelbrot fractals using custom complex number arithmetic
-* Efficient **multithreaded computation** via OpenMP (`#pragma omp parallel for`)
-* User-definable grid bounds, resolution, and iteration depth
-* Clean separation of computation logic and rendering interface
-* Easily extendable to graphical display or GPU offloading
+* Agents interact with neighbors
+* Step or async loop simulation
+* Configurable parameters & performance metrics
 
 ---
 
-🚀 Each project in this repository is written with readability, extensibility, and performance in mind — ready to be showcased, built upon, or adapted into larger systems.
+## 🚀 6. Parallel Mandelbrot Renderer (Phase 6)
 
-Feel free to fork, contribute, or get inspired.
+**Goal:** Render Mandelbrot fractals using OpenMP for parallelism.
+
+### 🧩 Concepts Practiced:
+
+* OpenMP parallel for pixel computation
+* Manual complex number implementation
+* Modular header design (`array`, `complex`, `definitions`)
+
+### 🎯 Features:
+
+* Multi-threaded rendering engine
+* Zoom/resolution tuning
+* Output visualization via PPM or display API
+
+---
+
+## 📂 Repository Structure
+
+```
+project-root/
+│
+├── Phase1_TaskManager/
+├── Phase2_FinancialAnalyzer/
+├── Phase3_LogParser/
+├── Phase4_AsyncScheduler/
+├── Phase5_SimulationEngine/
+├── Phase6_Mandelbrot/
+└── README.md
+```
+
+## 📬 Contact
+
+For questions, collaboration, or feedback:
+**Mahdi Tavakol**
+📧 [mahdi.tavakol@eng.ox.ac.uk](mailto:mahdi.tavakol@eng.ox.ac.uk)
+
+---
+
+## 🧪 Future Plans
+
+* Unit tests for each module
+* GUI frontend for some phases
+* Cross-platform builds using CMake presets
+* Optional Boost/Qt integration
+
+> 🌟 If you found these projects useful or inspiring, feel free to ⭐ the repo and follow me for more C++ content!
