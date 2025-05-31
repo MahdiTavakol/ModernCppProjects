@@ -116,6 +116,7 @@ make
 * OpenMP parallel for pixel computation
 * Manual complex number implementation
 * Modular header design (`array`, `complex`, `definitions`)
+* ** Testing the effect of memory layout on the openmp peformance
 
 ### 🎯 Features:
 
