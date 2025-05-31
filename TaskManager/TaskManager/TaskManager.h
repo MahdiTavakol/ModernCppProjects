@@ -30,7 +30,7 @@ public:
 
 	TaskManager(const TaskManager&) = delete;
     TaskManager& operator=(const TaskManager&) = delete;
-    TaskManager(const TaskManager&&) = default;
+    TaskManager(TaskManager&&) = default;
     TaskManager& operator=(TaskManager&&) = default;
 	~TaskManager();
 
