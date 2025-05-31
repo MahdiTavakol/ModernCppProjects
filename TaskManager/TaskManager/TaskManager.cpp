@@ -156,7 +156,11 @@ void TaskManager::saveToFile(const std::string& filename) const
     };
 	file << std::format("{:<20}, {:^10}, {:^15}, {:^8}\n", headers[0], headers[1], headers[2], headers[3]) << std::endl;
     for (const auto& task : Tasks) {
-        file << std::format("{:<20} {:^10} {:^15} {:^8}\n", task->getName(),task->getPriority(),task->getDueDate());
+        std::stringstream ss;
+		std::string due_date_str;
+		ss << task->getDueDate();
+		ss >> due_date_str;
+        file << std::format("{:<20} {:^10} {:^15} {:^8}\n", task->getName(),task->getPriority(),due_date_str,task->getProgress());
     }
 }
 
