@@ -4,7 +4,7 @@
 #include "mandelbrot_xmesh.h"
 
 
-class mandelbrot_xmesh_outerloop : public mandelbrot_xmesh
+class mandelbrot_xmesh_outerloop final : public mandelbrot_xmesh
 {
 public:
 	mandelbrot_xmesh_outerloop(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys);
@@ -13,8 +13,10 @@ public:
 	mandelbrot_xmesh_outerloop(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys, const thread_config& _thread_config, const std::string& _file_name);
 	mandelbrot_xmesh_outerloop(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys, const int& n_threads_x, const int& _n_threads_y, const std::string& _file_name);
 
-	void calculate(const double& _scale);
-	void calculate();
+
+
+	void calculate(const double& _scale) override;
+	void calculate() override;
 };
 
 

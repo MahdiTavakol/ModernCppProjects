@@ -143,6 +143,7 @@
     <ClInclude Include="mandelbrot_xmesh_outerloop.h" />
     <ClInclude Include="mandelbrot_ymesh.h" />
     <ClInclude Include="mandelbrot_ymesh_innerloop.h" />
+    <ClInclude Include="mandelbrot_ymesh_outerloop.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="array.cpp" />
@@ -159,6 +160,7 @@
     <ClCompile Include="mandelbrot_xmesh_outerloop.cpp" />
     <ClCompile Include="mandelbrot_ymesh.cpp" />
     <ClCompile Include="mandelbrot_ymesh_innerloop.cpp" />
+    <ClCompile Include="mandelbrot_ymesh_outerloop.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

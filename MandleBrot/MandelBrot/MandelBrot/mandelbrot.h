@@ -27,7 +27,7 @@ public:
 	mandelbrot(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys, const thread_config& _thread_config, const std::string& _file_name);
 	mandelbrot(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys, const int& _n_threads_x, const int& _n_threads_y, const std::string& _file_name);
 	~mandelbrot();
-	void calculate();
+	virtual void calculate();
 	virtual void calculate(const double& _scale);
 	void output();
 	double& return_area();

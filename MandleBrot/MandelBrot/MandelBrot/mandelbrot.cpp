@@ -45,15 +45,15 @@ mandelbrot::~mandelbrot()
 	{
 
 	}
-void mandelbrot::calculate()
+void mandelbrot::calculate(const double& _scale)
 	{
 		// Row bases similar to our allocation
 		for (int j = 0; j < n_ys; j++)
 			for (int i = 0; i < n_xs; i++)
 			{
 				complex min(x_min, y_min);
-				double _i = static_cast<double> ((i + n_xs / 2.0) / 2.0);
-				double _j = static_cast<double> ((j + n_ys / 2.0) / 2.0);
+				double _i = static_cast<double> ((i + n_xs / _scale) / _scale);
+				double _j = static_cast<double> ((j + n_ys / _scale) / _scale);
 
 				complex delta(static_cast<double>(_i * (x_max - x_min) / (n_xs - 1)), static_cast<double>(_j * (y_max - y_min) / (n_ys - 1)));
 				complex c = min + delta;
