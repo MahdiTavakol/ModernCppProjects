@@ -209,56 +209,44 @@ void run_mandelbrot::generate_timing_info()
 	allocation_mode = C_X_MAJOR;
 	std::string info("1-C_X_MAJOR---serial");
 	timing = run_mandelbrot<mandelbrot>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_serial, area);
-	timings[info] = timing;
-	areas[info] = area;
+
 	info = "2-C_X_MAJOR---X_MESHES";
 	timing = run_mandelbrot<mandelbrot_xmesh>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_x_meshes, area);
-	timings[info] = timing;
-	areas[info] = area;
+
 	info = "3-C_X_MAJOR---Y_MESHES";
 	timing = run_mandelbrot<mandelbrot_ymesh>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_y_meshes, area);
-	timings[info] = timing;
-	areas[info] = area;
+
 	allocation_mode = C_Y_MAJOR;
 	info = "4-C_Y_MAJOR---X_MESHES";
 	timing = run_mandelbrot<mandelbrot_xmesh>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_x_meshes, area);
-	timings[info] = timing;
-	areas[info] = area;
+
 	info = "5-C_Y_MAJOR---Y_MESHES";
 	timing = run_mandelbrot<mandelbrot_ymesh>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_y_meshes, area);
-	timings[info] = timing;
-	areas[info] = area;
+
 	allocation_mode = CPP_X_MAJOR;
 	info = "6-CPP_X_MAJOR---serial";
 	timing = run_mandelbrot<mandelbrot>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_serial, area);
-	timings[info] = timing;
-	areas[info] = area;
+
 	info = "7-CPP_X_MAJOR---X_MESHES";
 	timing = run_mandelbrot<mandelbrot_xmesh>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_x_meshes, area);
-	timings[info] = timing;
-	areas[info] = area;
+
 	info = "8-CPP_X_MAJOR---Y_MESHES";
 	timing = run_mandelbrot<mandelbrot_ymesh>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_y_meshes, area);
-	timings[info] = timing;
-	areas[info] = area;
+
 	allocation_mode = CPP_Y_MAJOR;
 	info = "9-CPP_Y_MAJOR---X_MESHES";
 	timing = run_mandelbrot<mandelbrot_xmesh>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_x_meshes, area);
-	timings[info] = timing;
-	areas[info] = area;
+;
 	info = "10-CPP_Y_MAJOR---Y_MESHES";
 	timing = run_mandelbrot<mandelbrot_ymesh>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_y_meshes, area);
-	timings[info] = timing;
-	areas[info] = area;
+
 	allocation_mode = C_X_MAJOR;
 	info = "11-C_X_MAJOR---X_MESHES---OMP_INNER";
 	timing = run_mandelbrot<mandelbrot_xmesh_innerloop>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_x_meshes, area);
-	timings[info] = timing;
-	areas[info] = area;
+
 	info = "12-C_X_MAJOR---Y_MESHES---OMP_INNER";
 	timing = run_mandelbrot<mandelbrot_ymesh_innerloop>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_y_meshes, area);
-	timings[info] = timing;
-	areas[info] = area;
+
 	allocation_mode = C_Y_MAJOR;
 	info = "13-C_Y_MAJOR---X_MESHES---OMP_INNER";
 	timing = run_mandelbrot<mandelbrot_xmesh_innerloop>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_x_meshes, area);
