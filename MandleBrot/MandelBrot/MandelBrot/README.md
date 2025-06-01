@@ -84,6 +84,6 @@ Each implementation renders a segment of the Mandelbrot set into a file (e.g., C
 
 **Mahdi Tavakol**
 Postdoctoral Researcher | Computational Scientist
-📧 [mahdi.tavakol@eng.ox.ac.uk](mailto:mahdi.tavakol@eng.ox.ac.uk)
+📧 [mahdi.tavakol@eng.ox.ac.uk](mailto:mahditavakol90@gmail.com)
 
 > If you find this project useful, ⭐ it on GitHub and feel free to reach out!
