@@ -144,7 +144,7 @@ project-root/
 
 For questions, collaboration, or feedback:
 **Mahdi Tavakol**
-📧 [mahdi.tavakol@eng.ox.ac.uk](mailto:mahdi.tavakol@eng.ox.ac.uk)
+📧 [mahditavakol90@gmail.com](mailto:mahditavakol90@gmail.com)
 
 ---
 
