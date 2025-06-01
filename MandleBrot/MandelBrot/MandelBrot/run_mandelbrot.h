@@ -1,4 +1,5 @@
 #pragma once
+#include <map>
 
 #include "array.h"
 #include "array_allocator.h"
@@ -10,7 +11,7 @@
 #include "definitions.h"
 
 enum class Run_type { TIMING, ANIMATE_1, ANIMATE_2, ANIMATE_3, ANIMATE_4, ANIMATE_5 };
-enum class Mesh_type { SERIAL, INNER_LOOP, OUTER_LOOP };
+enum class Mesh_type { SERIAL, XMESH_INNER_LOOP, XMESH_OUTER_LOOP, YMESH_INNER_LOOP, YMESH_OUTER_LOOP };
 
 class run_mandelbrot
 {
@@ -27,8 +28,19 @@ private:
 	bounds bnds;
 	int x_size;
 	int y_size;
-	thread_config thread_config;
+	thread_config thread_cfg;
 	Run_type run_type;
 	double area;
 	std::unique_ptr<mandelbrot> mandelbrot_ptr;
+
+	std::map<std::string, double> timings;
+	std::map<std::string, double> areas;
+
+
+	void run_timing();
+	void generate_animation(const complex& _center, int frame_init = 0, int num_frames = 100);
+	void animate(std::string _file_name, const complex& _center, const double& _scale);
+	void writeMaps(std::string _info_file_name, std::map<std::string, double>& _timings, std::map<std::string, double>& _areas);
+	void generate_timing_info();
+
 };
