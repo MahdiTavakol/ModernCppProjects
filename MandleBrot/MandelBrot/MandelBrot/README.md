@@ -42,8 +42,8 @@ Mandelbrot/
 ├── array.h                        # Base abstract interface
 ├── array_c_x_major.h/.cpp         # C-style col-major layout
 ├── array_c_y_major.h/.cpp         # C-style row-major layout
-├── array_cpp_x_major.h/.cpp       # C++ vector col-major layout
-├── array_cpp_y_major.h/.cpp       # C++ vector row-major layout
+├── array_cpp_x_major.h/.cpp       # C++-style heap col-major layout
+├── array_cpp_y_major.h/.cpp       # C++-style heap row-major layout
 ├── array_c_modern_x_major.h/.cpp  # Modern C++ heap col-major
 ├── array_c_modern_y_major.h/.cpp  # Modern C++ heap row-major
 ├── array_allocator.h              # Polymorphic allocator factory
