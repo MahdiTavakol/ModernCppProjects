@@ -1,23 +1,23 @@
 #include "mandelbrot_ymesh.h"
 
 
-mandelbrot_ymesh::mandelbrot_ymesh(const int& _allocation_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys)
-	: mandelbrot_ymesh(_allocation_mode, _bnds, _n_xs, _n_ys, (int)1, (int)1, std::string("Mandelbrot_ymesh.dat"))
+mandelbrot_ymesh::mandelbrot_ymesh(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys)
+	: mandelbrot_ymesh(_alloc_mode, _bnds, _n_xs, _n_ys, (int)1, (int)1, std::string("Mandelbrot_ymesh.dat"))
 {}
-mandelbrot_ymesh::mandelbrot_ymesh(const int& _allocation_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys, const thread_config& _thread_config) :
-	mandelbrot_ymesh(_allocation_mode, _bnds, _n_xs, _n_ys, _thread_config, std::string("Mandelbrot_ymesh.dat"))
+mandelbrot_ymesh::mandelbrot_ymesh(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys, const thread_config& _thread_config) :
+	mandelbrot_ymesh(_alloc_mode, _bnds, _n_xs, _n_ys, _thread_config, std::string("Mandelbrot_ymesh.dat"))
 {}
-mandelbrot_ymesh::mandelbrot_ymesh(const int& _allocation_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys, const std::string& _file_name) :
-	mandelbrot_ymesh(_allocation_mode, _bnds, _n_xs, _n_ys, (int)1, (int)1, _file_name)
+mandelbrot_ymesh::mandelbrot_ymesh(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys, const std::string& _file_name) :
+	mandelbrot_ymesh(_alloc_mode, _bnds, _n_xs, _n_ys, (int)1, (int)1, _file_name)
 {}
-mandelbrot_ymesh::mandelbrot_ymesh(const int& _allocation_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys, 
+mandelbrot_ymesh::mandelbrot_ymesh(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys,
 	const thread_config& _thread_config, const std::string& _file_name) :
-	mandelbrot_ymesh(_allocation_mode, _bnds, _n_xs, _n_ys, _thread_config.threads_x,_thread_config.threads_y, _file_name)
+	mandelbrot_ymesh(_alloc_mode, _bnds, _n_xs, _n_ys, _thread_config.threads_x,_thread_config.threads_y, _file_name)
 {}
 
-mandelbrot_ymesh::mandelbrot_ymesh(const int& _allocation_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys, 
+mandelbrot_ymesh::mandelbrot_ymesh(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys,
 	const int& _n_threads_x, const int& _n_threads_y, const std::string& _file_name) :
-	mandelbrot(_allocation_mode, _bnds, _n_xs, _n_ys,(int)1, _n_threads_y, _file_name)
+	mandelbrot(_alloc_mode, _bnds, _n_xs, _n_ys,(int)1, _n_threads_y, _file_name)
 {
 	omp_set_num_threads(n_threads_y);
 #pragma omp parallel

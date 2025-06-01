@@ -73,6 +73,7 @@ void mandelbrot::calculate()
 				(*(array_alloc_ptr))(i, j) = static_cast<double>(k) / static_cast<double>(this->num_iterations);
 			}
 	}
+
 void mandelbrot::output()
 {
 	array_alloc_ptr->write_data(n_xs,n_ys);

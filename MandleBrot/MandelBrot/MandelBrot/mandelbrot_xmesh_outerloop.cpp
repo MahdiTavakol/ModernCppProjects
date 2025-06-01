@@ -1,27 +1,27 @@
-#include "mandelbrot_xmesh_innerloop.h"
+#include "mandelbrot_xmesh_outerloop.h"
 
-mandelbrot_xmesh_innerloop::mandelbrot_xmesh_innerloop(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys) :
-	mandelbrot_xmesh(_alloc_mode,_bnds,_n_xs,_n_ys)
+mandelbrot_xmesh_outerloop::mandelbrot_xmesh_outerloop(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys) :
+	mandelbrot_xmesh(_alloc_mode, _bnds, _n_xs, _n_ys)
 {}
-mandelbrot_xmesh_innerloop::mandelbrot_xmesh_innerloop(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys,
+mandelbrot_xmesh_outerloop::mandelbrot_xmesh_outerloop(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys,
 	const thread_config& _thread_config) :
 	mandelbrot_xmesh(_alloc_mode, _bnds, _n_xs, _n_ys, _thread_config)
 {}
-mandelbrot_xmesh_innerloop::mandelbrot_xmesh_innerloop(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys,
+mandelbrot_xmesh_outerloop::mandelbrot_xmesh_outerloop(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys,
 	const std::string& _file_name) :
-	mandelbrot_xmesh(_alloc_mode,_bnds,_n_xs,_n_ys,_file_name)
+	mandelbrot_xmesh(_alloc_mode, _bnds, _n_xs, _n_ys, _file_name)
 {}
-mandelbrot_xmesh_innerloop::mandelbrot_xmesh_innerloop(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys,
-	const thread_config& _thread_config, const std::string& _file_name):
-	mandelbrot_xmesh(_alloc_mode,_bnds,_n_xs,_n_ys,_thread_config,_file_name)
+mandelbrot_xmesh_outerloop::mandelbrot_xmesh_outerloop(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys,
+	const thread_config& _thread_config, const std::string& _file_name) :
+	mandelbrot_xmesh(_alloc_mode, _bnds, _n_xs, _n_ys, _thread_config, _file_name)
 {}
-mandelbrot_xmesh_innerloop::mandelbrot_xmesh_innerloop(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys,
+mandelbrot_xmesh_outerloop::mandelbrot_xmesh_outerloop(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys,
 	const int& _n_threads_x, const int& _n_threads_y, const std::string& _file_name) :
 	mandelbrot_xmesh(_alloc_mode, _bnds, _n_xs, _n_ys, _n_threads_x, _n_threads_y, _file_name)
 {}
 
 
-void mandelbrot_xmesh_innerloop::calculate(const double& _scale)
+void mandelbrot_xmesh_outerloop::calculate(const double& _scale)
 
 {
 	double ara = 0.0;
@@ -32,10 +32,9 @@ void mandelbrot_xmesh_innerloop::calculate(const double& _scale)
 			std::cout << "Using " << omp_get_num_threads() << " omp threads" << std::endl;
 		int first = first_ranges[thread_id];
 		int last = last_ranges[thread_id];
-
-		for (int j = 0; j < n_ys; j++)
+		for (int i = first; i < last; i++)
 		{
-			for (int i = first; i < last; i++)
+			for (int j = 0; j < n_ys; j++)
 			{
 				complex min(static_cast<double> (this->x_min), static_cast<double> (this->y_min));
 				double _i = static_cast<double> (i % this->n_xs);
@@ -69,7 +68,7 @@ void mandelbrot_xmesh_innerloop::calculate(const double& _scale)
 				(*(array_alloc_ptr))(i - k * this->n_xs, j) = (*(array_alloc_ptr))(i, j);
 }
 
-void mandelbrot_xmesh_innerloop::calculate()
+void mandelbrot_xmesh_outerloop::calculate()
 {
 	calculate(2.0);
 }

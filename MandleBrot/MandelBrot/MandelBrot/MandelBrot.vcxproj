@@ -140,6 +140,7 @@
     <ClInclude Include="mandelbrot.h" />
     <ClInclude Include="mandelbrot_xmesh.h" />
     <ClInclude Include="mandelbrot_xmesh_innerloop.h" />
+    <ClInclude Include="mandelbrot_xmesh_outerloop.h" />
     <ClInclude Include="mandelbrot_ymesh.h" />
     <ClInclude Include="mandelbrot_ymesh_innerloop.h" />
   </ItemGroup>
@@ -155,6 +156,7 @@
     <ClCompile Include="mandelbrot.cpp" />
     <ClCompile Include="mandelbrot_xmesh.cpp" />
     <ClCompile Include="mandelbrot_xmesh_innerloop.cpp" />
+    <ClCompile Include="mandelbrot_xmesh_outerloop.cpp" />
     <ClCompile Include="mandelbrot_ymesh.cpp" />
     <ClCompile Include="mandelbrot_ymesh_innerloop.cpp" />
   </ItemGroup>
