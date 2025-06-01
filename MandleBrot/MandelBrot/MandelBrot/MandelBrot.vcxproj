@@ -128,14 +128,35 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="array.h" />
+    <ClInclude Include="array_allocator.h" />
+    <ClInclude Include="array_cpp_x_major.h" />
+    <ClInclude Include="array_cpp_y_major.h" />
+    <ClInclude Include="array_c_modern_y_major.h" />
+    <ClInclude Include="array_c_x_major.h" />
+    <ClInclude Include="array_c_y_major.h" />
     <ClInclude Include="complex.h" />
+    <ClInclude Include="array_c_modern_x_major.h" />
     <ClInclude Include="definitions.h" />
     <ClInclude Include="mandelbrot.h" />
+    <ClInclude Include="mandelbrot_xmesh.h" />
+    <ClInclude Include="mandelbrot_xmesh_innerloop.h" />
+    <ClInclude Include="mandelbrot_ymesh.h" />
+    <ClInclude Include="mandelbrot_ymesh_innerloop.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="array.cpp" />
+    <ClCompile Include="array_cpp_x_major.cpp" />
+    <ClCompile Include="array_cpp_y_major.cpp" />
+    <ClCompile Include="array_c_modern_y_major.cpp" />
+    <ClCompile Include="array_c_x_major.cpp" />
+    <ClCompile Include="array_c_y_major.cpp" />
+    <ClCompile Include="array_c_modern_x_major.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mandelbrot.cpp" />
+    <ClCompile Include="mandelbrot_xmesh.cpp" />
+    <ClCompile Include="mandelbrot_xmesh_innerloop.cpp" />
+    <ClCompile Include="mandelbrot_ymesh.cpp" />
+    <ClCompile Include="mandelbrot_ymesh_innerloop.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

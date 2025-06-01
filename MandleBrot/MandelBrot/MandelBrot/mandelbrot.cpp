@@ -3,48 +3,47 @@
 #include "array.h"
 
 
-mandelbrot::mandelbrot(const int& _allocation_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys) :
-	mandelbrot(_allocation_mode, _bnds, _n_xs, _n_ys, (int)1, (int)1, std::string("Mandelbrot.dat"))
+mandelbrot::mandelbrot(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys) :
+	mandelbrot(_alloc_mode, _bnds, _n_xs, _n_ys, (int)1, (int)1, std::string("Mandelbrot.dat"))
 	{}
-mandelbrot::mandelbrot(const int& _allocation_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys, const thread_config& _thread_config) :
-		mandelbrot(_allocation_mode, _bnds, _n_xs, _n_ys)
+mandelbrot::mandelbrot(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys, const thread_config& _thread_config) :
+		mandelbrot(_alloc_mode, _bnds, _n_xs, _n_ys)
 	{
 		std::cout << "Ignoring the thread_config values in the serial mandelbrot code" << std::endl;
 	}
-mandelbrot::mandelbrot(const int& _allocation_mode, const bounds& _bnds,
+mandelbrot::mandelbrot(const allocation_mode& _alloc_mode, const bounds& _bnds,
 		const int& _n_xs, const int& _n_ys, const std::string& _file_name) :
-	mandelbrot(_allocation_mode, _bnds, _n_xs, _n_ys, (int)1, (int)1, _file_name)
+	mandelbrot(_alloc_mode, _bnds, _n_xs, _n_ys, (int)1, (int)1, _file_name)
 	{}
 
-mandelbrot::mandelbrot(const int& _allocation_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys, 
+mandelbrot::mandelbrot(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys,
 	                   const thread_config& _thread_config, const std::string& _file_name):
-	mandelbrot(_allocation_mode,_bnds,_n_xs,_n_ys,_thread_config.threads_x,_thread_config.threads_y,_file_name)
+	mandelbrot(_alloc_mode,_bnds,_n_xs,_n_ys,_thread_config.threads_x,_thread_config.threads_y,_file_name)
 {}
-mandelbrot::mandelbrot(const int& _allocation_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys,
+mandelbrot::mandelbrot(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys,
 	                   const int& _n_threads_x, const int& _n_threads_y, const std::string& _file_name) :
-		allocation_mode(_allocation_mode), x_min(_bnds.x_min),
+		alloc_mode(_alloc_mode), x_min(_bnds.x_min),
 		x_max(_bnds.x_max), y_min(_bnds.y_min), y_max(_bnds.y_max), n_xs(_n_xs), n_ys(_n_ys),
 	    n_threads_x(_n_threads_x), n_threads_y(_n_threads_y),
 		file_name(_file_name)
+{
+	file = std::make_unique<std::ofstream>(_file_name);
+	array_alloc_ptr = std::make_unique<array_allocator>(alloc_mode, n_xs, n_ys, file.get());
+
+	this->num_iterations = 80;
+
+	if (!this->file->is_open())
 	{
-		this->file = new std::ofstream(_file_name);
-		this->img = new array(allocation_mode, n_threads_x * n_xs, n_threads_y * n_ys, this->file);
-		this->num_iterations = 80;
-
-		if (!this->file->is_open())
-		{
-			std::cout << "Error: Cannot open " << file_name << " for writing" << std::endl;
-			return;
-		}
-
-		this->area = 0.0;
-
+		std::cout << "Error: Cannot open " << file_name << " for writing" << std::endl;
+		return;
 	}
+
+	this->area = 0.0;
+
+}
 mandelbrot::~mandelbrot()
 	{
-		file->close();
-		delete file;
-		delete img;
+
 	}
 void mandelbrot::calculate()
 	{
@@ -71,17 +70,17 @@ void mandelbrot::calculate()
 				{
 					area++;
 				}
-				(*(this->img))(i, j) = static_cast<double>(k) / static_cast<double>(this->num_iterations);
+				(*(array_alloc_ptr))(i, j) = static_cast<double>(k) / static_cast<double>(this->num_iterations);
 			}
 	}
 void mandelbrot::output()
-	{
-		img->write_data(n_xs,n_ys);
-	}
+{
+	array_alloc_ptr->write_data(n_xs,n_ys);
+}
 double& mandelbrot::return_area()
-	{
-		return this->area;
-	}
+{
+	return this->area;
+}
 
 
 
