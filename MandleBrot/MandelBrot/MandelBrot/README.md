@@ -19,7 +19,7 @@ This project demonstrates the rendering of the Mandelbrot fractal set using vari
 ## ✅ Key Concepts Demonstrated
 
 * RAII with `std::unique_ptr` for safe resource management
-* `std::make_unique` vs. 'new' vs. 'malloc' allocation comparisons
+* `std::make_unique` vs. `new` vs. `malloc` allocation comparisons
 * Abstract base class `array` for unified 2D access
 * Multiple concrete implementations:
 
