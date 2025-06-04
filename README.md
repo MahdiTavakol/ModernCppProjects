@@ -42,7 +42,7 @@ make
 ### 🧩 Concepts Practiced:
 
 * `std::ifstream`, `std::stringstream`
-* `std::transform`, `std::accumulate`, ranges
+* `std::transform`, `std::accumulate`, `ranges`
 * Aggregation and filtering
 
 ### 🎯 Features:
