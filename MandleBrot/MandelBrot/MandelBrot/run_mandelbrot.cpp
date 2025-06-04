@@ -92,8 +92,8 @@ void run_mandelbrot::run_timing()
 
 	//std::cout << "Deallocating the " << info << " mandlebrot pointer" << std::endl;
 
-	timings[title] = timeRequired.count();
-	areas[title] = area;
+	timings[info + " - " + title] = timeRequired.count();
+	areas[info + " - " + title] = area;
 
 }
 
@@ -206,15 +206,70 @@ void run_mandelbrot::generate_timing_info()
 
 
 	mesh_type = Mesh_type::SERIAL;
-	allocation_mode = C_X_MAJOR;
-	std::string info("1-C_X_MAJOR---serial");
-	timing = run_mandelbrot<mandelbrot>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_serial, area);
+	alloc_mode = allocation_mode::C_X_MAJOR;
+	info = std::string("C_X_MAJOR");
+	run_timing();
 
-	info = "2-C_X_MAJOR---X_MESHES";
-	timing = run_mandelbrot<mandelbrot_xmesh>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_x_meshes, area);
+	thread_cfg = trd_cnfg_x_meshes;
+	mesh_type = Mesh_type::XMESH_OUTER_LOOP;
+	run_timing();
 
-	info = "3-C_X_MAJOR---Y_MESHES";
-	timing = run_mandelbrot<mandelbrot_ymesh>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_y_meshes, area);
+	mesh_type = Mesh_type::XMESH_INNER_LOOP;
+	run_timing();
+
+	thread_cfg = trd_cnfg_y_meshes;
+	mesh_type = Mesh_type::YMESH_OUTER_LOOP;
+	run_timing();
+
+	mesh_type = Mesh_type::YMESH_INNER_LOOP;
+	run_timing();
+
+	alloc_mode = allocation_mode::C_Y_MAJOR;
+	info = std::string("C_Y_MAJOR");
+	run_timing();
+
+	thread_cfg = trd_cnfg_x_meshes;
+	mesh_type = Mesh_type::XMESH_OUTER_LOOP;
+	run_timing();
+
+	mesh_type = Mesh_type::XMESH_INNER_LOOP;
+	run_timing();
+
+	thread_cfg = trd_cnfg_y_meshes;
+	mesh_type = Mesh_type::YMESH_OUTER_LOOP;
+	run_timing();
+
+	mesh_type = Mesh_type::YMESH_INNER_LOOP;
+	run_timing();
+
+	alloc_mode = allocation_mode::CPP_X_MAJOR;
+	info = std::string("CPP_X_MAJOR");
+	run_timing();
+
+	thread_cfg = trd_cnfg_x_meshes;
+	mesh_type = Mesh_type::XMESH_OUTER_LOOP;
+	run_timing();
+
+	mesh_type = Mesh_type::XMESH_INNER_LOOP;
+	run_timing();
+
+	thread_cfg = trd_cnfg_y_meshes;
+	mesh_type = Mesh_type::YMESH_OUTER_LOOP;
+	run_timing();
+
+	mesh_type = Mesh_type::YMESH_INNER_LOOP;
+	run_timing();
+
+	alloc_mode = allocation_mode::CPP_Y_MAJOR;
+	info = std::string("CPP_Y_MAJOR");
+	run_timing();
+
+	thread_cfg = trd_cnfg_x_meshes;
+	mesh_type = Mesh_type::XMESH_OUTER_LOOP;
+	run_timing();
+
+	mesh_type = Mesh_type::XMESH_INNER_LOOP;
+	run_timing();
 
 	allocation_mode = C_Y_MAJOR;
 	info = "4-C_Y_MAJOR---X_MESHES";
