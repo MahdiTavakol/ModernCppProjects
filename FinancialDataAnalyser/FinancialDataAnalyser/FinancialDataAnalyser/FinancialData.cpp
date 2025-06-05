@@ -115,7 +115,10 @@ std::array<double, 2> FinancialData::calculate_average_stddev(const std::string&
 	std::array<double, 2> result = { 0.0,0.0 }; // {average, stddev}
 	double& average = result[0];
 	double& sttdev = result[1];
-	double average = std::accumulate(records.begin(), records.end(), 0.0);
+	double average = std::accumulate(records.begin(), records.end(), 0.0,
+		[](const double& acc, const FinancialDataRecord& record) 
+		{ return acc + record.close; }
+	);
 	average /= static_cast<double>(records.size());
 	double sttdev = std::accumulate(records.begin(), records.end(), 0.0,
 		[&average](const double& acc, const FinancialDataRecord& record) {
