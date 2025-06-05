@@ -57,18 +57,99 @@ void FinancialData::sortData(SortingKey key)
 	std::ranges::sort(records, sortFunction);
 }
 
-std::vector<FinancialDataRecord> FinancialData::filterDataByTicker(const std::string& ticker_)
+std::vector<FinancialDataRecord> FinancialData::filterDataByTicker(const std::string& ticker_) const
 {
 	std::vector<FinancialDataRecord> filteredRecords;
 	filteredRecords.reserve(records.size());
 	std::ranges::copy_if(records, std::back_inserter(filteredRecords), [&ticker_](const FinancialDataRecord& rec) {
 		return rec.ticker == ticker_; });
+	return filteredRecords;
 }
 
-std::vector<FinancialDataRecord> FinancialData::filterDataByDate(const ChronoDate& date_)
+std::vector<FinancialDataRecord> FinancialData::filterDataByDate(const ChronoDate& date_) const
 {
 	std::vector<FinancialDataRecord> filteredRecords;
 	filteredRecords.reserve(records.size());
 	std::ranges::copy_if(records, std::back_inserter(filteredRecords), [&date_](const FinancialDataRecord& rec) {
 		return rec.date == date_; });
+	return filteredRecords;
+}
+
+
+double FinancialData::maximum_drawdown(const std::string& ticker_) const
+{
+	double maxDrawdown = 0.0;
+	double currentDrawdown = 0.0;
+	double peak = 0.0;
+
+	std::vector<FinancialDataRecord> tickerRecords = filterDataByTicker(ticker_);
+
+	std::function<void(const FinancialDataRecord& record)> lambdaFunction =
+		[&maxDrawdown, &currentDrawdown, &peak](const FinancialDataRecord& record)
+		{
+			if (record.close > peak) {
+				if (currentDrawdown > maxDrawdown) {
+				maxDrawdown = currentDrawdown; // Update max drawdown if current is greater
+			}
+			currentDrawdown = 0.0; // Reset current drawdown if a new peak is found
+			peak = record.close; // Update the peak if the current close is higher
+			}
+				else if (record.close < peak)
+			{
+				currentDrawdown = (peak - record.close)/peak; // Calculate current drawdown
+			}
+		};
+
+	std::ranges::for_each(tickerRecords, lambdaFunction);
+
+	// Catch the last drawdown if it was the largest
+	if (currentDrawdown > maxDrawdown) {
+		maxDrawdown = currentDrawdown;
+	}
+
+	return maxDrawdown;
+}
+
+std::array<double, 2> FinancialData::calculate_average_stddev(const std::string& ticker) const
+{
+	std::array<double, 2> result = { 0.0,0.0 }; // {average, stddev}
+	double& average = result[0];
+	double& sttdev = result[1];
+	double average = std::accumulate(records.begin(), records.end(), 0.0);
+	average /= static_cast<double>(records.size());
+	double sttdev = std::accumulate(records.begin(), records.end(), 0.0,
+		[&average](const double& acc, const FinancialDataRecord& record) {
+			return acc + (record.close - average) * (record.close - average);
+		}) / static_cast<double>(records.size() - 1);
+	return result;
+}
+
+double FinancialData::calculate_daily_return(const std::string& ticker) const
+{
+	double totalReturn = 0.0;
+	int count = 0;
+
+	std::vector<FinancialDataRecord> tickerRecords = filterDataByTicker(ticker);
+
+	if (tickerRecords.size() < 2) {
+		throw std::runtime_error("Not enough data to calculate daily return for ticker: " + ticker);
+	}
+
+	auto total_return_func = [&totalReturn,&count](const FinancialDataRecord& current, const FinancialDataRecord& previous) {
+		totalReturn += (current.close - previous.close) / previous.close;
+		count++;
+		};
+
+	for (size_t i = 1; i < tickerRecords.size(); ++i) {
+		const FinancialDataRecord& current = tickerRecords[i];
+		const FinancialDataRecord& previous = tickerRecords[i - 1];
+
+		if (current.date == previous.date) {
+			continue; // Skip if the dates are the same
+		}
+
+		total_return_func(current, previous);
+	}
+
+	return totalReturn / count; // Return the average daily return
 }
