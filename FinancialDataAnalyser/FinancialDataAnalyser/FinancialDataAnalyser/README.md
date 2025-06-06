@@ -29,15 +29,7 @@ This C++20 project reads historical stock data from `.csv` or `.txt` files, filt
 ---
 
 ## 📂 File Structure
-.
-├── ChronoDate.h             # Wrapper around std::chrono::year_month_day for date handling
-├── ChronoDate.cpp
-├── FinancialDataRecord.h    # Struct representing a single stock data entry
-├── ReadData.h               # Functions to read and parse .csv or .txt files
-├── ReadData.cpp
-├── FinancialData.h          # Core logic for filtering, sorting, and computing statistics
-├── FinancialData.cpp
-└── main.cpp (optional)      # Entry point for CLI or test driver (not included yet)
+<pre> 📁 Project Root ├── ChronoDate.h # Date wrapper based on std::chrono ├── ChronoDate.cpp ├── FinancialDataRecord.h # Struct for a single financial data row ├── ReadData.h # File I/O and CSV/TXT parsing ├── ReadData.cpp ├── FinancialData.h # Filtering, sorting, and stats logic ├── FinancialData.cpp └── main.cpp # (Optional) CLI driver or unit test entry point </pre>
 
 ## 🔧 Build Instructions
 
