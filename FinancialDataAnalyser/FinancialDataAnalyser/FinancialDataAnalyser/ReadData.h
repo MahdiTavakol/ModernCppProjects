@@ -21,6 +21,11 @@ enum class SortingKey {
 	VOLUME
 };
 
+enum class FileMode {
+	TXT,
+	CSV
+};
+
 
 class ReadData {
 public:
@@ -32,10 +37,13 @@ public:
 	~ReadData() = default; // Default destructor
 
 	void read();
+	void read_txt(std::istream& inputStream);
+	void read_csv(std::istream& inputStream);
 	void returnData(std::vector<FinancialDataRecord>& outRecords);
 
 private:
 	std::string filePath;
+	FileMode fileMode;
 	std::ifstream inputStream;
 	std::vector<FinancialDataRecord> records;
 };
