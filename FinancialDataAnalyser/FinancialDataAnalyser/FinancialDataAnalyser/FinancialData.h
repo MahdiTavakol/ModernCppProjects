@@ -10,6 +10,12 @@
 
 #define TICKER_RECORD std::vector<FinancialDataRecord> tickerRecords = filterDataByTicker(ticker_)
 
+enum class SortingOrder
+{
+	ASCENDING = 0,
+	DESCENDING = 1
+};
+
 class FinancialData {
 public:
 	FinancialData(const std::string& filePath_);
@@ -43,7 +49,7 @@ public:
 		return calculate_average_stddev(tickerRecords);
 	}
 
-	static void sortData(std::vector<FinancialDataRecord>& in_records, SortingKey key);
+	static void sortData(std::vector<FinancialDataRecord>& in_records, SortingKey key, SortingOrder order = SortingOrder::ASCENDING);
 	static double maximum_drawdown(std::vector<FinancialDataRecord>& tickerRecords);
 	static void writeDataToFile(const std::string& dataPath, const std::vector<FinancialDataRecord>& records_vector);
 	static std::array<double, 2> calculate_average_stddev(const std::vector<FinancialDataRecord>& records_vector);

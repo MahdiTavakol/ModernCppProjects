@@ -14,20 +14,44 @@ FinancialData::FinancialData(const std::string& filePath_):
 }
 
 
-void FinancialData::sortData(std::vector<FinancialDataRecord>& in_records, SortingKey key)
+void FinancialData::sortData(std::vector<FinancialDataRecord>& in_records, SortingKey key, SortingOrder order)
 {
-	static const std::map<SortingKey, std::function<bool(const FinancialDataRecord& a, const FinancialDataRecord& b)>> sortMap =
+	static const std::map<SortingKey, std::function<bool(const FinancialDataRecord& a, const FinancialDataRecord& b)>> sortMapAscend =
 	{
-		{SortingKey::DATE,  SORTDATA_LAMBDA_FUNC_ARGS { return a.date < b.date; }},
-		{SortingKey::TICKER,SORTDATA_LAMBDA_FUNC_ARGS { return a.ticker < b.ticker; }},
-		{SortingKey::OPEN,  SORTDATA_LAMBDA_FUNC_ARGS { return a.open < b.open; }},
-		{SortingKey::HIGH,  SORTDATA_LAMBDA_FUNC_ARGS { return a.high < b.high; }},
-		{SortingKey::CLOSE, SORTDATA_LAMBDA_FUNC_ARGS { return a.close < b.close; }},
-		{SortingKey::VOLUME,SORTDATA_LAMBDA_FUNC_ARGS { return a.volume < b.volume; }},
+		{SortingKey::DATE,  SORTDATA_LAMBDA_FUNC_ARGS { return a.date   < b.date;  }},
+		{SortingKey::TICKER,SORTDATA_LAMBDA_FUNC_ARGS { return a.ticker < b.ticker;}},
+		{SortingKey::OPEN,  SORTDATA_LAMBDA_FUNC_ARGS { return a.open   < b.open;  }},
+		{SortingKey::HIGH,  SORTDATA_LAMBDA_FUNC_ARGS { return a.high   < b.high;  }},
+		{SortingKey::CLOSE, SORTDATA_LAMBDA_FUNC_ARGS { return a.close  < b.close; }},
+		{SortingKey::VOLUME,SORTDATA_LAMBDA_FUNC_ARGS { return a.volume < b.volume;}},
 	};
 
-	auto it = sortMap.find(key);
-	if (it != sortMap.end())
+	static const std::map<SortingKey, std::function<bool(const FinancialDataRecord& a, const FinancialDataRecord& b)>> sortMapDescend =
+	{
+		{SortingKey::DATE,  SORTDATA_LAMBDA_FUNC_ARGS { return a.date   > b.date;  }},
+		{SortingKey::TICKER,SORTDATA_LAMBDA_FUNC_ARGS { return a.ticker > b.ticker; }},
+		{SortingKey::OPEN,  SORTDATA_LAMBDA_FUNC_ARGS { return a.open   > b.open;  }},
+		{SortingKey::HIGH,  SORTDATA_LAMBDA_FUNC_ARGS { return a.high   > b.high;  }},
+		{SortingKey::CLOSE, SORTDATA_LAMBDA_FUNC_ARGS { return a.close  > b.close; }},
+		{SortingKey::VOLUME,SORTDATA_LAMBDA_FUNC_ARGS { return a.volume > b.volume; }},
+	};
+
+	
+	static const std::map<SortingKey, std::function<bool(const FinancialDataRecord& a, const FinancialDataRecord& b)>>* sortMapPtr;
+	switch (order)
+	{
+	case SortingOrder::ASCENDING:
+		sortMapPtr = &sortMapAscend;
+		break;
+	case SortingOrder::DESCENDING:
+		sortMapPtr = &sortMapDescend;
+		break;
+	default:
+		throw std::runtime_error("Wrong order keyword");
+	}
+
+	auto it = sortMapPtr->find(key);
+	if (it != sortMapPtr->end())
 		std::ranges::sort(in_records, it->second);
 	else
 		throw std::invalid_argument("Unsupported sortingKey");
