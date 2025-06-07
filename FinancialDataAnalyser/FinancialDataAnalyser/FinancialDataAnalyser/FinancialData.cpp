@@ -85,19 +85,6 @@ double FinancialData::maximum_drawdown(std::vector<FinancialDataRecord>& tickerR
 	return maxDrawdown;
 }
 
-double FinancialData::maximum_drawdown(const std::string& ticker_) const
-{
-	std::vector<FinancialDataRecord> tickerRecords = filterDataByTicker(ticker_);
-	return maximum_drawdown(tickerRecords);
-}
-
-std::array<double, 2> FinancialData::calculate_average_stddev(const std::string& ticker_) const
-{
-	std::vector<FinancialDataRecord> tickerRecords = filterDataByTicker(ticker_);
-	return calculate_average_stddev(tickerRecords);
-}
-
-
 std::array<double, 2> calculate_average_stddev(const std::vector<FinancialDataRecord>& records_vector)
 {
 	std::array<double, 2> result = { 0.0,0.0 }; // {average, stddev}

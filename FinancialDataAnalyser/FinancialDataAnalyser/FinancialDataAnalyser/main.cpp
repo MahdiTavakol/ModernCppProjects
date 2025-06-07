@@ -18,25 +18,28 @@ void main()
 	{
 		std::string ticker;
 		SortingKey key;
-	} inputs_ticker [] = {{"AMZN",SortingKey::CLOSE},
-		                  {"GOOG",SortingKey::OPEN},
-				          {"AAPL",SortingKey::VOLUME},
-		                  {"MSFT",SortingKey::HIGH},
-		                  {"TSLA",SortingKey::LOW},
-                          {"AMZN",SortingKey::DATE} }
-	;
+	} inputs_ticker [] = {
+		{"AMZN",SortingKey::CLOSE},
+		{"GOOG",SortingKey::OPEN},
+		{"AAPL",SortingKey::VOLUME},
+		{"MSFT",SortingKey::HIGH},
+		{"TSLA",SortingKey::LOW},
+        {"AMZN",SortingKey::DATE}
+	};
 
+	// Checking date data
 	struct
 	{
 		std::string date_string;
 		SortingKey key;
-	} inputs_date[] = { {"2023-04-03",SortingKey::CLOSE},
-						{"2023-04-07",SortingKey::OPEN},
-						{"2023-04-17",SortingKey::VOLUME},
-						{"2023-04-29",SortingKey::HIGH},
-						{"2023-05-13",SortingKey::LOW},
-						{"2023-06-02",SortingKey::DATE} }
-	;
+	} inputs_date[] = {
+		{"2023-04-03",SortingKey::CLOSE},
+		{"2023-04-07",SortingKey::OPEN},
+		{"2023-04-17",SortingKey::VOLUME},
+		{"2023-04-29",SortingKey::HIGH},
+		{"2023-05-13",SortingKey::LOW},
+		{"2023-06-02",SortingKey::DATE}
+	};
 
 
 	for (auto& input : inputs_ticker)
@@ -54,7 +57,6 @@ void main()
 		std::vector<FinancialDataRecord> data_vector = financialDataCSV->filterDataByDate(date);
 		checking_data(data_vector, input.key, input.date_string);
 	}
-	
 }
 
 
