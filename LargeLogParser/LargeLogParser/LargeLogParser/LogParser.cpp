@@ -25,6 +25,8 @@ void LogParser::initialize()
 
 void LogParser::readFile()
 {
+	initialize();
+
 	file.seekg(beg);
 	std::string line;
 
