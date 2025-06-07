@@ -1,5 +1,8 @@
 #include "FinancialData.h"
 #include <memory>
+#include <map>
+
+#define SORTDATA_LAMBDA_FUNC_ARGS [](const FinancialDataRecord& a, const FinancialDataRecord& b)
 
 FinancialData::FinancialData(const std::string& filePath_):
 	filePath(filePath_)
@@ -11,50 +14,23 @@ FinancialData::FinancialData(const std::string& filePath_):
 }
 
 
-void FinancialData::sortData(SortingKey key)
+void FinancialData::sortData(std::vector<FinancialDataRecord>& in_records, SortingKey key)
 {
-	std::function<bool(const FinancialDataRecord& a, const FinancialDataRecord& b)> sortFunction;
-	switch (key)
+	static const std::map<SortingKey, std::function<bool(const FinancialDataRecord& a, const FinancialDataRecord& b)>> sortMap =
 	{
-	case SortingKey::DATE:
-		sortFunction = [](const FinancialDataRecord& a, const FinancialDataRecord& b) {
-			return a.date < b.date;
-			};
-		break;
-	case SortingKey::TICKER:
-		sortFunction = [](const FinancialDataRecord& a, const FinancialDataRecord& b) {
-			return a.ticker < b.ticker;
-			};
-		break;
-	case SortingKey::OPEN:
-		sortFunction = [](const FinancialDataRecord& a, const FinancialDataRecord& b) {
-			return a.open < b.open;
-			};
-		break;
-	case SortingKey::HIGH:
-		sortFunction = [](const FinancialDataRecord& a, const FinancialDataRecord& b) {
-			return a.high < b.high;
-			};
-		break;
-	case SortingKey::LOW:
-		sortFunction = [](const FinancialDataRecord& a, const FinancialDataRecord& b) {
-			return a.low < b.low;
-			};
-		break;
-	case SortingKey::CLOSE:
-		sortFunction = [](const FinancialDataRecord& a, const FinancialDataRecord& b) {
-			return a.close < b.close;
-			};
-		break;
-	case SortingKey::VOLUME:
-		sortFunction = [](const FinancialDataRecord& a, const FinancialDataRecord& b) {
-			return a.volume < b.volume;
-			};
-		break;
-	default:
-		throw std::invalid_argument("Invalid sorting key provided.");
-	}
-	std::ranges::sort(records, sortFunction);
+		{SortingKey::DATE,  SORTDATA_LAMBDA_FUNC_ARGS { return a.date < b.date; }},
+		{SortingKey::TICKER,SORTDATA_LAMBDA_FUNC_ARGS { return a.ticker < b.ticker; }},
+		{SortingKey::OPEN,  SORTDATA_LAMBDA_FUNC_ARGS { return a.open < b.open; }},
+		{SortingKey::HIGH,  SORTDATA_LAMBDA_FUNC_ARGS { return a.high < b.high; }},
+		{SortingKey::CLOSE, SORTDATA_LAMBDA_FUNC_ARGS { return a.close < b.close; }},
+		{SortingKey::VOLUME,SORTDATA_LAMBDA_FUNC_ARGS { return a.volume < b.volume; }},
+	};
+
+	auto it = sortMap.find(key);
+	if (it != sortMap.end())
+		std::ranges::sort(in_records, it->second);
+	else
+		throw std::invalid_argument("Unsupported sortingKey");
 }
 
 std::vector<FinancialDataRecord> FinancialData::filterDataByTicker(const std::string& ticker_) const
@@ -75,28 +51,27 @@ std::vector<FinancialDataRecord> FinancialData::filterDataByDate(const ChronoDat
 	return filteredRecords;
 }
 
-
-double FinancialData::maximum_drawdown(const std::string& ticker_) const
+double FinancialData::maximum_drawdown(std::vector<FinancialDataRecord>& tickerRecords)
 {
 	double maxDrawdown = 0.0;
 	double currentDrawdown = 0.0;
 	double peak = 0.0;
 
-	std::vector<FinancialDataRecord> tickerRecords = filterDataByTicker(ticker_);
+
 
 	std::function<void(const FinancialDataRecord& record)> lambdaFunction =
 		[&maxDrawdown, &currentDrawdown, &peak](const FinancialDataRecord& record)
 		{
 			if (record.close > peak) {
 				if (currentDrawdown > maxDrawdown) {
-				maxDrawdown = currentDrawdown; // Update max drawdown if current is greater
+					maxDrawdown = currentDrawdown; // Update max drawdown if current is greater
+				}
+				currentDrawdown = 0.0; // Reset current drawdown if a new peak is found
+				peak = record.close; // Update the peak if the current close is higher
 			}
-			currentDrawdown = 0.0; // Reset current drawdown if a new peak is found
-			peak = record.close; // Update the peak if the current close is higher
-			}
-				else if (record.close < peak)
+			else if (record.close < peak)
 			{
-				currentDrawdown = (peak - record.close)/peak; // Calculate current drawdown
+				currentDrawdown = (peak - record.close) / peak; // Calculate current drawdown
 			}
 		};
 
@@ -110,22 +85,36 @@ double FinancialData::maximum_drawdown(const std::string& ticker_) const
 	return maxDrawdown;
 }
 
-std::array<double, 2> FinancialData::calculate_average_stddev(const std::string& ticker) const
+double FinancialData::maximum_drawdown(const std::string& ticker_) const
+{
+	std::vector<FinancialDataRecord> tickerRecords = filterDataByTicker(ticker_);
+	return maximum_drawdown(tickerRecords);
+}
+
+std::array<double, 2> FinancialData::calculate_average_stddev(const std::string& ticker_) const
+{
+	std::vector<FinancialDataRecord> tickerRecords = filterDataByTicker(ticker_);
+	return calculate_average_stddev(tickerRecords);
+}
+
+
+std::array<double, 2> calculate_average_stddev(const std::vector<FinancialDataRecord>& records_vector)
 {
 	std::array<double, 2> result = { 0.0,0.0 }; // {average, stddev}
 	double& average = result[0];
 	double& sttdev = result[1];
-	average = std::accumulate(records.begin(), records.end(), 0.0,
-		[](const double& acc, const FinancialDataRecord& record) 
+	average = std::accumulate(records_vector.begin(), records_vector.end(), 0.0,
+		[](const double& acc, const FinancialDataRecord& record)
 		{ return acc + record.close; }
 	);
-	average /= static_cast<double>(records.size());
-	sttdev = std::accumulate(records.begin(), records.end(), 0.0,
+	average /= static_cast<double>(records_vector.size());
+	sttdev = std::accumulate(records_vector.begin(), records_vector.end(), 0.0,
 		[&average](const double& acc, const FinancialDataRecord& record) {
 			return acc + (record.close - average) * (record.close - average);
-		}) / static_cast<double>(records.size() - 1);
+		}) / static_cast<double>(records_vector.size() - 1);
 	return result;
 }
+
 
 double FinancialData::calculate_daily_return(const std::string& ticker) const
 {
@@ -155,4 +144,31 @@ double FinancialData::calculate_daily_return(const std::string& ticker) const
 	}
 
 	return totalReturn / count; // Return the average daily return
+}
+
+void FinancialData::writeDataToFile(const std::string& dataPath, const std::vector<FinancialDataRecord>& records_vector)
+{
+	std::ofstream outFile(dataPath);
+
+	if (!outFile.is_open())
+		throw std::runtime_error("Could not open file for writing: " + dataPath);
+
+	std::string extension = dataPath.substr(dataPath.size() - 3);
+
+	char spacing;
+	if (!extension.compare("txt")) spacing = ' ';
+	else if (!extension.compare("csv")) spacing = ',';
+	else throw std::invalid_argument("Unsupported file format " + extension);
+
+
+	for (const auto& record : records_vector) {
+		outFile << std::format("{}{}{}{}{}{}{}{}{}{}{}{}{}", 
+			                    record.date, spacing, 
+			                    record.ticker, spacing,
+			                    record.open, spacing, 
+			                    record.high, spacing,
+			                    record.low, spacing,
+			                    record.close, spacing,
+			                    record.volume) << std::endl;
+	}
 }

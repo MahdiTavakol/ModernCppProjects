@@ -11,12 +11,22 @@
 class FinancialData {
 public:
 	FinancialData(const std::string& filePath_);
-	void sortData(SortingKey key);
+	void sortData(SortingKey key) {
+		sortData(records, key);
+	}
 	std::vector<FinancialDataRecord> filterDataByTicker(const std::string& ticker) const;
 	std::vector<FinancialDataRecord> filterDataByDate(const ChronoDate& date_) const;
 	double maximum_drawdown(const std::string& ticker) const;
 	std::array<double, 2> calculate_average_stddev(const std::string& ticker) const;
 	double calculate_daily_return(const std::string& ticker) const;
+	void writeDataToFile(const std::string& dataPath) const {
+		writeDataToFile(dataPath, records);
+	}
+
+	static void sortData(std::vector<FinancialDataRecord>& in_records, SortingKey key);
+	static double maximum_drawdown(std::vector<FinancialDataRecord>& tickerRecords);
+	static void writeDataToFile(const std::string& dataPath, const std::vector<FinancialDataRecord>& records_vector);
+	static std::array<double, 2> calculate_average_stddev(const std::vector<FinancialDataRecord>& records_vector);
 
 protected:
 	std::string filePath;

@@ -130,6 +130,7 @@
   <ItemGroup>
     <ClCompile Include="ChronoDate.cpp" />
     <ClCompile Include="FinancialData.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="ReadData.cpp" />
   </ItemGroup>
   <ItemGroup>
