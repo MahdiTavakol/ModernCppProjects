@@ -361,4 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# FinancialDataAnalyser output data
 /FinancialDataAnalyser/FinancialDataAnalyser/FinancialDataAnalyser/data
