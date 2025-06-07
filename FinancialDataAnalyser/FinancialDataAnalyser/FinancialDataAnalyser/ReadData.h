@@ -11,16 +11,6 @@
 
 #include "FinancialDataRecord.h"
 
-enum class SortingKey {
-	DATE,
-	TICKER,
-	OPEN,
-	HIGH,
-	LOW,
-	CLOSE,
-	VOLUME
-};
-
 enum class FileMode {
 	TXT,
 	CSV

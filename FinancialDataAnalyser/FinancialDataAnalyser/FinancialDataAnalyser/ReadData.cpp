@@ -120,6 +120,6 @@ void ReadData::returnData(std::vector<FinancialDataRecord>& outRecords)
 		if (records.empty()) {
 			throw std::runtime_error("No data available after reading. Check the input file.");
 		}
-		outRecords = std::move(records);
 	}
+	outRecords = std::move(records);
 }

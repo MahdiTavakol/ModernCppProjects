@@ -10,6 +10,16 @@
 
 #define TICKER_RECORD std::vector<FinancialDataRecord> tickerRecords = filterDataByTicker(ticker_)
 
+enum class SortingKey {
+	DATE,
+	TICKER,
+	OPEN,
+	HIGH,
+	LOW,
+	CLOSE,
+	VOLUME
+};
+
 enum class SortingOrder
 {
 	ASCENDING = 0,
@@ -23,7 +33,7 @@ public:
 	FinancialData(const FinancialData&) = default;
 	FinancialData& operator=(const FinancialData&) = default;
 	FinancialData(FinancialData&&) = default;
-	FinancialData& operator=(const FinancialData&&) = default;
+	FinancialData& operator=(FinancialData&&) = default;
 	~FinancialData() = default;
 
 	std::vector<FinancialDataRecord> filterDataByTicker(const std::string& ticker) const;

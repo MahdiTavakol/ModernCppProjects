@@ -22,6 +22,7 @@ void FinancialData::sortData(std::vector<FinancialDataRecord>& in_records, Sorti
 		{SortingKey::TICKER,SORTDATA_LAMBDA_FUNC_ARGS { return a.ticker < b.ticker;}},
 		{SortingKey::OPEN,  SORTDATA_LAMBDA_FUNC_ARGS { return a.open   < b.open;  }},
 		{SortingKey::HIGH,  SORTDATA_LAMBDA_FUNC_ARGS { return a.high   < b.high;  }},
+		{SortingKey::LOW,   SORTDATA_LAMBDA_FUNC_ARGS { return a.low    < b.low;  }},
 		{SortingKey::CLOSE, SORTDATA_LAMBDA_FUNC_ARGS { return a.close  < b.close; }},
 		{SortingKey::VOLUME,SORTDATA_LAMBDA_FUNC_ARGS { return a.volume < b.volume;}},
 	};
@@ -32,6 +33,7 @@ void FinancialData::sortData(std::vector<FinancialDataRecord>& in_records, Sorti
 		{SortingKey::TICKER,SORTDATA_LAMBDA_FUNC_ARGS { return a.ticker > b.ticker; }},
 		{SortingKey::OPEN,  SORTDATA_LAMBDA_FUNC_ARGS { return a.open   > b.open;  }},
 		{SortingKey::HIGH,  SORTDATA_LAMBDA_FUNC_ARGS { return a.high   > b.high;  }},
+		{SortingKey::LOW,   SORTDATA_LAMBDA_FUNC_ARGS { return a.low    > b.low;   }},
 		{SortingKey::CLOSE, SORTDATA_LAMBDA_FUNC_ARGS { return a.close  > b.close; }},
 		{SortingKey::VOLUME,SORTDATA_LAMBDA_FUNC_ARGS { return a.volume > b.volume; }},
 	};
@@ -77,6 +79,21 @@ std::vector<FinancialDataRecord> FinancialData::filterDataByDate(const ChronoDat
 
 double FinancialData::maximum_drawdown(std::vector<FinancialDataRecord>& tickerRecords)
 {
+	std::string ticker_0 = tickerRecords[0].ticker;
+
+	for (auto record : tickerRecords)
+		if (record.ticker.compare(ticker_0))
+		{
+			/*
+			    std::cout << "Warning: there are different tickers in the maximum_drawdowns" <<
+				"filter each ticker separately by filterDataByTicker and for each " <<
+				"ticker run maximum_drawdowns!" << std::endl;
+			*/
+			return -1.0;
+		}
+
+	sortData(tickerRecords, SortingKey::DATE);
+
 	double maxDrawdown = 0.0;
 	double currentDrawdown = 0.0;
 	double peak = 0.0;
@@ -109,7 +126,7 @@ double FinancialData::maximum_drawdown(std::vector<FinancialDataRecord>& tickerR
 	return maxDrawdown;
 }
 
-std::array<double, 2> calculate_average_stddev(const std::vector<FinancialDataRecord>& records_vector)
+std::array<double, 2> FinancialData::calculate_average_stddev(const std::vector<FinancialDataRecord>& records_vector)
 {
 	std::array<double, 2> result = { 0.0,0.0 }; // {average, stddev}
 	double& average = result[0];
@@ -123,6 +140,7 @@ std::array<double, 2> calculate_average_stddev(const std::vector<FinancialDataRe
 		[&average](const double& acc, const FinancialDataRecord& record) {
 			return acc + (record.close - average) * (record.close - average);
 		}) / static_cast<double>(records_vector.size() - 1);
+	sttdev = std::sqrt(sttdev);
 	return result;
 }
 
@@ -166,20 +184,24 @@ void FinancialData::writeDataToFile(const std::string& dataPath, const std::vect
 
 	std::string extension = dataPath.substr(dataPath.size() - 3);
 
+	std::string header[] = {"Date","Ticker","Open","High","Low","Close","Volume"};
 	char spacing;
 	if (!extension.compare("txt")) spacing = ' ';
 	else if (!extension.compare("csv")) spacing = ',';
 	else throw std::invalid_argument("Unsupported file format " + extension);
 
+	for (const auto& head : header)
+		outFile << head << spacing;
+	outFile << std::endl;
 
 	for (const auto& record : records_vector) {
-		outFile << std::format("{}{}{}{}{}{}{}{}{}{}{}{}{}", 
-			                    record.date, spacing, 
-			                    record.ticker, spacing,
-			                    record.open, spacing, 
-			                    record.high, spacing,
-			                    record.low, spacing,
-			                    record.close, spacing,
-			                    record.volume) << std::endl;
+		outFile <<
+			record.date << spacing <<
+			record.ticker << spacing <<
+			record.open << spacing <<
+			record.high << spacing <<
+			record.low << spacing <<
+			record.close << spacing <<
+			record.volume << std::endl;
 	}
 }
