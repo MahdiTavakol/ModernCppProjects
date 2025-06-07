@@ -40,7 +40,7 @@ A modern C++ application to read, filter, sort, and analyze stock market data fr
 
 Both `.csv` and `.txt` are supported.
 
-### Expected format:
+### Expected csv format:
 ```
 date,ticker,open,high,low,close,volume
 2023-04-03,AMZN,101.23,104.00,100.10,103.20,34500000
@@ -49,6 +49,17 @@ date,ticker,open,high,low,close,volume
 ```
 
 - Delimited by commas
+- Date format: `YYYY-MM-DD`
+
+### Expected txt format:
+```
+date ticker open high low close volume
+2023-04-03 AMZN 101.23 104.00 100.10 103.20 34500000
+2023-04-03 AAPL 161.42 162.74 160.10 161.79 38250000
+...
+```
+
+- Delimited by space
 - Date format: `YYYY-MM-DD`
 
 ---
