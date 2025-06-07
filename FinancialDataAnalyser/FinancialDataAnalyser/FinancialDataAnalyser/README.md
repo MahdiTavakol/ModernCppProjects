@@ -1,36 +1,122 @@
-# 📊 Financial Data Analyzer
+# 📊 Financial Data Analyser
 
-This C++20 project reads historical stock data from `.csv` or `.txt` files, filters records by ticker or date, and computes key financial statistics such as **mean price**, **maximum drawdown**, and **daily return**. Designed to demonstrate practical use of modern C++ concepts like ranges, smart pointers, and chrono-based date management.
+A modern C++ application to read, filter, sort, and analyze stock market data from CSV or TXT files. The tool enables quick insights into market trends by computing average prices, standard deviations, and maximum drawdowns.
+
+---
+
+## 🚀 Features
+
+- ✅ Read financial data from `.csv` or `.txt` files
+- 🔍 Filter records by:
+  - Ticker symbol
+  - Specific date
+- 📈 Compute statistics:
+  - **Average** and **Standard Deviation** of closing prices
+  - **Maximum Drawdown** (MDD)
+- 📊 Sort records by:
+  - `DATE`, `TICKER`, `OPEN`, `HIGH`, `LOW`, `CLOSE`, `VOLUME`
+- 💾 Export sorted data to CSV
+- 🧪 Simple CLI test via `main.cpp`
+
+---
+
+## 📁 File Structure
+
+<pre>
+📁 Project Root
+├── ChronoDate.h            # Date wrapper based on std::chrono
+├── ChronoDate.cpp
+├── FinancialDataRecord.h   # Struct for a single financial data row
+├── ReadData.h              # File I/O and CSV/TXT parsing
+├── ReadData.cpp
+├── FinancialData.h         # Filtering, sorting, and stats logic
+├── FinancialData.cpp
+└── main.cpp                # (Optional) CLI driver or unit test entry point
+</pre>
+
+---
+
+## 📝 Input File Format
+
+Both `.csv` and `.txt` are supported.
+
+### Expected csv format:
+```
+date,ticker,open,high,low,close,volume
+2023-04-03,AMZN,101.23,104.00,100.10,103.20,34500000
+2023-04-03,AAPL,161.42,162.74,160.10,161.79,38250000
+...
+```
+
+- Delimited by commas
+- Date format: `YYYY-MM-DD`
+
+### Expected txt format:
+```
+date ticker open high low close volume
+2023-04-03 AMZN 101.23 104.00 100.10 103.20 34500000
+2023-04-03 AAPL 161.42 162.74 160.10 161.79 38250000
+...
+```
+
+- Delimited by space
+- Date format: `YYYY-MM-DD`
+
+---
+
+## 📊 Sample Output
+
+For each ticker:
+- Printed to stdout:
+  - Mean and standard deviation of `close` price
+  - Max drawdown
+- Exported file:
+  - `AAPL_data_sorted_CLOSE.csv`, etc.
+
+---
+
+## 📦 Build Instructions
+
+### Prerequisites
+- C++20-compatible compiler (e.g., GCC ≥ 10, Clang ≥ 11, MSVC ≥ 2019)
+- CMake (optional but recommended)
+
+### Using g++:
+```bash
+g++ -std=c++20 -o analyser main.cpp FinancialData.cpp ReadData.cpp ChronoDate.cpp
+./analyser
+```
 
 ---
 
 ## 🧩 Concepts Practiced
 
-- `std::ifstream`, `std::stringstream` for robust file I/O
-- `std::accumulate`, `std::transform`, `std::ranges::copy_if` for functional data processing
-- `std::chrono` and `std::year_month_day` via a custom `ChronoDate` wrapper
-- Use of `std::unique_ptr`, RAII, and enum-driven design
-- Modular design: parsing, filtering, and analysis are fully decoupled
+- `std::ifstream`, `std::stringstream`
+- `std::transform`, `std::accumulate`, C++20 `ranges`
+- Filtering with lambda + `std::ranges::copy_if`
+- Enum-based function dispatch using `std::map`
+- `std::unique_ptr`, RAII
+- Custom `ChronoDate` class with `std::chrono`
 
 ---
 
-## 🎯 Features
+## 🧠 Future Improvements
 
-- ✅ **Input Support**: `.csv` and `.txt` file parsing with automatic format detection
-- ✅ **Ticker Filtering**: Extract records for a specific stock ticker
-- ✅ **Date Filtering**: (planned/optional) Filter records by exact date or date range
-- ✅ **Sorting**: Sort data by volume, close price, or other keys using an extensible enum
-- ✅ **Statistics**:
-  - Average closing price
-  - Standard deviation of closing price
-  - Maximum drawdown
-  - Average daily return
+- Date range filtering (start and end)
+- JSON/Excel export
+- Rolling averages and volatility metrics
+- Multithreaded I/O and computations
 
 ---
 
-## 🔧 Build Instructions
+## 👨‍💻 Author
 
-Requires a C++20 compatible compiler (e.g. `g++ >= 10`, `clang++ >= 11`, or MSVC with `/std:c++20`).
+**Mahdi Tavakol**  
+Department of Engineering Science, University of Oxford  
+✉️ mahdi.tavakol@eng.ox.ac.uk
 
-```bash
-g++ -std=c++20 -o analyzer main.cpp ChronoDate.cpp ReadData.cpp FinancialData.cpp
+---
+
+## 📄 License
+
+This project is for educational and research purposes. No commercial license is granted.
