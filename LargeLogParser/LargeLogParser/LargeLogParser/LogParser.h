@@ -9,26 +9,20 @@
 #include <format>
 #include <mutex>
 
-enum class ExecMode
-{
-	SERIAL,
-	PARALLEL
-};
-
 class LogParser
 {
 public:
-	LogParser(std::string filePath_, std::array<std::string,3> keys, ExecMode execMode_ = ExecMode::SERIAL);
-	LogParser(std::string filePath_, ExecMode execMode_ = ExecMode::SERIAL) {
-		LogParser(filePath_, std::array<std::string, 3>{"[ERROR]", "[WARN]", "[INFO]"}, execMode_);
-	}
+	LogParser(std::string filePath_, std::array<std::string,3> keys);
+	LogParser(std::string filePath_)
+		: LogParser(filePath_, { "[ERROR]", "[WARN]", "[INFO]" }) {}
+	virtual void initialize();
 	void readFile();
+	virtual void printProgress(const double& progress);
 	void returnNumErrorWarnInfo(std::array<int,3>& nums);
 	void returnErrorWarnInfo(std::array<std::vector<std::string>, 3>& ouput);
 	void returnFileLength(int& fileLength_) { fileLength_ = fileLength; }
 
 protected:
-	ExecMode execMode;
 
 	int thread_id, num_threads;
 

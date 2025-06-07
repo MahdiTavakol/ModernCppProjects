@@ -1,10 +1,24 @@
 #include "LogParserRunner.h"
 
+#include <filesystem>
+
 LogParserRunner::LogParserRunner(std::string filePath_, const int& numThreads_) :
-	filePath{ filePath_}, numThreads{ numThreads }
+	filePath{ filePath_ }, numThreads{ numThreads }, tot_nums{ {0,0,0} }
 {
-	std::unique_ptr<LogParser> parserSerialPtr = std::make_unique<LogParser>( filePath );
-	parserSerialPtr->returnFileLength(fileLength);
+	/*
+	* I do not want each instance of parallel log parser read the file size
+	* so I on purpose created a serial log parser just to get the file size.
+	*/
+	//std::unique_ptr<LogParser> parserSerialPtr = std::make_unique<LogParser>( filePath );
+	//parserSerialPtr->returnFileLength(fileLength);
+
+	std::filesystem::path p = filePath;
+	if (!std::filesystem::exists(p)) {
+		throw std::runtime_error("File does not exist: " + filePath);
+	}
+	fileLength = std::filesystem::file_size(p);
+
+
 	logParsers.reserve(numThreads);
 	threads.reserve(numThreads);
 }
@@ -13,7 +27,7 @@ void LogParserRunner::parseLogs()
 {
 	for (int i = 0; i < numThreads; i++)
 	{
-		threadId = i;
+		int threadId = i;
 		logParsers.emplace_back(filePath, fileLength, threadId, numThreads);
 		threads.emplace_back(&LogParserParallel::readFile, &logParsers[i]);
 	}

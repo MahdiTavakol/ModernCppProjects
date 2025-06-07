@@ -29,7 +29,7 @@ private:
 	std::string filePath;
 	int fileLength;
 
-	int threadId, numThreads;
+	int numThreads;
 
 	std::vector<std::thread> threads;
 	std::vector<LogParserParallel> logParsers;
