@@ -24,6 +24,9 @@
     <ClInclude Include="LogParserRunner.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="LogParserParallelFuture.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LogParserParallel.cpp">
@@ -33,6 +36,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="LogParserRunner.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LogParserParallelFuture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

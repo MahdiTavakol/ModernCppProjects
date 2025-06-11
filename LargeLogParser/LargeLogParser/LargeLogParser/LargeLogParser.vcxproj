@@ -130,11 +130,13 @@
   <ItemGroup>
     <ClInclude Include="LogParserParallel.h" />
     <ClInclude Include="LogParser.h" />
+    <ClInclude Include="LogParserParallelFuture.h" />
     <ClInclude Include="LogParserRunner.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LogParserParallel.cpp" />
     <ClCompile Include="LogParser.cpp" />
+    <ClCompile Include="LogParserParallelFuture.cpp" />
     <ClCompile Include="LogParserRunner.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

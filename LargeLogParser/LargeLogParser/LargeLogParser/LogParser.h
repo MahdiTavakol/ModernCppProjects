@@ -16,7 +16,7 @@ public:
 	LogParser(std::string filePath_)
 		: LogParser(filePath_, { "[ERROR]", "[WARN]", "[INFO]" }) {}
 	virtual void initialize();
-	void readFile();
+	virtual void readFile();
 	virtual void printProgress(const double& progress);
 	void returnNumErrorWarnInfo(std::array<int,3>& nums);
 	void returnErrorWarnInfo(std::array<std::vector<std::string>, 3>& ouput);
