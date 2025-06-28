@@ -1,87 +1,57 @@
-# 🧵 Multithreaded Log Parser (Phase 3)
+🧾 Log File Parser Benchmark Project
+This project generates synthetic log files with various proportions of [INFO], [WARN], and [ERROR] messages, and benchmarks different strategies for parsing them:
 
-## 📌 Goal
-Efficiently parse large log files in **parallel** to count occurrences of specific log levels like `[ERROR]`, `[WARN]`, and `[INFO]`.
+LogParser: A serial log parser.
 
----
+LogParserParallel: A parallel thread-based parser.
 
-## 🧩 Concepts Practiced
+LogParserParallelFuture: A std::future-based parallel parser.
 
-- `std::thread`, `std::mutex`, `std::async`, `std::future`
-- Thread-safe logging
-- Chunk-based file I/O
-- Optional real-time progress reporting
-- Optional regex-based pattern search
+LogParserParallelRunner: A manager for parallel parsing using multiple threads.
 
----
+🛠 Features
+Synthetic log file generation with configurable message proportions and sizes.
 
-## 🎯 Features
+Parsing strategies supporting single-threaded and multi-threaded approaches.
 
-- ✅ Count lines starting with `[ERROR]`, `[WARN]`, `[INFO]`
-- ✅ Parallel parsing using multiple threads
-- ✅ File is divided into non-overlapping byte chunks
-- ✅ Each thread opens and processes its own chunk
-- ✅ Skips partial line at the start of each chunk (if needed)
-- ✅ Real-time progress display per thread
+Performance benchmarks for different file sizes and thread configurations.
 
----
+Thread-safe I/O and progress reporting for parallel parsing.
 
-## 🏗️ Project Structure
+🧪 Test Framework
+Unit tests and performance benchmarks are implemented using Catch2.
 
-```
-.
-├── LogParser.h              # Abstract base class with common utilities
-├── LogParser.cpp
-├── LogParserParallel.h     # Inherits from LogParser for multithreaded chunk parsing
-├── LogParserRunner.h       # Manages threads, launches LogParserParallel instances
-├── LogParserRunner.cpp
-```
+✔️ How to Build & Run Tests
+Catch2 Integration:
+The project uses a single-header version of Catch2 (catch_amalgamated.hpp). No separate installation is required.
 
----
+Build with CMake or Visual Studio (Make sure you have C++20 enabled):
 
-## 🧪 Sample Output (Console)
+If using Visual Studio:
 
-```
-[Thread 0] Progress: 32.57%
-[Thread 1] Progress: 47.19%
-[Thread 2] Progress: 68.14%
-[Thread 3] Progress: 90.83%
-```
+Add test.cpp to your test target or create a new test project and include all .h and .cpp files.
 
----
+Make sure to define CATCH_CONFIG_MAIN in one .cpp file to enable the main test runner.
 
-## 🧵 How It Works
+If using CMake:
 
-1. `LogParserRunner` reads file size and splits it into N chunks.
-2. For each chunk:
-    - A new `LogParserParallel` is created
-    - Each opens the file, seeks to its own `beg` and `end` position
-    - First line skipped if `beg` is not at a newline
-    - Each line is checked for `[ERROR]`, `[WARN]`, `[INFO]`
-3. Threads join and results are aggregated
+cmake
+Copy
+Edit
+add_executable(runTests test.cpp)
+target_compile_features(runTests PRIVATE cxx_std_20)
+Run Tests:
+Run the compiled test binary in terminal or from within Visual Studio. All tests will run and show timing/validation output.
 
----
+🧪 Test Coverage
+The test suite benchmarks and verifies:
 
-## 🔧 Notes
+Parser correctness (e.g., count of [INFO], [WARN], [ERROR] lines).
 
-- File I/O is **not shared** between threads — each opens its own `ifstream`
-- Progress is calculated using `tellg()` against chunk range
-- Future enhancements can include:
-  - Regex pattern matching
-  - Configurable log levels
-  - Output to JSON or summary report
+Scalability with increasing file sizes.
 
----
+Performance scaling with varying thread counts.
 
-## 📤 How to Run
+Comparison between serial and different parallel implementations.
 
-```bash
-g++ -std=c++20 -pthread -o parser main.cpp LogParser*.cpp
-./parser logfile.txt 4
-```
-Arguments: `<file> <num_threads>`
-
----
-
-## 👤 Author
-Created by Mahdi Tavakol, 2025
+Benchmark results are printed to the console in a structured format.
