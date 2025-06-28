@@ -164,6 +164,7 @@ mkdir build && cd build
 cmake ..
 make
 ./NeuralNet
+```
 
 
 ## 📂 Repository Structure
