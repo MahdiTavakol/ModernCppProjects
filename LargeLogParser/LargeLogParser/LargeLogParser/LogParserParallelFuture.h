@@ -16,12 +16,11 @@ class LogParserParallelFuture : public LogParser
 	};
 
 public:
-	LogParserParallelFuture(std::string filePath_, int fileLength_, int thread_id_, int num_threads_) :
+	LogParserParallelFuture(std::string filePath_, int num_threads_) :
 		LogParser{ filePath_ }
 	{
-		thread_id = thread_id_;
+		thread_id = -1;
 		num_threads = num_threads_;
-		fileLength = fileLength_;
 	}
 
 	virtual void initialize() override;

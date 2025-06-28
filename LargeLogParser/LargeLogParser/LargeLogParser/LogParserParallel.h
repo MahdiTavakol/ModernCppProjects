@@ -9,16 +9,15 @@
 class LogParserParallel: public LogParser
 {
 public:
-	LogParserParallel(std::string filePath_, int fileLength_, int thread_id_, int num_threads_):
+	LogParserParallel(std::string filePath_, const int& file_length_, int thread_id_, int num_threads_):
 		LogParser{ filePath_}
 	{
+		fileLength = file_length_;
 		thread_id = thread_id_;
 		num_threads = num_threads_;
-		fileLength = fileLength_;
 	}
 
 	void initialize() override {
-		
 		int lengthPerThread = static_cast<int>(fileLength / num_threads);
 		beg = thread_id * lengthPerThread;
 		end = beg + lengthPerThread;

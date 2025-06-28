@@ -21,10 +21,19 @@
     <ClInclude Include="LogParser.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="LogParserRunner.h">
+    <ClInclude Include="LogParserParallelRunner.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="LogParserParallelFuture.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CreateLargeLogs.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="catch_amalgamated.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -35,10 +44,19 @@
     <ClCompile Include="LogParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LogParserRunner.cpp">
+    <ClCompile Include="LogParserParallelRunner.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="LogParserParallelFuture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CreateLargeLogs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="catch_amalgamated.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

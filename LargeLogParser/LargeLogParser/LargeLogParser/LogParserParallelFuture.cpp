@@ -1,7 +1,14 @@
 #include "LogParserParallelFuture.h"
+#include <filesystem>
 
 void LogParserParallelFuture::initialize()
 {
+	std::filesystem::path p = filePath;
+	if (!std::filesystem::exists(p)) {
+		throw std::runtime_error("File does not exist: " + filePath);
+	}
+	fileLength = std::filesystem::file_size(p);
+
 	if (!file.is_open())
 		throw std::runtime_error("Cannot open the file " + filePath + " for reading!");
 }

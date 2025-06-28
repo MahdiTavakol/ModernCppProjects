@@ -1,17 +1,10 @@
-#include "LogParserRunner.h"
+#include "LogParserParallelRunner.h"
 
 #include <filesystem>
 
-LogParserRunner::LogParserRunner(std::string filePath_, const int& numThreads_) :
-	filePath{ filePath_ }, numThreads{ numThreads }, tot_nums{ {0,0,0} }
+LogParserParallelRunner::LogParserParallelRunner(std::string filePath_, const int& numThreads_) :
+	filePath{ filePath_ }, numThreads{ numThreads }, tot_nums{ {0,0,0} }, num_lines{0}
 {
-	/*
-	* I do not want each instance of parallel log parser read the file size
-	* so I on purpose created a serial log parser just to get the file size.
-	*/
-	//std::unique_ptr<LogParser> parserSerialPtr = std::make_unique<LogParser>( filePath );
-	//parserSerialPtr->returnFileLength(fileLength);
-
 	std::filesystem::path p = filePath;
 	if (!std::filesystem::exists(p)) {
 		throw std::runtime_error("File does not exist: " + filePath);
@@ -23,12 +16,13 @@ LogParserRunner::LogParserRunner(std::string filePath_, const int& numThreads_) 
 	threads.reserve(numThreads);
 }
 
-void LogParserRunner::parseLogs()
+void LogParserParallelRunner::parseLogs()
 {
 	for (int i = 0; i < numThreads; i++)
 	{
 		int threadId = i;
 		logParsers.emplace_back(filePath, fileLength, threadId, numThreads);
+		logParsers[i].initialize();
 		threads.emplace_back(&LogParserParallel::readFile, &logParsers[i]);
 	}
 
@@ -42,6 +36,7 @@ void LogParserRunner::parseLogs()
 		ARRAY_DATA_3 data;
 		parser.returnNumErrorWarnInfo(nums);
 		parser.returnErrorWarnInfo(data);
+		num_lines += parser.returnNumLines();
 
 		for (int i = 0; i < 3; i++)
 		{
@@ -52,17 +47,25 @@ void LogParserRunner::parseLogs()
 }
 
 template<ReturnMode returnMode>
-void LogParserRunner::returnLogs(ARRAY_DATA_3& tot_data_)
+void LogParserParallelRunner::returnLogs(ARRAY_DATA_3& tot_data_)
 {
 	switch (returnMode)
 	{
-	case ReturnMode::COPY:
-		tot_data_ = tot_data;
-		return;
-	case ReturnMode::MOVE:
-		tot_data_ = std::move(tot_data);
-		return;
-	default:
-		throw std::invalid_argument("Wrong return mode!");
+		case ReturnMode::COPY:
+			tot_data_ = tot_data;
+			return;
+		case ReturnMode::MOVE:
+			tot_data_ = std::move(tot_data);
+			return;
+		default:
+			throw std::invalid_argument("Wrong return mode!");
 	}
+}
+
+int LogParserParallelRunner::operator()(int& num_infos_, int& num_warns_, int& num_errors_)
+{
+	num_errors_ = tot_nums[0];
+	num_warns_ = tot_nums[1];
+	num_infos_ = tot_nums[2];
+	return num_lines;
 }
