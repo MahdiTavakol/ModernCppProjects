@@ -55,19 +55,26 @@ make
 
 ## ✅ 3. Multithreaded Log Parser (Phase 3)
 
-**Goal:** Parse large log files in parallel and summarize results.
+**Goal:** Parse large log files efficiently using multithreading techniques and validate implementations via unit tests.
 
 ### 🧩 Concepts Practiced:
 
 * `std::thread`, `std::mutex`, `std::async`, `std::future`
-* Thread-safe containers
-* Regex or substring-based parsing
+* Chunk-based and future-based parallelization strategies
+* `constexpr`, `if constexpr`, and template metaprogramming
+* RAII, scoped timing with `std::chrono`
+* Use of modern testing frameworks (Catch2)
 
 ### 🎯 Features:
 
-* Count ERROR, WARN lines
-* Chunk-based parallel parsing
-* Real-time progress reporting
+* Serial and two parallel implementations:
+  * Thread-based with `std::thread` (via `LogParserParallelRunner`)
+  * Future-based with `std::async` (via `LogParserParallelFuture`)
+* Count `INFO`, `WARN`, `ERROR` messages
+* Thread-safe parsing and aggregation
+* Scalable benchmarking across file sizes and thread counts
+* Real-time timing information and test validation
+* Extensive Catch2-based test suite for functional and performance checks
 
 ---
 
