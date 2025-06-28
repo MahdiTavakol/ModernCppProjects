@@ -134,6 +134,39 @@ make
 
 ---
 
+## ✅ 7. Neural Network from Scratch (Phase 7)
+
+**Goal:** Implement a simple feedforward neural network (MLP) to classify data (e.g., XOR or MNIST subset) using only modern C++ and Eigen for matrix math.
+
+### 🧩 Concepts Practiced:
+
+* `Eigen::MatrixXd` for vectorized computation
+* Backpropagation algorithm (from scratch)
+* `std::function`, lambdas, and activation functions
+* Minimal `SGD` (Stochastic Gradient Descent)
+* Loss functions (MSE, CrossEntropy)
+
+### 🎯 Features:
+
+* Build multi-layer perceptrons with customizable topology
+* Train on toy datasets like XOR or linearly separable data
+* Output training loss, weights, and predictions
+* Extendable to image data via CSV (e.g., MNIST subset)
+
+### 🧪 Testing:
+
+* Catch2 tests ensure correct forward pass, loss, and backpropagation updates
+
+### 🔧 Build Instructions:
+
+```bash
+mkdir build && cd build
+cmake ..
+make
+./NeuralNet
+
+---
+
 ## 📂 Repository Structure
 
 ```
