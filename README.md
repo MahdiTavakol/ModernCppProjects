@@ -3,6 +3,7 @@
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)]()
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)]()
 [![C++](https://img.shields.io/badge/C%2B%2B-17/20-blue)]()
+![Tests](https://img.shields.io/badge/tests-Catch2%20included-lightgrey)
 
 Welcome to my collection of modern C++ projects, crafted to demonstrate practical software engineering skills using STL, RAII, concurrency, and modular design. These projects progress in difficulty and complexity, and are all built with clean, testable, and extensible architecture in mind.
 
