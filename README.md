@@ -165,7 +165,6 @@ cmake ..
 make
 ./NeuralNet
 
----
 
 ## 📂 Repository Structure
 
