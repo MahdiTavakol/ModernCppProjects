@@ -1,3 +1,9 @@
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-blue)
+![C++](https://img.shields.io/badge/language-C%2B%2B17-blue)
+![Tests](https://img.shields.io/badge/tests-Catch2%20included-lightgrey)
+
+
 
 # 🧾 Log File Parser Benchmark Project
 
