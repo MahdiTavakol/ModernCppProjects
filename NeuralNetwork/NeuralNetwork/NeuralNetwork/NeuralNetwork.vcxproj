@@ -125,11 +125,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Activations.cpp" />
+    <ClCompile Include="Layer.cpp" />
     <ClCompile Include="Loss.cpp" />
     <ClCompile Include="Neuron.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Activations.h" />
+    <ClInclude Include="Layer.h" />
     <ClInclude Include="Loss.h" />
     <ClInclude Include="Neuron.h" />
   </ItemGroup>

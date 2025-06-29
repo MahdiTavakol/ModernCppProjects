@@ -1,6 +1,7 @@
 #pragma once
 #include <Eigen/Dense>
 #include "Activations.h"
+#include "Loss.h"
 
 using Eigen::VectorXd;
 using Eigen::MatrixXd;
@@ -13,19 +14,24 @@ enum class ActivationType
 	TANH
 };
 
+
+
 class Neuron
 {
 public:
-	Neuron(const ActivationType& activType_);
+	Neuron(const ActivationType& activType_, const double& learningRate_);
 	void reset(const VectorXd& weights_, const VectorXd& input_);
 	double forward();
-	double backward();
+	void backward(const double& diffPrevious);
+	void update();
 
 private:
-	VectorXd input;
+	double learningRate;
+	VectorXd input, dLoss_dweights;
 	VectorXd weights;
-	double bias;
+	double bias, dLoss_dbias;
 	ActivationType activType;
 	std::unique_ptr<Activation> activationFunction;
+	std::unique_ptr<Loss> LossFunction;
 	double weightedSum, output, gradient;
 };
