@@ -3,6 +3,7 @@
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)]()
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)]()
 [![C++](https://img.shields.io/badge/C%2B%2B-17/20-blue)]()
+![Tests](https://img.shields.io/badge/tests-Catch2%20included-lightgrey)
 
 Welcome to my collection of modern C++ projects, crafted to demonstrate practical software engineering skills using STL, RAII, concurrency, and modular design. These projects progress in difficulty and complexity, and are all built with clean, testable, and extensible architecture in mind.
 
@@ -55,19 +56,26 @@ make
 
 ## ✅ 3. Multithreaded Log Parser (Phase 3)
 
-**Goal:** Parse large log files in parallel and summarize results.
+**Goal:** Parse large log files efficiently using multithreading techniques and validate implementations via unit tests.
 
 ### 🧩 Concepts Practiced:
 
 * `std::thread`, `std::mutex`, `std::async`, `std::future`
-* Thread-safe containers
-* Regex or substring-based parsing
+* Chunk-based and future-based parallelization strategies
+* `constexpr`, `if constexpr`, and template metaprogramming
+* RAII, scoped timing with `std::chrono`
+* Use of modern testing frameworks (Catch2)
 
 ### 🎯 Features:
 
-* Count ERROR, WARN lines
-* Chunk-based parallel parsing
-* Real-time progress reporting
+* Serial and two parallel implementations:
+  * Thread-based with `std::thread` (via `LogParserParallelRunner`)
+  * Future-based with `std::async` (via `LogParserParallelFuture`)
+* Count `INFO`, `WARN`, `ERROR` messages
+* Thread-safe parsing and aggregation
+* Scalable benchmarking across file sizes and thread counts
+* Real-time timing information and test validation
+* Extensive Catch2-based test suite for functional and performance checks
 
 ---
 
@@ -125,6 +133,39 @@ make
 * Output visualization via PPM or display API
 
 ---
+
+## ✅ 7. Neural Network from Scratch (Phase 7)
+
+**Goal:** Implement a simple feedforward neural network (MLP) to classify data (e.g., XOR or MNIST subset) using only modern C++ and Eigen for matrix math.
+
+### 🧩 Concepts Practiced:
+
+* `Eigen::MatrixXd` for vectorized computation
+* Backpropagation algorithm (from scratch)
+* `std::function`, lambdas, and activation functions
+* Minimal `SGD` (Stochastic Gradient Descent)
+* Loss functions (MSE, CrossEntropy)
+
+### 🎯 Features:
+
+* Build multi-layer perceptrons with customizable topology
+* Train on toy datasets like XOR or linearly separable data
+* Output training loss, weights, and predictions
+* Extendable to image data via CSV (e.g., MNIST subset)
+
+### 🧪 Testing:
+
+* Catch2 tests ensure correct forward pass, loss, and backpropagation updates
+
+### 🔧 Build Instructions:
+
+```bash
+mkdir build && cd build
+cmake ..
+make
+./NeuralNet
+```
+
 
 ## 📂 Repository Structure
 
