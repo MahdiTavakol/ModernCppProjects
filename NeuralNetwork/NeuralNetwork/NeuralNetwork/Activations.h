@@ -5,40 +5,33 @@ class Activation
 {
 public:
 	virtual double operator()(const double& x) = 0;
+	virtual double diff(const double& x) = 0;
 };
 
-class ReLu : public Activation
+class ReLu final : public Activation
 {
 public:
-	double operator()(const double& x)
-	{
-		return (x + std::abs(x)) / 2.0;
-	}
+	double operator()(const double& x) override;
+	double diff(const double& x) override;
 };
 
-class Sigmoid : public Activation
+class Sigmoid final : public Activation
 {
 public:
-	double operator()(const double& x)
-	{
-		return (1.0 / (1.0 + std::exp(-x)));
-	}
+	double operator()(const double& x) override;
+	double diff(const double& x) override;
 };
 
-class FastSigmoid : public Activation
+class FastSigmoid final : public Activation
 {
 public:
-	double operator()(const double& x)
-	{
-		return x / (1 + std::abs(x));
-	}
+	double operator()(const double& x) override;
+	double diff(const double& x) override;
 };
 
-class TanH : public Activation
+class TanH final : public Activation
 {
 public:
-	double operator()(const double& x)
-	{
-		return std::tanh(x);
-	}
+	double operator()(const double& x) override;
+	double diff(const double& x) override;
 };
