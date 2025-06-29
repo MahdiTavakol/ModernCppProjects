@@ -17,8 +17,9 @@ class Neuron
 {
 public:
 	Neuron(const ActivationType& activType_);
-	double forward(const VectorXd& input_);
-	double backward(const VectorXd& input_);
+	void initialize(const VectorXd& weights_, const VectorXd& input_);
+	double forward();
+	double backward();
 
 private:
 	VectorXd input;

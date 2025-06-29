@@ -21,4 +21,13 @@ Neuron::Neuron(const ActivationType& activType_):
 	}
 }
 
-double forward(const VectorXd& input_)
+void Neuron::initialize(const VectorXd& weights_, const VectorXd& input_)
+{
+	weights = weights_;
+	input = input_;
+}
+
+double Neuron::forward()
+{
+	return weights.dot(input);
+}
