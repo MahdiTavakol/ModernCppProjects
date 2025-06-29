@@ -21,7 +21,7 @@ Neuron::Neuron(const ActivationType& activType_):
 	}
 }
 
-void Neuron::initialize(const VectorXd& weights_, const VectorXd& input_)
+void Neuron::reset(const VectorXd& weights_, const VectorXd& input_)
 {
 	weights = weights_;
 	input = input_;
