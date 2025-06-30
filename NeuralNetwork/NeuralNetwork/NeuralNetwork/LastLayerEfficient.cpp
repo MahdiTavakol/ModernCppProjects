@@ -24,19 +24,20 @@ LastLayerEfficient::LastLayerEfficient(const int& inputDim_, const int& outputDi
 void LastLayerEfficient::backward(VectorXd& expectedValue_)
 {
 	// dActivation_dz
-	VectorXd output = weights * input + bias;
-	VectorXd dActive_dz = output.unaryExpr([&](double v) {return activationFunction->diff(v); });
-	// dzi_dweights
-	MatrixXd dzi_dweights = input;
-	// doutput_dwi
-	MatrixXd doutput_dweights = dActive_dz * dzi_dweights;
-	// dLoss_douput
-	MatrixXd dLoss_doutput = lossFunction->diff(output, expectedValue_);
-	// dLoss_dwi
-	dLoss_dweights = dLoss_doutput * doutput_dweights;
+	VectorXd z = weights * input + bias;
+	VectorXd output = z.unaryExpr([&](double v) {return (*activationFunction)(v); });
+	VectorXd dActive_dz = z.unaryExpr([&](double v) {return activationFunction->diff(v); });
+	// dz_dweights
+	RowVectorXd dz_dweights = input.transpose();
+	// dLoss_dz
+	VectorXd dLoss_dz = lossFunction->diff(expectedValue_, output).cwiseProduct(dActive_dz);
+
+	dLoss_dweights = dLoss_dz * dz_dweights;
 
 	// dzi_dbias
-	VectorXd dzi_dbias = Eigen::VectorXd::Ones(inputDim);
-	VectorXd doutput_dbias = dActive_dz.cwiseProduct(dzi_dbias);
-	dLoss_dbias = nextDiff_ * doutput_dbias;
+	VectorXd dz_dbias = Eigen::VectorXd::Ones(inputDim);
+	dLoss_dbias = dLoss_dz * dz_dbias;
+
+	// previous_diff
+	prev_diff = weights.transpose() * dLoss_dz;
 }
