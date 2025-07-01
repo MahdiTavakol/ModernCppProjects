@@ -1,9 +1,12 @@
 #include "LayerEfficient.h"
 
 LayerEfficient::LayerEfficient(const int& inputDim_, const int& outputDim_,
-	const ActivationType& activType_, const double& learningRate_) :
+	const ActivationType& activType_, const OptimizerType& optType_, const double& learningRate_) :
 	inputDim{ inputDim_ }, outputDim{ outputDim_ },
-	activType{ activType_ }, learningRate{ learningRate_ }
+	activType{ activType_ }, 
+	optType{ optType_ }, learningRate {
+	learningRate_
+}
 {
 	switch (activType)
 	{
@@ -22,6 +25,28 @@ LayerEfficient::LayerEfficient(const int& inputDim_, const int& outputDim_,
 	default:
 		throw std::invalid_argument("Unknown loss type!");
 	}
+
+	switch (optType)
+	{
+	case OptimizerType::SGD:
+		optFunction = std::make_unique<SGD>(learningRate);
+		break;
+	case OptimizerType::SGDMOMENUM:
+		optFunction = std::make_unique<SGDMomentum>(learningRate);
+		break;
+	case OptimizerType::RMSPROP:
+		optFunction = std::make_unique<RMSProp>(learningRate);
+		break;
+	case OptimizerType::ADAM:
+		optFunction = std::make_unique<Adam>(learningRate);
+		break;
+	case OptimizerType::ADAGRAD:
+		optFunction = std::make_unique<AdaGrad>(learningRate);
+		break;
+	default:
+		throw std::invalid_argument("Unknown optimizer type!");
+	}
+
 }
 
 VectorXd LayerEfficient::forward(VectorXd& input_)
@@ -52,6 +77,12 @@ void LayerEfficient::backward(VectorXd& nextDiff_)
 
 void LayerEfficient::update()
 {
-	weights -= learningRate * dLoss_dweights;
-	bias -= learningRate * dLoss_dbias;
+	MatrixXd newWeights(weights.rows(), weights.cols() + 1);
+	newWeights.col(0) = dLoss_dbias;
+	newWeights.block(0, 1, dLoss_dweights.rows(), dLoss_dweights.cols());
+	
+	optFunction->update(newWeights);
+
+	bias = newWeights.col(0);
+	weights = newWeights.block(0, 1, newWeights.rows(), newWeights.cols() - 1);
 }

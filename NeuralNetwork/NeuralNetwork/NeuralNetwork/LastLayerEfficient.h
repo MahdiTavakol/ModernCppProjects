@@ -10,6 +10,7 @@ enum class LossType
 	Huber
 };
 
+
 class LastLayerEfficient final : public LayerEfficient
 {
 public:

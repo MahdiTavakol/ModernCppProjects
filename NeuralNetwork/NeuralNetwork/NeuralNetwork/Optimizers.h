@@ -8,56 +8,62 @@ using Eigen::MatrixXd;
 class Optimizer
 {
 public:
-	Optimizer();
-	virtual void update();
+	Optimizer(const int& learningRate_);
+	virtual void update(MatrixXd& weights) = 0;
 	
 protected:
+	double learningRate;
 	MatrixXd gradient;
 };
 
 class SGD : public Optimizer
 {
 public:
-	SGD();
-	void update() override;
+	SGD(const int& learningRate_);
+	void update(MatrixXd& weights) override;
 
-private:
-	double learningRate;
 };
 
 class SGDMomentum : public Optimizer
 {
 public:
-	SGDMomentum();
-	void update() override;
+	SGDMomentum(const int& learningRate_, const double& gamma_);
+	SGDMomentum(const int& learningRate_);
+	void update(MatrixXd& weights) override;
 
 private:
 	double gamma;
+	MatrixXd weightsVelocity;
 };
 
 class RMSProp : public Optimizer
 {
-	RMSProp();
-	void update() override;
+	RMSProp(const int& learningRate_, const double& rho_);
+	RMSProp(const int& learningRate_);
+	void update(MatrixXd& weights) override;
 
 private:
 	double rho, epsilon;
+	MatrixXd st;
 };
 
 class Adam : public Optimizer
 {
-	Adam();
-	void update() override;
+	Adam(const int& learningRate_, const double& beta1, const double& beta2);
+	Adam(const int& learningRate_);
+	void update(MatrixXd& weights) override;
 
 private:
 	double beta1, beta2, epsilon;
+	MatrixXd firstMomentum, secondMomentum;
 };
 
 class AdaGrad : public Optimizer
 {
-	AdaGrad();
-	void update() override;
+	AdaGrad(const int& learningRate_);
+	void update(MatrixXd& weights) override;
 
 private:
 	double epsilon;
+	MatrixXd squareGradient;
 };
