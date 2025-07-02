@@ -127,7 +127,7 @@
     <ClCompile Include="Activations.cpp" />
     <ClCompile Include="LastLayerEfficient.cpp" />
     <ClCompile Include="Layer.cpp" />
-    <ClCompile Include="LayerEfficient.cpp" />
+    <ClCompile Include="LayerBatchEfficient.cpp" />
     <ClCompile Include="Loss.cpp" />
     <ClCompile Include="NeuralNetwork.cpp" />
     <ClCompile Include="Neuron.cpp" />
@@ -137,7 +137,7 @@
     <ClInclude Include="Activations.h" />
     <ClInclude Include="LastLayerEfficient.h" />
     <ClInclude Include="Layer.h" />
-    <ClInclude Include="LayerEfficient.h" />
+    <ClInclude Include="LayerBatchEfficient.h" />
     <ClInclude Include="Loss.h" />
     <ClInclude Include="NeuralNetwork.h" />
     <ClInclude Include="Neuron.h" />

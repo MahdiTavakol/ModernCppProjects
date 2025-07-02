@@ -27,7 +27,7 @@
     <ClCompile Include="Layer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LayerEfficient.cpp">
+    <ClCompile Include="LayerBatchEfficient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="LastLayerEfficient.cpp">
@@ -53,7 +53,7 @@
     <ClInclude Include="Layer.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="LayerEfficient.h">
+    <ClInclude Include="LayerBatchEfficient.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="LastLayerEfficient.h">

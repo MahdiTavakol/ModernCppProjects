@@ -26,17 +26,19 @@ enum class OptimizerType
 };
 
 
-class LayerEfficient
+class LayerBatchEfficient
 {
 public:
-	LayerEfficient(const int& inputDim_, const int& outputDim_, const ActivationType& activType_, const OptimizerType& optType_, const double& learningRate_);
-	VectorXd forward(VectorXd& input_);
-	virtual void backward(VectorXd& nextDiff_);
+	LayerBatchEfficient(const int& batchsize_, const int& inputDim_, const int& outputDim_, const ActivationType& activType_, const OptimizerType& optType_, const double& learningRate_);
+	MatrixXd forward(MatrixXd& input_); // outputDim X batchsize --> inputDim X batchsize
+	virtual void backward(MatrixXd& nextDiff_);
 	void update();
 
 protected:
+	int batchsize;
+
 	int inputDim, outputDim;
-	VectorXd input, output;
+	MatrixXd input, output; // inputDim X batchsize , outputDim X batchsize
 	MatrixXd weights;
 	VectorXd bias;
 
