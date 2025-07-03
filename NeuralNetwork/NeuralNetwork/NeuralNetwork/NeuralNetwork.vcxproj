@@ -125,7 +125,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Activations.cpp" />
-    <ClCompile Include="LastLayerEfficient.cpp" />
+    <ClCompile Include="LastLayerBatchEfficient.cpp" />
     <ClCompile Include="Layer.cpp" />
     <ClCompile Include="LayerBatchEfficient.cpp" />
     <ClCompile Include="Loss.cpp" />
@@ -135,7 +135,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Activations.h" />
-    <ClInclude Include="LastLayerEfficient.h" />
+    <ClInclude Include="LastLayerBatchEfficient.h" />
     <ClInclude Include="Layer.h" />
     <ClInclude Include="LayerBatchEfficient.h" />
     <ClInclude Include="Loss.h" />

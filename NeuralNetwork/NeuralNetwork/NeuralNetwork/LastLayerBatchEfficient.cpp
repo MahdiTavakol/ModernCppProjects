@@ -1,8 +1,8 @@
-#include "LastLayerEfficient.h"
+#include "LastLayerBatchEfficient.h"
 
-LastLayerEfficient::LastLayerEfficient(const int& inputDim_, const int& outputDim_, const ActivationType& activType_,
+LastLayerBatchEfficient::LastLayerBatchEfficient(const int& inputDim_, const int& outputDim_, const ActivationType& activType_,
 	const double& learningRate_, const LossType& lossType_):
-	LayerEfficient{inputDim_, outputDim_, activType_,learningRate_}, lossType{lossType_}
+	LayerBatchEfficient{inputDim_, outputDim_, activType_,learningRate_}, lossType{lossType_}
 { 
 	switch (lossType)
 	{
@@ -21,7 +21,7 @@ LastLayerEfficient::LastLayerEfficient(const int& inputDim_, const int& outputDi
 }
 
 
-void LastLayerEfficient::backward(VectorXd& expectedValue_)
+MatrixXd LastLayerBatchEfficient::backward(MatrixXd& expectedValue_)
 {
 	// dActivation_dz
 	VectorXd z = weights * input + bias;
@@ -40,4 +40,11 @@ void LastLayerEfficient::backward(VectorXd& expectedValue_)
 
 	// previous_diff
 	prev_diff = weights.transpose() * dLoss_dz;
+
+	return prev_diff;
+}
+
+double LastLayerBatchEfficient::loss(MatrixXd& output_, MatrixXd& expectedValue_)
+{
+	return (*lossFunction)(output_,expectedValue_);
 }
