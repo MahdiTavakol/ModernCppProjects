@@ -8,10 +8,15 @@
 NeuralNetwork::NeuralNetwork(const string networkInputFileName_, const string& networkOutputFileName_,
 	const int& maxNumLayers_, const int& batchsize_) :
 	maxNumLayers{ maxNumLayers_ }, batchsize{batchsize_},
-	networkInputDim{ readCSVDataFile(networkInputFileName_, networkInputMatrix) },
-	networkOutputDim{ readCSVDataFile(networkOutputFileName_,networkOutputMatrix)},
-	trainingPercent{70.0}
+	trainingPercent{ 70.0 }, inputPtr{ std::make_unique<Input>(networkInputFileName_,networkOutputFileName_)}
+{}
+
+void NeuralNetwork::initializeData()
 {
+	inputPtr->read();
+	inputPtr->return_data(networkInputDim, networkOutputDim, networkInputMatrix, networkOutputMatrix);
+	inputPtr.reset();
+
 	if (networkInputDim[1] != networkOutputDim[1])
 		throw std::invalid_argument("The number of data in the input and output data are not the same!");
 	Layers.reserve(maxNumLayers);
@@ -55,66 +60,10 @@ void NeuralNetwork::addLastLayer(const int& inputDim_, const int& outputDim_,
 		throw std::invalid_argument("The batchsize must be > 0");
 }
 
-array<int, 2> NeuralNetwork::readCSVDataFile(string fileName_, MatrixXd& output_)
-{
-	string line;
-	int numData, dim;
-	array<int, 2> returnArray;
-	VectorXd dataLineI;
-	std::ifstream file(fileName_);
-
-	if (!file.is_open())
-		throw std::invalid_argument("The file " + fileName_ + " is not found!");
-
-	std::getline(file, line);
-	std::stringstream iss(line);
-	iss >> numData >> dim;
-
-	output_.resize(dim, numData);
-
-
-	int colNumber = -1;
-	while (std::getline(file, line) )
-	{
-		colNumber++;
-		int readInt;
-		int countReadInt = 0;
-		VectorXd readVector(dim);
-		std::stringstream iss(line);
-		
-		while (iss >> readInt)
-		{
-			countReadInt++;
-			if (countReadInt > dim)
-				std::cout << "Warning: The number of data in this line is larger than the dim" << std::endl;
-			readVector[countReadInt - 1] = readInt;
-		}
-		if (countReadInt < dim)
-			throw std::invalid_argument("Not enough data in the line");
-
-		output_.col(colNumber) = readVector;
-		
-		if (colNumber >= numData) {
-			std::cout << "Warning: The number of data in this file is larger " <<
-				"than the number of data read from the first line: " <<
-				"Ignoring the rest!" << std::endl;
-			break;
-		}
-	}
-
-	if (colNumber < numData)
-		throw std::invalid_argument("Not enough data in the file") << std::endl;
-	
-	returnArray[0] = dim;
-	returnArray[1] = numData;
-
-	return returnArray;
-}
-
-void NeuralNetwork::initialize()
+void NeuralNetwork::initializeLayers()
 {
 	// Checking the last layer type
-	LayerBatchEfficient* LastLayerRawPtr = Layers[Layers.size() - 1].get();
+	LayerBatchEfficient* LastLayerRawPtr = Layers.back().get();
 	if (!(dynamic_cast<LastLayerBatchEfficient*>(LastLayerRawPtr)))
 	{
 		throw std::invalid_argument("The last layer must be of type LastLayerBatchEfficient!");
@@ -139,31 +88,6 @@ void NeuralNetwork::train()
 	validationLoss.reserve(MaxNumSteps);
 
 	int numStepsTrainLossDownValidLossUp = 0;
-
-	auto trainBatches = [&](const double& firstData, const double& numData, const int& numBatchs, double& lossValue, const bool& doBack)
-		{
-			for (int j = 0; j < numBatchs; j++)
-			{
-				MatrixXd outputBatch;
-
-				int firstCol = batchsize * j;
-				int lastCol = batchsize * (j + 1) < numData ? batchsize * (j + 1) : numData;
-				firstCol += firstData;
-				lastCol += firstData;
-				int numCols = lastCol - firstCol + 1;
-
-				MatrixXd input = networkInputMatrix.block(0, firstCol, networkInputMatrix.rows(), numCols);
-				MatrixXd expected = networkOutputMatrix.block(0, firstCol, networkOutputMatrix.rows(), numCols);
-
-				outputBatch = forwardBatch(input);
-				if (doBack) {
-					backwardBatch(outputBatch);
-					updateBatch();
-				}
-				lossValue += lossBatch(outputBatch, expected);
-			}
-		};
-
 
 	for (int i = 0; i < MaxNumSteps; i++)
 	{
@@ -216,4 +140,28 @@ void NeuralNetwork::updateBatch()
 double NeuralNetwork::lossBatch(const MatrixXd& output_, const MatrixXd& expected_)
 {
 	return Layers.back()->loss(output_, expected_);
+}
+
+void NeuralNetwork::trainBatches(const double& firstData, const double& numData, const int& numBatchs, double& lossValue, const bool& doBack)
+{
+	for (int j = 0; j < numBatchs; j++)
+	{
+		MatrixXd outputBatch;
+
+		int firstCol = batchsize * j;
+		int lastCol = batchsize * (j + 1) < numData ? batchsize * (j + 1) : numData;
+		firstCol += firstData;
+		lastCol += firstData;
+		int numCols = lastCol - firstCol + 1;
+
+		MatrixXd input = networkInputMatrix.block(0, firstCol, networkInputMatrix.rows(), numCols);
+		MatrixXd expected = networkOutputMatrix.block(0, firstCol, networkOutputMatrix.rows(), numCols);
+
+		outputBatch = forwardBatch(input);
+		if (doBack) {
+			backwardBatch(outputBatch);
+			updateBatch();
+		}
+		lossValue += lossBatch(outputBatch, expected);
+	}
 }

@@ -8,6 +8,7 @@
 #include "LayerBatchEfficient.h"
 #include "LastLayerBatchEfficient.h"
 #include "Loss.h"
+#include "Input.h"
 
 using std::vector;
 using std::string;
@@ -16,8 +17,9 @@ using std::array;
 class NeuralNetwork
 {
 public:
-	NeuralNetwork(const string networkInputFileName_, const string& networkOutputFileName_, 
+	NeuralNetwork(const string networkInputFileName_, const string& networkOutputFileName_,
 		const int& maxNumLayers_ = 10, const int& batchsize_ = -1);
+	void initializeData();
 	void addLayer(const int& inputDim_, const int& outputDim_,
 		const ActivationType& activType_ = ActivationType::RELU,
 		const OptimizerType& optType_ = OptimizerType::SGD,
@@ -26,16 +28,16 @@ public:
 		const ActivationType& activType_ = ActivationType::RELU,
 		const OptimizerType& optType_ = OptimizerType::SGD,
 		const double& learningRate_);
-	array<int,2> readCSVDataFile(string fileName_, MatrixXd& output_);
-	void initialize();
+	void initializeLayers();
 	void train();
 
 
 
-private:
-	string networkInputFileName, networkOutputFileName;
-	const array<int, 2> networkInputDim;
-	const array<int, 2> networkOutputDim;
+protected:
+	std::unique_ptr<Input> inputPtr;
+
+	array<int, 2> networkInputDim;
+	array<int, 2> networkOutputDim;
 	MatrixXd networkInputMatrix;
 	MatrixXd networkOutputMatrix;
 
@@ -51,6 +53,7 @@ private:
 	void backwardBatch(const MatrixXd& output_);
 	void updateBatch();
 	double lossBatch(const MatrixXd& output_, const MatrixXd& expected_);
+	virtual void trainBatches(const double& firstData_, const double& numData_, const int& numBatchs_, double& lossValue_, const bool& doBack_);
 
 
 	vector<double> trainingLoss;

@@ -125,21 +125,25 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Activations.cpp" />
+    <ClCompile Include="Input.cpp" />
     <ClCompile Include="LastLayerBatchEfficient.cpp" />
     <ClCompile Include="Layer.cpp" />
     <ClCompile Include="LayerBatchEfficient.cpp" />
     <ClCompile Include="Loss.cpp" />
     <ClCompile Include="NeuralNetwork.cpp" />
+    <ClCompile Include="NeuralNetworkMPI.cpp" />
     <ClCompile Include="Neuron.cpp" />
     <ClCompile Include="Optimizers.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Activations.h" />
+    <ClInclude Include="Input.h" />
     <ClInclude Include="LastLayerBatchEfficient.h" />
     <ClInclude Include="Layer.h" />
     <ClInclude Include="LayerBatchEfficient.h" />
     <ClInclude Include="Loss.h" />
     <ClInclude Include="NeuralNetwork.h" />
+    <ClInclude Include="NeuralNetworkMPI.h" />
     <ClInclude Include="Neuron.h" />
     <ClInclude Include="Optimizers.h" />
   </ItemGroup>
