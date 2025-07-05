@@ -19,21 +19,22 @@ class NeuralNetwork
 public:
 	NeuralNetwork(const string networkInputFileName_, const string& networkOutputFileName_,
 		const int& maxNumLayers_ = 10, const int& batchsize_ = -1);
-	void initializeData();
+	virtual void initializeData();
 	void addLayer(const int& inputDim_, const int& outputDim_,
 		const ActivationType& activType_ = ActivationType::RELU,
 		const OptimizerType& optType_ = OptimizerType::SGD,
-		const double& learningRate_);
+		const double& learningRate_ = 0.1);
 	void addLastLayer(const int& inputDim_, const int& outputDim_,
 		const ActivationType& activType_ = ActivationType::RELU,
 		const OptimizerType& optType_ = OptimizerType::SGD,
-		const double& learningRate_);
+		const double& learningRate_ = 0.1);
 	void initializeLayers();
 	void train();
 
 
 
 protected:
+	string networkInputFileName, networkOutputFileName;
 	std::unique_ptr<Input> inputPtr;
 
 	array<int, 2> networkInputDim;

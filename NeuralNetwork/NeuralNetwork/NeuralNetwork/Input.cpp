@@ -1,19 +1,26 @@
 #include "Input.h"
 #include <iostream>
+#include <filesystem>
 
 Input::Input(const string& inputFileName_, const string& outputFileName_):
 	inputFile{inputFileName_}, outputFile{outputFileName_}
 {
-	if (!inputFile.is_open())
+	std::filesystem::path inputPath{ inputFileName_ };
+	std::filesystem::path outputPath{ outputFileName_ };
+	if (!std::filesystem::exists(inputPath))
 		throw std::invalid_argument("Cannot open the file " + inputFileName_);
-	if (!outputFile.is_open())
+	if (!std::filesystem::exists(outputPath))
 		throw std::invalid_argument("Cannot open the file " + outputFileName_);
 }
 
 void Input::read()
 {
-	inputDim = readCSVFile(inputFile, inputMatrix);
-	outputDim = readCSVFile(outputFile, outputMatrix);
+	inputDim = readCSVFileDim(inputFile);
+	outputDim = readCSVFileDim(outputFile);
+	inputMatrix.resize(inputDim[0],inputDim[1]);
+	outputMatrix.resize(outputDim[0], outputDim[1]);
+	readCSVFile(inputFile, inputMatrix, inputDim);
+	readCSVFile(outputFile, outputMatrix, outputDim);
 }
 
 void Input::return_data(array<int, 2> inputDim_, array<int, 2> outputDim_, MatrixXd& inputMatrix_, MatrixXd& outputMatrix_)
@@ -32,7 +39,7 @@ void Input::return_data(array<int, 2> inputDim_, array<int, 2> outputDim_, Matri
 	outputDim = array<int, 2>{ 0,0 };
 }
 
-array<int, 2> Input::readCSVFile(ifstream& file_, MatrixXd& output_)
+array<int, 2> Input::readCSVFileDim(ifstream& file_)
 {
 	string line;
 	int numData, dim;
@@ -43,13 +50,30 @@ array<int, 2> Input::readCSVFile(ifstream& file_, MatrixXd& output_)
 	std::stringstream iss(line);
 	iss >> numData >> dim;
 
-	output_.resize(dim, numData);
+	returnArray[0] = dim;
+	returnArray[1] = numData;
+
+	return returnArray;
+}
+
+void Input::readCSVFile(ifstream& file_, MatrixXd& data_, array<int, 2>& dataDim_, array<int, 2>& indxRange_)
+{
+	string line;
+	VectorXd dataLineI;
+
+	int numData = dataDim_[0];
+	int dim = dataDim_[1];
+
+	if (indxRange_[0] >= dataDim_[0] || indxRange_[1] >= dataDim_[0])
+		throw std::invalid_argument("The indx is out of range");
 
 
 	int colNumber = -1;
 	while (std::getline(file_, line))
 	{
 		colNumber++;
+		if (colNumber < indxRange_[0] || colNumber > indxRange_[1])
+			continue;
 		int readInt;
 		int countReadInt = 0;
 		VectorXd readVector(dim);
@@ -65,7 +89,7 @@ array<int, 2> Input::readCSVFile(ifstream& file_, MatrixXd& output_)
 		if (countReadInt < dim)
 			throw std::invalid_argument("Not enough data in the line");
 
-		output_.col(colNumber) = readVector;
+		data_.col(colNumber - indxRange_[0]) = readVector;
 
 		if (colNumber >= numData) {
 			std::cout << "Warning: The number of data in this file is larger " <<
@@ -76,11 +100,6 @@ array<int, 2> Input::readCSVFile(ifstream& file_, MatrixXd& output_)
 	}
 
 	if (colNumber < numData)
-		throw std::invalid_argument("Not enough data in the file") << std::endl;
-
-	returnArray[0] = dim;
-	returnArray[1] = numData;
-
-	return returnArray;
+		throw std::invalid_argument("Not enough data in the file");
 }
 

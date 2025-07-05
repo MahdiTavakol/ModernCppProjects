@@ -37,7 +37,7 @@ public:
 		const OptimizerType& optType_, const double& learningRate_);
 	void initialize();
 	MatrixXd forward(const MatrixXd& input_); // outputDim X batchsize --> inputDim X batchsize
-	MatrixXd backward(MatrixXd& nextDiff_);
+	virtual MatrixXd backward(MatrixXd& nextDiff_);
 	void update();
 	double loss(const MatrixXd& output_,const MatrixXd& expected_);
 	// To be used by MPI and possibly other parallelization approaches

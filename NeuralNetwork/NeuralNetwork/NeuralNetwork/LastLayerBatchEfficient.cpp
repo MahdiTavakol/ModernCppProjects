@@ -1,8 +1,10 @@
 #include "LastLayerBatchEfficient.h"
 
-LastLayerBatchEfficient::LastLayerBatchEfficient(const int& inputDim_, const int& outputDim_, const ActivationType& activType_,
+LastLayerBatchEfficient::LastLayerBatchEfficient(const int& batchsize_, 
+	const int& inputDim_, const int& outputDim_, 
+	const ActivationType& activType_, const OptimizerType& optType_,
 	const double& learningRate_, const LossType& lossType_):
-	LayerBatchEfficient{inputDim_, outputDim_, activType_,learningRate_}, lossType{lossType_}
+	LayerBatchEfficient{batchsize_,inputDim_,outputDim_,activType_,optType_,learningRate_ }, lossType{lossType_}
 { 
 	switch (lossType)
 	{
@@ -20,26 +22,29 @@ LastLayerBatchEfficient::LastLayerBatchEfficient(const int& inputDim_, const int
 	}
 }
 
+LastLayerBatchEfficient::LastLayerBatchEfficient(const int& inputDim_, const int& outputDim_,
+	const ActivationType& activType_, const OptimizerType& optType_,
+	const double& learningRate_, const LossType& lossType_):
+	LastLayerBatchEfficient{32,inputDim_, outputDim_, activType_, optType_, learningRate_, lossType_ }
+{}
+
 
 MatrixXd LastLayerBatchEfficient::backward(MatrixXd& expectedValue_)
 {
-	// dActivation_dz
-	VectorXd z = weights * input + bias;
-	VectorXd output = z.unaryExpr([&](double v) {return (*activationFunction)(v); });
-	VectorXd dActive_dz = z.unaryExpr([&](double v) {return activationFunction->diff(v); });
-	// dz_dweights
-	RowVectorXd dz_dweights = input.transpose();
+	// dActivation_doutput
+	MatrixXd output = weights.block(0, 0, weights.rows(), weights.cols() - 1) * input
+		+ weights.block(0, weights.cols() - 1, weights.rows(), 1);
+
+	MatrixXd dActive_dz = output.unaryExpr([&](double v) {return (*activationFunction)(v); });
+	
 	// dLoss_dz
-	VectorXd dLoss_dz = lossFunction->diff(expectedValue_, output).cwiseProduct(dActive_dz);
+	MatrixXd dLoss_doutput = lossFunction->diff(expectedValue_, output).cwiseProduct(dActive_dz);
 
-	dLoss_dweights = dLoss_dz * dz_dweights;
-
-	// dzi_dbias
-	VectorXd dz_dbias = Eigen::VectorXd::Ones(inputDim);
-	dLoss_dbias = dLoss_dz * dz_dbias;
+	dLoss_dweights.block(0, 0, weights.rows(), weights.cols() - 1) = dLoss_doutput * input.transpose();
+	dLoss_dweights.block(0, weights.cols() - 1, weights.rows(), 1) = dLoss_doutput.rowwise().sum();
 
 	// previous_diff
-	prev_diff = weights.transpose() * dLoss_dz;
+	prev_diff = weights.block(0, 0, weights.rows(), weights.cols() - 1).transpose() * dLoss_doutput;
 
 	return prev_diff;
 }

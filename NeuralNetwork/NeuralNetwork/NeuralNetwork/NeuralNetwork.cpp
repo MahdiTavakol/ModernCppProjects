@@ -7,12 +7,15 @@
 
 NeuralNetwork::NeuralNetwork(const string networkInputFileName_, const string& networkOutputFileName_,
 	const int& maxNumLayers_, const int& batchsize_) :
+	networkInputFileName{networkInputFileName_},
+	networkOutputFileName{ networkOutputFileName_},
 	maxNumLayers{ maxNumLayers_ }, batchsize{batchsize_},
-	trainingPercent{ 70.0 }, inputPtr{ std::make_unique<Input>(networkInputFileName_,networkOutputFileName_)}
+	trainingPercent{ 70.0 }
 {}
 
 void NeuralNetwork::initializeData()
 {
+	inputPtr = std::make_unique<Input>(networkInputFileName, networkOutputFileName);
 	inputPtr->read();
 	inputPtr->return_data(networkInputDim, networkOutputDim, networkInputMatrix, networkOutputMatrix);
 	inputPtr.reset();
@@ -110,7 +113,6 @@ void NeuralNetwork::train()
 			numStepsTrainLossDownValidLossUp = 0;
 		if (numStepsTrainLossDownValidLossUp >= 10)
 			break;
-
 
 	}
 

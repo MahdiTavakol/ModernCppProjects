@@ -15,7 +15,7 @@ class Input
 {
 public:
 	Input(const string& inputFileName_, const string& outputFileName_);
-	void read();
+	virtual void read();
 	void return_data(array<int, 2> inputDim_, array<int, 2> outputDim_, MatrixXd& inputMatrix_, MatrixXd& outputMatrix_);
 	
 	Input(const Input&) = delete;
@@ -24,14 +24,19 @@ public:
 	Input& operator=(Input&&) = delete;
 	~Input() = default;
 
-private:
+protected:
 	ifstream inputFile, outputFile;
 	array<int, 2> inputDim;
 	array<int, 2> outputDim;
 	MatrixXd inputMatrix;
 	MatrixXd outputMatrix;
 
-	array<int, 2> readCSVFile(ifstream& file_, MatrixXd& output_);
+	array<int, 2> readCSVFileDim(ifstream& file_);
+	void readCSVFile(ifstream& file_, MatrixXd& data_, array<int, 2>& dataDim_) {
+		array<int, 2> range{ 0, dataDim_[0] - 1 };
+		readCSVFile(file_, data_, dataDim_, range);
+	};
+	void readCSVFile(ifstream& file_, MatrixXd& data_, array<int, 2>& dataDim_, array<int, 2>& indxRange_);
 
 	void returnDim(array<int, 2>& inputDim_, array<int, 2>& outputDim_)
 	{
