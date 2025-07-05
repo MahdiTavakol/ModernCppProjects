@@ -7,10 +7,11 @@ LayerBatchEfficient::LayerBatchEfficient(const int& batchsize_, const int& input
 	const ActivationType& activType_, const OptimizerType& optType_, const double& learningRate_) :
 	batchsize{batchsize_},
 	inputDim{ inputDim_ }, outputDim{ outputDim_ },
+	input{inputDim_, batchsize_}, output{outputDim_,batchsize_},
+	weights{outputDim_,inputDim_ + 1}, dLoss_dweights{outputDim_, inputDim_ + 1},
+	prev_diff{inputDim_,batchsize_},
 	activType{ activType_ }, 
-	optType{ optType_ }, learningRate {
-	learningRate_
-}
+	optType{ optType_ }, learningRate {learningRate_}
 {
 	switch (activType)
 	{
@@ -97,46 +98,36 @@ void LayerBatchEfficient::initialize()
 
 MatrixXd LayerBatchEfficient::forward(const MatrixXd& input_)
 {
-	MatrixXd biasMatrix = bias.replicate(1, batchsize);
-	MatrixXd output = weights * input + biasMatrix;
-	return output.unaryExpr((*activationFunction));
+	MatrixXd output = weights.block(0, 0, weights.rows(), weights.cols() - 1) * input
+		+ weights.block(0, weights.cols() - 1, weights.rows(), 1);
+	output = output.unaryExpr((*activationFunction));
+	return output;
 }
 
 MatrixXd LayerBatchEfficient::backward(MatrixXd& nextDiff_)
 {
-	// dActivation_dz
-	MatrixXd z = weights * input + bias;
-	MatrixXd dActive_dz = z.unaryExpr([&](double v) {return activationFunction->diff(v); });
+	// dActivation_doutput
+	MatrixXd output = weights.block(0, 0, weights.rows(), weights.cols() - 1) * input 
+		+ weights.block(0, weights.cols() - 1, weights.rows(), 1);
+
+	MatrixXd dActive_doutput = output.unaryExpr([&](double v) {return activationFunction->diff(v); });
 
 	// dLoss_dz
-	MatrixXd dLoss_dz = nextDiff_.cwiseProduct(dActive_dz);
+	MatrixXd dLoss_doutput = nextDiff_.cwiseProduct(dActive_doutput);
 
-	dLoss_dweights = (dLoss_dz * input.transpose());
+	dLoss_dweights.block(0,0, weights.rows(), weights.cols() - 1) = dLoss_doutput * input.transpose();
+	dLoss_dweights.block(0, weights.cols() - 1, weights.rows(), 1) = dLoss_doutput.rowwise().sum();
 
-	// dzi_dbias
-	dLoss_dbias = dLoss_dz.rowwise().sum();
 
 	// previous_diff
-	prev_diff = weights.transpose() * dLoss_dz;
+	prev_diff = weights.block(0, 0, weights.rows(), weights.cols() - 1).transpose() * dLoss_doutput;
 
 	return prev_diff;
 }
 
 void LayerBatchEfficient::update()
 {
-	MatrixXd weightsExtended(weights.rows(), weights.cols() + 1);
-	MatrixXd gradientExtended(weights.rows(), weights.cols() + 1);
-
-	weightsExtended.col(0) = bias;
-	weightsExtended.block(0, 1, weights.rows(), weights.cols());
-
-	gradientExtended.col(0) = dLoss_dbias;
-	gradientExtended.block(0, 1, dLoss_dweights.rows(), dLoss_dweights.cols());
-
-	optFunction->update(weightsExtended, gradientExtended);
-
-	bias = weightsExtended.col(0);
-	weights = weightsExtended.block(0, 1, weightsExtended.rows(), weightsExtended.cols() - 1);
+	optFunction->update(weights, dLoss_dweights);
 }
 
 void LayerBatchEfficient::weightInitialization(const double& mean_, const double& std_)
@@ -145,10 +136,16 @@ void LayerBatchEfficient::weightInitialization(const double& mean_, const double
 	std::mt19937_64 gen{ rd() };
 	std::normal_distribution<double> dist{ mean_, std_ };
 
-	MatrixXd weightsExtended{ weights.rows(),weights.cols() + 1 };
-	
-	weightsExtended.unaryExpr([&dist, &gen](const double& v) {return dist(gen); });
-
-	bias = weightsExtended.col(0);
-	weights = weightsExtended.block(0, 1, weights.rows(), weights.cols());
+	weights.unaryExpr([&dist, &gen](const double& v) {return dist(gen); });
 }
+
+MatrixXd&& LayerBatchEfficient::returnGradients()
+{
+	return std::move(dLoss_dweights);
+}
+
+void LayerBatchEfficient::updateGradients(MatrixXd&& gradients_)
+{
+	dLoss_dweights = std::move(gradients_);
+}
+

@@ -37,9 +37,12 @@ public:
 		const OptimizerType& optType_, const double& learningRate_);
 	void initialize();
 	MatrixXd forward(const MatrixXd& input_); // outputDim X batchsize --> inputDim X batchsize
-	virtual MatrixXd backward(MatrixXd& nextDiff_);
+	MatrixXd backward(MatrixXd& nextDiff_);
 	void update();
 	double loss(const MatrixXd& output_,const MatrixXd& expected_);
+	// To be used by MPI and possibly other parallelization approaches
+	MatrixXd&& returnGradients();
+	void updateGradients(MatrixXd&& gradients_);
 
 protected:
 	int batchsize;
@@ -48,13 +51,11 @@ protected:
 	MatrixXd input, output; // inputDim X batchsize , outputDim X batchsize
 
 	// these are updated when each batch is fed into the layer!
-	MatrixXd weights;
-	VectorXd bias;
+	MatrixXd weights; // outputDim X (inputDim + 1)
+	MatrixXd dLoss_dweights; // outputDim X (inputDim + 1)
 
-	MatrixXd dLoss_dweights;
-	VectorXd dLoss_dbias;
 
-	VectorXd prev_diff;
+	VectorXd prev_diff; // inputDim X batchsize
 
 	std::unique_ptr<Activation> activationFunction;
 	ActivationType activType;
