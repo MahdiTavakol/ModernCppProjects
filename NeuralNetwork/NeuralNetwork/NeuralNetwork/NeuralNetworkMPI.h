@@ -10,6 +10,7 @@ public:
 	NeuralNetworkMPI(const string networkInputFileName_, const string& networkOutputFileName_,
 		const int& maxNumLayers_ = 10, const int& batchsize_ = -1);
 	void initializeData() override;
+	void train() override;
 
 protected:
 	void backwardBatch(const MatrixXd& output_) override;

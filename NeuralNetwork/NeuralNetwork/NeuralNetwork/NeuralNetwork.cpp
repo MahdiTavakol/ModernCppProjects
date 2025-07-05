@@ -94,20 +94,17 @@ void NeuralNetwork::train()
 
 	for (int i = 0; i < MaxNumSteps; i++)
 	{
-		double trainingLossValue  = 0.0;
-		double validationLossValue = 0.0;
+		double tLossVal  = 0.0;
+		double vLossVal  = 0.0;
 
 
-		trainBatches(0, numTrainingData, numTrainingBatchs, trainingLossValue,true);
-		trainBatches(numTrainingData, numValidationData, numValidationBatchs, validationLossValue,false);
+		trainBatches(0, numTrainingData, numTrainingBatchs, tLossVal,true);
+		trainBatches(numTrainingData, numValidationData, numValidationBatchs, vLossVal,false);
 
-		trainingLossValue /= static_cast<double> (numTrainingData);
-		validationLossValue /= static_cast<double> (numValidationData);
-
-		trainingLoss.push_back(trainingLossValue);
-		validationLoss.push_back(validationLossValue);
+		trainingLoss.push_back(tLossVal);
+		validationLoss.push_back(vLossVal);
 		
-		if (!trainingLoss.empty() && trainingLossValue < trainingLoss.back() && validationLossValue > validationLoss.back())
+		if (!trainingLoss.empty() && tLossVal < trainingLoss.back() && vLossVal > validationLoss.back())
 			numStepsTrainLossDownValidLossUp;
 		else
 			numStepsTrainLossDownValidLossUp = 0;
@@ -115,7 +112,6 @@ void NeuralNetwork::train()
 			break;
 
 	}
-
 }
 
 MatrixXd NeuralNetwork::forwardBatch(const MatrixXd& input_)

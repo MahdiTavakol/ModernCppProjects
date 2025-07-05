@@ -25,7 +25,6 @@ public:
 	double loss(MatrixXd& output_, MatrixXd& expectedValue_);
 
 private:
-
 	std::unique_ptr<Loss> lossFunction;
 	LossType lossType;
 };

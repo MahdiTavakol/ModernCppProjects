@@ -29,7 +29,7 @@ public:
 		const OptimizerType& optType_ = OptimizerType::SGD,
 		const double& learningRate_ = 0.1);
 	void initializeLayers();
-	void train();
+	virtual void train();
 
 
 
