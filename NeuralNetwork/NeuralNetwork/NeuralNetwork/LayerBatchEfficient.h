@@ -41,10 +41,10 @@ public:
 	MatrixXd forward(const MatrixXd& input_); // outputDim X batchsize --> inputDim X batchsize
 	virtual MatrixXd backward(MatrixXd& nextDiff_);
 	void update();
-	double loss(const MatrixXd& output_,const MatrixXd& expected_);
 	// To be used by MPI and possibly other parallelization approaches
 	MatrixXd&& moveGradients();
 	MatrixXd returnGradients();
+	array<int, 2> returnInputOutputDims();
 	array<int, 2> returnGradientSize();
 	void updateGradients(MatrixXd&& gradients_);
 

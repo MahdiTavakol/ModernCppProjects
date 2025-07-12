@@ -27,7 +27,8 @@ public:
 	void addLastLayer(const int& inputDim_, const int& outputDim_,
 		const ActivationType& activType_ = ActivationType::RELU,
 		const OptimizerType& optType_ = OptimizerType::SGD,
-		const double& learningRate_ = 0.1);
+		const double& learningRate_ = 0.1,
+		const LossType& lossType_ = LossType::MSE);
 	void initializeLayers();
 	virtual void train();
 
@@ -56,7 +57,7 @@ protected:
 	double lossBatch(const MatrixXd& output_, const MatrixXd& expected_);
 
 
-	virtual void trainBatches(const double& firstData_, const double& numData_,
+	virtual void trainBatches(const int& firstData_, const int& numData_,
 		const int& numBatchs_, double& lossValue_, const bool& doBack_);
 
 

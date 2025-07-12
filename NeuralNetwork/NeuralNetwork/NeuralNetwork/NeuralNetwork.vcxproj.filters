@@ -24,9 +24,6 @@
     <ClCompile Include="Loss.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Layer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="LayerBatchEfficient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -63,9 +60,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Loss.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Layer.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="LayerBatchEfficient.h">

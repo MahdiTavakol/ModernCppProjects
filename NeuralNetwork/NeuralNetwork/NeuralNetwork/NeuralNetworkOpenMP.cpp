@@ -1,7 +1,7 @@
 #include "NeuralNetworkOpenMP.h"
 
 NeuralNetworkOpenMP::NeuralNetworkOpenMP(const string networkInputFileName_, const string& networkOutputFileName_,
-	const int& maxNumLayers_ = 10, const int& batchsize_ = -1) :
+	const int& maxNumLayers_, const int& batchsize_) :
 	NeuralNetwork{ networkInputFileName_,networkOutputFileName_, maxNumLayers_ , batchsize_ }
 {
 #pragma omp single private(num_threads)
@@ -64,7 +64,7 @@ void NeuralNetworkOpenMP::train()
 	}
 }
 
-void NeuralNetworkOpenMP::trainBatches(const double& firstData_, const double& numData_,
+void NeuralNetworkOpenMP::trainBatches(const int& firstData_, const int& numData_,
 	const int& numBatchs_, double& lossValue_, const bool& doBack_)
 {
 	double lossVal = 0.0;
@@ -130,12 +130,12 @@ void NeuralNetworkOpenMP::trainBatches(const double& firstData_, const double& n
 	{
 		for (int i = numLayers - 1; i >= 0; i--)
 		{
-			int rows = gradientAvgThreads[0][i].rows();
-			int cols = gradientAvgThreads[0][i].cols();
+			auto rows = gradientAvgThreads[0][i].rows();
+			auto cols = gradientAvgThreads[0][i].cols();
 			MatrixXd gradientAvg = MatrixXd::Zero( rows,cols );
 			for (int j = 0; j < num_threads; j++)
 				gradientAvg += gradientAvgThreads[j][i];
-			gradientAvg = gradientAvg.unaryExpr([&](double& v) {return v / num_threads; });
+			gradientAvg = gradientAvg.unaryExpr([&](double v) {return v / num_threads; });
 			Layers[i]->updateGradients(std::move(gradientAvg));
 		}
 	}

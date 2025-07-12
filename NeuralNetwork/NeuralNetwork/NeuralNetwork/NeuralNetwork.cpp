@@ -26,10 +26,12 @@ void NeuralNetwork::initializeData()
 }
 
 void NeuralNetwork::addLayer(const int& inputDim_, const int& outputDim_,
-	const ActivationType& activType_ = ActivationType::RELU,
-	const OptimizerType& optType_ = OptimizerType::SGD,
+	const ActivationType& activType_,
+	const OptimizerType& optType_,
 	const double& learningRate_)
 {
+	int prevLayerOutputDim = Layers.back()->returnInputOutputDims()[1];
+	if (inputDim_ != prevLayerOutputDim) throw std::invalid_argument("Incompatible with the previous layer!");
 	if (batchsize == -1) {
 		/* I do not put the default value of the batch size here
 		* on purpose so that the Layers decides on the default value
@@ -47,17 +49,20 @@ void NeuralNetwork::addLayer(const int& inputDim_, const int& outputDim_,
 }
 
 void NeuralNetwork::addLastLayer(const int& inputDim_, const int& outputDim_,
-	const ActivationType& activType_ = ActivationType::RELU,
-	const OptimizerType& optType_ = OptimizerType::SGD,
-	const double& learningRate_)
+	const ActivationType& activType_,
+	const OptimizerType& optType_,
+	const double& learningRate_,
+	const LossType& lossType_)
 {
+	int prevLayerOutputDim = Layers.back()->returnInputOutputDims()[1];
+	if (inputDim_ != prevLayerOutputDim) throw std::invalid_argument("Incompatible with the previous layer!");
 	if (batchsize == -1) {
 		Layers.push_back(std::make_unique<LastLayerBatchEfficient>(inputDim_, outputDim_,
-			activType_, optType_, learningRate_));
+			activType_, optType_, learningRate_, lossType_));
 	}
 	else if (batchsize > 0) {
 		Layers.push_back(std::make_unique<LastLayerBatchEfficient>(batchsize, inputDim_, outputDim_,
-			activType_, optType_, learningRate_));
+			activType_, optType_, learningRate_, lossType_));
 	}
 	else
 		throw std::invalid_argument("The batchsize must be > 0");
@@ -137,10 +142,13 @@ void NeuralNetwork::updateBatch()
 
 double NeuralNetwork::lossBatch(const MatrixXd& output_, const MatrixXd& expected_)
 {
-	return Layers.back()->loss(output_, expected_);
+	
+	LastLayerBatchEfficient* LastLayerRawPtr = dynamic_cast<LastLayerBatchEfficient*> (Layers.back().get());
+	if (!LastLayerRawPtr) throw std::runtime_error("The last layer type is wrong!");
+	return LastLayerRawPtr->loss(output_, expected_);
 }
 
-void NeuralNetwork::trainBatches(const double& firstData, const double& numData, const int& numBatchs, double& lossValue, const bool& doBack)
+void NeuralNetwork::trainBatches(const int& firstData, const int& numData, const int& numBatchs, double& lossValue, const bool& doBack)
 {
 	for (int j = 0; j < numBatchs; j++)
 	{

@@ -8,7 +8,7 @@ using Eigen::MatrixXd;
 class Optimizer
 {
 public:
-	Optimizer(const int& learningRate_);
+	Optimizer(const double& learningRate_);
 	virtual void update(MatrixXd& weights_, const MatrixXd& gradient_) = 0;
 	
 protected:
@@ -18,7 +18,7 @@ protected:
 class SGD : public Optimizer
 {
 public:
-	SGD(const int& learningRate_);
+	SGD(const double& learningRate_);
 	void update(MatrixXd& weights_, const MatrixXd& gradient_) override;
 
 };
@@ -26,8 +26,8 @@ public:
 class SGDMomentum : public Optimizer
 {
 public:
-	SGDMomentum(const int& learningRate_, const double& gamma_);
-	SGDMomentum(const int& learningRate_);
+	SGDMomentum(const double& learningRate_, const double& gamma_);
+	SGDMomentum(const double& learningRate_);
 	void update(MatrixXd& weights_, const MatrixXd& gradient_) override;
 
 private:
@@ -37,8 +37,9 @@ private:
 
 class RMSProp : public Optimizer
 {
-	RMSProp(const int& learningRate_, const double& rho_);
-	RMSProp(const int& learningRate_);
+public:
+	RMSProp(const double& learningRate_, const double& rho_);
+	RMSProp(const double& learningRate_);
 	void update(MatrixXd& weights_, const MatrixXd& gradient_) override;
 
 private:
@@ -48,8 +49,9 @@ private:
 
 class Adam : public Optimizer
 {
-	Adam(const int& learningRate_, const double& beta1, const double& beta2);
-	Adam(const int& learningRate_);
+public:
+	Adam(const double& learningRate_, const double& beta1, const double& beta2);
+	Adam(const double& learningRate_);
 	void update(MatrixXd& weights_, const MatrixXd& gradient_) override;
 
 private:
@@ -59,7 +61,8 @@ private:
 
 class AdaGrad : public Optimizer
 {
-	AdaGrad(const int& learningRate_);
+public:
+	AdaGrad(const double& learningRate_);
 	void update(MatrixXd& weights_, const MatrixXd& gradient_) override;
 
 private:

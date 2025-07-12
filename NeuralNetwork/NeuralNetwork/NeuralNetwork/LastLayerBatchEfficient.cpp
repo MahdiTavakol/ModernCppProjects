@@ -49,7 +49,7 @@ MatrixXd LastLayerBatchEfficient::backward(MatrixXd& expectedValue_)
 	return prev_diff;
 }
 
-double LastLayerBatchEfficient::loss(MatrixXd& output_, MatrixXd& expectedValue_)
+double LastLayerBatchEfficient::loss(const MatrixXd& output_,const MatrixXd& expectedValue_)
 {
 	return (*lossFunction)(output_,expectedValue_);
 }

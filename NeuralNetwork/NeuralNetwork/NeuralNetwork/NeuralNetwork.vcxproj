@@ -131,7 +131,6 @@
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="InputMPI.cpp" />
     <ClCompile Include="LastLayerBatchEfficient.cpp" />
-    <ClCompile Include="Layer.cpp" />
     <ClCompile Include="LayerBatchEfficient.cpp" />
     <ClCompile Include="Loss.cpp" />
     <ClCompile Include="main.cpp" />
@@ -146,7 +145,6 @@
     <ClInclude Include="Input.h" />
     <ClInclude Include="InputMPI.h" />
     <ClInclude Include="LastLayerBatchEfficient.h" />
-    <ClInclude Include="Layer.h" />
     <ClInclude Include="LayerBatchEfficient.h" />
     <ClInclude Include="Loss.h" />
     <ClInclude Include="NeuralNetwork.h" />

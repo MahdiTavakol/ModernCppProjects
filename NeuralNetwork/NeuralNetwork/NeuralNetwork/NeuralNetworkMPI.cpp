@@ -1,7 +1,7 @@
 #include "NeuralNetworkMPI.h"
 
 NeuralNetworkMPI::NeuralNetworkMPI(const string networkInputFileName_, const string& networkOutputFileName_,
-	const int& maxNumLayers_ = 10, const int& batchsize_ = -1):
+	const int& maxNumLayers_, const int& batchsize_):
 	NeuralNetwork{networkInputFileName_,networkOutputFileName_, maxNumLayers_ , batchsize_}
 {
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -69,7 +69,7 @@ void NeuralNetworkMPI::backwardBatch(const MatrixXd& output_)
 		int cols = gradientLocal.cols();
 		MatrixXd gradientAvg{ rows, cols };
 		MPI_Allreduce(gradientLocal.data(), gradientAvg.data(), rows * cols, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-		gradientAvg.unaryExpr([&](double& v) {return v / size; });
+		gradientAvg = gradientAvg.unaryExpr([&](double v) {return v / size; });
 		layer->updateGradients(std::move(gradientAvg));
 	}
 }

@@ -100,7 +100,7 @@ MatrixXd LayerBatchEfficient::forward(const MatrixXd& input_)
 {
 	MatrixXd output = weights.block(0, 0, weights.rows(), weights.cols() - 1) * input
 		+ weights.block(0, weights.cols() - 1, weights.rows(), 1);
-	output = output.unaryExpr((*activationFunction));
+	output = output.unaryExpr([&](double v) {return (*activationFunction)(v); });
 	return output;
 }
 
@@ -136,7 +136,7 @@ void LayerBatchEfficient::weightInitialization(const double& mean_, const double
 	std::mt19937_64 gen{ rd() };
 	std::normal_distribution<double> dist{ mean_, std_ };
 
-	weights.unaryExpr([&dist, &gen](const double& v) {return dist(gen); });
+	weights.unaryExpr([&dist, &gen](const double v) {return dist(gen); });
 }
 
 MatrixXd&& LayerBatchEfficient::moveGradients()
@@ -149,11 +149,19 @@ MatrixXd LayerBatchEfficient::returnGradients()
 	return dLoss_dweights;
 }
 
+array<int, 2> LayerBatchEfficient::returnInputOutputDims()
+{
+	array<int, 2> output;
+	output[0] = inputDim;
+	output[1] = outputDim;
+	return output;
+}
+
 array<int, 2> LayerBatchEfficient::returnGradientSize()
 {
 	array<int, 2> dim;
-	dim[0] = dLoss_dweights.rows();
-	dim[1] = dLoss_dweights.cols();
+	dim[0] = static_cast<int>(dLoss_dweights.rows());
+	dim[1] = static_cast<int>(dLoss_dweights.cols());
 	return dim;
 }
 
