@@ -1,5 +1,6 @@
 #pragma once
 #include <Eigen/Dense>
+#include <array>
 
 #include "Activations.h"
 #include "Optimizers.h"
@@ -7,6 +8,7 @@
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 using Eigen::RowVectorXd;
+using std::array;
 
 enum class ActivationType
 {
@@ -41,7 +43,9 @@ public:
 	void update();
 	double loss(const MatrixXd& output_,const MatrixXd& expected_);
 	// To be used by MPI and possibly other parallelization approaches
-	MatrixXd&& returnGradients();
+	MatrixXd&& moveGradients();
+	MatrixXd returnGradients();
+	array<int, 2> returnGradientSize();
 	void updateGradients(MatrixXd&& gradients_);
 
 protected:

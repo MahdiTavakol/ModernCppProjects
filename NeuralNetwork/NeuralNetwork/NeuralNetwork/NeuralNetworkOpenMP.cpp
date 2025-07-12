@@ -32,57 +32,113 @@ void NeuralNetworkOpenMP::train()
 	int numTrainingData = static_cast<int>(trainingPercent * networkInputDim[1]);
 	int numValidationData = networkInputDim[1] - numTrainingData;
 
-	int numTrainingDataPerThread = numTrainingData / num_threads;
-	int numValidationDataPerThread = numValidationData / num_threads;
 
+	int numTrainingBatchs = (numTrainingData + batchsize - 1) / batchsize;
+	int numValidationBatchs = (numValidationData + batchsize - 1) / batchsize;
 
-	for (int i = 0; i < num_threads ; i++)
-	{
-		trainRangesLow[i] = i * numTrainingDataPerThread;
-		int trainHigh = std::min(trainRangesLow[i] + numTrainingDataPerThread, numTrainingData);
-		validRangesLow[i] = i * numValidationDataPerThread;
-		int validHigh = std::min(validRangesLow[i] + numValidationDataPerThread, numValidationData);
-		validRangesLow[i] += numTrainingData;
-		validHigh += numTrainingData;
-
-		int numT = trainHigh - trainRangesLow[i] + 1;
-		int numV = validHigh - validRangesLow[i] + 1;
-		trainNums[i] = numT;
-		validNums[i] = numV;
-	}
-
+	trainingLoss.reserve(MaxNumSteps);
+	validationLoss.reserve(MaxNumSteps);
 
 	int numStepsTrainLossDownValidLossUp = 0;
 
+
 	for (int i = 0; i < MaxNumSteps; i++)
 	{
-		double tLoss = 0, vLoss = 0;
+		double tLossVal = 0.0;
+		double vLossVal = 0.0;
 
-#pragma omp parallel reduction (+ : tLoss, vLoss)
-		{
-			std::array<double, 2> lossLocal;
 
-			int thread_id = omp_get_thread_num();
+		trainBatches(0, numTrainingData, numTrainingBatchs, tLossVal, true);
+		trainBatches(numTrainingData, numValidationData, numValidationBatchs, vLossVal, false);
 
-			int numTrainingBatchs = (trainNums[thread_id] + batchsize - 1) / batchsize;
-			int numValidationBatchs = (validNums[thread_id] + batchsize - 1) / batchsize;
+		trainingLoss.push_back(tLossVal);
+		validationLoss.push_back(vLossVal);
 
-			trainBatches(trainRangesLow[thread_id], trainNums[thread_id], numTrainingBatchs, lossLocal[0], true);
-			trainBatches(validRangesLow[thread_id], validNums[thread_id], numValidationBatchs, lossLocal[1], false);
-			
-			tLoss += lossLocal[0];
-			vLoss += lossLocal[1];
-		}
-
-		trainingLoss.push_back(tLoss);
-		validationLoss.push_back(vLoss);
-
-		if (tLoss < trainingLoss.back() && vLoss > validationLoss.back())
+		if (!trainingLoss.empty() && tLossVal < trainingLoss.back() && vLossVal > validationLoss.back())
 			numStepsTrainLossDownValidLossUp++;
 		else
 			numStepsTrainLossDownValidLossUp = 0;
 		if (numStepsTrainLossDownValidLossUp >= 10)
 			break;
+
 	}
 }
 
+void NeuralNetworkOpenMP::trainBatches(const double& firstData_, const double& numData_,
+	const int& numBatchs_, double& lossValue_, const bool& doBack_)
+{
+	double lossVal = 0.0;
+
+	vector<vector<MatrixXd>> gradientAvgThreads;
+	gradientAvgThreads.resize(num_threads);
+
+	for (int j = 0; j < num_threads; j++)
+		gradientAvgThreads[j].resize(numLayers);
+
+	for (int i = numLayers - 1; i >= 0  && doBack_ ; i--)
+	{
+		auto& layer = Layers[i];
+		array<int, 2> dim = layer->returnGradientSize();
+		int rows = dim[0];
+		int cols = dim[1];
+		for (int j = 0; j < num_threads; j++)
+			gradientAvgThreads[j][i] = MatrixXd::Zero(rows, cols);
+	}
+
+#pragma omp parallel reduction( + : lossVal) 
+	{
+		int thread_id = omp_get_thread_num();
+		for (int j = 0; j < numBatchs_; j++)
+		{
+			MatrixXd outputBatch;
+
+			int nums = trainNums[thread_id];
+			int init = trainRangesLow[thread_id];
+			if (doBack_)
+			{
+				nums = validNums[thread_id];
+				init = validRangesLow[thread_id];
+			}
+
+			int firstCol = batchsize * j;
+			int lastCol = batchsize * (j + 1) < nums ? batchsize * (j + 1) : nums;
+			firstCol += init;
+			lastCol += init;
+			int numCols = lastCol - firstCol + 1;
+
+
+			MatrixXd input = networkInputMatrix.block(0, firstCol, networkInputMatrix.rows(), numCols);
+			MatrixXd expected = networkOutputMatrix.block(0, firstCol, networkOutputMatrix.rows(), numCols);
+
+			outputBatch = forwardBatch(input);
+			if (doBack_) {
+				MatrixXd prevDiffBatch = outputBatch;
+				for (int i = numLayers - 1; i >= 0; i--)
+				{
+					auto& layer = Layers[i];
+					prevDiffBatch = layer->backward(prevDiffBatch);
+					gradientAvgThreads[thread_id][i] += layer->returnGradients();
+				}
+				for (auto& layer : Layers)
+					layer->update();
+			}
+			lossVal += lossBatch(outputBatch, expected);
+		}
+	}
+
+	if (doBack_)
+	{
+		for (int i = numLayers - 1; i >= 0; i--)
+		{
+			int rows = gradientAvgThreads[0][i].rows();
+			int cols = gradientAvgThreads[0][i].cols();
+			MatrixXd gradientAvg = MatrixXd::Zero( rows,cols );
+			for (int j = 0; j < num_threads; j++)
+				gradientAvg += gradientAvgThreads[j][i];
+			gradientAvg = gradientAvg.unaryExpr([&](double& v) {return v / num_threads; });
+			Layers[i]->updateGradients(std::move(gradientAvg));
+		}
+	}
+
+	lossValue_ = lossVal;
+}

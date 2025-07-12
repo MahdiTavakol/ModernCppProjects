@@ -64,7 +64,7 @@ void NeuralNetworkMPI::backwardBatch(const MatrixXd& output_)
 	{
 		auto& layer = Layers[i];
 		prevDiffBatch = layer->backward(prevDiffBatch);
-		MatrixXd gradientLocal = layer->returnGradients();
+		MatrixXd gradientLocal = layer->moveGradients();
 		int rows = gradientLocal.rows();
 		int cols = gradientLocal.cols();
 		MatrixXd gradientAvg{ rows, cols };

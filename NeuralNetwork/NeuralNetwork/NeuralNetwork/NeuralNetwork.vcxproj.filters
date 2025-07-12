@@ -54,9 +54,6 @@
     <ClCompile Include="NeuralNetworkOpenMP.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="NeuralNetworkOpenMP2.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Neuron.h">
@@ -93,9 +90,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="NeuralNetworkOpenMP.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NeuralNetworkOpenMP2.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

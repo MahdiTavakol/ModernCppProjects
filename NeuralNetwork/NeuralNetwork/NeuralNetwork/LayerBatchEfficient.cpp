@@ -139,9 +139,22 @@ void LayerBatchEfficient::weightInitialization(const double& mean_, const double
 	weights.unaryExpr([&dist, &gen](const double& v) {return dist(gen); });
 }
 
-MatrixXd&& LayerBatchEfficient::returnGradients()
+MatrixXd&& LayerBatchEfficient::moveGradients()
 {
 	return std::move(dLoss_dweights);
+}
+
+MatrixXd LayerBatchEfficient::returnGradients()
+{
+	return dLoss_dweights;
+}
+
+array<int, 2> LayerBatchEfficient::returnGradientSize()
+{
+	array<int, 2> dim;
+	dim[0] = dLoss_dweights.rows();
+	dim[1] = dLoss_dweights.cols();
+	return dim;
 }
 
 void LayerBatchEfficient::updateGradients(MatrixXd&& gradients_)

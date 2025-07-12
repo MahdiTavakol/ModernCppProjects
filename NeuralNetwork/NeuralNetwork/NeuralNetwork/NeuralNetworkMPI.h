@@ -15,6 +15,7 @@ public:
 protected:
 	void backwardBatch(const MatrixXd& output_) override;
 
+
 private:
 	int rank, size;
 };

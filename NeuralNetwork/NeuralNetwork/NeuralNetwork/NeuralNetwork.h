@@ -56,7 +56,8 @@ protected:
 	double lossBatch(const MatrixXd& output_, const MatrixXd& expected_);
 
 
-	virtual void trainBatches(const double& firstData_, const double& numData_, const int& numBatchs_, double& lossValue_, const bool& doBack_);
+	virtual void trainBatches(const double& firstData_, const double& numData_,
+		const int& numBatchs_, double& lossValue_, const bool& doBack_);
 
 
 	vector<double> trainingLoss;
