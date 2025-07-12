@@ -11,6 +11,7 @@
 
 #include <memory>
 #include <string>
+#include <iostream>
 
 enum class RunType
 {
@@ -19,8 +20,11 @@ enum class RunType
 	OPENMP
 };
 
-void main()
+
+void main(int argc, char** argv)
 {
+	MPI_Init(&argc, &argv);
+
 	std::string inputFileName = "input.dat";
 	std::string outputFileName = "output.dat";
 
@@ -48,7 +52,9 @@ void main()
 	neuralNetworkPtr->addLayer(8, 5);
 	neuralNetworkPtr->addLayer(5, 3);
 	neuralNetworkPtr->addLastLayer(3, 3);
-
 	neuralNetworkPtr->initializeLayers();
 	neuralNetworkPtr->train();
+
+	
+	MPI_Finalize();
 }
