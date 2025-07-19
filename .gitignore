@@ -364,3 +364,7 @@ FodyWeavers.xsd
 
 # FinancialDataAnalyser output data
 /FinancialDataAnalyser/FinancialDataAnalyser/FinancialDataAnalyser/data
+
+# NeuralNetwork train and test files
+/NeuralNetwork/NeuralNetwork/NeuralNetwork/data/train.csv
+/NeuralNetwork/NeuralNetwork/NeuralNetwork/data/test.csv
