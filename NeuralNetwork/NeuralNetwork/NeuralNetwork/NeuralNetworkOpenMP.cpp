@@ -1,8 +1,9 @@
 #include "NeuralNetworkOpenMP.h"
 
 NeuralNetworkOpenMP::NeuralNetworkOpenMP(const string& networkInputFileName_, const string& networkTestFileName_,
+	const int& numTargetCols_,
 	const int& maxNumLayers_, const int& batchsize_) :
-	NeuralNetwork{ networkInputFileName_, networkTestFileName_,maxNumLayers_ , batchsize_ }
+	NeuralNetwork{ networkInputFileName_, networkTestFileName_,numTargetCols_,maxNumLayers_ , batchsize_ }
 {
 #pragma omp single private(num_threads)
 	{
