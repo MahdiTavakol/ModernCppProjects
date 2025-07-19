@@ -59,7 +59,7 @@ protected:
 	MatrixXd dLoss_dweights; // outputDim X (inputDim + 1)
 
 
-	VectorXd prev_diff; // inputDim X batchsize
+	MatrixXd prev_diff; // inputDim X batchsize
 
 	std::unique_ptr<Activation> activationFunction;
 	ActivationType activType;

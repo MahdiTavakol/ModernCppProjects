@@ -42,5 +42,10 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 
 # Include paths
 target_include_directories(${PROJECT_NAME} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_D_
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../../eigen-master
+)
+
+# Link OpenMP
+target_link_libraries(${PROJECT_NAME} PRIVATE OpenMP::OpenMP_CXX)
 

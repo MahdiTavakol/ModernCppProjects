@@ -57,8 +57,11 @@ void NeuralNetwork::addLayer(const int& inputDim_, const int& outputDim_,
 	const OptimizerType& optType_,
 	const double& learningRate_)
 {
-	int prevLayerOutputDim = Layers.back()->returnInputOutputDims()[1];
-	if (inputDim_ != prevLayerOutputDim) throw std::invalid_argument("Incompatible with the previous layer!");
+	if (Layers.size())
+	{
+		int prevLayerOutputDim = Layers.back()->returnInputOutputDims()[1];
+		if (inputDim_ != prevLayerOutputDim) throw std::invalid_argument("Incompatible with the previous layer!");
+	}
 	if (batchsize == -1) {
 		/* I do not put the default value of the batch size here
 		* on purpose so that the Layers decides on the default value
