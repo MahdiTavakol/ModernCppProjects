@@ -37,9 +37,9 @@ A high-performance C++ implementation of a feedforward neural network supporting
 ---
 
 ### 🧱 Data
-train.csv and test.csv files were taken from the Kaggle Tabular Playground Series - Nov 2021 
-https://www.kaggle.com/competitions/tabular-playground-series-nov-2021/
-under the Attribution 4.0 International (CC BY 4.0) license
+train.csv and test.csv files were taken from the Kaggle Tabular Playground Series - Nov 2021 \n
+https://www.kaggle.com/competitions/tabular-playground-series-nov-2021/ \n
+under the Attribution 4.0 International (CC BY 4.0) license \n
 https://creativecommons.org/licenses/by/4.0/
 
 ## ⚙️ Build Instructions
