@@ -8,7 +8,10 @@ set(CMAKE_CXX_COMPILER mpiicpx)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Enable OpenMP
+# Enable Debug build type and symbols
+set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+
 # Manually enable Intel OpenMP support for mpiicpx
 set(OpenMP_CXX_FLAGS "-qopenmp")
 set(OpenMP_CXX_LIB_NAMES "iomp5")
@@ -37,11 +40,7 @@ set(SOURCES
 # Create the executable
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-# Include paths (add Eigen and current directory)
+# Include paths
 target_include_directories(${PROJECT_NAME} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../../eigen-master
-)
+    ${CMAKE_CURRENT_SOURCE_D_
 
-# Link OpenMP
-target_link_libraries(${PROJECT_NAME} PRIVATE OpenMP::OpenMP_CXX)
