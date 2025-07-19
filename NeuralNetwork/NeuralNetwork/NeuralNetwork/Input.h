@@ -20,7 +20,7 @@ public:
 	void resetFileName(const string& dataFileName_);
 	void init();
 	virtual void read();
-	void return_data(array<int, 2> inputDim_, array<int, 2> outputDim_, MatrixXd& inputMatrix_, MatrixXd& outputMatrix_);
+	void return_data(array<int, 2>& inputDim_, array<int, 2>& outputDim_, MatrixXd& inputMatrix_, MatrixXd& outputMatrix_);
 	Input(const Input&) = delete;
 	const Input& operator=(const Input&) = delete;
 	Input(Input&&) = delete;

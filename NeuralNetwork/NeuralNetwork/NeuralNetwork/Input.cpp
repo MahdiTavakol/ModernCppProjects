@@ -55,7 +55,7 @@ void Input::read()
 	readCSVFile(dataFile, inputMatrix, outputMatrix, inputDim, outputDim);
 }
 
-void Input::return_data(array<int, 2> inputDim_, array<int, 2> outputDim_, MatrixXd& inputMatrix_, MatrixXd& outputMatrix_)
+void Input::return_data(array<int, 2>& inputDim_, array<int, 2>& outputDim_, MatrixXd& inputMatrix_, MatrixXd& outputMatrix_)
 {
 	if (inputMatrix.size() == 0 || outputMatrix.size() == 0)
 	{
