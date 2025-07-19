@@ -31,7 +31,6 @@ void Input::init()
 	fileDim = readCSVFileDim(dataFile);
 	inputDim = fileDim;
 	outputDim = inputDim;
-	std::cout << "Here " << numTargetCols << std::endl;
 	if (numTargetCols >= fileDim[1])
 		throw std::invalid_argument("Number of Target columns is larger than the Data Columns!");
 	inputDim[1] -= numTargetCols;
@@ -134,6 +133,7 @@ void Input::readCSVFile(ifstream& file_, MatrixXd& inputData_, MatrixXd& outputD
 		RowVectorXd inputRow{inputDim_[1]};
 		RowVectorXd outputRow{outputDim_[1]};
 		std::stringstream iss(line);
+		std::ostringstream oss;
 		while (std::getline(iss,readIntStr,','))
 		{
 			try
@@ -142,7 +142,8 @@ void Input::readCSVFile(ifstream& file_, MatrixXd& inputData_, MatrixXd& outputD
 			}
 			catch (std::invalid_argument& e)
 			{
-				throw std::invalid_argument("Wrong input value in the csv file!");
+				oss << "Wrong input value (" << readIntStr << ") in the csv file!";
+				throw std::invalid_argument(oss.str());
 			}
 			countReadInt++;
 
