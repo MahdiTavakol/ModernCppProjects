@@ -25,8 +25,8 @@ int main(int argc, char** argv)
 {
 	MPI_Init(&argc, &argv);
 
-	std::string trainFile = "train.csv";
-	std::string testFile = "test.csv";
+	std::string trainFile = "data/train.csv";
+	std::string testFile = "data/test.csv";
 
 	RunType runType = RunType::MPI;
 	std::unique_ptr<NeuralNetwork> neuralNetworkPtr;
