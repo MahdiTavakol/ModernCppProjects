@@ -151,6 +151,7 @@ MatrixXd NeuralNetwork::transform()
 	testPtr->return_data(networkTestDim, networkDummyDim, networkTestMatrix, networkDummyMatrix);
 	testPtr.reset();
 
+
 	int dum = networkTestDim[0];
 	networkTestDim[0] = networkTestDim[1];
 	networkTestDim[1] = dum;
