@@ -368,3 +368,4 @@ FodyWeavers.xsd
 # NeuralNetwork train and test files
 /NeuralNetwork/NeuralNetwork/NeuralNetwork/data/train.csv
 /NeuralNetwork/NeuralNetwork/NeuralNetwork/data/test.csv
+/NeuralNetwork/NeuralNetwork/NeuralNetwork/build/
