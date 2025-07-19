@@ -118,6 +118,9 @@ void Input::readCSVFile(ifstream& file_, MatrixXd& inputData_, MatrixXd& outputD
 		indxRange_[1] < 0 )
 		throw std::invalid_argument("The index is out of range");
 
+	// Skipping the header line.
+	std::getline(file_, line);
+
 
 	int lineNumber = -1;
 	while (std::getline(file_, line))
