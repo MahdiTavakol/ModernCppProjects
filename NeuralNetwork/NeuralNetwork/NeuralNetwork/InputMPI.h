@@ -9,7 +9,8 @@ using std::array;
 class InputMPI : public Input
 {
 public:
-	InputMPI(const string& dataFileName_);
+	InputMPI(const int& numTargetCols_);
+	InputMPI(const string& dataFileName_, const int& numTargetCols_);
 	void read() override;
 
 private:

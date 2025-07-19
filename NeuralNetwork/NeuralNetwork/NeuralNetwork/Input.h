@@ -15,7 +15,10 @@ using std::ifstream;
 class Input
 {
 public:
-	Input(const string& dataFileName_);
+	Input(const int& numTargetCols_);
+	Input(const string& dataFileName_, const int& numTargetCols_);
+	void resetFileName(const string& dataFileName_);
+	void init();
 	virtual void read();
 	void return_data(array<int, 2> inputDim_, array<int, 2> outputDim_, MatrixXd& inputMatrix_, MatrixXd& outputMatrix_);
 	
@@ -27,6 +30,7 @@ public:
 
 protected:
 	ifstream dataFile;
+	const int numTargetCols;
 	array<int, 2> fileDim;
 	array<int, 2> inputDim;
 	array<int, 2> outputDim;

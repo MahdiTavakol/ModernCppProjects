@@ -26,6 +26,7 @@ int main(int argc, char** argv)
 	MPI_Init(&argc, &argv);
 
 	std::string trainFile = "train.csv";
+	std::string testFile = "test.csv";
 
 	RunType runType = RunType::MPI;
 	std::unique_ptr<NeuralNetwork> neuralNetworkPtr;
@@ -34,17 +35,16 @@ int main(int argc, char** argv)
 	{
 	case RunType::SERIAL:
 		// trainfiles, n_in (input_cols) , n_out
-		neuralNetworkPtr = std::make_unique<NeuralNetwork>(trainFile,100, 90);
+		neuralNetworkPtr = std::make_unique<NeuralNetwork>(trainFile,testFile,100, 90);
 		break;
 	case RunType::MPI:
-		neuralNetworkPtr = std::make_unique<NeuralNetworkMPI>(trainFile,100, 90);
+		neuralNetworkPtr = std::make_unique<NeuralNetworkMPI>(trainFile, testFile, 100, 90);
 		break;
 	case RunType::OPENMP:
-		neuralNetworkPtr = std::make_unique<NeuralNetworkOpenMP>(trainFile,100, 90);
+		neuralNetworkPtr = std::make_unique<NeuralNetworkOpenMP>(trainFile, testFile, 100, 90);
 		break;
 	default:
 		throw std::invalid_argument("Uknown run type");
-
 	}
 
 	neuralNetworkPtr->initializeInputPtr();
@@ -61,7 +61,8 @@ int main(int argc, char** argv)
 	neuralNetworkPtr->addLayer(4, 2);
 	neuralNetworkPtr->addLastLayer(2, 1);
 	neuralNetworkPtr->initializeLayers();
-	neuralNetworkPtr->train();
+	neuralNetworkPtr->fit();
+	neuralNetworkPtr->transform();
 
 	
 	MPI_Finalize();

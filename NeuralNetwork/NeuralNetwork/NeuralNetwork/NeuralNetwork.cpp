@@ -5,20 +5,25 @@
 #include <sstream>
 
 
-NeuralNetwork::NeuralNetwork(const string networkDataFileName_,	const int& maxNumLayers_, 
+NeuralNetwork::NeuralNetwork(const string& networkDataFileName_, const string& networkTestFileName_,
+	const int& numTargetCols_, const int& maxNumLayers_,
 	const int& batchsize_) :
 	networkDataFileName{networkDataFileName_},
+	networkTestFileName{networkTestFileName_},
+	numTargetCols{numTargetCols_},
 	maxNumLayers{ maxNumLayers_ }, batchsize{batchsize_},
 	trainingPercent{ 70.0 }
 {}
 
 void NeuralNetwork::initializeInputPtr()
 {
-	inputPtr = std::make_unique<Input>(networkDataFileName);
+	inputPtr = std::make_unique<Input>(networkDataFileName, numTargetCols);
+	testPtr = std::make_unique<Input>(networkTestFileName, 0);
 }
 
 void NeuralNetwork::readInputData()
 {
+	inputPtr->init();
 	inputPtr->read();
 	inputPtr->return_data(networkInputDim, networkOutputDim, networkInputMatrix, networkOutputMatrix);
 	inputPtr.reset();
@@ -99,7 +104,7 @@ void NeuralNetwork::initializeLayers()
 	}
 }
 
-void NeuralNetwork::train()
+void NeuralNetwork::fit()
 {
 	int numTrainingData = static_cast<int>(trainingPercent * networkInputDim[1]);
 	int numValidationData = networkInputDim[1] - numTrainingData;
@@ -132,6 +137,30 @@ void NeuralNetwork::train()
 			break;
 
 	}
+}
+
+MatrixXd NeuralNetwork::transform()
+{
+	array<int, 2> networkTestDim;
+	array<int, 2> networkDummyDim;
+	MatrixXd networkTestMatrix;
+	MatrixXd networkDummyMatrix;
+
+	testPtr->init();
+	testPtr->read();
+	testPtr->return_data(networkTestDim, networkDummyDim, networkTestMatrix, networkDummyMatrix);
+	testPtr.reset();
+
+	int dum = networkTestDim[0];
+	networkTestDim[0] = networkTestDim[1];
+	networkTestDim[1] = dum;
+
+	networkTestMatrix = networkTestMatrix.transpose();
+
+	if (networkInputDim[0] != networkTestMatrix[0])
+		throw std::invalid_argument("The number of feature for the test data is different than the training data!");
+
+	return forwardBatch(networkTestMatrix);
 }
 
 MatrixXd NeuralNetwork::forwardBatch(const MatrixXd& input_)

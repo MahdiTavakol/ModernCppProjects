@@ -17,7 +17,8 @@ using std::array;
 class NeuralNetwork
 {
 public:
-	NeuralNetwork(const string networkDataFileName_,const int& maxNumLayers_ = 10,
+	NeuralNetwork(const string& networkDataFileName_, const string& networkTestFileName_,
+		const int& numTargetCols_, const int& maxNumLayers_ = 10,
 		const int& batchsize_ = -1);
 	virtual void initializeInputPtr();
 	void readInputData();
@@ -31,13 +32,18 @@ public:
 		const double& learningRate_ = 0.1,
 		const LossType& lossType_ = LossType::MSE);
 	void initializeLayers();
-	virtual void train();
+	virtual void fit();
+	MatrixXd transform();
 
 
 
 protected:
 	string networkDataFileName;
+	string networkTestFileName;
 	std::unique_ptr<Input> inputPtr;
+	std::unique_ptr<Input> testPtr;
+	const int numTargetCols;
+	
 
 	array<int, 2> networkInputDim;
 	array<int, 2> networkOutputDim;
@@ -64,4 +70,6 @@ protected:
 
 	vector<double> trainingLoss;
 	vector<double> validationLoss;
+
+	
 };

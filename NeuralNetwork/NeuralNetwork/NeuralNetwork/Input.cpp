@@ -2,15 +2,27 @@
 #include <iostream>
 #include <filesystem>
 
-Input::Input(const string& dataFileName_):
-	dataFile{dataFileName_}
+Input::Input(const int& numTargetCols_): 
+	numTargetCols{ numTargetCols_ }
+{}
+
+Input::Input(const string& dataFileName_, const int& numTargetCols_):
+	dataFile{ dataFileName_ }, numTargetCols{numTargetCols_}
 {
 	std::filesystem::path dataPath{ dataFileName_ };
 	if (!std::filesystem::exists(dataPath))
 		throw std::invalid_argument("Cannot open the file " + dataFileName_);
 }
 
-void Input::read()
+void Input::resetFileName(const string& dataFileName_)
+{
+	std::filesystem::path dataPath{ dataFileName_ };
+	if (!std::filesystem::exists(dataPath))
+		throw std::invalid_argument("Cannot open the file " + dataFileName_);
+	dataFile.open(dataFileName_);
+}
+
+void Input::init()
 {
 	if (!dataFile.is_open())
 		throw std::runtime_error("File is not open");
@@ -19,8 +31,16 @@ void Input::read()
 	fileDim = readCSVFileDim(dataFile);
 	inputDim = fileDim;
 	outputDim = inputDim;
-	inputDim[1]--; // One col for the target
-	outputDim[1] = 1; // One col for the target
+	if (numTargetCols >= fileDim[1])
+		throw std::invalid_argument("Number of Target columns is larger than the Data Columns!");
+	inputDim[1] -= numTargetCols;
+	outputDim[1] = numTargetCols;
+	if (outputDim[1] > inputDim[1])
+		std::cout << "Warning: The number of target columns is larger than the input columns!" << std::endl;
+}
+
+void Input::read()
+{
 	inputMatrix.resize(inputDim[0],inputDim[1]);
 	outputMatrix.resize(outputDim[0], outputDim[1]);
 	dataFile.clear();         // just to be extra safe

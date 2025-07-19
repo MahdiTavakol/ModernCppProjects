@@ -1,8 +1,8 @@
 #include "NeuralNetworkOpenMP.h"
 
-NeuralNetworkOpenMP::NeuralNetworkOpenMP(const string networkInputFileName_, const string& networkOutputFileName_,
+NeuralNetworkOpenMP::NeuralNetworkOpenMP(const string& networkInputFileName_, const string& networkTestFileName_,
 	const int& maxNumLayers_, const int& batchsize_) :
-	NeuralNetwork{ networkInputFileName_, maxNumLayers_ , batchsize_ }
+	NeuralNetwork{ networkInputFileName_, networkTestFileName_,maxNumLayers_ , batchsize_ }
 {
 #pragma omp single private(num_threads)
 	{
@@ -16,7 +16,7 @@ NeuralNetworkOpenMP::NeuralNetworkOpenMP(const string networkInputFileName_, con
 }
 
 
-void NeuralNetworkOpenMP::train()
+void NeuralNetworkOpenMP::fit()
 {
 	int numTrainingData = static_cast<int>(trainingPercent * networkInputDim[1]);
 	int numValidationData = networkInputDim[1] - numTrainingData;

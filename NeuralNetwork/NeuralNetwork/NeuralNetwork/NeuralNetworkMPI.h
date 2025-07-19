@@ -7,10 +7,11 @@
 class NeuralNetworkMPI final : public NeuralNetwork
 {
 public:
-	NeuralNetworkMPI(const string networkInputFileName_, const string& networkOutputFileName_,
+	NeuralNetworkMPI(const string& networkInputFileName_, const string& networkTestFileName_, 
+		const int& numTargetCols_,
 		const int& maxNumLayers_ = 10, const int& batchsize_ = -1);
 	void initializeInputPtr() override;
-	void train() override;
+	void fit() override;
 
 protected:
 	void backwardBatch(const MatrixXd& output_) override;

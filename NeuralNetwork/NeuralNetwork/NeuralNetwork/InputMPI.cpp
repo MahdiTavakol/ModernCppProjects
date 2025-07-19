@@ -1,7 +1,11 @@
 #include "InputMPI.h"
 
-InputMPI::InputMPI(const string& dataFileName_):
-	Input{dataFileName_}
+InputMPI::InputMPI(const int& numTargetCols_) :
+	Input{ numTargetCols_ }
+{}
+
+InputMPI::InputMPI(const string& dataFileName_, const int& numTargetCols_):
+	Input{dataFileName_,numTargetCols_}
 {
 	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 	MPI_Comm_size(MPI_COMM_WORLD,&size);
@@ -9,15 +13,6 @@ InputMPI::InputMPI(const string& dataFileName_):
 
 void InputMPI::read()
 {
-	if (!dataFile.is_open())
-		throw std::runtime_error("File is not open");
-	dataFile.clear();         // clear any error flags
-	dataFile.seekg(0);        // go back to the beginning
-	fileDim = readCSVFileDim(dataFile);
-	inputDim = fileDim;
-	outputDim = inputDim;
-	inputDim[1]--;
-	outputDim[1] = 1;
 	localInputDim = inputDim;
 	localOutputDim = outputDim;
 

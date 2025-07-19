@@ -1,8 +1,9 @@
 #include "NeuralNetworkMPI.h"
 
-NeuralNetworkMPI::NeuralNetworkMPI(const string networkInputFileName_, const string& networkOutputFileName_,
+NeuralNetworkMPI::NeuralNetworkMPI(const string& networkInputFileName_, const string& networkTestFileName_, 
+	const int& numTargetCols_,
 	const int& maxNumLayers_, const int& batchsize_):
-	NeuralNetwork{networkInputFileName_, maxNumLayers_ , batchsize_}
+	NeuralNetwork{networkInputFileName_, networkTestFileName_, numTargetCols_, maxNumLayers_ , batchsize_}
 {
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -10,10 +11,11 @@ NeuralNetworkMPI::NeuralNetworkMPI(const string networkInputFileName_, const str
 
 void NeuralNetworkMPI::initializeInputPtr()
 {
-	inputPtr = std::make_unique<InputMPI>(networkDataFileName);
+	inputPtr = std::make_unique<InputMPI>(networkDataFileName,numTargetCols);
+	testPtr = std::make_unique<InputMPI>(networkTestFileName, 0);
 }
 
-void NeuralNetworkMPI::train()
+void NeuralNetworkMPI::fit()
 {
 	int numTrainingData = static_cast<int>(trainingPercent * networkInputDim[1]);
 	int numValidationData = networkInputDim[1] - numTrainingData;
