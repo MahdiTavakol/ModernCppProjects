@@ -40,8 +40,15 @@ void NeuralNetwork::readInputData()
 	networkInputMatrix.transposeInPlace();
 	networkOutputMatrix.transposeInPlace();
 
-	if (networkInputDim[1] != networkOutputDim[1])
-		throw std::invalid_argument("The number of data in the input and output data are not the same!");
+	if (networkInputDim[1] != networkOutputDim[1]) {
+		std::ostringstream oss;
+		oss << "The number of data in the input ("
+			<< networkInputDim[1]
+			<< ") and output data ("
+			<< networkOutputDim[1]
+			<< ") are not the same!";
+		throw std::invalid_argument(oss.str());
+	}
 	Layers.reserve(maxNumLayers);
 }
 
