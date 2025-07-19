@@ -37,8 +37,8 @@ void NeuralNetwork::readInputData()
 
 	swap_array_2(networkInputDim);
 	swap_array_2(networkOutputDim);
-	networkInputMatrix = networkInputMatrix.transpose();
-	networkOutputMatrix = networkOutputMatrix.transpose();
+	networkInputMatrix.transposeInPlace();
+	networkOutputMatrix.transposeInPlace();
 
 	if (networkInputDim[1] != networkOutputDim[1])
 		throw std::invalid_argument("The number of data in the input and output data are not the same!");
@@ -156,7 +156,7 @@ MatrixXd NeuralNetwork::transform()
 	networkTestDim[0] = networkTestDim[1];
 	networkTestDim[1] = dum;
 
-	networkTestMatrix = networkTestMatrix.transpose();
+	networkTestMatrix.transposeInPlace();
 
 	if (networkInputDim[0] != networkTestDim[0])
 		throw std::invalid_argument("The number of feature for the test data is different than the training data!");
