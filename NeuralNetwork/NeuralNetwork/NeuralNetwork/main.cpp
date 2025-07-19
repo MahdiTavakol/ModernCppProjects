@@ -35,13 +35,13 @@ int main(int argc, char** argv)
 	{
 	case RunType::SERIAL:
 		// trainfiles, n_in (input_cols) , n_out
-		neuralNetworkPtr = std::make_unique<NeuralNetwork>(trainFile,testFile,100, 90);
+		neuralNetworkPtr = std::make_unique<NeuralNetwork>(trainFile,testFile,1,12,32);
 		break;
 	case RunType::MPI:
-		neuralNetworkPtr = std::make_unique<NeuralNetworkMPI>(trainFile, testFile, 100, 90);
+		neuralNetworkPtr = std::make_unique<NeuralNetworkMPI>(trainFile, testFile, 1,12, 32);
 		break;
 	case RunType::OPENMP:
-		neuralNetworkPtr = std::make_unique<NeuralNetworkOpenMP>(trainFile, testFile, 100, 90);
+		neuralNetworkPtr = std::make_unique<NeuralNetworkOpenMP>(trainFile, testFile,1, 12, 32);
 		break;
 	default:
 		throw std::invalid_argument("Uknown run type");
@@ -49,6 +49,7 @@ int main(int argc, char** argv)
 
 	neuralNetworkPtr->initializeInputPtr();
 	neuralNetworkPtr->readInputData();
+	neuralNetworkPtr->addLayer(100, 90);
 	neuralNetworkPtr->addLayer(90, 80);
 	neuralNetworkPtr->addLayer(80, 70);
 	neuralNetworkPtr->addLayer(60, 50);

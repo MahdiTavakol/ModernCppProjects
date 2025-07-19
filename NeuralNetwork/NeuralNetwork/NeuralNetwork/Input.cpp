@@ -31,12 +31,20 @@ void Input::init()
 	fileDim = readCSVFileDim(dataFile);
 	inputDim = fileDim;
 	outputDim = inputDim;
+	std::cout << "Here " << numTargetCols << std::endl;
 	if (numTargetCols >= fileDim[1])
 		throw std::invalid_argument("Number of Target columns is larger than the Data Columns!");
 	inputDim[1] -= numTargetCols;
 	outputDim[1] = numTargetCols;
 	if (outputDim[1] > inputDim[1])
-		std::cout << "Warning: The number of target columns is larger than the input columns!" << std::endl;
+	{
+		std::cout << "Warning: The number of target columns " 
+			<< outputDim[1] 
+			<< " is larger than the input columns " 
+			<< inputDim[1]
+			<< "!"
+			<< std::endl;
+	}
 }
 
 void Input::read()
