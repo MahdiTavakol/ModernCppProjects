@@ -6,7 +6,6 @@ LastLayerBatchEfficient::LastLayerBatchEfficient(const int& batchsize_,
 	const double& learningRate_, const LossType& lossType_):
 	LayerBatchEfficient{batchsize_,inputDim_,outputDim_,activType_,optType_,learningRate_ }, lossType{lossType_}
 { 
-
 	switch (lossType)
 	{
 		case LossType::MSE:

@@ -157,7 +157,7 @@ MatrixXd NeuralNetwork::transform()
 
 	networkTestMatrix = networkTestMatrix.transpose();
 
-	if (networkInputDim[0] != networkTestMatrix[0])
+	if (networkInputDim[0] != networkTestDim[0])
 		throw std::invalid_argument("The number of feature for the test data is different than the training data!");
 
 	return forwardBatch(networkTestMatrix);
