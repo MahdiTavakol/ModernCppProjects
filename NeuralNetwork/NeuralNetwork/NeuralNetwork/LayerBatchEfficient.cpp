@@ -57,7 +57,6 @@ LayerBatchEfficient::LayerBatchEfficient(const int& batchsize_, const int& input
 	default:
 		throw std::invalid_argument("Unknown optimizer type!");
 	}
-
 }
 
 LayerBatchEfficient::LayerBatchEfficient(const int& inputDim_, const int& outputDim_, const ActivationType& activType_,

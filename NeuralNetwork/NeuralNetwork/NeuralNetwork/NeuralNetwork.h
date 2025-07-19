@@ -17,9 +17,10 @@ using std::array;
 class NeuralNetwork
 {
 public:
-	NeuralNetwork(const string networkInputFileName_, const string& networkOutputFileName_,
-		const int& maxNumLayers_ = 10, const int& batchsize_ = -1);
-	virtual void initializeData();
+	NeuralNetwork(const string networkDataFileName_,const int& maxNumLayers_ = 10,
+		const int& batchsize_ = -1);
+	virtual void initializeInputPtr();
+	void readInputData();
 	void addLayer(const int& inputDim_, const int& outputDim_,
 		const ActivationType& activType_ = ActivationType::RELU,
 		const OptimizerType& optType_ = OptimizerType::SGD,
@@ -35,7 +36,7 @@ public:
 
 
 protected:
-	string networkInputFileName, networkOutputFileName;
+	string networkDataFileName;
 	std::unique_ptr<Input> inputPtr;
 
 	array<int, 2> networkInputDim;

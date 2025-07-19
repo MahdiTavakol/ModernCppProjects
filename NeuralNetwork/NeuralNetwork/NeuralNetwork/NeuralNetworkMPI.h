@@ -9,7 +9,7 @@ class NeuralNetworkMPI final : public NeuralNetwork
 public:
 	NeuralNetworkMPI(const string networkInputFileName_, const string& networkOutputFileName_,
 		const int& maxNumLayers_ = 10, const int& batchsize_ = -1);
-	void initializeData() override;
+	void initializeInputPtr() override;
 	void train() override;
 
 protected:

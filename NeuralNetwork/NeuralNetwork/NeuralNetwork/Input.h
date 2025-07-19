@@ -9,12 +9,13 @@ using std::string;
 using std::array;
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
+using Eigen::RowVectorXd;
 using std::ifstream;
 
 class Input
 {
 public:
-	Input(const string& inputFileName_, const string& outputFileName_);
+	Input(const string& dataFileName_);
 	virtual void read();
 	void return_data(array<int, 2> inputDim_, array<int, 2> outputDim_, MatrixXd& inputMatrix_, MatrixXd& outputMatrix_);
 	
@@ -25,18 +26,23 @@ public:
 	~Input() = default;
 
 protected:
-	ifstream inputFile, outputFile;
+	ifstream dataFile;
+	array<int, 2> fileDim;
 	array<int, 2> inputDim;
 	array<int, 2> outputDim;
 	MatrixXd inputMatrix;
 	MatrixXd outputMatrix;
 
 	array<int, 2> readCSVFileDim(ifstream& file_);
-	void readCSVFile(ifstream& file_, MatrixXd& data_, array<int, 2>& dataDim_) {
-		array<int, 2> range{ 0, dataDim_[0] - 1 };
-		readCSVFile(file_, data_, dataDim_, range);
+	void readCSVFile(ifstream& file_, MatrixXd& inputData_, MatrixXd& outputData_,
+		array<int, 2>& inputDim_, array<int,2>& outputDim_) {
+		if (inputDim_[0] != outputDim_[0])
+			throw std::runtime_error("Internal Error!");
+		array<int, 2> range{ 0, inputDim_[0]-1};
+		readCSVFile(file_, inputData_, outputData_, inputDim_, outputDim_, range);
 	};
-	void readCSVFile(ifstream& file_, MatrixXd& data_, array<int, 2>& dataDim_, array<int, 2>& indxRange_);
+	void readCSVFile(ifstream& file_, MatrixXd& inputData_, MatrixXd& outputData_, 
+		array<int, 2>& inputDim_, array<int, 2> outputDim_, array<int, 2>& indxRange_);
 
 	void returnDim(array<int, 2>& inputDim_, array<int, 2>& outputDim_)
 	{

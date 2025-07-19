@@ -5,20 +5,35 @@
 #include <sstream>
 
 
-NeuralNetwork::NeuralNetwork(const string networkInputFileName_, const string& networkOutputFileName_,
-	const int& maxNumLayers_, const int& batchsize_) :
-	networkInputFileName{networkInputFileName_},
-	networkOutputFileName{ networkOutputFileName_},
+NeuralNetwork::NeuralNetwork(const string networkDataFileName_,	const int& maxNumLayers_, 
+	const int& batchsize_) :
+	networkDataFileName{networkDataFileName_},
 	maxNumLayers{ maxNumLayers_ }, batchsize{batchsize_},
 	trainingPercent{ 70.0 }
 {}
 
-void NeuralNetwork::initializeData()
+void NeuralNetwork::initializeInputPtr()
 {
-	inputPtr = std::make_unique<Input>(networkInputFileName, networkOutputFileName);
+	inputPtr = std::make_unique<Input>(networkDataFileName);
+}
+
+void NeuralNetwork::readInputData()
+{
 	inputPtr->read();
 	inputPtr->return_data(networkInputDim, networkOutputDim, networkInputMatrix, networkOutputMatrix);
 	inputPtr.reset();
+
+	auto swap_array_2 = [](std::array<int, 2>& input)
+		{
+			int dum = input[0];
+			input[0] = input[1];
+			input[1] = dum;
+		};
+
+	swap_array_2(networkInputDim);
+	swap_array_2(networkOutputDim);
+	networkInputMatrix = networkInputMatrix.transpose();
+	networkOutputMatrix = networkOutputMatrix.transpose();
 
 	if (networkInputDim[1] != networkOutputDim[1])
 		throw std::invalid_argument("The number of data in the input and output data are not the same!");

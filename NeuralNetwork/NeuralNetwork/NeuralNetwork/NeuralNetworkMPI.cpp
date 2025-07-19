@@ -2,22 +2,15 @@
 
 NeuralNetworkMPI::NeuralNetworkMPI(const string networkInputFileName_, const string& networkOutputFileName_,
 	const int& maxNumLayers_, const int& batchsize_):
-	NeuralNetwork{networkInputFileName_,networkOutputFileName_, maxNumLayers_ , batchsize_}
+	NeuralNetwork{networkInputFileName_, maxNumLayers_ , batchsize_}
 {
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 }
 
-void NeuralNetworkMPI::initializeData()
+void NeuralNetworkMPI::initializeInputPtr()
 {
-	inputPtr = std::make_unique<InputMPI>(networkInputFileName, networkOutputFileName);
-	inputPtr->read();
-	inputPtr->return_data(networkInputDim, networkOutputDim, networkInputMatrix, networkOutputMatrix);
-	inputPtr.reset();
-
-	if (networkInputDim[1] != networkOutputDim[1])
-		throw std::invalid_argument("The number of data in the input and output data are not the same!");
-	Layers.reserve(maxNumLayers);
+	inputPtr = std::make_unique<InputMPI>(networkDataFileName);
 }
 
 void NeuralNetworkMPI::train()
