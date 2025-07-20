@@ -74,7 +74,6 @@ void NeuralNetwork::addLayer(const int& inputDim_, const int& outputDim_,
 			activType_, optType_, learningRate_));
 	} else
 		throw std::invalid_argument("The batchsize must be > 0");
-	
 	numLayers++;
 }
 
@@ -96,6 +95,7 @@ void NeuralNetwork::addLastLayer(const int& inputDim_, const int& outputDim_,
 	}
 	else
 		throw std::invalid_argument("The batchsize must be > 0");
+	numLayers++;
 }
 
 void NeuralNetwork::initializeLayers()

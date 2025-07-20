@@ -95,28 +95,32 @@ void LayerBatchEfficient::initialize()
 	weightInitialization(mean, std);
 }
 
-MatrixXd LayerBatchEfficient::forward(const MatrixXd& input_)
+MatrixXd LayerBatchEfficient::forward(const MatrixXd& input_, const ActivMode& mode_)
 {
-	MatrixXd output = weights.block(0, 0, weights.rows(), weights.cols() - 1) * input
-		+ weights.block(0, weights.cols() - 1, weights.rows(), 1);
-	output = output.unaryExpr([&](double v) {return (*activationFunction)(v); });
+	//  (outputDimXinputDim)  X  (inputDimXBatchSize) -> outputDimXbatchsize
+	MatrixXd linear = weights.block(0, 0, weights.rows(), weights.cols() - 1) * input;
+	//  (outputDimX1).replicate(1,batchsize) -> outputDimXbatchsize
+	MatrixXd bias = weights.block(0, weights.cols() - 1, weights.rows(), 1).replicate(1,batchsize);
+	// outputDimXbatchsize + outputDimXbatchsize -> outputDimXbatchsize
+	MatrixXd output = linear + bias;
+
+	if (mode_ == ActivMode::Value)
+		output = output.unaryExpr([&](double v) {return (*activationFunction)(v); });
+	else if (mode_ == ActivMode::Diff)
+		output = output.unaryExpr([&](double v) {return activationFunction->diff(v); });
 	return output;
 }
 
 MatrixXd LayerBatchEfficient::backward(MatrixXd& nextDiff_)
 {
 	// dActivation_doutput
-	MatrixXd output = weights.block(0, 0, weights.rows(), weights.cols() - 1) * input 
-		+ weights.block(0, weights.cols() - 1, weights.rows(), 1);
-
-	MatrixXd dActive_doutput = output.unaryExpr([&](double v) {return activationFunction->diff(v); });
+	MatrixXd dActive_doutput = forward(input, ActivMode::Diff);
 
 	// dLoss_dz
 	MatrixXd dLoss_doutput = nextDiff_.cwiseProduct(dActive_doutput);
 
 	dLoss_dweights.block(0,0, weights.rows(), weights.cols() - 1) = dLoss_doutput * input.transpose();
 	dLoss_dweights.block(0, weights.cols() - 1, weights.rows(), 1) = dLoss_doutput.rowwise().sum();
-
 
 	// previous_diff
 	prev_diff = weights.block(0, 0, weights.rows(), weights.cols() - 1).transpose() * dLoss_doutput;
@@ -168,4 +172,5 @@ void LayerBatchEfficient::updateGradients(MatrixXd&& gradients_)
 {
 	dLoss_dweights = std::move(gradients_);
 }
+
 

@@ -32,10 +32,7 @@ LastLayerBatchEfficient::LastLayerBatchEfficient(const int& inputDim_, const int
 MatrixXd LastLayerBatchEfficient::backward(MatrixXd& expectedValue_)
 {
 	// dActivation_doutput
-	MatrixXd output = weights.block(0, 0, weights.rows(), weights.cols() - 1) * input
-		+ weights.block(0, weights.cols() - 1, weights.rows(), 1);
-
-	MatrixXd dActive_dz = output.unaryExpr([&](double v) {return (*activationFunction)(v); });
+	MatrixXd dActive_dz = forward(input);
 	
 	// dLoss_dz
 	MatrixXd dLoss_doutput = lossFunction->diff(expectedValue_, output).cwiseProduct(dActive_dz);
