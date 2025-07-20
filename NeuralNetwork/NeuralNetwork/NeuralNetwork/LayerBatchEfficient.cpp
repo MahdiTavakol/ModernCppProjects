@@ -97,6 +97,7 @@ void LayerBatchEfficient::initialize()
 
 MatrixXd LayerBatchEfficient::forward(const MatrixXd& input_, const ActivMode& mode_)
 {
+	input = input_;
 	//  (outputDimXinputDim)  X  (inputDimXBatchSize) -> outputDimXbatchsize
 	MatrixXd linear = weights.block(0, 0, weights.rows(), weights.cols() - 1) * input;
 	//  (outputDimX1).replicate(1,batchsize) -> outputDimXbatchsize

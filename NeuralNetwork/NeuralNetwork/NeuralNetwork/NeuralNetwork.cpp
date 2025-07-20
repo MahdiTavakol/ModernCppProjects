@@ -116,7 +116,7 @@ void NeuralNetwork::initializeLayers()
 
 void NeuralNetwork::fit()
 {
-	int numTrainingData = static_cast<int>(trainingPercent * networkInputDim[1]);
+	int numTrainingData = static_cast<int>(trainingPercent * networkInputDim[1] / 100.0);
 	int numValidationData = networkInputDim[1] - numTrainingData;
 	
 	int numTrainingBatchs = (numTrainingData + batchsize - 1) / batchsize;
@@ -210,10 +210,10 @@ void NeuralNetwork::trainBatches(const int& firstData, const int& numData, const
 		MatrixXd outputBatch;
 
 		int firstCol = batchsize * j;
-		int lastCol = batchsize * (j + 1) < numData ? batchsize * (j + 1) : numData;
+		int lastCol = firstCol + batchsize < numData ? firstCol + batchsize : numData;
 		firstCol += firstData;
 		lastCol += firstData;
-		int numCols = lastCol - firstCol + 1;
+		int numCols = lastCol - firstCol;
 
 		MatrixXd input = networkInputMatrix.block(0, firstCol, networkInputMatrix.rows(), numCols);
 		MatrixXd expected = networkOutputMatrix.block(0, firstCol, networkOutputMatrix.rows(), numCols);

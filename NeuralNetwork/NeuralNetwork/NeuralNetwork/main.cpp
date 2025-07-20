@@ -49,18 +49,7 @@ int main(int argc, char** argv)
 
 	neuralNetworkPtr->initializeInputPtr();
 	neuralNetworkPtr->readInputData();
-	neuralNetworkPtr->addLayer(100, 90);
-	neuralNetworkPtr->addLayer(90, 80);
-	neuralNetworkPtr->addLayer(80, 70);
-	neuralNetworkPtr->addLayer(70, 60);
-	neuralNetworkPtr->addLayer(60, 50);
-	neuralNetworkPtr->addLayer(50, 40);
-	neuralNetworkPtr->addLayer(40, 30);
-	neuralNetworkPtr->addLayer(30, 20);
-	neuralNetworkPtr->addLayer(20, 10);
-	neuralNetworkPtr->addLayer(10, 6);
-	neuralNetworkPtr->addLayer(6, 4);
-	neuralNetworkPtr->addLayer(4, 2);
+	neuralNetworkPtr->addLayer(100, 2);
 	neuralNetworkPtr->addLastLayer(2, 1);
 	neuralNetworkPtr->initializeLayers();
 	neuralNetworkPtr->fit();

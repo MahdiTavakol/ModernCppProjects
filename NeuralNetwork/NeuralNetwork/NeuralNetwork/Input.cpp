@@ -86,6 +86,7 @@ array<int, 2> Input::readCSVFileDim(ifstream& file_)
 	
 	while (std::getline(iss, token, ','))
 		dim++;
+	dim--; // The first col is the id
 	
 	while (std::getline(file_, line))
 		numData++;
@@ -137,6 +138,7 @@ void Input::readCSVFile(ifstream& file_, MatrixXd& inputData_, MatrixXd& outputD
 		RowVectorXd outputRow{outputDim_[1]};
 		std::stringstream iss(line);
 		std::ostringstream oss;
+		std::getline(iss,readIntStr,',');
 		while (std::getline(iss,readIntStr,','))
 		{
 			try

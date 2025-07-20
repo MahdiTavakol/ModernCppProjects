@@ -17,7 +17,7 @@ void NeuralNetworkMPI::initializeInputPtr()
 
 void NeuralNetworkMPI::fit()
 {
-	int numTrainingData = static_cast<int>(trainingPercent * networkInputDim[1]);
+	int numTrainingData = static_cast<int>(trainingPercent * networkInputDim[1] /100.0);
 	int numValidationData = networkInputDim[1] - numTrainingData;
 
 	int numTrainingBatchs = (numTrainingData + batchsize - 1) / batchsize;
