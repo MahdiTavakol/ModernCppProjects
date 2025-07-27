@@ -70,3 +70,10 @@ public:
 	MatrixXd operator()(const MatrixXd& mat_) override;
 	virtual MatrixXd diff(const MatrixXd& mat_) override;
 };
+
+class SoftMax final : public Activation
+{
+public:
+	MatrixXd operator()(const MatrixXd& mat_) override;
+	virtual MatrixXd diff(const MatrixXd& mat_) override;
+};

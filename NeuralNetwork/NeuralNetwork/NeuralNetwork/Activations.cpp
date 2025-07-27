@@ -67,6 +67,27 @@ double Selu::diff(const double& x)
 	else return lambda * (alpha + 1.0) / 2.0;
 }
 
+MatrixXd Selu::operator()(const MatrixXd& mat_)
+{
+	auto func = [&](double x)
+		{
+			if (x > 0) return lambda * x;
+			else if (x < 0) return lambda * alpha * (std::exp(x) - 1);
+		};
+	return mat_.unaryExpr(func);
+}
+
+MatrixXd Selu::diff(const MatrixXd& mat_)
+{
+	auto func = [&](double x)
+		{
+			if (x > 0) return lambda;
+			else if (x < 0) return lambda * alpha * std::exp(x);
+			else return lambda * (alpha + 1.0) / 2.0;
+		};
+	return mat_.unaryExpr(func);
+}
+
 double Sigmoid::operator()(const double& x)
 {
 	return (1.0 / (1.0 + std::exp(-x)));
@@ -75,6 +96,24 @@ double Sigmoid::operator()(const double& x)
 double Sigmoid::diff(const double& x)
 {
 	return std::exp(-x) / ((1.0 + std::exp(-x)) * (1.0 + std::exp(-x)));
+}
+
+MatrixXd Sigmoid::operator()(const MatrixXd& mat_)
+{
+	auto func = [&](double x)
+		{
+			return (1.0 / (1.0 + std::exp(-x)));
+		};
+	return mat_.unaryExpr(func);
+}
+
+MatrixXd Sigmoid::diff(const MatrixXd& mat_)
+{
+	auto func = [&](double x)
+		{
+			return std::exp(-x) / ((1.0 + std::exp(-x)) * (1.0 + std::exp(-x)));
+		};
+	return mat_.unaryExpr(func);
 }
 
 double FastSigmoid::operator()(const double& x)
@@ -87,6 +126,18 @@ double FastSigmoid::diff(const double& x)
 	return ((1 + std::abs(x)) + x * (x/std::abs(x))) / ((1 + std::abs(x))* (1 + std::abs(x)));
 }
 
+MatrixXd FastSigmoid::operator()(const MatrixXd& mat_)
+{
+	return mat_.unaryExpr([&](double x) {return x / (1 + std::abs(x)); });
+}
+
+MatrixXd FastSigmoid::diff(const MatrixXd& mat_)
+{
+	return mat_.unaryExpr([&](double x) {
+		return ((1 + std::abs(x)) + x * (x / std::abs(x))) / ((1 + std::abs(x)) * (1 + std::abs(x)));
+		});
+}
+
 double TanH::operator()(const double& x)
 {
 	return std::tanh(x);
@@ -95,4 +146,14 @@ double TanH::operator()(const double& x)
 double TanH::diff(const double& x)
 {
 	return 1.0 / (std::cosh(x)* std::cosh(x));
+}
+
+MatrixXd TanH::operator()(const MatrixXd& mat_)
+{
+	return mat_.unaryExpr([&](double x) {return std::tanh(x); });
+}
+
+MatrixXd TanH::diff(const MatrixXd& mat_)
+{
+	return mat_.unaryExpr([&](double x) {return 1.0 / (std::cosh(x) * std::cosh(x)); });
 }
