@@ -1,11 +1,16 @@
 #pragma once
 #include <cmath>
+#include <Eigen/Dense>
+
+using Eigen::MatrixXd;
 
 class Activation
 {
 public:
 	virtual double operator()(const double& x) = 0;
 	virtual double diff(const double& x) = 0;
+	virtual MatrixXd operator()(const MatrixXd& mat_) = 0;
+	virtual MatrixXd diff(const MatrixXd& mat_) = 0;
 };
 
 class ReLu final : public Activation
@@ -13,6 +18,8 @@ class ReLu final : public Activation
 public:
 	double operator()(const double& x) override;
 	double diff(const double& x) override;
+	MatrixXd operator()(const MatrixXd& mat_) override;
+	virtual MatrixXd diff(const MatrixXd& mat_) override;
 };
 
 class LeakyRelu final : public Activation
@@ -20,6 +27,8 @@ class LeakyRelu final : public Activation
 public:
 	double operator()(const double& x) override;
 	double diff(const double& x) override;
+	MatrixXd operator()(const MatrixXd& mat_) override;
+	virtual MatrixXd diff(const MatrixXd& mat_) override;
 private:
 	double alpha = 0.01;
 };
@@ -29,6 +38,8 @@ class Selu final : public Activation
 public:
 	double operator()(const double& x) override;
 	double diff(const double& x) override;
+	MatrixXd operator()(const MatrixXd& mat_) override;
+	virtual MatrixXd diff(const MatrixXd& mat_) override;
 private:
 	double alpha = 1.0507, lambda = 1.6733;
 };
@@ -38,6 +49,8 @@ class Sigmoid final : public Activation
 public:
 	double operator()(const double& x) override;
 	double diff(const double& x) override;
+	MatrixXd operator()(const MatrixXd& mat_) override;
+	virtual MatrixXd diff(const MatrixXd& mat_) override;
 };
 
 class FastSigmoid final : public Activation
@@ -45,6 +58,8 @@ class FastSigmoid final : public Activation
 public:
 	double operator()(const double& x) override;
 	double diff(const double& x) override;
+	MatrixXd operator()(const MatrixXd& mat_) override;
+	virtual MatrixXd diff(const MatrixXd& mat_) override;
 };
 
 class TanH final : public Activation
@@ -52,4 +67,6 @@ class TanH final : public Activation
 public:
 	double operator()(const double& x) override;
 	double diff(const double& x) override;
+	MatrixXd operator()(const MatrixXd& mat_) override;
+	virtual MatrixXd diff(const MatrixXd& mat_) override;
 };

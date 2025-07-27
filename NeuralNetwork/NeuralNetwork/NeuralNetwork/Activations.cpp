@@ -10,6 +10,16 @@ double ReLu::diff(const double& x)
 	return (1.0 + x / std::abs(x)) / 2.0;
 }
 
+MatrixXd ReLu::operator()(const MatrixXd& mat_)
+{
+	return mat_.unaryExpr([&](double x) {return (x + std::abs(x)) / 2.0; });
+}
+
+MatrixXd ReLu::diff(const MatrixXd& mat_)
+{
+	return mat_.unaryExpr([&](double x) {return (1.0 + x / std::abs(x)) / 2.0; });
+}
+
 double LeakyRelu::operator()(const double& x)
 {
 	if (x >= 0) return x;
@@ -21,6 +31,27 @@ double LeakyRelu::diff(const double& x)
 	if (x > 0) return 1.0;
 	else if (x < 0) return -alpha;
 	else return (1.0 + alpha) / 2.0;
+}
+
+MatrixXd LeakyRelu::operator()(const MatrixXd& mat_)
+{
+	auto lambda = [&](double x)
+		{
+			if (x >= 0) return x;
+			else return alpha * x;
+		};
+	return mat_.unaryExpr(lambda);
+}
+
+MatrixXd LeakyRelu::diff(const MatrixXd& mat_)
+{
+	auto lambda = [&](double x)
+		{
+			if (x > 0) return 1.0;
+			else if (x < 0) return -alpha;
+			else return (1.0 + alpha) / 2.0;
+		};
+	return mat_.unaryExpr(lambda);
 }
 
 double Selu::operator()(const double& x)
