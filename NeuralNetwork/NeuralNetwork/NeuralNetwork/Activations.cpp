@@ -159,7 +159,7 @@ MatrixXd TanH::diff(const MatrixXd& mat_)
 	return mat_.unaryExpr([&](double x) {return 1.0 / (std::cosh(x) * std::cosh(x)); });
 }
 
-MatrixXd SoftMax::operator()(const MatrixXd& mat_)
+MatrixXd SoftMaxLastLayer::operator()(const MatrixXd& mat_)
 {
 	RowVectorXd colMax = mat_.colwise().maxCoeff();
 	MatrixXd mat = mat_ - colMax.replicate(mat_.rows(), 1);
@@ -172,20 +172,6 @@ MatrixXd SoftMax::operator()(const MatrixXd& mat_)
 	}
 
 	return expMat;
-}
-
-MatrixXd SoftMax::diff(const MatrixXd& mat_)
-{
-	/*
-	* K1 = w11*i1+w12*i2
-	* K2 = w21*i1+w22*i2
-	* O1 = F1(K1,K2) // the softmax is dependent on all the output value (just in one data point AKA one column here)
-	* diffO1/diffw11 = diffF1/diffK1*diffK1/diffw11 + diffF1/diffK2*diffK2/diffw11
-	* diffK2/diffw11 = 0
-	* diffO1/diffw11 = diffF1/diffK1*diffK1/diffw11
-	* even though each softmax value is depedent on the all elements the diff is zero so we can still use unaryExpr
-	*/
-	return mat_.unaryExpr([&](double elem) {return elem * (1.0 - elem); });
 }
 
 MatrixXd SoftMaxLastLayer::diff(const MatrixXd& mat_)

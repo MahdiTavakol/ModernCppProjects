@@ -75,16 +75,10 @@ public:
 	virtual MatrixXd diff(const MatrixXd& mat_) override;
 };
 
-class SoftMax : public Activation
+class SoftMaxLastLayer final : public Activation
 {
 public:
 	MatrixXd operator()(const MatrixXd& mat_) override;
-	virtual MatrixXd diff(const MatrixXd& mat_) override;
-};
-
-class SoftMaxLastLayer final : public SoftMax
-{
-public:
 	virtual MatrixXd diff(const MatrixXd& mat_) override;
 	vector<MatrixXd> diff_vec(const MatrixXd& mat_);
 };
