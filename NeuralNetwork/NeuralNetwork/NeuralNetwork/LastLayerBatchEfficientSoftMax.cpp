@@ -51,8 +51,3 @@ MatrixXd LastLayerBatchEfficientSoftMax::backward(MatrixXd& expectedValue_)
 
 	return prev_diff;
 }
-
-double LastLayerBatchEfficient::loss(const MatrixXd& output_, const MatrixXd& expectedValue_)
-{
-	return (*lossFunction)(output_, expectedValue_);
-}

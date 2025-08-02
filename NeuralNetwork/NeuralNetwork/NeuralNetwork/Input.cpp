@@ -12,6 +12,7 @@ Input::Input(const string& dataFileName_, const int& numTargetCols_):
 	std::filesystem::path dataPath{ dataFileName_ };
 	if (!std::filesystem::exists(dataPath))
 		throw std::invalid_argument("Cannot open the file " + dataFileName_);
+	std::cout << "Opening the " << dataFileName_ << std::endl;
 }
 
 void Input::resetFileName(const string& dataFileName_)
@@ -73,6 +74,7 @@ void Input::return_data(array<int, 2>& inputDim_, array<int, 2>& outputDim_, Mat
 
 array<int, 2> Input::readCSVFileDim(ifstream& file_)
 {
+	std::cout << "Getting the the file dimensions" << std::endl;
 	if (!file_.is_open())
 		throw std::runtime_error("The input file is closed!");
 
@@ -84,8 +86,10 @@ array<int, 2> Input::readCSVFileDim(ifstream& file_)
 	std::getline(file_, line);
 	std::stringstream iss(line);
 	
-	while (std::getline(iss, token, ','))
+	while (std::getline(iss, token, ',')) {
 		dim++;
+	}
+		
 	dim--; // The first col is the id
 	
 	while (std::getline(file_, line))
@@ -97,12 +101,15 @@ array<int, 2> Input::readCSVFileDim(ifstream& file_)
 	file_.clear();
 	file_.seekg(0);
 
+	returnArray[0] = 100;
+
 	return returnArray;
 }
 
 void Input::readCSVFile(ifstream& file_, MatrixXd& inputData_, MatrixXd& outputData_,
 	array<int, 2>& inputDim_, array<int, 2> outputDim_, array<int, 2>& indxRange_)
 {
+	std::cout << "Reading the file" << std::endl;
 	if (!file_.is_open())
 		throw std::runtime_error("The input file is closed!");
 
@@ -147,7 +154,7 @@ void Input::readCSVFile(ifstream& file_, MatrixXd& inputData_, MatrixXd& outputD
 			}
 			catch (std::invalid_argument& e)
 			{
-				oss << "Wrong input value (" << readIntStr << ") in the csv file!";
+				oss << "Wrong input value (" << readIntStr << ") in the csv file! " << e.what();
 				throw std::invalid_argument(oss.str());
 			}
 			countReadInt++;

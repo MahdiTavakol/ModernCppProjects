@@ -4,6 +4,7 @@
 #include "LastLayerBatchEfficient.h"
 #include "LayerBatchEfficient.h"
 #include "Loss.h"
+#include "Logger.h"
 #include "NeuralNetwork.h"
 #include "NeuralNetworkMPI.h"
 #include "NeuralNetworkOpenMP.h"
@@ -27,9 +28,13 @@ int main(int argc, char** argv)
 
 	std::string trainFile = "data/train.csv";
 	std::string testFile = "data/test.csv";
+	Logger logger{};
 
 	RunType runType = RunType::MPI;
 	std::unique_ptr<NeuralNetwork> neuralNetworkPtr;
+
+	std::cout << "Initializing the program" << std::endl;
+	std::cout << "Creating the Neural Network" << std::endl;
 	
 	switch (runType)
 	{
