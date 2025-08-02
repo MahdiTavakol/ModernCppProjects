@@ -17,7 +17,8 @@ enum class ActivationType
 	SELU,
 	SIGMOID,
 	FASTSIGMOID,
-	TANH
+	TANH,
+	SOFTMAX
 };
 
 enum class OptimizerType
@@ -32,7 +33,8 @@ enum class OptimizerType
 enum class ActivMode
 {
 	Value,
-	Diff
+	Diff,
+	Diff_Vec
 };
 
 

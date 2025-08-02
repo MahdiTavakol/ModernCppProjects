@@ -1,8 +1,12 @@
 #pragma once
 #include <cmath>
+#include <vector>
 #include <Eigen/Dense>
 
+using Eigen::VectorXd;
 using Eigen::MatrixXd;
+using Eigen::RowVectorXd;
+using std::vector;
 
 class Activation
 {
@@ -71,9 +75,16 @@ public:
 	virtual MatrixXd diff(const MatrixXd& mat_) override;
 };
 
-class SoftMax final : public Activation
+class SoftMax : public Activation
 {
 public:
 	MatrixXd operator()(const MatrixXd& mat_) override;
 	virtual MatrixXd diff(const MatrixXd& mat_) override;
+};
+
+class SoftMaxLastLayer final : public SoftMax
+{
+public:
+	virtual MatrixXd diff(const MatrixXd& mat_) override;
+	vector<MatrixXd> diff_vec(const MatrixXd& mat_);
 };

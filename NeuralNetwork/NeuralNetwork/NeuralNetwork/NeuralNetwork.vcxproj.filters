@@ -51,6 +51,9 @@
     <ClCompile Include="NeuralNetworkOpenMP.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LastLayerBatchEfficientSoftMax.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Neuron.h">
@@ -84,6 +87,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="NeuralNetworkOpenMP.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LastLayerBatchEfficientSoftMax.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -103,28 +103,36 @@ MatrixXd LayerBatchEfficient::forward(const MatrixXd& input_, const ActivMode& m
 	//  (outputDimX1).replicate(1,batchsize) -> outputDimXbatchsize
 	MatrixXd bias = weights.block(0, weights.cols() - 1, weights.rows(), 1).replicate(1,batchsize);
 	// outputDimXbatchsize + outputDimXbatchsize -> outputDimXbatchsize
-	MatrixXd output = linear + bias;
+	MatrixXd z = linear + bias;
+	MatrixXd output{ z.rows(),z.cols() };
 
 	if (mode_ == ActivMode::Value)
-		output = output.unaryExpr([&](double v) {return (*activationFunction)(v); });
+		output = z.unaryExpr([&](double v) {return (*activationFunction)(v); });
 	else if (mode_ == ActivMode::Diff)
-		output = output.unaryExpr([&](double v) {return activationFunction->diff(v); });
+		output = z.unaryExpr([&](double v) {return activationFunction->diff(v); });
 	return output;
 }
 
+// The nextDiff_ contains the diffLoss / diffOi of this layer for each data point 
+// outputDim * batchsize
 MatrixXd LayerBatchEfficient::backward(MatrixXd& nextDiff_)
 {
+	// output = Active(z) = Active(weights * input + bias)
+	// here was are intested in three different diffs
+	// 1 --> dLoss_dweigths (to optimize this layer weights)
+	// 2 --> dLoss_dbiass (to optimize this layer bias)
+	// 3 --> dLoss_dinput (prev_diff : to be passed as the nextDiff_ for the previous layer)
 	// dActivation_doutput
-	MatrixXd dActive_doutput = forward(input, ActivMode::Diff);
+	MatrixXd dActive_dz = forward(input, ActivMode::Diff);
 
-	// dLoss_dz
-	MatrixXd dLoss_doutput = nextDiff_.cwiseProduct(dActive_doutput);
+	// dLoss_dz (z is the output before the activation function is applied)
+	MatrixXd dLoss_dz = nextDiff_.cwiseProduct(dActive_dz);
 
-	dLoss_dweights.block(0,0, weights.rows(), weights.cols() - 1) = dLoss_doutput * input.transpose();
-	dLoss_dweights.block(0, weights.cols() - 1, weights.rows(), 1) = dLoss_doutput.rowwise().sum();
+	dLoss_dweights.block(0,0, weights.rows(), weights.cols() - 1) = dLoss_dz * input.transpose();
+	dLoss_dweights.block(0, weights.cols() - 1, weights.rows(), 1) = dLoss_dz.rowwise().sum();
 
 	// previous_diff
-	prev_diff = weights.block(0, 0, weights.rows(), weights.cols() - 1).transpose() * dLoss_doutput;
+	prev_diff = weights.block(0, 0, weights.rows(), weights.cols() - 1).transpose() * dLoss_dz;
 
 	return prev_diff;
 }
