@@ -129,6 +129,7 @@ void NeuralNetwork::fit()
 
 	for (int i = 0; i < MaxNumSteps; i++)
 	{
+		std::cout << "Step " << i << std::endl;
 		double tLossVal  = 0.0;
 		double vLossVal  = 0.0;
 
@@ -177,8 +178,12 @@ MatrixXd NeuralNetwork::transform()
 MatrixXd NeuralNetwork::forwardBatch(const MatrixXd& input_)
 {
 	MatrixXd outputMatrixBatch = input_;
+	int i = 0;
 	for (auto& layer : Layers)
+	{
+		std::cout << "Forward on the layer " << ++i << std::endl;
 		outputMatrixBatch = layer->forward(outputMatrixBatch);
+	}
 	return outputMatrixBatch;
 }
 
@@ -186,7 +191,10 @@ void NeuralNetwork::backwardBatch(const MatrixXd& output_)
 {
 	MatrixXd prevDiffBatch = output_;
 	for (int i = numLayers - 1; i >= 0; i--)
+	{
+		std::cout << "Backward on the layer " << i << std::endl;
 		prevDiffBatch = Layers[i]->backward(prevDiffBatch);
+	}
 }
 
 void NeuralNetwork::updateBatch()
@@ -207,6 +215,7 @@ void NeuralNetwork::trainBatches(const int& firstData, const int& numData, const
 {
 	for (int j = 0; j < numBatchs; j++)
 	{
+		std::cout << "Training the batch " << j << std::endl;
 		MatrixXd outputBatch;
 
 		int firstCol = batchsize * j;

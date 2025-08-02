@@ -1,6 +1,7 @@
 #include "LayerBatchEfficient.h"
 
 #include <random>
+#include <iostream>
 
 
 LayerBatchEfficient::LayerBatchEfficient(const int& batchsize_, const int& inputDim_, const int& outputDim_,
@@ -57,6 +58,8 @@ LayerBatchEfficient::LayerBatchEfficient(const int& batchsize_, const int& input
 	default:
 		throw std::invalid_argument("Unknown optimizer type!");
 	}
+
+	std::cout << "Here " << weights.rows() << "," << weights.cols() << std::endl;
 }
 
 LayerBatchEfficient::LayerBatchEfficient(const int& inputDim_, const int& outputDim_, const ActivationType& activType_,
@@ -101,7 +104,9 @@ MatrixXd LayerBatchEfficient::forward(const MatrixXd& input_, const ActivMode& m
 	//  (outputDimXinputDim)  X  (inputDimXBatchSize) -> outputDimXbatchsize
 	MatrixXd linear = weights.block(0, 0, weights.rows(), weights.cols() - 1) * input;
 	//  (outputDimX1).replicate(1,batchsize) -> outputDimXbatchsize
-	MatrixXd bias = weights.block(0, weights.cols() - 1, weights.rows(), 1).replicate(1,batchsize);
+	// For the last batch the number of data (linear.cols()) is less than the batchsize 
+	int batch_len = linear.cols();
+	MatrixXd bias = weights.block(0, weights.cols() - 1, weights.rows(), 1).replicate(1, batch_len);
 	// outputDimXbatchsize + outputDimXbatchsize -> outputDimXbatchsize
 	MatrixXd z = linear + bias;
 	MatrixXd output{ z.rows(),z.cols() };

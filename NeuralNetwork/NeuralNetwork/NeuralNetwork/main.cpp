@@ -30,7 +30,7 @@ int main(int argc, char** argv)
 	std::string testFile = "data/test.csv";
 	Logger logger{};
 
-	RunType runType = RunType::MPI;
+	RunType runType = RunType::SERIAL;
 	std::unique_ptr<NeuralNetwork> neuralNetworkPtr;
 
 	std::cout << "Initializing the program" << std::endl;

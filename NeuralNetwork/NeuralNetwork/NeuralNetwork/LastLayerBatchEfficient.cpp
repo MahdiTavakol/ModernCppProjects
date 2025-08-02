@@ -52,6 +52,7 @@ MatrixXd LastLayerBatchEfficient::backward(MatrixXd& expectedValue_)
 	// previous_diff
 	prev_diff = weights.block(0, 0, weights.rows(), weights.cols() - 1).transpose() * dLoss_dz;
 
+
 	return prev_diff;
 }
 
