@@ -13,7 +13,9 @@ NeuralNetwork::NeuralNetwork(Logger& logger_, const string& networkDataFileName_
 	networkTestFileName{networkTestFileName_},
 	numTargetCols{numTargetCols_},
 	maxNumLayers{ maxNumLayers_ }, batchsize{batchsize_},
-	trainingPercent{ 70.0 }
+	trainingPercent{ 70.0 },
+	trainLossFile{"training-loss.dat"},
+	validationLossFile{"validation-loss.dat"}
 {}
 
 void NeuralNetwork::initializeInputPtr()
@@ -131,24 +133,51 @@ void NeuralNetwork::fit()
 	trainingLoss.reserve(MaxNumSteps);
 	validationLoss.reserve(MaxNumSteps);
 
+	auto header_lambda = [&](fstream& file, const int& numBatchs)
+		{
+			file << "Step";
+			for (int i = 0; i < numBatchs; i++)
+				file << ",Batch-" << i;
+			file << "All-batches";
+			file << std::endl;
+		};
+	auto print_step = [&](fstream& file, const int& i)
+		{
+			file << i;
+		};
+	header_lambda(trainLossFile, numTrainingBatchs);
+	header_lambda(validationLossFile, numValidationBatchs);
+
 	int numStepsTrainLossDownValidLossUp = 0;
 
 	for (int i = 0; i < MaxNumSteps; i++)
 	{
-		logger.print("The batchsize must be > 0");
+		print_step(trainLossFile, i);
+		print_step(validationLossFile,i);
+		if (logger.log_level >= LOG_LEVEL_INFO)
+			logger << "Step " << i << " out of " << MaxNumSteps << " steps " << std::endl;
 		double tLossVal  = 0.0;
 		double vLossVal  = 0.0;
 
-		logger.print("Training data on the training set");
+		if (logger.log_level >= LOG_LEVEL_DEBUG)
+			logger << "\tTraining data on the training set" << std::endl;
 		trainBatches(0, numTrainingData, numTrainingBatchs, tLossVal,true);
-		logger << "Training loss: " << tLossVal << std::endl;
+		if (logger.log_level >= LOG_LEVEL_DEBUG)
+			logger << "\tTraining loss: " << tLossVal << std::endl;
 
-		logger << "Testing the data on the validating set" << std::endl;
+		if (logger.log_level >= LOG_LEVEL_DEBUG)
+			logger << "\tTesting the data on the validating set" << std::endl;
 		trainBatches(numTrainingData, numValidationData, numValidationBatchs, vLossVal,false);
-		logger << "Validation loss: " << vLossVal << std::endl;
+		if (logger.log_level >= LOG_LEVEL_DEBUG)
+			logger << "\tValidation loss: " << vLossVal << std::endl;
 
+		if (logger.log_level >= LOG_LEVEL_DEBUG)
+			logger << "\tAppending to the loss vectors and outputing values into files" << std::endl;
 		trainingLoss.push_back(tLossVal);
 		validationLoss.push_back(vLossVal);
+		//These two should be replaces with an instance of the Logger
+		trainLossFile << "," << tLossVal << endl;
+		validationLossFile << "," << vLossVal << endl;
 		
 		if (!trainingLoss.empty() && tLossVal < trainingLoss.back() && vLossVal > validationLoss.back())
 			numStepsTrainLossDownValidLossUp;
@@ -156,8 +185,9 @@ void NeuralNetwork::fit()
 			numStepsTrainLossDownValidLossUp = 0;
 		if (numStepsTrainLossDownValidLossUp >= 10)
 			break;
-
 	}
+
+
 }
 
 MatrixXd NeuralNetwork::transform()
@@ -189,12 +219,15 @@ MatrixXd NeuralNetwork::forwardBatch(const MatrixXd& input_)
 {
 	MatrixXd outputMatrixBatch = input_;
 	int i = 0;
-	logger << "\tInput Matrix dims for forwardBatch = " << input_.rows() << "X" << input_.cols() << std::endl;
+	if (logger.log_level >= LOG_LEVEL_TRACE)
+		logger << "\t\tInput Matrix dims for forwardBatch = " << input_.rows() << "X" << input_.cols() << std::endl;
 	for (auto& layer : Layers)
 	{
-		logger << "\t\tForward on the layer " << i++ << std::endl;
-		outputMatrixBatch = layer->forward(outputMatrixBatch);
-		logger << "\t\tOutputMatrixBatch dims = " << outputMatrixBatch.rows() << "X" << outputMatrixBatch.cols() << std::endl;
+		if (logger.log_level >= LOG_LEVEL_VERBOSE)
+		logger << "\t\t\tForward on the layer " << i++ << std::endl;
+			outputMatrixBatch = layer->forward(outputMatrixBatch);
+		if (logger.log_level >= LOG_LEVEL_VERBOSE)
+			logger << "\t\t\tOutputMatrixBatch dims = " << outputMatrixBatch.rows() << "X" << outputMatrixBatch.cols() << std::endl;
 	}
 	return outputMatrixBatch;
 }
@@ -202,12 +235,15 @@ MatrixXd NeuralNetwork::forwardBatch(const MatrixXd& input_)
 void NeuralNetwork::backwardBatch(const MatrixXd& output_)
 {
 	MatrixXd prevDiffBatch = output_;
-	logger << "\tInput Matrix dims for backwardBatch = " << output_.rows() << "X" << output_.cols() << std::endl;
+	if (logger.log_level >= LOG_LEVEL_TRACE)
+		logger << "\t\tInput Matrix dims for backwardBatch = " << output_.rows() << "X" << output_.cols() << std::endl;
 	for (int i = numLayers - 1; i >= 0; i--)
 	{
-		logger << "\t\tBackward on the layer " << i << std::endl;
+		if (logger.log_level >= LOG_LEVEL_VERBOSE)
+			logger << "\t\t\tBackward on the layer " << i << std::endl;
 		prevDiffBatch = Layers[i]->backward(prevDiffBatch);
-		logger << "\t\tprevDiffBatch dims = " << prevDiffBatch.rows() << "X" << prevDiffBatch.cols() << std::endl;
+		if (logger.log_level >= LOG_LEVEL_VERBOSE)
+			logger << "\t\t\tprevDiffBatch dims = " << prevDiffBatch.rows() << "X" << prevDiffBatch.cols() << std::endl;
 	}
 }
 
@@ -229,7 +265,8 @@ void NeuralNetwork::trainBatches(const int& firstData, const int& numData, const
 {
 	for (int j = 0; j < numBatchs; j++)
 	{
-		logger << "\tWorking on the batch " << j << std::endl;
+		if (logger.log_level >= LOG_LEVEL_TRACE)
+			logger << "\t\tWorking on the batch " << j << std::endl;
 		MatrixXd outputBatch;
 
 		int firstCol = batchsize * j;
@@ -241,7 +278,8 @@ void NeuralNetwork::trainBatches(const int& firstData, const int& numData, const
 		MatrixXd inputBatch = networkInputMatrix.block(0, firstCol, networkInputMatrix.rows(), numCols);
 		MatrixXd expectedBatch = networkOutputMatrix.block(0, firstCol, networkOutputMatrix.rows(), numCols);
 
-		logger << "\tInput Matrix dims = " << inputBatch.rows() << "X" << inputBatch.cols() << std::endl;
+		if (logger.log_level >= LOG_LEVEL_TRACE)
+			logger << "\t\tInput Matrix dims = " << inputBatch.rows() << "X" << inputBatch.cols() << std::endl;
 
 		outputBatch = forwardBatch(inputBatch);
 		if (doBack) {
@@ -253,11 +291,20 @@ void NeuralNetwork::trainBatches(const int& firstData, const int& numData, const
 		lossValue += lossValueBatch;
 
 		
-		logger << "\tOutput Matrix dims = " << outputBatch.rows() << "X" << outputBatch.cols() << std::endl;
+		if (logger.log_level >= LOG_LEVEL_TRACE)
+			logger << "\t\tOutput Matrix dims = " << outputBatch.rows() << "X" << outputBatch.cols() << std::endl;
+		if (logger.log_level >= LOG_LEVEL_VERBOSE)
+		{
+			if (doBack)
+				logger << "\t\tTrainLossbatch = ";
+			else
+				logger << "\t\tValidationLossbatch = ";
+			logger << lossValueBatch << std::endl;
+		}
+
 		if (doBack)
-			logger << "\tTrainLossbatch = ";
+			trainLossFile << "," << lossValueBatch;
 		else
-			logger << "\tValidationLossbatch = ";
-		logger << lossValueBatch << std::endl;
+			validationLossFile << "," << lossValueBatch;
 	}
 }

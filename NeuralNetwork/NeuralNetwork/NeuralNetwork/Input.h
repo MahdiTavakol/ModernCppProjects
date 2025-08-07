@@ -6,6 +6,7 @@
 #include <fstream>
 #include "Logger.h"
 
+
 using std::string;
 using std::array;
 using Eigen::MatrixXd;

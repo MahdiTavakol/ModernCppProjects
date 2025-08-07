@@ -15,6 +15,8 @@
 #include <string>
 #include <iostream>
 
+using std::ostream;
+
 
 enum class RunType
 {
@@ -31,6 +33,8 @@ int main(int argc, char** argv)
 	std::string trainFile = "data/train.csv";
 	std::string testFile = "data/test.csv";
 	std::ofstream logFile{ "log.txt" };
+	std::ofstream outFile1{ "Losses.dat" };
+	std::ofstream outFile2{ "BatchLosses.dat" };
 	std::vector<std::reference_wrapper<ostream>> logger_ref =
 	{
 		std::ref(std::cout),
@@ -38,11 +42,15 @@ int main(int argc, char** argv)
 	};
 	Logger logger{logger_ref};
 
+
 	RunType runType = RunType::SERIAL;
 	std::unique_ptr<NeuralNetwork> neuralNetworkPtr;
 
-	logger << "Initializing the program" << std::endl;
-	logger << "Creating the Neural Network" << std::endl;
+	if (logger.log_level >= LOG_LEVEL_INFO)
+	{
+		logger << "Initializing the program" << std::endl;
+		logger << "Creating the Neural Network" << std::endl;
+	}
 	
 	switch (runType)
 	{

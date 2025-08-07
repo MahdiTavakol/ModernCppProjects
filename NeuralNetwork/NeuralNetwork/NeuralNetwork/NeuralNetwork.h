@@ -14,6 +14,9 @@
 using std::vector;
 using std::string;
 using std::array;
+using std::fstream;
+using std::cout;
+using std::endl;
 
 class NeuralNetwork
 {
@@ -36,10 +39,11 @@ public:
 	virtual void fit();
 	MatrixXd transform();
 
-
-
 protected:
+	// output parameters
 	Logger& logger;
+	fstream trainLossFile, validationLossFile;
+
 
 	string networkDataFileName;
 	string networkTestFileName;
