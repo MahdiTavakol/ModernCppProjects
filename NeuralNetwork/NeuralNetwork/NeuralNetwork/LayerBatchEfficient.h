@@ -30,12 +30,6 @@ enum class OptimizerType
 	ADAGRAD
 };
 
-enum class ActivMode
-{
-	Value,
-	Diff,
-	Diff_Vec
-};
 
 
 class LayerBatchEfficient
@@ -46,7 +40,7 @@ public:
 	LayerBatchEfficient(const int& inputDim_, const int& outputDim_, const ActivationType& activType,
 		const OptimizerType& optType_, const double& learningRate_);
 	void initialize();
-	MatrixXd forward(const MatrixXd& input_, const ActivMode& mode_ = ActivMode::Value); // outputDim X batchsize --> inputDim X batchsize
+	MatrixXd forward(const MatrixXd& input_); // outputDim X batchsize --> inputDim X batchsize
 	virtual MatrixXd backward(MatrixXd& nextDiff_);
 	void update();
 	// To be used by MPI and possibly other parallelization approaches
@@ -61,6 +55,7 @@ protected:
 
 	int inputDim, outputDim;
 	MatrixXd input, output; // inputDim X batchsize , outputDim X batchsize
+	MatrixXd dActive_dz; // outputDim X batchsize
 
 	// these are updated when each batch is fed into the layer!
 	MatrixXd weights; // outputDim X (inputDim + 1)

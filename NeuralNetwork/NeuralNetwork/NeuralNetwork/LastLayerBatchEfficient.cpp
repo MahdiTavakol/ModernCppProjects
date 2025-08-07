@@ -40,18 +40,13 @@ MatrixXd LastLayerBatchEfficient::backward(MatrixXd& expectedValue_)
 		<< "components of differential of the activation function\n"
 		<< "The special lastlayer designed for this purpose "
 		<< "should be used!" << std::endl;
-	// dActivation_doutput
-	MatrixXd dActive_dz = forward(input, ActivMode::Diff);
-	
+	// dActivation_dz calculated during the forward step
 	// dLoss_dz
 	MatrixXd dLoss_dz = lossFunction->diff(expectedValue_, output).cwiseProduct(dActive_dz);
-
 	dLoss_dweights.block(0, 0, weights.rows(), weights.cols() - 1) = dLoss_dz * input.transpose();
 	dLoss_dweights.block(0, weights.cols() - 1, weights.rows(), 1) = dLoss_dz.rowwise().sum();
-
 	// previous_diff
 	prev_diff = weights.block(0, 0, weights.rows(), weights.cols() - 1).transpose() * dLoss_dz;
-
 
 	return prev_diff;
 }

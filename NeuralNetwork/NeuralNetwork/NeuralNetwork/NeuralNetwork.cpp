@@ -133,9 +133,13 @@ void NeuralNetwork::fit()
 		double tLossVal  = 0.0;
 		double vLossVal  = 0.0;
 
-
+		std::cout << "Training data on the training set" << std::endl;
 		trainBatches(0, numTrainingData, numTrainingBatchs, tLossVal,true);
+		std::cout << "Training loss: " << tLossVal << std::endl;
+
+		std::cout << "Testing the data on the validating set" << std::endl;
 		trainBatches(numTrainingData, numValidationData, numValidationBatchs, vLossVal,false);
+		std::cout << "Validation loss: " << vLossVal << std::endl;
 
 		trainingLoss.push_back(tLossVal);
 		validationLoss.push_back(vLossVal);
@@ -179,10 +183,12 @@ MatrixXd NeuralNetwork::forwardBatch(const MatrixXd& input_)
 {
 	MatrixXd outputMatrixBatch = input_;
 	int i = 0;
+	std::cout << "\tInput Matrix dims for forwardBatch = " << input_.rows() << "X" << input_.cols() << std::endl;
 	for (auto& layer : Layers)
 	{
-		std::cout << "Forward on the layer " << ++i << std::endl;
+		std::cout << "\t\tForward on the layer " << i++ << std::endl;
 		outputMatrixBatch = layer->forward(outputMatrixBatch);
+		std::cout << "\t\tOutputMatrixBatch dims = " << outputMatrixBatch.rows() << "X" << outputMatrixBatch.cols() << std::endl;
 	}
 	return outputMatrixBatch;
 }
@@ -190,10 +196,12 @@ MatrixXd NeuralNetwork::forwardBatch(const MatrixXd& input_)
 void NeuralNetwork::backwardBatch(const MatrixXd& output_)
 {
 	MatrixXd prevDiffBatch = output_;
+	std::cout << "\tInput Matrix dims for backwardBatch = " << output_.rows() << "X" << output_.cols() << std::endl;
 	for (int i = numLayers - 1; i >= 0; i--)
 	{
-		std::cout << "Backward on the layer " << i << std::endl;
+		std::cout << "\t\tBackward on the layer " << i << std::endl;
 		prevDiffBatch = Layers[i]->backward(prevDiffBatch);
+		std::cout << "\t\tprevDiffBatch dims = " << prevDiffBatch.rows() << "X" << prevDiffBatch.cols() << std::endl;
 	}
 }
 
@@ -215,7 +223,7 @@ void NeuralNetwork::trainBatches(const int& firstData, const int& numData, const
 {
 	for (int j = 0; j < numBatchs; j++)
 	{
-		std::cout << "Training the batch " << j << std::endl;
+		std::cout << "\tWorking on the batch " << j << std::endl;
 		MatrixXd outputBatch;
 
 		int firstCol = batchsize * j;
@@ -224,14 +232,26 @@ void NeuralNetwork::trainBatches(const int& firstData, const int& numData, const
 		lastCol += firstData;
 		int numCols = lastCol - firstCol;
 
-		MatrixXd input = networkInputMatrix.block(0, firstCol, networkInputMatrix.rows(), numCols);
-		MatrixXd expected = networkOutputMatrix.block(0, firstCol, networkOutputMatrix.rows(), numCols);
+		MatrixXd inputBatch = networkInputMatrix.block(0, firstCol, networkInputMatrix.rows(), numCols);
+		MatrixXd expectedBatch = networkOutputMatrix.block(0, firstCol, networkOutputMatrix.rows(), numCols);
 
-		outputBatch = forwardBatch(input);
+		std::cout << "\tInput Matrix dims = " << inputBatch.rows() << "X" << inputBatch.cols() << std::endl;
+
+		outputBatch = forwardBatch(inputBatch);
 		if (doBack) {
 			backwardBatch(outputBatch);
 			updateBatch();
 		}
-		lossValue += lossBatch(outputBatch, expected);
+
+		double lossValueBatch = lossBatch(outputBatch, expectedBatch);
+		lossValue += lossValueBatch;
+
+		
+		std::cout << "\tOutput Matrix dims = " << outputBatch.rows() << "X" << outputBatch.cols() << std::endl;
+		if (doBack)
+			std::cout << "\tTrainLossbatch = ";
+		else
+			std::cout << "\tValidationLossbatch = ";
+		std::cout << lossValueBatch << std::endl;
 	}
 }

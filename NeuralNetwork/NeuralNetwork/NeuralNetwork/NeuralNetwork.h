@@ -51,7 +51,7 @@ protected:
 	MatrixXd networkOutputMatrix;
 
 	const double trainingPercent = 70.0;
-	const int MaxNumSteps = 1000;
+	const int MaxNumSteps = 10; // 1000;
 	const int batchsize = -1;
 	int numLayers = 0;
 

@@ -58,7 +58,7 @@ void Input::read()
 
 void Input::return_data(array<int, 2>& inputDim_, array<int, 2>& outputDim_, MatrixXd& inputMatrix_, MatrixXd& outputMatrix_)
 {
-	if (inputMatrix.size() == 0 || outputMatrix.size() == 0)
+	if (inputMatrix.size() == 0)
 	{
 		std::cout << "Matrix has either not been read or has been retured as an rval" << std::endl;
 		std::cout << " reading it again" << std::endl;
@@ -100,8 +100,6 @@ array<int, 2> Input::readCSVFileDim(ifstream& file_)
 
 	file_.clear();
 	file_.seekg(0);
-
-	returnArray[0] = 100;
 
 	return returnArray;
 }
