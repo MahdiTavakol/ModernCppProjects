@@ -4,8 +4,9 @@
 #include <iostream>
 
 
-LayerBatchEfficient::LayerBatchEfficient(const int& batchsize_, const int& inputDim_, const int& outputDim_,
+LayerBatchEfficient::LayerBatchEfficient(Logger& logger_, const int& batchsize_, const int& inputDim_, const int& outputDim_,
 	const ActivationType& activType_, const OptimizerType& optType_, const double& learningRate_) :
+	logger{logger_},
 	batchsize{batchsize_},
 	inputDim{ inputDim_ }, outputDim{ outputDim_ },
 	input{inputDim_, batchsize_}, output{outputDim_,batchsize_},
@@ -62,9 +63,9 @@ LayerBatchEfficient::LayerBatchEfficient(const int& batchsize_, const int& input
 
 }
 
-LayerBatchEfficient::LayerBatchEfficient(const int& inputDim_, const int& outputDim_, const ActivationType& activType_,
+LayerBatchEfficient::LayerBatchEfficient(Logger& logger_, const int& inputDim_, const int& outputDim_, const ActivationType& activType_,
 	const OptimizerType& optType_, const double& learningRate_):
-	LayerBatchEfficient{32,inputDim_,outputDim_,activType_,optType_,learningRate_}
+	LayerBatchEfficient{logger_,32,inputDim_,outputDim_,activType_,optType_,learningRate_}
 {}
 
 void LayerBatchEfficient::initialize()

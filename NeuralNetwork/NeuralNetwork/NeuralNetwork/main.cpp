@@ -9,10 +9,12 @@
 #include "NeuralNetworkMPI.h"
 #include "NeuralNetworkOpenMP.h"
 #include "Optimizers.h"
+#include "Logger.h"
 
 #include <memory>
 #include <string>
 #include <iostream>
+
 
 enum class RunType
 {
@@ -28,25 +30,31 @@ int main(int argc, char** argv)
 
 	std::string trainFile = "data/train.csv";
 	std::string testFile = "data/test.csv";
-	Logger logger{};
+	std::ofstream logFile{ "log.txt" };
+	std::vector<std::reference_wrapper<ostream>> logger_ref =
+	{
+		std::ref(std::cout),
+		std::ref(logFile)
+	};
+	Logger logger{logger_ref};
 
 	RunType runType = RunType::SERIAL;
 	std::unique_ptr<NeuralNetwork> neuralNetworkPtr;
 
-	std::cout << "Initializing the program" << std::endl;
-	std::cout << "Creating the Neural Network" << std::endl;
+	logger << "Initializing the program" << std::endl;
+	logger << "Creating the Neural Network" << std::endl;
 	
 	switch (runType)
 	{
 	case RunType::SERIAL:
 		// trainfiles, n_in (input_cols) , n_out
-		neuralNetworkPtr = std::make_unique<NeuralNetwork>(trainFile,testFile,1,13,32);
+		neuralNetworkPtr = std::make_unique<NeuralNetwork>(logger,trainFile,testFile,1,13,32);
 		break;
 	case RunType::MPI:
-		neuralNetworkPtr = std::make_unique<NeuralNetworkMPI>(trainFile, testFile, 1,13, 32);
+		neuralNetworkPtr = std::make_unique<NeuralNetworkMPI>(logger,trainFile, testFile, 1,13, 32);
 		break;
 	case RunType::OPENMP:
-		neuralNetworkPtr = std::make_unique<NeuralNetworkOpenMP>(trainFile, testFile,1, 13, 32);
+		neuralNetworkPtr = std::make_unique<NeuralNetworkOpenMP>(logger,trainFile, testFile,1, 13, 32);
 		break;
 	default:
 		throw std::invalid_argument("Uknown run type");

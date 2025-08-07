@@ -14,11 +14,11 @@ enum class LossType
 class LastLayerBatchEfficient : public LayerBatchEfficient
 {
 public:
-	LastLayerBatchEfficient(const int& batchsize_,
+	LastLayerBatchEfficient(Logger& logger_, const int& batchsize_,
 		const int& inputDim_, const int& outputDim_,
 		const ActivationType& activType_, const OptimizerType& optType_,
 		const double& learningRate_, const LossType& lossType_);
-	LastLayerBatchEfficient(const int& inputDim_, const int& outputDim_,
+	LastLayerBatchEfficient(Logger& logger_, const int& inputDim_, const int& outputDim_,
 		const ActivationType& activType_, const OptimizerType& optType_,
 		const double& learningRate_, const LossType& lossType_);
 	virtual MatrixXd backward(MatrixXd& expectedValue_) override;

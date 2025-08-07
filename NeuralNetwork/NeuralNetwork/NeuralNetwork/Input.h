@@ -4,6 +4,7 @@
 #include <array>
 #include <string>
 #include <fstream>
+#include "Logger.h"
 
 using std::string;
 using std::array;
@@ -15,8 +16,8 @@ using std::ifstream;
 class Input
 {
 public:
-	Input(const int& numTargetCols_);
-	Input(const string& dataFileName_, const int& numTargetCols_);
+	Input(Logger& logger_, const int& numTargetCols_);
+	Input(Logger& logger_, const string& dataFileName_, const int& numTargetCols_);
 	void resetFileName(const string& dataFileName_);
 	void init();
 	virtual void read();
@@ -27,6 +28,7 @@ public:
 	Input& operator=(Input&&) = delete;
 	~Input() = default;
 protected:
+	Logger& logger;
 	ifstream dataFile;
 	const int numTargetCols;
 	array<int, 2> fileDim;

@@ -1,12 +1,12 @@
 #include "InputMPI.h"
 #include <iostream>
 
-InputMPI::InputMPI(const int& numTargetCols_) :
-	Input{ numTargetCols_ }
+InputMPI::InputMPI(Logger& logger_, const int& numTargetCols_) :
+	Input{logger_, numTargetCols_ }
 {}
 
-InputMPI::InputMPI(const string& dataFileName_, const int& numTargetCols_):
-	Input{dataFileName_,numTargetCols_}
+InputMPI::InputMPI(Logger& logger_, const string& dataFileName_, const int& numTargetCols_):
+	Input{ logger_,dataFileName_,numTargetCols_}
 {
 	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 	MPI_Comm_size(MPI_COMM_WORLD,&size);
@@ -14,7 +14,7 @@ InputMPI::InputMPI(const string& dataFileName_, const int& numTargetCols_):
 
 void InputMPI::read()
 {
-	if (rank == 0) std::cout << "Reading the file" << std::endl;
+	if (rank == 0) logger << "Reading the file" << std::endl;
 	localInputDim = inputDim;
 	localOutputDim = outputDim;
 
@@ -36,5 +36,5 @@ void InputMPI::read()
 	dataFile.seekg(0);        // go back to the beginning
 	readCSVFile(dataFile, inputMatrix, outputMatrix, localInputDim, localOutputDim, inputRange);
 
-	if (rank == 0) std::cout << "Finished reading the file" << std::endl;
+	if (rank == 0) logger << "Finished reading the file" << std::endl;
 }

@@ -1,9 +1,9 @@
 #include "NeuralNetworkMPI.h"
 
-NeuralNetworkMPI::NeuralNetworkMPI(const string& networkInputFileName_, const string& networkTestFileName_, 
+NeuralNetworkMPI::NeuralNetworkMPI(Logger& logger_, const string& networkInputFileName_, const string& networkTestFileName_,
 	const int& numTargetCols_,
 	const int& maxNumLayers_, const int& batchsize_):
-	NeuralNetwork{networkInputFileName_, networkTestFileName_, numTargetCols_, maxNumLayers_ , batchsize_}
+	NeuralNetwork{logger_, networkInputFileName_, networkTestFileName_, numTargetCols_, maxNumLayers_ , batchsize_}
 {
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -11,8 +11,8 @@ NeuralNetworkMPI::NeuralNetworkMPI(const string& networkInputFileName_, const st
 
 void NeuralNetworkMPI::initializeInputPtr()
 {
-	inputPtr = std::make_unique<InputMPI>(networkDataFileName,numTargetCols);
-	testPtr = std::make_unique<InputMPI>(networkTestFileName, 0);
+	inputPtr = std::make_unique<InputMPI>(logger,networkDataFileName,numTargetCols);
+	testPtr = std::make_unique<InputMPI>(logger,networkTestFileName, 0);
 }
 
 void NeuralNetworkMPI::fit()

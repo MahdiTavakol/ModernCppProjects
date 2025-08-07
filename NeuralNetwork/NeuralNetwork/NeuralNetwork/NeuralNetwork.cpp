@@ -5,9 +5,10 @@
 #include <sstream>
 
 
-NeuralNetwork::NeuralNetwork(const string& networkDataFileName_, const string& networkTestFileName_,
+NeuralNetwork::NeuralNetwork(Logger& logger_, const string& networkDataFileName_, const string& networkTestFileName_,
 	const int& numTargetCols_, const int& maxNumLayers_,
 	const int& batchsize_) :
+	logger{logger_},
 	networkDataFileName{networkDataFileName_},
 	networkTestFileName{networkTestFileName_},
 	numTargetCols{numTargetCols_},
@@ -17,8 +18,8 @@ NeuralNetwork::NeuralNetwork(const string& networkDataFileName_, const string& n
 
 void NeuralNetwork::initializeInputPtr()
 {
-	inputPtr = std::make_unique<Input>(networkDataFileName, numTargetCols);
-	testPtr = std::make_unique<Input>(networkTestFileName, 0);
+	inputPtr = std::make_unique<Input>(logger,networkDataFileName, numTargetCols);
+	testPtr = std::make_unique<Input>(logger,networkTestFileName, 0);
 }
 
 void NeuralNetwork::readInputData()
@@ -47,6 +48,7 @@ void NeuralNetwork::readInputData()
 			<< ") and output data ("
 			<< networkOutputDim[1]
 			<< ") are not the same!";
+		logger.print(oss.str());
 		throw std::invalid_argument(oss.str());
 	}
 	Layers.reserve(maxNumLayers);
@@ -67,13 +69,17 @@ void NeuralNetwork::addLayer(const int& inputDim_, const int& outputDim_,
 		* on purpose so that the Layers decides on the default value
 		* avoiding having a mismatch between the two default values
 		*/
-		Layers.push_back(std::make_unique<LayerBatchEfficient>(inputDim_, outputDim_,
+		Layers.push_back(std::make_unique<LayerBatchEfficient>(logger,inputDim_, outputDim_,
 			activType_, optType_, learningRate_));
 	} else if (batchsize > 0) {
-		Layers.push_back(std::make_unique<LayerBatchEfficient>(batchsize,inputDim_, outputDim_, 
+		Layers.push_back(std::make_unique<LayerBatchEfficient>(logger,batchsize,inputDim_, outputDim_, 
 			activType_, optType_, learningRate_));
-	} else
+	}
+	else
+	{
+		logger.print("The batchsize must be > 0");
 		throw std::invalid_argument("The batchsize must be > 0");
+	}
 	numLayers++;
 }
 
@@ -86,11 +92,11 @@ void NeuralNetwork::addLastLayer(const int& inputDim_, const int& outputDim_,
 	int prevLayerOutputDim = Layers.back()->returnInputOutputDims()[1];
 	if (inputDim_ != prevLayerOutputDim) throw std::invalid_argument("Incompatible with the previous layer!");
 	if (batchsize == -1) {
-		Layers.push_back(std::make_unique<LastLayerBatchEfficient>(inputDim_, outputDim_,
+		Layers.push_back(std::make_unique<LastLayerBatchEfficient>(logger,inputDim_, outputDim_,
 			activType_, optType_, learningRate_, lossType_));
 	}
 	else if (batchsize > 0) {
-		Layers.push_back(std::make_unique<LastLayerBatchEfficient>(batchsize, inputDim_, outputDim_,
+		Layers.push_back(std::make_unique<LastLayerBatchEfficient>(logger,batchsize, inputDim_, outputDim_,
 			activType_, optType_, learningRate_, lossType_));
 	}
 	else
@@ -129,17 +135,17 @@ void NeuralNetwork::fit()
 
 	for (int i = 0; i < MaxNumSteps; i++)
 	{
-		std::cout << "Step " << i << std::endl;
+		logger.print("The batchsize must be > 0");
 		double tLossVal  = 0.0;
 		double vLossVal  = 0.0;
 
-		std::cout << "Training data on the training set" << std::endl;
+		logger.print("Training data on the training set");
 		trainBatches(0, numTrainingData, numTrainingBatchs, tLossVal,true);
-		std::cout << "Training loss: " << tLossVal << std::endl;
+		logger << "Training loss: " << tLossVal << std::endl;
 
-		std::cout << "Testing the data on the validating set" << std::endl;
+		logger << "Testing the data on the validating set" << std::endl;
 		trainBatches(numTrainingData, numValidationData, numValidationBatchs, vLossVal,false);
-		std::cout << "Validation loss: " << vLossVal << std::endl;
+		logger << "Validation loss: " << vLossVal << std::endl;
 
 		trainingLoss.push_back(tLossVal);
 		validationLoss.push_back(vLossVal);
@@ -183,12 +189,12 @@ MatrixXd NeuralNetwork::forwardBatch(const MatrixXd& input_)
 {
 	MatrixXd outputMatrixBatch = input_;
 	int i = 0;
-	std::cout << "\tInput Matrix dims for forwardBatch = " << input_.rows() << "X" << input_.cols() << std::endl;
+	logger << "\tInput Matrix dims for forwardBatch = " << input_.rows() << "X" << input_.cols() << std::endl;
 	for (auto& layer : Layers)
 	{
-		std::cout << "\t\tForward on the layer " << i++ << std::endl;
+		logger << "\t\tForward on the layer " << i++ << std::endl;
 		outputMatrixBatch = layer->forward(outputMatrixBatch);
-		std::cout << "\t\tOutputMatrixBatch dims = " << outputMatrixBatch.rows() << "X" << outputMatrixBatch.cols() << std::endl;
+		logger << "\t\tOutputMatrixBatch dims = " << outputMatrixBatch.rows() << "X" << outputMatrixBatch.cols() << std::endl;
 	}
 	return outputMatrixBatch;
 }
@@ -196,12 +202,12 @@ MatrixXd NeuralNetwork::forwardBatch(const MatrixXd& input_)
 void NeuralNetwork::backwardBatch(const MatrixXd& output_)
 {
 	MatrixXd prevDiffBatch = output_;
-	std::cout << "\tInput Matrix dims for backwardBatch = " << output_.rows() << "X" << output_.cols() << std::endl;
+	logger << "\tInput Matrix dims for backwardBatch = " << output_.rows() << "X" << output_.cols() << std::endl;
 	for (int i = numLayers - 1; i >= 0; i--)
 	{
-		std::cout << "\t\tBackward on the layer " << i << std::endl;
+		logger << "\t\tBackward on the layer " << i << std::endl;
 		prevDiffBatch = Layers[i]->backward(prevDiffBatch);
-		std::cout << "\t\tprevDiffBatch dims = " << prevDiffBatch.rows() << "X" << prevDiffBatch.cols() << std::endl;
+		logger << "\t\tprevDiffBatch dims = " << prevDiffBatch.rows() << "X" << prevDiffBatch.cols() << std::endl;
 	}
 }
 
@@ -223,7 +229,7 @@ void NeuralNetwork::trainBatches(const int& firstData, const int& numData, const
 {
 	for (int j = 0; j < numBatchs; j++)
 	{
-		std::cout << "\tWorking on the batch " << j << std::endl;
+		logger << "\tWorking on the batch " << j << std::endl;
 		MatrixXd outputBatch;
 
 		int firstCol = batchsize * j;
@@ -235,7 +241,7 @@ void NeuralNetwork::trainBatches(const int& firstData, const int& numData, const
 		MatrixXd inputBatch = networkInputMatrix.block(0, firstCol, networkInputMatrix.rows(), numCols);
 		MatrixXd expectedBatch = networkOutputMatrix.block(0, firstCol, networkOutputMatrix.rows(), numCols);
 
-		std::cout << "\tInput Matrix dims = " << inputBatch.rows() << "X" << inputBatch.cols() << std::endl;
+		logger << "\tInput Matrix dims = " << inputBatch.rows() << "X" << inputBatch.cols() << std::endl;
 
 		outputBatch = forwardBatch(inputBatch);
 		if (doBack) {
@@ -247,11 +253,11 @@ void NeuralNetwork::trainBatches(const int& firstData, const int& numData, const
 		lossValue += lossValueBatch;
 
 		
-		std::cout << "\tOutput Matrix dims = " << outputBatch.rows() << "X" << outputBatch.cols() << std::endl;
+		logger << "\tOutput Matrix dims = " << outputBatch.rows() << "X" << outputBatch.cols() << std::endl;
 		if (doBack)
-			std::cout << "\tTrainLossbatch = ";
+			logger << "\tTrainLossbatch = ";
 		else
-			std::cout << "\tValidationLossbatch = ";
-		std::cout << lossValueBatch << std::endl;
+			logger << "\tValidationLossbatch = ";
+		logger << lossValueBatch << std::endl;
 	}
 }

@@ -9,6 +9,7 @@
 #include "LastLayerBatchEfficient.h"
 #include "Loss.h"
 #include "Input.h"
+#include "Logger.h"
 
 using std::vector;
 using std::string;
@@ -17,7 +18,7 @@ using std::array;
 class NeuralNetwork
 {
 public:
-	NeuralNetwork(const string& networkDataFileName_, const string& networkTestFileName_,
+	NeuralNetwork(Logger& logger_,  const string& networkDataFileName_, const string& networkTestFileName_,
 		const int& numTargetCols_, const int& maxNumLayers_ = 10,
 		const int& batchsize_ = -1);
 	virtual void initializeInputPtr();
@@ -38,6 +39,8 @@ public:
 
 
 protected:
+	Logger& logger;
+
 	string networkDataFileName;
 	string networkTestFileName;
 	std::unique_ptr<Input> inputPtr;

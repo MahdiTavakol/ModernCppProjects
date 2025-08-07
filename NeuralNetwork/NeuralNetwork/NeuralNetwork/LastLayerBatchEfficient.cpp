@@ -1,11 +1,11 @@
 #include "LastLayerBatchEfficient.h"
 #include <iostream>
 
-LastLayerBatchEfficient::LastLayerBatchEfficient(const int& batchsize_, 
+LastLayerBatchEfficient::LastLayerBatchEfficient(Logger& logger_, const int& batchsize_,
 	const int& inputDim_, const int& outputDim_, 
 	const ActivationType& activType_, const OptimizerType& optType_,
 	const double& learningRate_, const LossType& lossType_):
-	LayerBatchEfficient{batchsize_,inputDim_,outputDim_,activType_,optType_,learningRate_ }, lossType{lossType_}
+	LayerBatchEfficient{logger_,batchsize_,inputDim_,outputDim_,activType_,optType_,learningRate_ }, lossType{lossType_}
 { 
 	switch (lossType)
 	{
@@ -23,10 +23,10 @@ LastLayerBatchEfficient::LastLayerBatchEfficient(const int& batchsize_,
 	}
 }
 
-LastLayerBatchEfficient::LastLayerBatchEfficient(const int& inputDim_, const int& outputDim_,
+LastLayerBatchEfficient::LastLayerBatchEfficient(Logger& logger_, const int& inputDim_, const int& outputDim_,
 	const ActivationType& activType_, const OptimizerType& optType_,
 	const double& learningRate_, const LossType& lossType_):
-	LastLayerBatchEfficient{32,inputDim_, outputDim_, activType_, optType_, learningRate_, lossType_ }
+	LastLayerBatchEfficient{logger_,32,inputDim_, outputDim_, activType_, optType_, learningRate_, lossType_ }
 {}
 
 
@@ -35,7 +35,7 @@ MatrixXd LastLayerBatchEfficient::backward(MatrixXd& expectedValue_)
 	// output = Active(z) = Active(weights * input + bias)
 	// Error check
 	if (activType == ActivationType::SOFTMAX)
-		std::cout << "Warning: The use of softmax with the"
+		logger << "Warning: The use of softmax with the"
 		<< " LastLayerBatchEfficient ignores the non-orthogonal "
 		<< "components of differential of the activation function\n"
 		<< "The special lastlayer designed for this purpose "

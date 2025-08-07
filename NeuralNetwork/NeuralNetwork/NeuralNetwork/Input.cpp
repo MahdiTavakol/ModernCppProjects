@@ -2,17 +2,17 @@
 #include <iostream>
 #include <filesystem>
 
-Input::Input(const int& numTargetCols_): 
-	numTargetCols{ numTargetCols_ }
+Input::Input(Logger& logger_, const int& numTargetCols_):
+	logger{logger_},numTargetCols{ numTargetCols_ }
 {}
 
-Input::Input(const string& dataFileName_, const int& numTargetCols_):
-	dataFile{ dataFileName_ }, numTargetCols{numTargetCols_}
+Input::Input(Logger& logger_, const string& dataFileName_, const int& numTargetCols_):
+	logger{logger_}, dataFile{ dataFileName_ }, numTargetCols{numTargetCols_}
 {
 	std::filesystem::path dataPath{ dataFileName_ };
 	if (!std::filesystem::exists(dataPath))
 		throw std::invalid_argument("Cannot open the file " + dataFileName_);
-	std::cout << "Opening the " << dataFileName_ << std::endl;
+	logger << "Opening the " << dataFileName_ << std::endl;
 }
 
 void Input::resetFileName(const string& dataFileName_)
@@ -38,7 +38,7 @@ void Input::init()
 	outputDim[1] = numTargetCols;
 	if (outputDim[1] > inputDim[1])
 	{
-		std::cout << "Warning: The number of target columns " 
+		logger << "Warning: The number of target columns " 
 			<< outputDim[1] 
 			<< " is larger than the input columns " 
 			<< inputDim[1]
@@ -60,8 +60,8 @@ void Input::return_data(array<int, 2>& inputDim_, array<int, 2>& outputDim_, Mat
 {
 	if (inputMatrix.size() == 0)
 	{
-		std::cout << "Matrix has either not been read or has been retured as an rval" << std::endl;
-		std::cout << " reading it again" << std::endl;
+		logger << "Matrix has either not been read or has been retured as an rval" << std::endl;
+		logger << " reading it again" << std::endl;
 		read();
 	}
 
@@ -74,7 +74,7 @@ void Input::return_data(array<int, 2>& inputDim_, array<int, 2>& outputDim_, Mat
 
 array<int, 2> Input::readCSVFileDim(ifstream& file_)
 {
-	std::cout << "Getting the the file dimensions" << std::endl;
+	logger << "Getting the the file dimensions" << std::endl;
 	if (!file_.is_open())
 		throw std::runtime_error("The input file is closed!");
 
@@ -98,6 +98,8 @@ array<int, 2> Input::readCSVFileDim(ifstream& file_)
 	returnArray[0] = numData;
 	returnArray[1] = dim;
 
+	logger << "There are " << numData << " data points each with " << dim << " features" << std::endl;
+
 	file_.clear();
 	file_.seekg(0);
 
@@ -107,7 +109,7 @@ array<int, 2> Input::readCSVFileDim(ifstream& file_)
 void Input::readCSVFile(ifstream& file_, MatrixXd& inputData_, MatrixXd& outputData_,
 	array<int, 2>& inputDim_, array<int, 2> outputDim_, array<int, 2>& indxRange_)
 {
-	std::cout << "Reading the file" << std::endl;
+	logger << "Reading the file" << std::endl;
 	if (!file_.is_open())
 		throw std::runtime_error("The input file is closed!");
 
@@ -163,14 +165,14 @@ void Input::readCSVFile(ifstream& file_, MatrixXd& inputData_, MatrixXd& outputD
 				outputRow[countReadInt - inputDim_[1] - 1] = readInt;
 			else if (countReadInt > numCols)
 			{
-				std::cout << "Warning: The number of data in this line is larger than the dim" << std::endl;
+				logger << "Warning: The number of data in this line is larger than the dim" << std::endl;
 				break;
 			}
 		}
 		if (countReadInt < numCols)
 			throw std::invalid_argument("Not enough data in the line");
 		if (lineNumber >= numData) {
-			std::cout << "Warning: The number of data in this file is larger " <<
+			logger << "Warning: The number of data in this file is larger " <<
 				"than the number of data read from the first line: " <<
 				"Ignoring the rest!" << std::endl;
 			break;

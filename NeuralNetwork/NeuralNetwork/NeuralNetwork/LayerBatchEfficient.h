@@ -4,6 +4,7 @@
 
 #include "Activations.h"
 #include "Optimizers.h"
+#include "Logger.h"
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
@@ -35,9 +36,9 @@ enum class OptimizerType
 class LayerBatchEfficient
 {
 public:
-	LayerBatchEfficient(const int& batchsize_, const int& inputDim_, const int& outputDim_, const ActivationType& activType_,
+	LayerBatchEfficient(Logger& logger_, const int& batchsize_, const int& inputDim_, const int& outputDim_, const ActivationType& activType_,
 		const OptimizerType& optType_, const double& learningRate_);
-	LayerBatchEfficient(const int& inputDim_, const int& outputDim_, const ActivationType& activType,
+	LayerBatchEfficient(Logger& logger_, const int& inputDim_, const int& outputDim_, const ActivationType& activType,
 		const OptimizerType& optType_, const double& learningRate_);
 	void initialize();
 	MatrixXd forward(const MatrixXd& input_); // outputDim X batchsize --> inputDim X batchsize
@@ -51,6 +52,7 @@ public:
 	void updateGradients(MatrixXd&& gradients_);
 
 protected:
+	Logger& logger;
 	int batchsize;
 
 	int inputDim, outputDim;

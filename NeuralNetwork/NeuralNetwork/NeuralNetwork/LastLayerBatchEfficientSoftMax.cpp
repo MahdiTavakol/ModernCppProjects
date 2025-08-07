@@ -1,17 +1,17 @@
 #include "LastLayerBatchEfficientSoftMax.h"
 #include <iostream>
 
-LastLayerBatchEfficientSoftMax::LastLayerBatchEfficientSoftMax(const int& batchsize_,
+LastLayerBatchEfficientSoftMax::LastLayerBatchEfficientSoftMax(Logger& logger_, const int& batchsize_,
 	const int& inputDim_, const int& outputDim_,
 	const ActivationType& activType_, const OptimizerType& optType_,
 	const double& learningRate_, const LossType& lossType_) :
-	LastLayerBatchEfficient{ batchsize_,inputDim_,outputDim_,activType_,optType_,learningRate_,lossType_ }
+	LastLayerBatchEfficient{logger_, batchsize_,inputDim_,outputDim_,activType_,optType_,learningRate_,lossType_ }
 {}
 
-LastLayerBatchEfficientSoftMax::LastLayerBatchEfficientSoftMax(const int& inputDim_, const int& outputDim_,
+LastLayerBatchEfficientSoftMax::LastLayerBatchEfficientSoftMax(Logger& logger_, const int& inputDim_, const int& outputDim_,
 	const ActivationType& activType_, const OptimizerType& optType_,
 	const double& learningRate_, const LossType& lossType_) :
-	LastLayerBatchEfficient{ 32,inputDim_, outputDim_, activType_, optType_, learningRate_, lossType_ }
+	LastLayerBatchEfficient{logger_,32,inputDim_, outputDim_, activType_, optType_, learningRate_, lossType_ }
 {}
 
 vector<MatrixXd>  LastLayerBatchEfficientSoftMax::active_diff(const MatrixXd& input_)
