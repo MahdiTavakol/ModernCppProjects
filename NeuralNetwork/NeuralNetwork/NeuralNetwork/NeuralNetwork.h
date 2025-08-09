@@ -30,11 +30,11 @@ public:
 	void addLayer(const int& inputDim_, const int& outputDim_,
 		const ActivationType& activType_ = ActivationType::RELU,
 		const OptimizerType& optType_ = OptimizerType::SGD,
-		const double& learningRate_ = 0.1);
+		const double& learningRate_ = 1000);
 	void addLastLayer(const int& inputDim_, const int& outputDim_,
 		const ActivationType& activType_ = ActivationType::RELU,
 		const OptimizerType& optType_ = OptimizerType::SGD,
-		const double& learningRate_ = 0.1,
+		const double& learningRate_ = 1000,
 		const LossType& lossType_ = LossType::MSE);
 	void initializeLayers();
 	virtual void fit();
@@ -62,7 +62,7 @@ protected:
 	MatrixXd networkOutputMatrix;
 
 	const double trainingPercent = 70.0;
-	const int MaxNumSteps = 10; // 1000;
+	const int MaxNumSteps = 2; // 1000;
 	const int batchsize = -1;
 	int numLayers = 0;
 

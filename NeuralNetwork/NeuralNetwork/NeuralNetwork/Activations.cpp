@@ -8,7 +8,12 @@ double ReLu::operator()(const double& x)
 
 double ReLu::diff(const double& x)
 {
-	return (1.0 + x / std::abs(x)) / 2.0;
+	double etol = 1e-6;
+	if (std::abs(x) > etol)
+		return (1.0 + x / std::abs(x)) / 2.0;
+	if (x<0)
+		return -1.0;
+	return 1.0;
 }
 
 MatrixXd ReLu::operator()(const MatrixXd& mat_)
@@ -18,7 +23,13 @@ MatrixXd ReLu::operator()(const MatrixXd& mat_)
 
 MatrixXd ReLu::diff(const MatrixXd& mat_)
 {
-	return mat_.unaryExpr([&](double x) {return (1.0 + x / std::abs(x)) / 2.0; });
+	double etol = 1e-6;
+	return mat_.unaryExpr([&](double x) {
+		if (std::abs(x) > etol)
+			return (1.0 + x / std::abs(x)) / 2.0;
+		if (x<0) return -1.0;
+		return 1.0; 
+	});
 }
 
 double LeakyRelu::operator()(const double& x)

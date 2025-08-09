@@ -55,6 +55,20 @@ MatrixXd LastLayerBatchEfficient::backward(MatrixXd& expectedValue_)
 	std::cout << "output(0,1)=" << output(0, 1) << std::endl;
 	std::cout << "dLoss_dz(0,1)=" << dLoss_dz(0, 1) << std::endl;
 	std::cout << "dLoss_dweights(0,1) inside the layer=" << dLoss_dweights(0, 1) << std::endl;
+	
+	
+	MatrixXd test = lossFunction->diff(expectedValue_, output);
+	double loss_diff_avg = test.sum()/static_cast<double>(test.cols()*test.rows());
+	double expected_avg  = expectedValue_.sum()/static_cast<double>(expectedValue_.cols()*expectedValue_.rows());
+	double dactive_dz_avg = dActive_dz.sum()/static_cast<double>(dActive_dz.cols()*dActive_dz.rows());
+	double dloss_dz_avg = dLoss_dz.sum()/static_cast<double>(dLoss_dz.cols()*dLoss_dz.rows());
+	double input_avg = input.sum()/static_cast<double>(input.cols()*input.rows());
+	double avg = dLoss_dweights.sum()/static_cast<double>(dLoss_dweights.cols()*dLoss_dweights.rows());
+	std::cout << "loss_diff_avg = " << loss_diff_avg << std::endl;
+	std::cout << "expected_avg inside the layer= " << expected_avg << std::endl;
+	std::cout << "Input_avg inside the layer= " << input_avg << std::endl;
+	std::cout << "dloss_dz_avg inside the layer= " << dloss_dz_avg << std::endl;
+	std::cout << "dactive_dz_avg inside the layer= " << dactive_dz_avg << std::endl;
 
 	return prev_diff;
 }
