@@ -110,7 +110,7 @@ array<int, 2> Input::readCSVFileDim(ifstream& file_)
 	file_.clear();
 	file_.seekg(0);
 
-	returnArray[0] = 160;
+	returnArray[0] = 6400;
 
 	return returnArray;
 }

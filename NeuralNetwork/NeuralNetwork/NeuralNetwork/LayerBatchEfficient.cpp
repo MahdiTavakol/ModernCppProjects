@@ -122,6 +122,7 @@ MatrixXd LayerBatchEfficient::forward(const MatrixXd& input_)
 	// needed for the backward step
 	dActive_dz = z.unaryExpr([&](double v) {return activationFunction->diff(v); });
 
+	std::cout << "dActive_dz(0,1)=" << dActive_dz(0, 1) << std::endl;
 	std::cout << "z(0,1)=" << z(0, 1) << std::endl;
 	std::cout << "output(0,1)=" << output(0, 1) << std::endl;
 
@@ -148,6 +149,7 @@ MatrixXd LayerBatchEfficient::backward(MatrixXd& nextDiff_)
 	// previous_diff
 	prev_diff = weights.block(0, 0, weights.rows(), weights.cols() - 1).transpose() * dLoss_dz;
 
+	std::cout << "dActive_dz(0,1)=" << dActive_dz(0, 1) << std::endl;
 	std::cout << "nextDiff_(0,1)=" << nextDiff_(0, 1) << std::endl;
 	std::cout << "dLoss_dz(0,1)=" << dLoss_dz(0, 1) << std::endl;
 	std::cout << "dLoss_dweights(0,1) inside the layer=" << dLoss_dweights(0, 1) << std::endl;

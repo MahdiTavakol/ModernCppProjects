@@ -29,6 +29,7 @@ set(SOURCES
     LastLayerBatchEfficient.cpp
     LayerBatchEfficient.cpp
     Loss.cpp
+    MinMaxScaler.cpp
     NeuralNetwork.cpp
     NeuralNetworkMPI.cpp
     NeuralNetworkOpenMP.cpp

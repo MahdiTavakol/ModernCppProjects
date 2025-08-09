@@ -70,7 +70,8 @@ int main(int argc, char** argv)
 
 	neuralNetworkPtr->initializeInputPtr();
 	neuralNetworkPtr->readInputData();
-	neuralNetworkPtr->addLayer(100, 2);
+	neuralNetworkPtr->addLayer(100, 50);
+	neuralNetworkPtr->addLayer(50, 2);
 	neuralNetworkPtr->addLastLayer(2, 1);
 	neuralNetworkPtr->initializeLayers();
 	neuralNetworkPtr->fit();
