@@ -10,6 +10,7 @@
 #include "Loss.h"
 #include "Input.h"
 #include "Logger.h"
+#include "MinMaxScaler.h"
 
 using std::vector;
 using std::string;
@@ -43,6 +44,9 @@ protected:
 	// output parameters
 	Logger& logger;
 	ofstream trainLossFile, validationLossFile;
+
+	// Scaling function
+	MinMaxScaler minMaxScaler;
 
 
 	string networkDataFileName;

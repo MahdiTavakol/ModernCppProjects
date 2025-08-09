@@ -136,6 +136,7 @@
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="Loss.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MinMaxScaler.cpp" />
     <ClCompile Include="NeuralNetwork.cpp" />
     <ClCompile Include="NeuralNetworkMPI.cpp" />
     <ClCompile Include="NeuralNetworkOpenMP.cpp" />
@@ -151,6 +152,7 @@
     <ClInclude Include="LayerBatchEfficient.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="Loss.h" />
+    <ClInclude Include="MinMaxScaler.h" />
     <ClInclude Include="NeuralNetwork.h" />
     <ClInclude Include="NeuralNetworkMPI.h" />
     <ClInclude Include="NeuralNetworkOpenMP.h" />

@@ -59,6 +59,12 @@ void NeuralNetwork::readInputData()
 		logger.print(oss.str());
 		throw std::invalid_argument(oss.str());
 	}
+
+	// Scaling the data
+	networkInputMatrix = minMaxScaler(networkInputMatrix);
+	networkOutputMatrix = minMaxScaler(networkOutputMatrix);
+
+	// reserving the layers
 	Layers.reserve(maxNumLayers);
 }
 

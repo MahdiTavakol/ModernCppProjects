@@ -57,6 +57,9 @@
     <ClCompile Include="Logger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MinMaxScaler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Neuron.h">
@@ -97,6 +100,9 @@
     </ClInclude>
     <ClInclude Include="Logger.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MinMaxScaler.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
