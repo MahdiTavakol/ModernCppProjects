@@ -2,12 +2,13 @@
 #include <iostream>
 #include <filesystem>
 
-Input::Input(Logger& logger_, const int& numTargetCols_):
-	logger{logger_},numTargetCols{ numTargetCols_ }
-{}
+Input::Input(Logger& logger_, const int& numTargetCols_) :
+	logger{ logger_ }, numTargetCols{ numTargetCols_ }
+{
+}
 
-Input::Input(Logger& logger_, const string& dataFileName_, const int& numTargetCols_):
-	logger{logger_}, dataFile{ dataFileName_ }, numTargetCols{numTargetCols_}
+Input::Input(Logger& logger_, const string& dataFileName_, const int& numTargetCols_) :
+	logger{ logger_ }, dataFile{ dataFileName_ }, numTargetCols{ numTargetCols_ }
 {
 	std::filesystem::path dataPath{ dataFileName_ };
 	if (!std::filesystem::exists(dataPath))
@@ -39,9 +40,9 @@ void Input::init()
 	if (outputDim[1] > inputDim[1])
 	{
 		if (logger.log_level >= LOG_LEVEL_WARN)
-			logger << "Warning: The number of target columns " 
-			<< outputDim[1] 
-			<< " is larger than the input columns " 
+			logger << "Warning: The number of target columns "
+			<< outputDim[1]
+			<< " is larger than the input columns "
 			<< inputDim[1]
 			<< "!"
 			<< std::endl;
@@ -50,7 +51,7 @@ void Input::init()
 
 void Input::read()
 {
-	inputMatrix.resize(inputDim[0],inputDim[1]);
+	inputMatrix.resize(inputDim[0], inputDim[1]);
 	outputMatrix.resize(outputDim[0], outputDim[1]);
 	dataFile.clear();         // just to be extra safe
 	dataFile.seekg(0);        // reset again before full read
@@ -83,20 +84,20 @@ array<int, 2> Input::readCSVFileDim(ifstream& file_)
 	if (!file_.is_open())
 		throw std::runtime_error("The input file is closed!");
 
-	string line,token;
+	string line, token;
 	int numData = 0, dim = 0;
 	array<int, 2> returnArray;
 	VectorXd dataLineI;
 
 	std::getline(file_, line);
 	std::stringstream iss(line);
-	
+
 	while (std::getline(iss, token, ',')) {
 		dim++;
 	}
-		
+
 	dim--; // The first col is the id
-	
+
 	while (std::getline(file_, line))
 		numData++;
 
@@ -108,6 +109,8 @@ array<int, 2> Input::readCSVFileDim(ifstream& file_)
 
 	file_.clear();
 	file_.seekg(0);
+
+	returnArray[0] = 160;
 
 	return returnArray;
 }
@@ -130,7 +133,7 @@ void Input::readCSVFile(ifstream& file_, MatrixXd& inputData_, MatrixXd& outputD
 	if (indxRange_[0] >= fileDim[0] ||
 		indxRange_[1] >= fileDim[0] ||
 		indxRange_[0] < 0 ||
-		indxRange_[1] < 0 )
+		indxRange_[1] < 0)
 		throw std::invalid_argument("The index is out of range");
 
 	// Skipping the header line.
@@ -148,12 +151,12 @@ void Input::readCSVFile(ifstream& file_, MatrixXd& inputData_, MatrixXd& outputD
 		int readInt;
 		std::string readIntStr;
 		int countReadInt = 0;
-		RowVectorXd inputRow{inputDim_[1]};
-		RowVectorXd outputRow{outputDim_[1]};
+		RowVectorXd inputRow{ inputDim_[1] };
+		RowVectorXd outputRow{ outputDim_[1] };
 		std::stringstream iss(line);
 		std::ostringstream oss;
-		std::getline(iss,readIntStr,',');
-		while (std::getline(iss,readIntStr,','))
+		std::getline(iss, readIntStr, ',');
+		while (std::getline(iss, readIntStr, ','))
 		{
 			try
 			{
@@ -194,4 +197,3 @@ void Input::readCSVFile(ifstream& file_, MatrixXd& inputData_, MatrixXd& outputD
 		outputData_.row(lineNumber - indxRange_[0]) = outputRow;
 	}
 }
-

@@ -2,32 +2,33 @@
 #include <iostream>
 
 LastLayerBatchEfficient::LastLayerBatchEfficient(Logger& logger_, const int& batchsize_,
-	const int& inputDim_, const int& outputDim_, 
+	const int& inputDim_, const int& outputDim_,
 	const ActivationType& activType_, const OptimizerType& optType_,
-	const double& learningRate_, const LossType& lossType_):
-	LayerBatchEfficient{logger_,batchsize_,inputDim_,outputDim_,activType_,optType_,learningRate_ }, lossType{lossType_}
-{ 
+	const double& learningRate_, const LossType& lossType_) :
+	LayerBatchEfficient{ logger_,batchsize_,inputDim_,outputDim_,activType_,optType_,learningRate_ }, lossType{ lossType_ }
+{
 	switch (lossType)
 	{
-		case LossType::MSE:
-			lossFunction = std::make_unique<MSE>();
-			break;
-		case LossType::MAE:
-			lossFunction = std::make_unique<MAE>();
-			break;
-		case LossType::Huber:
-			lossFunction = std::make_unique<Huber>();
-			break;
-		default:
-			throw std::invalid_argument("Wrong loss function type");
+	case LossType::MSE:
+		lossFunction = std::make_unique<MSE>();
+		break;
+	case LossType::MAE:
+		lossFunction = std::make_unique<MAE>();
+		break;
+	case LossType::Huber:
+		lossFunction = std::make_unique<Huber>();
+		break;
+	default:
+		throw std::invalid_argument("Wrong loss function type");
 	}
 }
 
 LastLayerBatchEfficient::LastLayerBatchEfficient(Logger& logger_, const int& inputDim_, const int& outputDim_,
 	const ActivationType& activType_, const OptimizerType& optType_,
-	const double& learningRate_, const LossType& lossType_):
-	LastLayerBatchEfficient{logger_,32,inputDim_, outputDim_, activType_, optType_, learningRate_, lossType_ }
-{}
+	const double& learningRate_, const LossType& lossType_) :
+	LastLayerBatchEfficient{ logger_,32,inputDim_, outputDim_, activType_, optType_, learningRate_, lossType_ }
+{
+}
 
 
 MatrixXd LastLayerBatchEfficient::backward(MatrixXd& expectedValue_)
@@ -48,10 +49,17 @@ MatrixXd LastLayerBatchEfficient::backward(MatrixXd& expectedValue_)
 	// previous_diff
 	prev_diff = weights.block(0, 0, weights.rows(), weights.cols() - 1).transpose() * dLoss_dz;
 
+	std::cout << "dActive_dz(0,1)=" << dActive_dz(0, 1) << std::endl;
+	std::cout << "lossFunction->diff(expectedValue_, output)(0,1)=" << lossFunction->diff(expectedValue_, output)(0, 1) << std::endl;
+	std::cout << "expectedValue_(0,1)=" << expectedValue_(0, 1) << std::endl;
+	std::cout << "output(0,1)=" << output(0, 1) << std::endl;
+	std::cout << "dLoss_dz(0,1)=" << dLoss_dz(0, 1) << std::endl;
+	std::cout << "dLoss_dweights(0,1) inside the layer=" << dLoss_dweights(0, 1) << std::endl;
+
 	return prev_diff;
 }
 
-double LastLayerBatchEfficient::loss(const MatrixXd& output_,const MatrixXd& expectedValue_)
+double LastLayerBatchEfficient::loss(const MatrixXd& output_, const MatrixXd& expectedValue_)
 {
-	return (*lossFunction)(output_,expectedValue_);
+	return (*lossFunction)(output_, expectedValue_);
 }

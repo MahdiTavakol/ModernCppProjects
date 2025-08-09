@@ -6,15 +6,15 @@
 
 LayerBatchEfficient::LayerBatchEfficient(Logger& logger_, const int& batchsize_, const int& inputDim_, const int& outputDim_,
 	const ActivationType& activType_, const OptimizerType& optType_, const double& learningRate_) :
-	logger{logger_},
-	batchsize{batchsize_},
+	logger{ logger_ },
+	batchsize{ batchsize_ },
 	inputDim{ inputDim_ }, outputDim{ outputDim_ },
-	input{inputDim_, batchsize_}, output{outputDim_,batchsize_},
-	dActive_dz{outputDim_,batchsize_},
-	weights{outputDim_,inputDim_ + 1}, dLoss_dweights{outputDim_, inputDim_ + 1},
-	prev_diff{inputDim_,batchsize_},
-	activType{ activType_ }, 
-	optType{ optType_ }, learningRate {learningRate_}
+	input{ inputDim_, batchsize_ }, output{ outputDim_,batchsize_ },
+	dActive_dz{ outputDim_,batchsize_ },
+	weights{ outputDim_,inputDim_ + 1 }, dLoss_dweights{ outputDim_, inputDim_ + 1 },
+	prev_diff{ inputDim_,batchsize_ },
+	activType{ activType_ },
+	optType{ optType_ }, learningRate{ learningRate_ }
 {
 	switch (activType)
 	{
@@ -64,9 +64,10 @@ LayerBatchEfficient::LayerBatchEfficient(Logger& logger_, const int& batchsize_,
 }
 
 LayerBatchEfficient::LayerBatchEfficient(Logger& logger_, const int& inputDim_, const int& outputDim_, const ActivationType& activType_,
-	const OptimizerType& optType_, const double& learningRate_):
-	LayerBatchEfficient{logger_,32,inputDim_,outputDim_,activType_,optType_,learningRate_}
-{}
+	const OptimizerType& optType_, const double& learningRate_) :
+	LayerBatchEfficient{ logger_,32,inputDim_,outputDim_,activType_,optType_,learningRate_ }
+{
+}
 
 void LayerBatchEfficient::initialize()
 {
@@ -114,12 +115,15 @@ MatrixXd LayerBatchEfficient::forward(const MatrixXd& input_)
 	// only resize if it necessary
 	if (output.rows() != z.rows() ||
 		output.cols() != z.cols())
-	output.resize(z.rows(),z.cols());
+		output.resize(z.rows(), z.cols());
 
 	output = z.unaryExpr([&](double v) {return (*activationFunction)(v); });
 
 	// needed for the backward step
 	dActive_dz = z.unaryExpr([&](double v) {return activationFunction->diff(v); });
+
+	std::cout << "z(0,1)=" << z(0, 1) << std::endl;
+	std::cout << "output(0,1)=" << output(0, 1) << std::endl;
 
 	return output;
 }
@@ -134,15 +138,19 @@ MatrixXd LayerBatchEfficient::backward(MatrixXd& nextDiff_)
 	// 2 --> dLoss_dbiass (to optimize this layer bias)
 	// 3 --> dLoss_dinput (prev_diff : to be passed as the nextDiff_ for the previous layer)
 	// dActivation_dz has been calculated in the forward step
-	
+
 	// dLoss_dz (z is the output before the activation function is applied)
 	MatrixXd dLoss_dz = nextDiff_.cwiseProduct(dActive_dz);
 
-	dLoss_dweights.block(0,0, weights.rows(), weights.cols() - 1) = dLoss_dz * input.transpose();
+	dLoss_dweights.block(0, 0, weights.rows(), weights.cols() - 1) = dLoss_dz * input.transpose();
 	dLoss_dweights.block(0, weights.cols() - 1, weights.rows(), 1) = dLoss_dz.rowwise().sum();
 
 	// previous_diff
 	prev_diff = weights.block(0, 0, weights.rows(), weights.cols() - 1).transpose() * dLoss_dz;
+
+	std::cout << "nextDiff_(0,1)=" << nextDiff_(0, 1) << std::endl;
+	std::cout << "dLoss_dz(0,1)=" << dLoss_dz(0, 1) << std::endl;
+	std::cout << "dLoss_dweights(0,1) inside the layer=" << dLoss_dweights(0, 1) << std::endl;
 
 	return prev_diff;
 }
@@ -191,5 +199,4 @@ void LayerBatchEfficient::updateGradients(MatrixXd&& gradients_)
 {
 	dLoss_dweights = std::move(gradients_);
 }
-
 

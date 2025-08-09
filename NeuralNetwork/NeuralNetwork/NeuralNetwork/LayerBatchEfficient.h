@@ -50,6 +50,9 @@ public:
 	array<int, 2> returnInputOutputDims();
 	array<int, 2> returnGradientSize();
 	void updateGradients(MatrixXd&& gradients_);
+	double returnDLoss_deweights(const int& i, const int& j) {
+		return dLoss_dweights(i, j);
+	}
 
 protected:
 	Logger& logger;
