@@ -18,6 +18,9 @@ LayerBatchEfficient::LayerBatchEfficient(Logger& logger_, const int& batchsize_,
 {
 	switch (activType)
 	{
+	case ActivationType::NONE:
+		activationFunction = std::make_unique<None>();
+		break;
 	case ActivationType::RELU:
 		activationFunction = std::make_unique<ReLu>();
 		break;
@@ -72,31 +75,39 @@ LayerBatchEfficient::LayerBatchEfficient(Logger& logger_, const int& inputDim_, 
 void LayerBatchEfficient::initialize()
 {
 	double mean, std;
+	int type = 0;
 	switch (activType)
 	{
 	case ActivationType::TANH:
+		type = 1;
 	case ActivationType::SIGMOID:
 	{
 		mean = -std::sqrt(6.0 / static_cast<double>(inputDim + outputDim));
 		std = std::sqrt(6.0 / static_cast<double>(inputDim + outputDim));
+		type = 2;
 		break;
 	}
+	case ActivationType::NONE:
 	case ActivationType::RELU:
+		type = 3;
 	case ActivationType::LEAKYRELU:
 	{
 		mean = 0.0;
 		std = 2.0 / inputDim;
+		type = 4;
 		break;
 	}
 	case ActivationType::SELU:
 	{
 		mean = 0.0;
 		std = 1.0 / inputDim;
+		type = 5;
 		break;
 	}
 	default:
 		throw std::invalid_argument("Unknown activation funtion type!");
 	}
+	std::cout << "Activation function type= " << type << " and inptDim = " << inputDim << std::endl;
 	weightInitialization(mean, std);
 }
 
@@ -122,9 +133,20 @@ MatrixXd LayerBatchEfficient::forward(const MatrixXd& input_)
 	// needed for the backward step
 	dActive_dz = z.unaryExpr([&](double v) {return activationFunction->diff(v); });
 
-	std::cout << "dActive_dz(0,1)=" << dActive_dz(0, 1) << std::endl;
-	std::cout << "z(0,1)=" << z(0, 1) << std::endl;
-	std::cout << "output(0,1)=" << output(0, 1) << std::endl;
+
+	std::cout << "Inside the forward for the layer" << std::endl;
+	double linear_avg  = linear.sum()/static_cast<double>(linear.cols()*linear.rows());
+	double bias_avg = bias.sum()/static_cast<double>(bias.cols()*bias.rows());
+	double z_avg = z.sum()/static_cast<double>(z.cols()*z.rows());
+	double input_avg = input.sum()/static_cast<double>(input.cols()*input.rows());
+	double dActive_dz_avg = dActive_dz.sum()/static_cast<double>(dActive_dz.cols()*dActive_dz.rows());
+	double weights_avg = weights.sum()/static_cast<double>(weights.cols()*weights.rows());
+	std::cout << "linear_avg inside the layer= " << linear_avg << std::endl;
+	std::cout << "bias_avg inside the layer= " << bias_avg << std::endl;
+	std::cout << "z_avg inside the layer= " << z_avg << std::endl;
+	std::cout << "input_avg inside the layer= " << input_avg << std::endl;
+	std::cout << "dActive_dz_avg inside the layer= " << dActive_dz_avg << std::endl;
+	std::cout << "weights_avg inside the layer= " << weights_avg << std::endl;
 
 	return output;
 }
@@ -149,10 +171,9 @@ MatrixXd LayerBatchEfficient::backward(MatrixXd& nextDiff_)
 	// previous_diff
 	prev_diff = weights.block(0, 0, weights.rows(), weights.cols() - 1).transpose() * dLoss_dz;
 
-	std::cout << "dActive_dz(0,1)=" << dActive_dz(0, 1) << std::endl;
-	std::cout << "nextDiff_(0,1)=" << nextDiff_(0, 1) << std::endl;
-	std::cout << "dLoss_dz(0,1)=" << dLoss_dz(0, 1) << std::endl;
+
 	
+	std::cout << "Inside the backward for the layer" << std::endl;
 	double nextdiff_avg  = nextDiff_.sum()/static_cast<double>(nextDiff_.cols()*nextDiff_.rows());
 	double dactive_dz_avg = dActive_dz.sum()/static_cast<double>(dActive_dz.cols()*dActive_dz.rows());
 	double dloss_dz_avg = dLoss_dz.sum()/static_cast<double>(dLoss_dz.cols()*dLoss_dz.rows());
@@ -179,7 +200,12 @@ void LayerBatchEfficient::weightInitialization(const double& mean_, const double
 	std::mt19937_64 gen{ rd() };
 	std::normal_distribution<double> dist{ mean_, std_ };
 
-	weights.unaryExpr([&dist, &gen](const double v) {return dist(gen); });
+	weights = weights.unaryExpr([&dist, &gen](const double v) {return dist(gen); });
+	
+	
+	std::cout << "Inside the weights initialization function" << std::endl;
+	double weights_avg = weights.sum(); // /static_cast<double>(weights.cols()*weights.rows());
+	std::cout << "weights_sum inside the layer= " << weights_avg << std::endl;
 }
 
 MatrixXd&& LayerBatchEfficient::moveGradients()

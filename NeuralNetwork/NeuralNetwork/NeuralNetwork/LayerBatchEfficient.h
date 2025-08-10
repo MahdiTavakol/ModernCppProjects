@@ -13,6 +13,7 @@ using std::array;
 
 enum class ActivationType
 {
+	NONE,
 	RELU,
 	LEAKYRELU,
 	SELU,

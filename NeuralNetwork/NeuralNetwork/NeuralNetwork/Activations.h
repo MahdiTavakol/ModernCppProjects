@@ -17,6 +17,15 @@ public:
 	virtual MatrixXd diff(const MatrixXd& mat_) = 0;
 };
 
+class None final : public Activation
+{
+public:
+	double operator()(const double& x) override;
+	double diff(const double& x) override;
+	MatrixXd operator()(const MatrixXd& mat_) override;
+	virtual MatrixXd diff(const MatrixXd& mat_) override;
+};
+
 class ReLu final : public Activation
 {
 public:

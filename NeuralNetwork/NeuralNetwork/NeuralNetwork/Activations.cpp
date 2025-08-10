@@ -1,6 +1,26 @@
 #include "Activations.h"
 #include <iostream>
 
+double None::operator()(const double& x)
+{
+	return x;
+}
+
+double None::diff(const double& x)
+{
+	return 1.0;
+}
+
+MatrixXd None::operator()(const MatrixXd& mat_)
+{
+	return mat_;
+}
+
+MatrixXd None::diff(const MatrixXd& mat_)
+{
+	return mat_.unaryExpr([&](double x) {return 1.0;});
+}
+
 double ReLu::operator()(const double& x)
 {
 	return (x + std::abs(x)) / 2.0;

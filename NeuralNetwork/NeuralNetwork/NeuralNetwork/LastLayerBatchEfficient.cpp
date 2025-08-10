@@ -49,12 +49,6 @@ MatrixXd LastLayerBatchEfficient::backward(MatrixXd& expectedValue_)
 	// previous_diff
 	prev_diff = weights.block(0, 0, weights.rows(), weights.cols() - 1).transpose() * dLoss_dz;
 
-	std::cout << "dActive_dz(0,1)=" << dActive_dz(0, 1) << std::endl;
-	std::cout << "lossFunction->diff(expectedValue_, output)(0,1)=" << lossFunction->diff(expectedValue_, output)(0, 1) << std::endl;
-	std::cout << "expectedValue_(0,1)=" << expectedValue_(0, 1) << std::endl;
-	std::cout << "output(0,1)=" << output(0, 1) << std::endl;
-	std::cout << "dLoss_dz(0,1)=" << dLoss_dz(0, 1) << std::endl;
-	std::cout << "dLoss_dweights(0,1) inside the layer=" << dLoss_dweights(0, 1) << std::endl;
 	
 	
 	MatrixXd test = lossFunction->diff(expectedValue_, output);
