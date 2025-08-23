@@ -7,6 +7,11 @@ NeuralNetworkMPI::NeuralNetworkMPI(Logger& logger_, const string& networkInputFi
 {
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
+	
+	if (rank == 0)
+		fOutputMode = AVG;
+	else
+		fOutputMode = 0;
 }
 
 void NeuralNetworkMPI::initializeInputPtr()
@@ -27,9 +32,33 @@ void NeuralNetworkMPI::fit()
 	validationLoss.reserve(MaxNumSteps);
 
 	int numStepsTrainLossDownValidLossUp = 0;
+	
+	auto header_lambda = [&](ofstream& file, const int& numBatchs)
+		{
+			file << "Step";
+			if (fOutputMode & PERBATCH) {
+				for (int i = 0; i < numBatchs; i++)
+					file << ",Batch-" << i;
+			}
+			file << ",All-batches";
+			file << std::endl;
+		};
+	auto print_step = [&](ofstream& file, const int& i)
+		{
+			file << i;
+		};
+	if ((fOutputMode & AVG) || (fOutputMode & PERBATCH) && (rank == 0)) {
+		header_lambda(trainLossFile, numTrainingBatchs);
+		header_lambda(validationLossFile, numValidationBatchs);
+	}
 
 	for (int i = 0; i < MaxNumSteps; i++)
 	{
+		if ((fOutputMode & AVG) || (fOutputMode & PERBATCH) && (rank == 0)) {
+			print_step(trainLossFile, i);
+			print_step(validationLossFile, i);
+		}
+		
 		std::array<double, 2> lossLocal;
 		std::array<double, 2> loss;
 
@@ -38,6 +67,8 @@ void NeuralNetworkMPI::fit()
 		trainBatches(numTrainingData, numValidationData, numValidationBatchs, lossLocal[1], false);
 
 		MPI_Allreduce(lossLocal.data(), loss.data(), 2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+		loss[0] /= static_cast<int>(size);
+		loss[1] /= static_cast<int>(size);
 
 		trainingLoss.push_back(loss[0]);
 		validationLoss.push_back(loss[1]);
