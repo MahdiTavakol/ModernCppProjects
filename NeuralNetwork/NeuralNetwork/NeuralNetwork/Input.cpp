@@ -104,7 +104,6 @@ array<int, 2> Input::readCSVFileDim(ifstream& file_)
 	returnArray[0] = numData;
 	returnArray[1] = dim;
 	
-	returnArray[0] = 10000;
 
 	if (logger.log_level >= LOG_LEVEL_INFO)
 		logger << "There are " << numData << " data points each with " << dim << " features" << std::endl;

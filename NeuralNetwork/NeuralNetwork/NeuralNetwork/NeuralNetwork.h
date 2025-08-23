@@ -86,5 +86,5 @@ protected:
 	vector<double> trainingLoss;
 	vector<double> validationLoss;
 
-	int fOutputMode = PERBATCH | AVG;
+	int fOutputMode = AVG;
 };

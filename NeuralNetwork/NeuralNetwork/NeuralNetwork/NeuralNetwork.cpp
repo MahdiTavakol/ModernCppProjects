@@ -157,8 +157,10 @@ void NeuralNetwork::fit()
 	auto header_lambda = [&](ofstream& file, const int& numBatchs)
 		{
 			file << "Step";
-			for (int i = 0; i < numBatchs; i++)
-				file << ",Batch-" << i;
+			if (fOutputMode & PERBATCH) {
+				for (int i = 0; i < numBatchs; i++)
+					file << ",Batch-" << i;
+			}
 			file << ",All-batches";
 			file << std::endl;
 		};
