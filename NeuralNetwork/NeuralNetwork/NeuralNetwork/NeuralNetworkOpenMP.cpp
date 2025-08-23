@@ -112,7 +112,7 @@ void NeuralNetworkOpenMP::trainBatches(const int& firstData_, const int& numData
 				for (auto& layer : Layers)
 					layer->update();
 			}
-			lossVal += lossBatch(outputBatch, expected);
+			//lossVal += lossBatch(outputBatch, expected);
 		}
 	}
 

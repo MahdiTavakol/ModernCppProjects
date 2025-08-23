@@ -4,31 +4,31 @@
 double MSE::operator()(const MatrixXd& output_, const MatrixXd& real_)
 {
 	MatrixXd difference = output_ - real_;
-	return difference.array().square().sum() / output_.size();
+	return difference.array().square().mean();
 }
 
 MatrixXd MSE::diff(const MatrixXd& output_, const MatrixXd& real_)
 {
-	MatrixXd difference = (2.0 / output_.size()) * (output_ - real_);
+	MatrixXd difference = 2.0 * (output_ - real_)/output_.size();
 	return difference;
 }
 
 double MAE::operator()(const MatrixXd& output_, const MatrixXd& real_)
 {
 	MatrixXd difference = output_ - real_;
-	return difference.array().abs().sum() / output_.size();
+	return difference.array().abs().mean();
 }
 
 MatrixXd MAE::diff(const MatrixXd& output_, const MatrixXd& real_)
 {
-	MatrixXd difference = (output_ - real_).unaryExpr([&](double v) {return v / std::abs(v); }) / output_.size();
+	MatrixXd difference = (output_ - real_).unaryExpr([&](double v) {return v / std::abs(v); })/output_.size();
 	return difference;
 }
 
 double Huber::operator()(const MatrixXd& output_, const MatrixXd& real_)
 {
 	MatrixXd difference = (output_ - real_).unaryExpr([&](double v) {return lFunction(v); });
-	return difference.array().sum()/output_.size();
+	return difference.array().sum();
 }
 
 MatrixXd Huber::diff(const MatrixXd& output_, const MatrixXd& real_)

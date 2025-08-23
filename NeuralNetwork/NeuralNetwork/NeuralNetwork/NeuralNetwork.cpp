@@ -61,8 +61,9 @@ void NeuralNetwork::readInputData()
 	}
 
 	// Scaling the data
-	networkInputMatrix = minMaxScaler(networkInputMatrix);
-	networkOutputMatrix = minMaxScaler(networkOutputMatrix);
+	scaler = std::make_unique<ZScoreScaler>();
+	networkInputMatrix = (*scaler)(networkInputMatrix);
+	//networkOutputMatrix = (*scaler)(networkOutputMatrix);
 
 	// reserving the layers
 	Layers.reserve(maxNumLayers);
@@ -123,15 +124,20 @@ void NeuralNetwork::addLastLayer(const int& inputDim_, const int& outputDim_,
 void NeuralNetwork::initializeLayers()
 {
 	// Checking the last layer type
-	LayerBatchEfficient* LastLayerRawPtr = Layers.back().get();
-	if (!(dynamic_cast<LastLayerBatchEfficient*>(LastLayerRawPtr)))
-	{
-		throw std::invalid_argument("The last layer must be of type LastLayerBatchEfficient!");
-	}
+	//LayerBatchEfficient* LastLayerRawPtr = Layers.back().get();
+	//if (!(dynamic_cast<LastLayerBatchEfficient*>(LastLayerRawPtr)))
+	//{
+	//	throw std::invalid_argument("The last layer must be of type LastLayerBatchEfficient!");
+	//}
 
+	if (logger.log_level >= LOG_LEVEL_INFO)
+		logger << "Initializing layers" << std::endl;
 	// Initializing the weights for each layer 
+	int layerNumber = 0;
 	for (auto& layer : Layers)
 	{
+		if (logger.log_level >= LOG_LEVEL_DEBUG)
+			logger << "Initializing the layer " << ++layerNumber << std::endl;
 		layer->initialize();
 	}
 }
@@ -146,6 +152,7 @@ void NeuralNetwork::fit()
 
 	trainingLoss.reserve(MaxNumSteps);
 	validationLoss.reserve(MaxNumSteps);
+	
 
 	auto header_lambda = [&](ofstream& file, const int& numBatchs)
 		{
@@ -190,8 +197,10 @@ void NeuralNetwork::fit()
 		trainingLoss.push_back(tLossVal);
 		validationLoss.push_back(vLossVal);
 		//These two should be replaces with an instance of the Logger
-		trainLossFile << "," << tLossVal << endl;
-		validationLossFile << "," << vLossVal << endl;
+		if (fOutputMode & AVG) {
+			trainLossFile << "," << tLossVal << endl;
+			validationLossFile << "," << vLossVal << endl;
+		}
 
 		if (!trainingLoss.empty() && tLossVal < trainingLoss.back() && vLossVal > validationLoss.back())
 			numStepsTrainLossDownValidLossUp;
@@ -275,37 +284,34 @@ void NeuralNetwork::updateBatch()
 			double testdLoss_deweights = layer->returnDLoss_deweights(0, 1);
 			logger << "\t\t\tdLoss_dweights(0,1)=" << testdLoss_deweights << std::endl;
 		}
-
 	}
-}
-
-double NeuralNetwork::lossBatch(const MatrixXd& output_, const MatrixXd& expected_)
-{
-
-	LastLayerBatchEfficient* LastLayerRawPtr = dynamic_cast<LastLayerBatchEfficient*> (Layers.back().get());
-	if (!LastLayerRawPtr) throw std::runtime_error("The last layer type is wrong!");
-	return LastLayerRawPtr->loss(output_, expected_);
 }
 
 void NeuralNetwork::trainBatches(const int& firstData, const int& numData, const int& numBatchs, double& lossValue, const bool& doBack)
 {
+	lossValue = 0.0;
+	
+	LastLayerBatchEfficient* LastLayerRawPtr = dynamic_cast<LastLayerBatchEfficient*> (Layers.back().get());
+	if (!LastLayerRawPtr) throw std::runtime_error("The last layer type is wrong!");
+	
 	for (int j = 0; j < numBatchs; j++)
 	{
 		if (logger.log_level >= LOG_LEVEL_TRACE)
 			logger << "\t\tWorking on the batch " << j << std::endl;
 		MatrixXd outputBatch;
 
-		int firstCol = batchsize * j;
-		int lastCol = firstCol + batchsize < numData ? firstCol + batchsize : numData;
-		firstCol += firstData;
-		lastCol += firstData;
+		int firstCol = firstData + batchsize * j;
+		if (firstCol-firstData >= numData) return;
+		int lastCol = std::min(firstCol+batchsize,numData+firstData);
 		int numCols = lastCol - firstCol;
 
 		MatrixXd inputBatch = networkInputMatrix.block(0, firstCol, networkInputMatrix.rows(), numCols);
 		MatrixXd expectedBatch = networkOutputMatrix.block(0, firstCol, networkOutputMatrix.rows(), numCols);
 
-		if (logger.log_level >= LOG_LEVEL_TRACE)
+		if (logger.log_level >= LOG_LEVEL_TRACE) {
 			logger << "\t\tInput Matrix dims = " << inputBatch.rows() << "X" << inputBatch.cols() << std::endl;
+			logger << "\t\tBatch Cols = " << firstCol << " , " << lastCol << " and numData = " << numData << std::endl;
+		}
 
 		outputBatch = forwardBatch(inputBatch);
 		if (doBack) {
@@ -313,8 +319,9 @@ void NeuralNetwork::trainBatches(const int& firstData, const int& numData, const
 			updateBatch();
 		}
 
-		double lossValueBatch = lossBatch(outputBatch, expectedBatch);
-		lossValue += lossValueBatch;
+
+		double lossValueBatch = LastLayerRawPtr->loss(outputBatch, expectedBatch);
+		lossValue += lossValueBatch*numCols;
 
 
 		if (logger.log_level >= LOG_LEVEL_TRACE)
@@ -327,10 +334,15 @@ void NeuralNetwork::trainBatches(const int& firstData, const int& numData, const
 				logger << "\t\tValidationLossbatch = ";
 			logger << lossValueBatch << std::endl;
 		}
-
-		if (doBack)
-			trainLossFile << "," << lossValueBatch;
-		else
-			validationLossFile << "," << lossValueBatch;
+		if (fOutputMode & PERBATCH) {
+			if (doBack)
+				trainLossFile << "," << lossValueBatch;
+			else
+				validationLossFile << "," << lossValueBatch;
+		}
 	}
+	
+	array<int,2> lastDims = LastLayerRawPtr->returnInputOutputDims();
+	int lastFeatures = lastDims[1];
+	lossValue /= static_cast<double>(numData*lastFeatures);
 }

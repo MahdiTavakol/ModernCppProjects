@@ -10,7 +10,7 @@
 #include "Loss.h"
 #include "Input.h"
 #include "Logger.h"
-#include "MinMaxScaler.h"
+#include "Scaler.h"
 
 using std::vector;
 using std::string;
@@ -18,6 +18,11 @@ using std::array;
 using std::ofstream;
 using std::cout;
 using std::endl;
+
+enum fileOutputMode {
+	PERBATCH = 1<<0,
+	AVG = 1<<1
+};
 
 class NeuralNetwork
 {
@@ -32,7 +37,7 @@ public:
 		const OptimizerType& optType_ = OptimizerType::SGD,
 		const double& learningRate_ = 0.1);
 	void addLastLayer(const int& inputDim_, const int& outputDim_,
-		const ActivationType& activType_ = ActivationType::NONE,
+		const ActivationType& activType_ = ActivationType::SIGMOID,
 		const OptimizerType& optType_ = OptimizerType::SGD,
 		const double& learningRate_ = 0.1,
 		const LossType& lossType_ = LossType::MSE);
@@ -46,7 +51,7 @@ protected:
 	ofstream trainLossFile, validationLossFile;
 
 	// Scaling function
-	MinMaxScaler minMaxScaler;
+	std::unique_ptr<Scaler> scaler;
 
 
 	string networkDataFileName;
@@ -72,7 +77,6 @@ protected:
 	MatrixXd forwardBatch(const MatrixXd& input_);
 	virtual void backwardBatch(const MatrixXd& output_);
 	void updateBatch();
-	double lossBatch(const MatrixXd& output_, const MatrixXd& expected_);
 
 
 	virtual void trainBatches(const int& firstData_, const int& numData_,
@@ -82,5 +86,5 @@ protected:
 	vector<double> trainingLoss;
 	vector<double> validationLoss;
 
-
+	int fOutputMode = PERBATCH | AVG;
 };

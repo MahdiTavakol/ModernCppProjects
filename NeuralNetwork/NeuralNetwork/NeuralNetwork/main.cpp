@@ -80,7 +80,7 @@ int main(int argc, char** argv)
 	neuralNetworkPtr->addLastLayer(2, 1);
 	neuralNetworkPtr->initializeLayers();
 	neuralNetworkPtr->fit();
-	neuralNetworkPtr->transform();
+	//neuralNetworkPtr->transform();
 
 	
 	MPI_Finalize();

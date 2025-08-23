@@ -77,9 +77,6 @@ protected:
 	OptimizerType  optType;
 
 	double learningRate;
-
-
-	//weight initialization
-	void weightInitialization(const double& mean_, const double& std_);
+	double L2regFactor = 0.0; //1e-4;
 
 };

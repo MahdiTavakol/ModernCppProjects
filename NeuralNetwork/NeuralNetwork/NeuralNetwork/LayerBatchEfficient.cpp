@@ -93,7 +93,7 @@ void LayerBatchEfficient::initialize()
 	case ActivationType::LEAKYRELU:
 	{
 		mean = 0.0;
-		std = 2.0 / inputDim;
+		std = std::sqrt(2.0 / inputDim);
 		type = 4;
 		break;
 	}
@@ -108,7 +108,20 @@ void LayerBatchEfficient::initialize()
 		throw std::invalid_argument("Unknown activation funtion type!");
 	}
 	std::cout << "Activation function type= " << type << " and inptDim = " << inputDim << std::endl;
-	weightInitialization(mean, std);
+	
+	
+	std::random_device rd;
+	std::mt19937_64 gen{ rd() };
+	std::normal_distribution<double> dist{ mean, std };
+
+	// Just weights has to be initialized not bias values
+	weights.block(0,0,weights.rows(),weights.cols()-1) = weights.block(0,0,weights.rows(),weights.cols()-1).unaryExpr([&dist, &gen](const double v) {return dist(gen); });
+	weights.block(0,weights.cols()-1,weights.rows(),1) = MatrixXd::Constant(weights.rows(),1,0.02);
+	
+	
+	std::cout << "Inside the weights initialization function" << std::endl;
+	double weights_avg = weights.sum(); // /static_cast<double>(weights.cols()*weights.rows());
+	std::cout << "weights_sum inside the layer= " << weights_avg << std::endl;
 }
 
 MatrixXd LayerBatchEfficient::forward(const MatrixXd& input_)
@@ -167,6 +180,9 @@ MatrixXd LayerBatchEfficient::backward(MatrixXd& nextDiff_)
 
 	dLoss_dweights.block(0, 0, weights.rows(), weights.cols() - 1) = dLoss_dz * input.transpose();
 	dLoss_dweights.block(0, weights.cols() - 1, weights.rows(), 1) = dLoss_dz.rowwise().sum();
+	
+	// Add the L2 regularization
+	dLoss_dweights += -L2regFactor*weights;
 
 	// previous_diff
 	prev_diff = weights.block(0, 0, weights.rows(), weights.cols() - 1).transpose() * dLoss_dz;
@@ -192,20 +208,6 @@ MatrixXd LayerBatchEfficient::backward(MatrixXd& nextDiff_)
 void LayerBatchEfficient::update()
 {
 	optFunction->update(weights, dLoss_dweights);
-}
-
-void LayerBatchEfficient::weightInitialization(const double& mean_, const double& std_)
-{
-	std::random_device rd;
-	std::mt19937_64 gen{ rd() };
-	std::normal_distribution<double> dist{ mean_, std_ };
-
-	weights = weights.unaryExpr([&dist, &gen](const double v) {return dist(gen); });
-	
-	
-	std::cout << "Inside the weights initialization function" << std::endl;
-	double weights_avg = weights.sum(); // /static_cast<double>(weights.cols()*weights.rows());
-	std::cout << "weights_sum inside the layer= " << weights_avg << std::endl;
 }
 
 MatrixXd&& LayerBatchEfficient::moveGradients()
