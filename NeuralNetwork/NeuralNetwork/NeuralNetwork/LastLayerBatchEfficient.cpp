@@ -50,7 +50,7 @@ MatrixXd LastLayerBatchEfficient::backward(MatrixXd& expectedValue_)
 	prev_diff = weights.block(0, 0, weights.rows(), weights.cols() - 1).transpose() * dLoss_dz;
 
 	
-	
+	/*
 	MatrixXd test = lossFunction->diff(expectedValue_, output);
 	double loss_diff_avg = test.sum()/static_cast<double>(test.cols()*test.rows());
 	double expected_avg  = expectedValue_.sum()/static_cast<double>(expectedValue_.cols()*expectedValue_.rows());
@@ -63,6 +63,7 @@ MatrixXd LastLayerBatchEfficient::backward(MatrixXd& expectedValue_)
 	std::cout << "Input_avg inside the layer= " << input_avg << std::endl;
 	std::cout << "dloss_dz_avg inside the layer= " << dloss_dz_avg << std::endl;
 	std::cout << "dactive_dz_avg inside the layer= " << dactive_dz_avg << std::endl;
+	*/
 
 	return prev_diff;
 }

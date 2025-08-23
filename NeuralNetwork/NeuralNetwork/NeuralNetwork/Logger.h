@@ -66,7 +66,7 @@ public:
         return *this;
     }
 
-    const int log_level = LOG_LEVEL_ALL;
+    const int log_level = LOG_LEVEL_WARN;
 
 private:
     std::vector<std::reference_wrapper<std::ostream>> strm_vec;

@@ -147,6 +147,7 @@ MatrixXd LayerBatchEfficient::forward(const MatrixXd& input_)
 	dActive_dz = z.unaryExpr([&](double v) {return activationFunction->diff(v); });
 
 
+	/*
 	std::cout << "Inside the forward for the layer" << std::endl;
 	double linear_avg  = linear.sum()/static_cast<double>(linear.cols()*linear.rows());
 	double bias_avg = bias.sum()/static_cast<double>(bias.cols()*bias.rows());
@@ -160,6 +161,7 @@ MatrixXd LayerBatchEfficient::forward(const MatrixXd& input_)
 	std::cout << "input_avg inside the layer= " << input_avg << std::endl;
 	std::cout << "dActive_dz_avg inside the layer= " << dActive_dz_avg << std::endl;
 	std::cout << "weights_avg inside the layer= " << weights_avg << std::endl;
+	*/
 
 	return output;
 }
@@ -188,7 +190,7 @@ MatrixXd LayerBatchEfficient::backward(MatrixXd& nextDiff_)
 	prev_diff = weights.block(0, 0, weights.rows(), weights.cols() - 1).transpose() * dLoss_dz;
 
 
-	
+	/*
 	std::cout << "Inside the backward for the layer" << std::endl;
 	double nextdiff_avg  = nextDiff_.sum()/static_cast<double>(nextDiff_.cols()*nextDiff_.rows());
 	double dactive_dz_avg = dActive_dz.sum()/static_cast<double>(dActive_dz.cols()*dActive_dz.rows());
@@ -200,6 +202,7 @@ MatrixXd LayerBatchEfficient::backward(MatrixXd& nextDiff_)
 	std::cout << "dloss_dz_avg inside the layer= " << dloss_dz_avg << std::endl;
 	std::cout << "dactive_dz_avg inside the layer= " << dactive_dz_avg << std::endl;
 	std::cout << "nextdiff_avg inside the layer= " << nextdiff_avg  << std::endl;
+	*/
 	
 
 	return prev_diff;
