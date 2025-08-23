@@ -22,7 +22,7 @@ public:
             std::vector<int>{ LOG_LEVEL_ALL }) {
     }
 
-    // Constructor with streams only — all use LOG_LEVEL_ALL
+    // Constructor with streams only  all use LOG_LEVEL_ALL
     Logger(const std::vector<std::reference_wrapper<std::ostream>>& strms)
         : Logger(strms, std::vector<int>(strms.size(), LOG_LEVEL_ALL)) {
     }

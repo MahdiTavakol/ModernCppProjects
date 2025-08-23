@@ -15,13 +15,14 @@ NeuralNetwork::NeuralNetwork(Logger& logger_, const string& networkDataFileName_
 	maxNumLayers{ maxNumLayers_ }, batchsize{ batchsize_ },
 	trainingPercent{ 70.0 }
 {
-	trainLossFile.open("training-loss.dat", std::ios::out | std::ios::trunc);
-	validationLossFile.open("validation-loss.dat", std::ios::out | std::ios::trunc);
-	if (!trainLossFile.is_open())
-		logger << "Warning: Cannot open the traininglossfile" << std::endl;
-	if (!validationLossFile.is_open())
-		logger << "Warning: Cannot open the validationlossfile" << std::endl;
-
+	if ((fOutputMode & AVG) || (fOutputMode & PERBATCH)) {
+		trainLossFile.open("training-loss.dat", std::ios::out | std::ios::trunc);
+		validationLossFile.open("validation-loss.dat", std::ios::out | std::ios::trunc);
+		if (!trainLossFile.is_open())
+			logger << "Warning: Cannot open the traininglossfile" << std::endl;
+		if (!validationLossFile.is_open())
+			logger << "Warning: Cannot open the validationlossfile" << std::endl;
+	}
 }
 
 void NeuralNetwork::initializeInputPtr()
@@ -168,15 +169,19 @@ void NeuralNetwork::fit()
 		{
 			file << i;
 		};
-	header_lambda(trainLossFile, numTrainingBatchs);
-	header_lambda(validationLossFile, numValidationBatchs);
+	if ((fOutputMode & AVG) || (fOutputMode & PERBATCH)) {
+		header_lambda(trainLossFile, numTrainingBatchs);
+		header_lambda(validationLossFile, numValidationBatchs);
+	}
 
 	int numStepsTrainLossDownValidLossUp = 0;
 
 	for (int i = 0; i < MaxNumSteps; i++)
 	{
-		print_step(trainLossFile, i);
-		print_step(validationLossFile, i);
+		if ((fOutputMode & AVG) || (fOutputMode & PERBATCH)) {
+			print_step(trainLossFile, i);
+			print_step(validationLossFile, i);
+		}
 		if (logger.log_level >= LOG_LEVEL_INFO)
 			logger << "Step " << i << " out of " << MaxNumSteps << " steps " << std::endl;
 		double tLossVal = 0.0;
