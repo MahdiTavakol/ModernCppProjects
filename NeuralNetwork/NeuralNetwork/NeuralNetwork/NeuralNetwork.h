@@ -30,11 +30,11 @@ public:
 	void addLayer(const int& inputDim_, const int& outputDim_,
 		const ActivationType& activType_ = ActivationType::RELU,
 		const OptimizerType& optType_ = OptimizerType::SGD,
-		const double& learningRate_ = -0.1);
+		const double& learningRate_ = 0.1);
 	void addLastLayer(const int& inputDim_, const int& outputDim_,
 		const ActivationType& activType_ = ActivationType::NONE,
 		const OptimizerType& optType_ = OptimizerType::SGD,
-		const double& learningRate_ = -0.1,
+		const double& learningRate_ = 0.1,
 		const LossType& lossType_ = LossType::MSE);
 	void initializeLayers();
 	virtual void fit();

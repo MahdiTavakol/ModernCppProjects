@@ -43,7 +43,7 @@ MatrixXd LastLayerBatchEfficient::backward(MatrixXd& expectedValue_)
 		<< "should be used!" << std::endl;
 	// dActivation_dz calculated during the forward step
 	// dLoss_dz
-	MatrixXd dLoss_dz = lossFunction->diff(expectedValue_, output).cwiseProduct(dActive_dz);
+	MatrixXd dLoss_dz = lossFunction->diff(output,expectedValue_).cwiseProduct(dActive_dz);
 	dLoss_dweights.block(0, 0, weights.rows(), weights.cols() - 1) = dLoss_dz * input.transpose();
 	dLoss_dweights.block(0, weights.cols() - 1, weights.rows(), 1) = dLoss_dz.rowwise().sum();
 	// previous_diff
