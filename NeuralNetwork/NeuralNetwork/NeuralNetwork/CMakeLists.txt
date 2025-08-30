@@ -8,9 +8,13 @@ set(CMAKE_CXX_COMPILER mpiicpx)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Enable Debug build type and symbols
-set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
+# Default to Release if not set
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+endif()
+
+# Debug flags (only active if CMAKE_BUILD_TYPE=Debug)
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -fno-omit-frame-pointer")
 
 # Manually enable Intel OpenMP support for mpiicpx
 set(OpenMP_CXX_FLAGS "-qopenmp")
@@ -29,7 +33,7 @@ set(SOURCES
     LastLayerBatchEfficient.cpp
     LayerBatchEfficient.cpp
     Loss.cpp
-    MinMaxScaler.cpp
+    Scaler.cpp
     NeuralNetwork.cpp
     NeuralNetworkMPI.cpp
     NeuralNetworkOpenMP.cpp

@@ -43,7 +43,7 @@ int main(int argc, char** argv)
 	Logger logger{logger_ref};
 
 
-	RunType runType = RunType::SERIAL;
+	RunType runType = RunType::MPI;
 	std::unique_ptr<NeuralNetwork> neuralNetworkPtr;
 
 	if (logger.log_level >= LOG_LEVEL_INFO)
@@ -69,6 +69,7 @@ int main(int argc, char** argv)
 	}
 
 	neuralNetworkPtr->initializeInputPtr();
+	neuralNetworkPtr->initializeOutputs();
 	neuralNetworkPtr->readInputData();
 	neuralNetworkPtr->addLayer(100, 90);
 	neuralNetworkPtr->addLayer(90,  80);

@@ -21,7 +21,8 @@ using std::endl;
 
 enum fileOutputMode {
 	PERBATCH = 1<<0,
-	AVG = 1<<1
+	AVG = 1<<1,
+	PERRANK = 1<<2
 };
 
 class NeuralNetwork
@@ -31,6 +32,7 @@ public:
 		const int& numTargetCols_, const int& maxNumLayers_ = 10,
 		const int& batchsize_ = -1);
 	virtual void initializeInputPtr();
+	void initializeOutputs();
 	void readInputData();
 	void addLayer(const int& inputDim_, const int& outputDim_,
 		const ActivationType& activType_ = ActivationType::RELU,
@@ -39,7 +41,7 @@ public:
 	void addLastLayer(const int& inputDim_, const int& outputDim_,
 		const ActivationType& activType_ = ActivationType::SIGMOID,
 		const OptimizerType& optType_ = OptimizerType::SGD,
-		const double& learningRate_ = 0.1,
+		const double& learningRate_ = 0.05,
 		const LossType& lossType_ = LossType::MSE);
 	void initializeLayers();
 	virtual void fit();
@@ -49,6 +51,7 @@ protected:
 	// output parameters
 	Logger& logger;
 	ofstream trainLossFile, validationLossFile;
+	std::string trainLossFileName, validationLossFileName;
 
 	// Scaling function
 	std::unique_ptr<Scaler> scaler;
@@ -61,6 +64,11 @@ protected:
 	const int numTargetCols;
 
 
+	/*
+	 * In the MPI version the networkInputMatrix dimensions is not the 
+	 * same as the networkInputDim as the former is the local matrix
+	 * and the latter is the dimension of the global matrix.
+	 */
 	array<int, 2> networkInputDim;
 	array<int, 2> networkOutputDim;
 	MatrixXd networkInputMatrix;

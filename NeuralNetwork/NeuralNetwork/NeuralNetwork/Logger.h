@@ -37,7 +37,7 @@ public:
     Logger(const Logger&) = delete;
     Logger(Logger&&) = default;
     Logger& operator=(const Logger&) = delete;
-    Logger& operator=(Logger&&) = default;
+    Logger& operator=(Logger&&) = delete;
     ~Logger() = default;
 
     void print(const std::string& input_, const int log_level_ = LOG_LEVEL_ERROR) const {
@@ -66,7 +66,7 @@ public:
         return *this;
     }
 
-    const int log_level = LOG_LEVEL_WARN;
+    const int log_level = LOG_LEVEL_INFO;
 
 private:
     std::vector<std::reference_wrapper<std::ostream>> strm_vec;

@@ -41,8 +41,8 @@ public:
 		const OptimizerType& optType_, const double& learningRate_);
 	LayerBatchEfficient(Logger& logger_, const int& inputDim_, const int& outputDim_, const ActivationType& activType,
 		const OptimizerType& optType_, const double& learningRate_);
-	void initialize();
-	MatrixXd forward(const MatrixXd& input_); // outputDim X batchsize --> inputDim X batchsize
+	virtual void initialize();
+	virtual MatrixXd forward(const MatrixXd& input_); // outputDim X batchsize --> inputDim X batchsize
 	virtual MatrixXd backward(MatrixXd& nextDiff_);
 	void update();
 	// To be used by MPI and possibly other parallelization approaches
@@ -77,6 +77,6 @@ protected:
 	OptimizerType  optType;
 
 	double learningRate;
-	double L2regFactor = 0.0; //1e-4;
+	double L2regFactor = 1e-5;
 
 };

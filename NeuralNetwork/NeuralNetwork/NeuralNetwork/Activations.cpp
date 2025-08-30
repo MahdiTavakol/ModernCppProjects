@@ -190,6 +190,18 @@ MatrixXd TanH::diff(const MatrixXd& mat_)
 	return mat_.unaryExpr([&](double x) {return 1.0 / (std::cosh(x) * std::cosh(x)); });
 }
 
+double SoftMaxLastLayer::operator()(const double& x_)
+{
+	std::cout << "Warning: this function returns a Zero"  << std::endl;
+	return 0.0;
+}
+
+double SoftMaxLastLayer::diff(const double& x_)
+{
+	std::cout << "Warning: this function returns a Zero"  << std::endl;
+	return 0.0;
+}
+
 MatrixXd SoftMaxLastLayer::operator()(const MatrixXd& mat_)
 {
 	RowVectorXd colMax = mat_.colwise().maxCoeff();

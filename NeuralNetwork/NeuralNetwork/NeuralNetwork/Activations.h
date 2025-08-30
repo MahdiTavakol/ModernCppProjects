@@ -87,7 +87,9 @@ public:
 class SoftMaxLastLayer final : public Activation
 {
 public:
+	double operator()(const double& x);
+	double diff(const double& x);
 	MatrixXd operator()(const MatrixXd& mat_) override;
-	virtual MatrixXd diff(const MatrixXd& mat_) override;
+	MatrixXd diff(const MatrixXd& mat_) override;
 	vector<MatrixXd> diff_vec(const MatrixXd& mat_);
 };

@@ -9,26 +9,32 @@ NeuralNetwork::NeuralNetwork(Logger& logger_, const string& networkDataFileName_
 	const int& numTargetCols_, const int& maxNumLayers_,
 	const int& batchsize_) :
 	logger{ logger_ },
+	trainLossFileName{"training-loss.dat"},
+	validationLossFileName{"validation-loss.dat"},
 	networkDataFileName{ networkDataFileName_ },
 	networkTestFileName{ networkTestFileName_ },
 	numTargetCols{ numTargetCols_ },
 	maxNumLayers{ maxNumLayers_ }, batchsize{ batchsize_ },
 	trainingPercent{ 70.0 }
-{
-	if ((fOutputMode & AVG) || (fOutputMode & PERBATCH)) {
-		trainLossFile.open("training-loss.dat", std::ios::out | std::ios::trunc);
-		validationLossFile.open("validation-loss.dat", std::ios::out | std::ios::trunc);
-		if (!trainLossFile.is_open())
-			logger << "Warning: Cannot open the traininglossfile" << std::endl;
-		if (!validationLossFile.is_open())
-			logger << "Warning: Cannot open the validationlossfile" << std::endl;
-	}
-}
+{}
 
 void NeuralNetwork::initializeInputPtr()
 {
 	inputPtr = std::make_unique<Input>(logger, networkDataFileName, numTargetCols);
 	testPtr = std::make_unique<Input>(logger, networkTestFileName, 0);
+}
+
+void NeuralNetwork::initializeOutputs()
+{
+	if ((fOutputMode & AVG) || (fOutputMode & PERBATCH)) {
+		std::cout << "Opening the files: " << trainLossFileName << " and " << validationLossFileName << std::endl; 
+		trainLossFile.open(trainLossFileName, std::ios::out | std::ios::trunc);
+		validationLossFile.open(validationLossFileName, std::ios::out | std::ios::trunc);
+		if (!trainLossFile.is_open())
+			logger << "Warning: Cannot open the traininglossfile" << std::endl;
+		if (!validationLossFile.is_open())
+			logger << "Warning: Cannot open the validationlossfile" << std::endl;
+	}
 }
 
 void NeuralNetwork::readInputData()
@@ -150,6 +156,8 @@ void NeuralNetwork::fit()
 
 	int numTrainingBatchs = (numTrainingData + batchsize - 1) / batchsize;
 	int numValidationBatchs = (numValidationData + batchsize - 1) / batchsize;
+	
+	int numFeatures = networkInputMatrix.rows();
 
 	trainingLoss.reserve(MaxNumSteps);
 	validationLoss.reserve(MaxNumSteps);
@@ -190,12 +198,14 @@ void NeuralNetwork::fit()
 		if (logger.log_level >= LOG_LEVEL_DEBUG)
 			logger << "\tTraining data on the training set" << std::endl;
 		trainBatches(0, numTrainingData, numTrainingBatchs, tLossVal, true);
+		tLossVal /= static_cast<double>(numTrainingData*numFeatures);
 		if (logger.log_level >= LOG_LEVEL_DEBUG)
 			logger << "\tTraining loss: " << tLossVal << std::endl;
 
 		if (logger.log_level >= LOG_LEVEL_DEBUG)
 			logger << "\tTesting the data on the validating set" << std::endl;
 		trainBatches(numTrainingData, numValidationData, numValidationBatchs, vLossVal, false);
+		vLossVal /= static_cast<double>(numValidationData*numFeatures);
 		if (logger.log_level >= LOG_LEVEL_DEBUG)
 			logger << "\tValidation loss: " << vLossVal << std::endl;
 
@@ -216,8 +226,6 @@ void NeuralNetwork::fit()
 		if (numStepsTrainLossDownValidLossUp >= 10)
 			break;
 	}
-
-
 }
 
 MatrixXd NeuralNetwork::transform()
@@ -350,6 +358,4 @@ void NeuralNetwork::trainBatches(const int& firstData, const int& numData, const
 	}
 	
 	array<int,2> lastDims = LastLayerRawPtr->returnInputOutputDims();
-	int lastFeatures = lastDims[1];
-	lossValue /= static_cast<double>(numData*lastFeatures);
 }
