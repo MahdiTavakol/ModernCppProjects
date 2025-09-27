@@ -64,8 +64,7 @@ void NeuralNetworkMPI::fit()
 		}
 		if (rank == 0) {
 			nColsFirstRank = networkOutputDim[1];
-			if (nColsFirstRank == nColsLastRank)
-				status_0 = nColsFirstRank - nColsLastRank;
+			status_0 = nColsFirstRank - nColsLastRank;
 		}
 		if (rank == 0) {
 			MPI_Ssend(&status_0, 1, MPI_INT, size - 1, 1, MPI_COMM_WORLD);
