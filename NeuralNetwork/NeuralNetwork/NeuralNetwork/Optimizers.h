@@ -10,6 +10,7 @@ class Optimizer
 public:
 	Optimizer(const double& learningRate_);
 	virtual void update(MatrixXd& weights_, const MatrixXd& gradient_) = 0;
+	virtual ~Optimizer() = default;
 	
 protected:
 	double learningRate;

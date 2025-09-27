@@ -28,6 +28,7 @@ set_property(TARGET OpenMP::OpenMP_CXX PROPERTY INTERFACE_LINK_LIBRARIES iomp5)
 # Source files
 set(SOURCES
     Activations.cpp
+    Dropout.cpp
     Input.cpp
     InputMPI.cpp
     LastLayerBatchEfficient.cpp

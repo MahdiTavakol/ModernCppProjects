@@ -90,6 +90,7 @@ double Selu::operator()(const double& x)
 {
 	if (x > 0) return lambda * x;
 	else if (x < 0) return lambda * alpha * (std::exp(x) - 1);
+	return 0.0;
 }
 
 double Selu::diff(const double& x)
@@ -106,6 +107,7 @@ MatrixXd Selu::operator()(const MatrixXd& mat_)
 		{
 			if (x > 0) return lambda * x;
 			else if (x < 0) return lambda * alpha * (std::exp(x) - 1);
+			return 0.0;
 		};
 	return mat_.unaryExpr(func);
 }

@@ -15,6 +15,7 @@ public:
 	virtual double diff(const double& x) = 0;
 	virtual MatrixXd operator()(const MatrixXd& mat_) = 0;
 	virtual MatrixXd diff(const MatrixXd& mat_) = 0;
+	virtual ~Activation() = default;
 };
 
 class NoneAct final : public Activation
@@ -87,8 +88,8 @@ public:
 class SoftMaxLastLayer final : public Activation
 {
 public:
-	double operator()(const double& x);
-	double diff(const double& x);
+	double operator()(const double& x) override;
+	double diff(const double& x) override;
 	MatrixXd operator()(const MatrixXd& mat_) override;
 	MatrixXd diff(const MatrixXd& mat_) override;
 	vector<MatrixXd> diff_vec(const MatrixXd& mat_);

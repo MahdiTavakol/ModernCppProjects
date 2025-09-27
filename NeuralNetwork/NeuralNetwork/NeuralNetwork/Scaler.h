@@ -13,6 +13,7 @@ class Scaler
 public:
 	Scaler() = default;
 	virtual MatrixXd operator()(MatrixXd& input_) = 0;
+	virtual ~Scaler() = default;
 };
 
 class MinMaxScaler final: public Scaler

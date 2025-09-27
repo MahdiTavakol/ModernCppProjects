@@ -9,6 +9,7 @@ class Loss
 public:
 	virtual double operator()(const MatrixXd& output_, const MatrixXd& real_) = 0;
 	virtual MatrixXd diff(const MatrixXd& output_, const MatrixXd& real_) = 0;
+	virtual ~Loss()= default;
 };
 
 class MSE final : public Loss
