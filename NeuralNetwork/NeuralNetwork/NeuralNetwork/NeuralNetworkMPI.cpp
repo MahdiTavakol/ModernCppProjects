@@ -43,7 +43,7 @@ void NeuralNetworkMPI::initializeOutputs()
 		// Check if the file name is initialized
 		if (TVLossAllFileName.size()) {
 			TVLossAllFile.open(TVLossAllFileName, std::ios::out | std::ios::trunc);
-			if (!trainLossFile.is_open())
+			if (!TVLossAllFile.is_open())
 				logger << "Warning: Cannot open the file " << TVLossAllFileName << std::endl;
 		}
 	}
@@ -75,8 +75,13 @@ void NeuralNetworkMPI::fit()
 			if (fOutputMode & PERBATCH) {
 				for (int i = 0; i < numBatchs; i++)
 					file << ",Batch-" << i;
+				file << ",All-batches";
 			}
-			file << ",All-batches";
+			if (fOutputMode & PERRANK) {
+				for (int i = 0; i < size; i++)
+					file << ",Rank-" << i;
+			}
+			
 			file << std::endl;
 		};
 	auto print_step = [&](ofstream& file, const int& i)
@@ -84,7 +89,7 @@ void NeuralNetworkMPI::fit()
 			file << i;
 		};
 	if (rank == 0) {
-		if ((fOutputMode & AVG) || (fOutputMode & PERBATCH)) {
+		if ((fOutputMode & AVG) || (fOutputMode & PERBATCH) || (fOutputMode & PERRANK)) {
 			header_lambda(trainLossFile, numTBatchs);
 			header_lambda(validationLossFile, numVBatchs);
 		}
@@ -106,9 +111,13 @@ void NeuralNetworkMPI::fit()
 
 		std::vector<double> lossTGather;
 		std::vector<double> lossVGather;
+		std::vector<int> nDataTGather;
+		std::vector<int> nDataVGather;
 		// resize puts zero into the vector --> no need to push_back despite the reserve
 		lossTGather.resize(size);
 		lossVGather.resize(size);
+		nDataTGather.resize(size);
+		nDataVGather.resize(size);
 
 		int numDataLocal[2] = {numTData,numVData};
 		int numData[2] = {0,0};
@@ -124,8 +133,10 @@ void NeuralNetworkMPI::fit()
 		MPI_Allreduce(numDataLocal,numData,2,MPI_INT,MPI_SUM,MPI_COMM_WORLD);
 		MPI_Gather(&lossLocal[0], 1, MPI_DOUBLE, lossTGather.data(), 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 		MPI_Gather(&lossLocal[1], 1, MPI_DOUBLE, lossVGather.data(), 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-		loss[0] /= static_cast<int>(numData[0]*numFeatures);
-		loss[1] /= static_cast<int>(numData[1]*numFeatures);
+		MPI_Gather(&numDataLocal[0], 1, MPI_INT, nDataTGather.data(), 1, MPI_INT, 0, MPI_COMM_WORLD);
+		MPI_Gather(&numDataLocal[1], 1, MPI_INT, nDataVGather.data(), 1, MPI_INT, 0, MPI_COMM_WORLD);
+		loss[0] /= static_cast<double>(numData[0]*numFeatures);
+		loss[1] /= static_cast<double>(numData[1]*numFeatures);
 		
 		if (logger.log_level >= LOG_LEVEL_WARN) {
 			if (numData[0] == 0 || numData[1] == 0 || numFeatures == 0)
@@ -143,8 +154,8 @@ void NeuralNetworkMPI::fit()
 		
 		if (rank == 0 && fOutputMode & AVG) {
 			for (int i = 0; i < size; i++) {
-				trainLossFile << "," << lossTGather[i] << endl;
-				validationLossFile << "," << lossVGather[i] << endl;
+				trainLossFile << "," << lossTGather[i]/static_cast<double>(nDataTGather[i] * numFeatures);
+				validationLossFile << "," << lossVGather[i]/static_cast<double>(nDataVGather[i] * numFeatures);
 			}
 			TVLossAllFile << loss[0] << "," << loss[1] << std::endl;
 		}
