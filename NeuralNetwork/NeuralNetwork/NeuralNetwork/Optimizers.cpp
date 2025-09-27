@@ -13,6 +13,15 @@ void SGD::update(MatrixXd& weights_, const MatrixXd& gradient_)
 	weights_ -= learningRate * gradient_;
 }
 
+NoneOpt::NoneOpt(const double& learningRate_) :
+	Optimizer{ learningRate_ }
+{}
+
+void NoneOpt::update(MatrixXd& /*weights_*/, const MatrixXd& /*gradient_*/)
+{
+	// do nothing
+}
+
 SGDMomentum::SGDMomentum(const double& learningRate_, const double& gamma_):
 	Optimizer{learningRate_}, gamma{gamma_}
 {}

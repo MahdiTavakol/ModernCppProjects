@@ -19,17 +19,17 @@ NeuralNetworkOpenMP::NeuralNetworkOpenMP(Logger& logger_, const string& networkI
 
 void NeuralNetworkOpenMP::fit()
 {
-	int numTrainingData = static_cast<int>(trainingPercent * networkInputDim[1]);
-	int numValidationData = networkInputDim[1] - numTrainingData;
+	int numTData = static_cast<int>(trainingPercent * networkInputDim[1]);
+	int numVData = networkInputDim[1] - numTData;
 
 
-	int numTrainingBatchs = (numTrainingData + batchsize - 1) / batchsize;
-	int numValidationBatchs = (numValidationData + batchsize - 1) / batchsize;
+	int numTrainingBatchs = (numTData + batchsize - 1) / batchsize;
+	int numValidationBatchs = (numVData + batchsize - 1) / batchsize;
 
 	trainingLoss.reserve(MaxNumSteps);
 	validationLoss.reserve(MaxNumSteps);
 
-	int numStepsTrainLossDownValidLossUp = 0;
+	int TDownVUp = 0;
 
 
 	for (int i = 0; i < MaxNumSteps; i++)
@@ -38,17 +38,17 @@ void NeuralNetworkOpenMP::fit()
 		double vLossVal = 0.0;
 
 
-		trainBatches(0, numTrainingData, numTrainingBatchs, tLossVal, true);
-		trainBatches(numTrainingData, numValidationData, numValidationBatchs, vLossVal, false);
+		trainBatches(0, numTData, numTrainingBatchs, tLossVal, true);
+		trainBatches(numTData, numVData, numValidationBatchs, vLossVal, false);
 
 		trainingLoss.push_back(tLossVal);
 		validationLoss.push_back(vLossVal);
 
 		if (!trainingLoss.empty() && tLossVal < trainingLoss.back() && vLossVal > validationLoss.back())
-			numStepsTrainLossDownValidLossUp++;
+			TDownVUp++;
 		else
-			numStepsTrainLossDownValidLossUp = 0;
-		if (numStepsTrainLossDownValidLossUp >= 10)
+			TDownVUp = 0;
+		if (TDownVUp >= maxTDownVUp)
 			break;
 
 	}
@@ -100,7 +100,7 @@ void NeuralNetworkOpenMP::trainBatches(const int& firstData_, const int& numData
 			MatrixXd input = networkInputMatrix.block(0, firstCol, networkInputMatrix.rows(), numCols);
 			MatrixXd expected = networkOutputMatrix.block(0, firstCol, networkOutputMatrix.rows(), numCols);
 
-			outputBatch = forwardBatch(input);
+			outputBatch = forwardBatch(input,doBack_);
 			if (doBack_) {
 				MatrixXd prevDiffBatch = outputBatch;
 				for (int i = numLayers - 1; i >= 0; i--)

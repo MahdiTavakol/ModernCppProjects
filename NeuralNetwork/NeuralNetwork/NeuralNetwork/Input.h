@@ -27,7 +27,7 @@ public:
 	const Input& operator=(const Input&) = delete;
 	Input(Input&&) = delete;
 	Input& operator=(Input&&) = delete;
-	~Input() = default;
+	virtual ~Input() = default;
 protected:
 	Logger& logger;
 	ifstream dataFile;

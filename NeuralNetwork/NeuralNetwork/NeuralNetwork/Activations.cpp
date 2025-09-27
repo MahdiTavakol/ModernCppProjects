@@ -1,24 +1,24 @@
 #include "Activations.h"
 #include <iostream>
 
-double None::operator()(const double& x)
+double NoneAct::operator()(const double& x)
 {
 	return x;
 }
 
-double None::diff(const double& x)
+double NoneAct::diff(const double& /* do not use x*/)
 {
 	return 1.0;
 }
 
-MatrixXd None::operator()(const MatrixXd& mat_)
+MatrixXd NoneAct::operator()(const MatrixXd& mat_)
 {
 	return mat_;
 }
 
-MatrixXd None::diff(const MatrixXd& mat_)
+MatrixXd NoneAct::diff(const MatrixXd& mat_)
 {
-	return mat_.unaryExpr([&](double x) {return 1.0;});
+	return mat_.unaryExpr([&](double /*x*/) {return 1.0; });
 }
 
 double ReLu::operator()(const double& x)
@@ -97,6 +97,7 @@ double Selu::diff(const double& x)
 	if (x > 0) return lambda;
 	else if (x < 0) return lambda * alpha * std::exp(x);
 	else return lambda * (alpha + 1.0) / 2.0;
+	return 0.0;
 }
 
 MatrixXd Selu::operator()(const MatrixXd& mat_)
@@ -190,13 +191,13 @@ MatrixXd TanH::diff(const MatrixXd& mat_)
 	return mat_.unaryExpr([&](double x) {return 1.0 / (std::cosh(x) * std::cosh(x)); });
 }
 
-double SoftMaxLastLayer::operator()(const double& x_)
+double SoftMaxLastLayer::operator()(const double& /*x_*/)
 {
 	std::cout << "Warning: this function returns a Zero"  << std::endl;
 	return 0.0;
 }
 
-double SoftMaxLastLayer::diff(const double& x_)
+double SoftMaxLastLayer::diff(const double& /*x_*/)
 {
 	std::cout << "Warning: this function returns a Zero"  << std::endl;
 	return 0.0;

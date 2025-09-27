@@ -29,19 +29,20 @@ void NeuralNetworkMPI::initializeInputPtr()
 
 void NeuralNetworkMPI::fit()
 {
-	int numTrainingData = static_cast<int>(trainingPercent * networkInputMatrix.cols() /100.0);
-	int numValidationData = networkInputMatrix.cols() - numTrainingData;
+	int numTData = static_cast<int>(trainingPercent * networkInputMatrix.cols() /100.0);
+	int numVData = static_cast<int>(networkInputMatrix.cols()) - numTData;
 
-	int numTrainingBatchs = (numTrainingData + batchsize - 1) / batchsize;
-	int numValidationBatchs = (numValidationData + batchsize - 1) / batchsize;
+	int numTBatchs = (numTData + batchsize - 1) / batchsize;
+	int numVBatchs = (numVData + batchsize - 1) / batchsize;
 	
-	int numFeatures = networkInputMatrix.rows();
+	int numFeatures = static_cast<int>(networkInputMatrix.rows());
 
 	
 	trainingLoss.reserve(MaxNumSteps);
 	validationLoss.reserve(MaxNumSteps);
 
-	int numStepsTrainLossDownValidLossUp = 0;
+	// The number of steps in which the training loss reduces while the validation loss increases (sign of overfitting)
+	int TDownVUp = 0;
 
 	
 	auto header_lambda = [&](ofstream& file, const int& numBatchs)
@@ -59,8 +60,8 @@ void NeuralNetworkMPI::fit()
 			file << i;
 		};
 	if ((fOutputMode & AVG) || (fOutputMode & PERBATCH)) {
-		header_lambda(trainLossFile, numTrainingBatchs);
-		header_lambda(validationLossFile, numValidationBatchs);
+		header_lambda(trainLossFile, numTBatchs);
+		header_lambda(validationLossFile, numVBatchs);
 	}
 
 
@@ -74,17 +75,18 @@ void NeuralNetworkMPI::fit()
 		if ((logger.log_level >= LOG_LEVEL_INFO) && (rank == 0))
 			logger << "Step " << i << " out of " << MaxNumSteps << " steps " << std::endl;
 		
-		std::array<double, 2> lossLocal;
-		std::array<double, 2> loss;
-		int numDataLocal[2] = {numTrainingData,numValidationData};
+		std::array<double, 2> lossLocal = { 0.0,0.0 };
+		std::array<double, 2> loss = { 0.0, 0.0 };
+
+		int numDataLocal[2] = {numTData,numVData};
 		int numData[2] = {0,0};
 
 		if (logger.log_level >= LOG_LEVEL_DEBUG && (rank == 0))
 			logger << "\tTraining data on the training set" << std::endl;
-		trainBatches(0, numTrainingData, numTrainingBatchs, lossLocal[0], true);
+		trainBatches(0, numTData, numTBatchs, lossLocal[0], true);
 		if (logger.log_level >= LOG_LEVEL_DEBUG && (rank == 0))
 			logger << "\tTesting the data on the validating set" << std::endl;
-		trainBatches(numTrainingData, numValidationData, numValidationBatchs, lossLocal[1], false);
+		trainBatches(numTData, numVData, numVBatchs, lossLocal[1], false);
 
 		MPI_Allreduce(lossLocal.data(), loss.data(), 2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 		MPI_Allreduce(numDataLocal,numData,2,MPI_INT,MPI_SUM,MPI_COMM_WORLD);
@@ -110,12 +112,27 @@ void NeuralNetworkMPI::fit()
 			validationLossFile << "," << loss[1] << endl;
 		}
 
+		// some double checking we should never reach here!!!
+		int stop_one = 0, stop_all;
+		// We have averaged the loss over all the ranks with MPI_Allreduce so these vectors are the same in all the ranks
 		if (!trainingLoss.empty() && loss[0] < trainingLoss.back() && loss[1] > validationLoss.back())
-			numStepsTrainLossDownValidLossUp;
+			TDownVUp++;
 		else
-			numStepsTrainLossDownValidLossUp = 0;
-		if (numStepsTrainLossDownValidLossUp >= 10)
+			TDownVUp = 0;
+		if (TDownVUp >= maxTDownVUp)
+			stop_one = 1;
+
+		// Checking that if all the ranks stop to avoid deadlock-> it should always happen 
+		MPI_Allreduce(&stop_one, &stop_all, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+		if (stop_all != size * stop_one)
+			throw std::runtime_error("You should never have reached here!");
+		if (stop_one) {
+			if (logger.log_level >= LOG_LEVEL_WARN && rank == 0)
+				logger << "\tIn " << TDownVUp
+				<< " steps the training loss reduced while the validation loss increased!"
+				<< std::endl << " Stopping the iteration!" << std::endl;
 			break;
+		}
 
 	}
 	
@@ -130,8 +147,8 @@ void NeuralNetworkMPI::backwardBatch(const MatrixXd& output_)
 		auto& layer = Layers[i];
 		prevDiffBatch = layer->backward(prevDiffBatch);
 		MatrixXd gradientLocal = layer->moveGradients();
-		int rows = gradientLocal.rows();
-		int cols = gradientLocal.cols();
+		int rows = static_cast<int>(gradientLocal.rows());
+		int cols = static_cast<int>(gradientLocal.cols());
 		MatrixXd gradientAvg{ rows, cols };
 		MPI_Allreduce(gradientLocal.data(), gradientAvg.data(), rows * cols, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 		gradientAvg = gradientAvg.unaryExpr([&](double v) {return v / size; });

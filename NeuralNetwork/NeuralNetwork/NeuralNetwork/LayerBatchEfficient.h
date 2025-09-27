@@ -1,6 +1,7 @@
 #pragma once
 #include <Eigen/Dense>
 #include <array>
+#include <random>
 
 #include "Activations.h"
 #include "Optimizers.h"
@@ -25,6 +26,7 @@ enum class ActivationType
 
 enum class OptimizerType
 {
+	NONE,
 	SGD,
 	SGDMOMENUM,
 	RMSPROP,
@@ -41,10 +43,11 @@ public:
 		const OptimizerType& optType_, const double& learningRate_);
 	LayerBatchEfficient(Logger& logger_, const int& inputDim_, const int& outputDim_, const ActivationType& activType,
 		const OptimizerType& optType_, const double& learningRate_);
+	virtual ~LayerBatchEfficient() = default;
 	virtual void initialize();
-	virtual MatrixXd forward(const MatrixXd& input_); // outputDim X batchsize --> inputDim X batchsize
+	virtual MatrixXd forward(const MatrixXd& input_, const bool trainMode ); // outputDim X batchsize --> inputDim X batchsize
 	virtual MatrixXd backward(MatrixXd& nextDiff_);
-	void update();
+	virtual void update();
 	// To be used by MPI and possibly other parallelization approaches
 	MatrixXd&& moveGradients();
 	MatrixXd returnGradients();
@@ -79,4 +82,8 @@ protected:
 	double learningRate;
 	double L2regFactor = 1e-5;
 
+private:
+	std::random_device rd;
+	std::mt19937_64 gen;
+	std::unique_ptr <std::normal_distribution<double>> distPtr;
 };

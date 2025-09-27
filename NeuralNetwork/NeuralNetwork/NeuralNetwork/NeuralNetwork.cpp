@@ -1,4 +1,5 @@
 #include "NeuralNetwork.h"
+#include "Dropout.h"
 
 #include <iostream>
 #include <fstream>
@@ -113,9 +114,17 @@ void NeuralNetwork::addLastLayer(const int& inputDim_, const int& outputDim_,
 	const double& learningRate_,
 	const LossType& lossType_)
 {
-	int prevLayerOutputDim = Layers.back()->returnInputOutputDims()[1];
-	if (inputDim_ != prevLayerOutputDim) throw std::invalid_argument("Incompatible with the previous layer!");
+	// It might be the only layer
+	if (Layers.size())
+	{
+		int prevLayerOutputDim = Layers.back()->returnInputOutputDims()[1];
+		if (inputDim_ != prevLayerOutputDim) throw std::invalid_argument("Incompatible with the previous layer!");
+	}
 	if (batchsize == -1) {
+		/* I do not put the default value of the batch size here
+		 * on purpose so that the Layers decides on the default value
+		 * avoiding having a mismatch between the two default values
+		 */
 		Layers.push_back(std::make_unique<LastLayerBatchEfficient>(logger, inputDim_, outputDim_,
 			activType_, optType_, learningRate_, lossType_));
 	}
@@ -125,6 +134,37 @@ void NeuralNetwork::addLastLayer(const int& inputDim_, const int& outputDim_,
 	}
 	else
 		throw std::invalid_argument("The batchsize must be > 0");
+	numLayers++;
+}
+
+void NeuralNetwork::addDropout(const int& dim_, const double& dropRate_, const double& learningRate_)
+{
+	// checking if the size is the same is the previous layer
+	if (Layers.size())
+	{
+		int prevLayerOutputDim = Layers.back()->returnInputOutputDims()[1];
+		if (dim_ != prevLayerOutputDim) throw std::invalid_argument("Incompatible with the previous layer!");
+	}
+	// The first layer cannot be a dropout as there is no previous weights to drop out!
+	if (!Layers.size())
+	{
+		throw std::invalid_argument("The first layer cannot be a dropout!");
+	}
+	if (batchsize == -1) {
+		/* I do not put the default value of the batch size here
+		* on purpose so that the Layers decides on the default value
+		* avoiding having a mismatch between the two default values
+		*/
+		Layers.push_back(std::make_unique<Dropout>(logger, dim_, learningRate_, dropRate_));
+	}
+	else if (batchsize > 0) {
+		Layers.push_back(std::make_unique<Dropout>(logger, batchsize, dim_, learningRate_, dropRate_));
+	}
+	else
+	{
+		logger.print("The batchsize must be > 0");
+		throw std::invalid_argument("The batchsize must be > 0");
+	}
 	numLayers++;
 }
 
@@ -151,13 +191,13 @@ void NeuralNetwork::initializeLayers()
 
 void NeuralNetwork::fit()
 {
-	int numTrainingData = static_cast<int>(trainingPercent * networkInputDim[1] / 100.0);
-	int numValidationData = networkInputDim[1] - numTrainingData;
+	int numTData = static_cast<int>(trainingPercent * networkInputDim[1] / 100.0);
+	int numVData = networkInputDim[1] - numTData;
 
-	int numTrainingBatchs = (numTrainingData + batchsize - 1) / batchsize;
-	int numValidationBatchs = (numValidationData + batchsize - 1) / batchsize;
+	int numTrainingBatchs = (numTData + batchsize - 1) / batchsize;
+	int numValidationBatchs = (numVData + batchsize - 1) / batchsize;
 	
-	int numFeatures = networkInputMatrix.rows();
+	int numFeatures = static_cast<int>(networkInputMatrix.rows());
 
 	trainingLoss.reserve(MaxNumSteps);
 	validationLoss.reserve(MaxNumSteps);
@@ -173,9 +213,9 @@ void NeuralNetwork::fit()
 			file << ",All-batches";
 			file << std::endl;
 		};
-	auto print_step = [&](ofstream& file, const int& i)
+	auto print_step = [&](ofstream& file, const int& stepNumber)
 		{
-			file << i;
+			file << stepNumber;
 		};
 	if ((fOutputMode & AVG) || (fOutputMode & PERBATCH)) {
 		header_lambda(trainLossFile, numTrainingBatchs);
@@ -197,15 +237,15 @@ void NeuralNetwork::fit()
 
 		if (logger.log_level >= LOG_LEVEL_DEBUG)
 			logger << "\tTraining data on the training set" << std::endl;
-		trainBatches(0, numTrainingData, numTrainingBatchs, tLossVal, true);
-		tLossVal /= static_cast<double>(numTrainingData*numFeatures);
+		trainBatches(0, numTData, numTrainingBatchs, tLossVal, true);
+		tLossVal /= static_cast<double>(numTData*numFeatures);
 		if (logger.log_level >= LOG_LEVEL_DEBUG)
 			logger << "\tTraining loss: " << tLossVal << std::endl;
 
 		if (logger.log_level >= LOG_LEVEL_DEBUG)
 			logger << "\tTesting the data on the validating set" << std::endl;
-		trainBatches(numTrainingData, numValidationData, numValidationBatchs, vLossVal, false);
-		vLossVal /= static_cast<double>(numValidationData*numFeatures);
+		trainBatches(numTData, numVData, numValidationBatchs, vLossVal, false);
+		vLossVal /= static_cast<double>(numVData*numFeatures);
 		if (logger.log_level >= LOG_LEVEL_DEBUG)
 			logger << "\tValidation loss: " << vLossVal << std::endl;
 
@@ -220,11 +260,16 @@ void NeuralNetwork::fit()
 		}
 
 		if (!trainingLoss.empty() && tLossVal < trainingLoss.back() && vLossVal > validationLoss.back())
-			numStepsTrainLossDownValidLossUp;
+			numStepsTrainLossDownValidLossUp++;
 		else
 			numStepsTrainLossDownValidLossUp = 0;
-		if (numStepsTrainLossDownValidLossUp >= 10)
+		if (numStepsTrainLossDownValidLossUp >= maxTDownVUp) {
+			if (logger.log_level >= LOG_LEVEL_WARN)
+				logger << "\tIn " << numStepsTrainLossDownValidLossUp 
+				<< " steps the training loss reduced while the validation loss increased!" 
+				<< std::endl << " Stopping the iteration!" << std::endl;
 			break;
+		}
 	}
 }
 
@@ -250,10 +295,10 @@ MatrixXd NeuralNetwork::transform()
 	if (networkInputDim[0] != networkTestDim[0])
 		throw std::invalid_argument("The number of feature for the test data is different than the training data!");
 
-	return forwardBatch(networkTestMatrix);
+	return forwardBatch(networkTestMatrix,false);
 }
 
-MatrixXd NeuralNetwork::forwardBatch(const MatrixXd& input_)
+MatrixXd NeuralNetwork::forwardBatch(const MatrixXd& input_, const bool& trainMode)
 {
 	MatrixXd outputMatrixBatch = input_;
 	int i = 0;
@@ -263,18 +308,18 @@ MatrixXd NeuralNetwork::forwardBatch(const MatrixXd& input_)
 	{
 		if (logger.log_level >= LOG_LEVEL_VERBOSE)
 			logger << "\t\t\tForward on the layer " << i++ << std::endl;
-		outputMatrixBatch = layer->forward(outputMatrixBatch);
+		outputMatrixBatch = layer->forward(outputMatrixBatch,trainMode);
 		if (logger.log_level >= LOG_LEVEL_VERBOSE)
 			logger << "\t\t\tOutputMatrixBatch dims = " << outputMatrixBatch.rows() << "X" << outputMatrixBatch.cols() << std::endl;
 	}
 	return outputMatrixBatch;
 }
 
-void NeuralNetwork::backwardBatch(const MatrixXd& output_)
+void NeuralNetwork::backwardBatch(const MatrixXd& expected_)
 {
-	MatrixXd prevDiffBatch = output_;
+	MatrixXd prevDiffBatch = expected_;
 	if (logger.log_level >= LOG_LEVEL_TRACE)
-		logger << "\t\tInput Matrix dims for backwardBatch = " << output_.rows() << "X" << output_.cols() << std::endl;
+		logger << "\t\tInput Matrix dims for backwardBatch = " << expected_.rows() << "X" << expected_.cols() << std::endl;
 	for (int i = numLayers - 1; i >= 0; i--)
 	{
 		if (logger.log_level >= LOG_LEVEL_VERBOSE)
@@ -328,7 +373,7 @@ void NeuralNetwork::trainBatches(const int& firstData, const int& numData, const
 			logger << "\t\tBatch Cols = " << firstCol << " , " << lastCol << " and numData = " << numData << std::endl;
 		}
 
-		outputBatch = forwardBatch(inputBatch);
+		outputBatch = forwardBatch(inputBatch,doBack);
 		if (doBack) {
 			backwardBatch(expectedBatch);
 			updateBatch();

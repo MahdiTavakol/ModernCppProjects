@@ -19,7 +19,7 @@ LayerBatchEfficient::LayerBatchEfficient(Logger& logger_, const int& batchsize_,
 	switch (activType)
 	{
 	case ActivationType::NONE:
-		activationFunction = std::make_unique<None>();
+		activationFunction = std::make_unique<NoneAct>();
 		break;
 	case ActivationType::RELU:
 		activationFunction = std::make_unique<ReLu>();
@@ -45,6 +45,9 @@ LayerBatchEfficient::LayerBatchEfficient(Logger& logger_, const int& batchsize_,
 
 	switch (optType)
 	{
+	case OptimizerType::NONE:
+		optFunction = std::make_unique<NoneOpt>(learningRate);
+		break;
 	case OptimizerType::SGD:
 		optFunction = std::make_unique<SGD>(learningRate);
 		break;
@@ -69,8 +72,7 @@ LayerBatchEfficient::LayerBatchEfficient(Logger& logger_, const int& batchsize_,
 LayerBatchEfficient::LayerBatchEfficient(Logger& logger_, const int& inputDim_, const int& outputDim_, const ActivationType& activType_,
 	const OptimizerType& optType_, const double& learningRate_) :
 	LayerBatchEfficient{ logger_,32,inputDim_,outputDim_,activType_,optType_,learningRate_ }
-{
-}
+{}
 
 void LayerBatchEfficient::initialize()
 {
@@ -80,28 +82,31 @@ void LayerBatchEfficient::initialize()
 	{
 	case ActivationType::TANH:
 		type = 1;
+		[[fallthrough]];
 	case ActivationType::SIGMOID:
 	{
+		type = 2;
 		mean = -std::sqrt(6.0 / static_cast<double>(inputDim + outputDim));
 		std = std::sqrt(6.0 / static_cast<double>(inputDim + outputDim));
-		type = 2;
 		break;
 	}
 	case ActivationType::NONE:
+		[[fallthrough]];
 	case ActivationType::RELU:
 		type = 3;
+		[[fallthrough]];
 	case ActivationType::LEAKYRELU:
 	{
+		type = 4;
 		mean = 0.0;
 		std = std::sqrt(2.0 / inputDim);
-		type = 4;
 		break;
 	}
 	case ActivationType::SELU:
 	{
+		type = 5;
 		mean = 0.0;
 		std = 1.0 / inputDim;
-		type = 5;
 		break;
 	}
 	default:
@@ -109,29 +114,26 @@ void LayerBatchEfficient::initialize()
 	}
 	std::cout << "Activation function type= " << type << " and inptDim = " << inputDim << std::endl;
 	
-	
-	std::random_device rd;
-	std::mt19937_64 gen{ rd() };
-	std::normal_distribution<double> dist{ mean, std };
+	gen.seed(rd());
+	distPtr = std::make_unique<std::normal_distribution<double>>(mean,std);
 
 	// Just weights has to be initialized not bias values
-	weights.block(0,0,weights.rows(),weights.cols()-1) = weights.block(0,0,weights.rows(),weights.cols()-1).unaryExpr([&dist, &gen](const double v) {return dist(gen); });
+	weights.block(0,0,weights.rows(),weights.cols()-1) = weights.block(0,0,weights.rows(),weights.cols()-1).unaryExpr([&](const double /*v*/) {return (*distPtr)(gen); });
 	weights.block(0,weights.cols()-1,weights.rows(),1) = MatrixXd::Constant(weights.rows(),1,0.02);
 	
 	
-	//std::cout << "Inside the weights initialization function" << std::endl;
-	double weights_avg = weights.sum(); // /static_cast<double>(weights.cols()*weights.rows());
-	//std::cout << "weights_sum inside the layer= " << weights_avg << std::endl;
+
+	//double weights_avg = weights.sum(); // /static_cast<double>(weights.cols()*weights.rows());
 }
 
-MatrixXd LayerBatchEfficient::forward(const MatrixXd& input_)
+MatrixXd LayerBatchEfficient::forward(const MatrixXd& input_, const bool /*do not use*/)
 {
 	input = input_;
 	//  (outputDimXinputDim)  X  (inputDimXBatchSize) -> outputDimXbatchsize
 	MatrixXd linear = weights.block(0, 0, weights.rows(), weights.cols() - 1) * input;
 	//  (outputDimX1).replicate(1,batchsize) -> outputDimXbatchsize
 	// For the last batch the number of data (linear.cols()) is less than the batchsize 
-	int batch_len = linear.cols();
+	int batch_len = static_cast<int>(linear.cols());
 	MatrixXd bias = weights.block(0, weights.cols() - 1, weights.rows(), 1).replicate(1, batch_len);
 	// outputDimXbatchsize + outputDimXbatchsiz e -> outputDimXbatchsize
 	MatrixXd z = linear + bias;
@@ -197,7 +199,7 @@ MatrixXd LayerBatchEfficient::backward(MatrixXd& nextDiff_)
 	double dloss_dz_avg = dLoss_dz.sum()/static_cast<double>(dLoss_dz.cols()*dLoss_dz.rows());
 	double input_avg = input.sum()/static_cast<double>(input.cols()*input.rows());
 	*/
-	double avg = dLoss_dweights.sum()/static_cast<double>(dLoss_dweights.cols()*dLoss_dweights.rows());
+	// double avg = dLoss_dweights.sum()/(static_cast<double>(dLoss_dweights.cols())*static_cast<double>(dLoss_dweights.rows()));
 	/*
 	std::cout << "dLoss_dweights_avg inside the layer= " << avg << std::endl;
 	std::cout << "Input_avg inside the layer= " << input_avg << std::endl;

@@ -17,7 +17,7 @@ public:
 	virtual MatrixXd diff(const MatrixXd& mat_) = 0;
 };
 
-class None final : public Activation
+class NoneAct final : public Activation
 {
 public:
 	double operator()(const double& x) override;

@@ -15,6 +15,14 @@ protected:
 	double learningRate;
 };
 
+class NoneOpt : public Optimizer
+{
+public:
+	NoneOpt(const double& learningRate_);
+	void update(MatrixXd& weights_, const MatrixXd& gradient_) override;
+
+};
+
 class SGD : public Optimizer
 {
 public:

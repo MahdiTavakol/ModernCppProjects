@@ -43,6 +43,7 @@ public:
 		const OptimizerType& optType_ = OptimizerType::SGD,
 		const double& learningRate_ = 0.05,
 		const LossType& lossType_ = LossType::MSE);
+	void addDropout(const int& dim_, const double& dropRate_, const double& learningRate_ = 0.1);
 	void initializeLayers();
 	virtual void fit();
 	MatrixXd transform();
@@ -74,16 +75,18 @@ protected:
 	MatrixXd networkInputMatrix;
 	MatrixXd networkOutputMatrix;
 
+	// Control parameters
 	const double trainingPercent = 70.0;
 	const int MaxNumSteps = 1000;
 	const int batchsize = -1;
+	const int maxTDownVUp = 10;
 	int numLayers = 0;
 
 	int maxNumLayers;
 	vector <std::unique_ptr<LayerBatchEfficient>> Layers;
 
-	MatrixXd forwardBatch(const MatrixXd& input_);
-	virtual void backwardBatch(const MatrixXd& output_);
+	MatrixXd forwardBatch(const MatrixXd& input_,const bool& trainMode);
+	virtual void backwardBatch(const MatrixXd& expected_);
 	void updateBatch();
 
 

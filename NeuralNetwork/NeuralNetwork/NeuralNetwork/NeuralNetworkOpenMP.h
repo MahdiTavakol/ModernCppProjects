@@ -12,7 +12,7 @@ public:
 	void fit() override;
 
 protected:
-	void backwardBatch(const MatrixXd& output_) {}
+	void backwardBatch(const MatrixXd& /*output_*/) {}
 
 	void trainBatches(const int& firstData_, const int& numData_,
 		const int& numBatchs_, double& lossValue_, const bool& doBack_) override;
