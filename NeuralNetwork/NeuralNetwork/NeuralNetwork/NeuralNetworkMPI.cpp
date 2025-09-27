@@ -76,10 +76,35 @@ void NeuralNetworkMPI::fit()
 		}
 		if (status_0 > 0) {
 			if (rank == 0) {
-				
+				int numDataIn = networkInputMatrix.rows() * status_0;
+				int numDataOut = networkOutputMatrix.rows() * status_0;
+				MatrixXd tranferMatInput = networkInputMatrix.block(0, 0, networkInputMatrix.rows(), status_0);
+				MatrixXd tranferMatOutput = networkOutputMatrix.block(0, 0, networkOutputMatrix.rows(), status_0);
+				MPI_Ssend(tranferMatInput.data(), numDataIn, MPI_DOUBLE, size - 1, 2, MPI_COMM_WORLD);
+				MPI_Ssend(tranferMatOutput.data(), numDataOut, MPI_DOUBLE, size - 1, 3, MPI_COMM_WORLD);
+			}
+			else if (rank == size - 1) {
+				MPI_Status status[2];
+				int numDataIn = networkInputMatrix.rows() * status_0;
+				int numDataOut = networkOutputMatrix.rows() * status_0;
+				MatrixXd tranferMatInput = networkInputMatrix.block(0, 0, networkInputMatrix.rows(), status_0);
+				MatrixXd tranferMatOutput = networkOutputMatrix.block(0, 0, networkOutputMatrix.rows(), status_0);
+				MPI_Recv(tranferMatInput.data(), numDataIn, MPI_DOUBLE, 0, 2, MPI_COMM_WORLD, &status[0]);
+				MPI_Recv(tranferMatOutput.data(), numDataOut, MPI_DOUBLE, 0, 3, MPI_COMM_WORLD, &status[1]);
+				MatrixXd newInputMatrix{ networkInputMatrix.rows(),networkInputMatrix.cols() + status_0 };
+				MatrixXd newOutputMatrix{ networkOutputMatrix.rows(),networkOutputMatrix.cols() + status_0 };
+				newInputMatrix.block(0, 0, networkInputMatrix.rows(), networkInputMatrix.cols()) = networkInputMatrix;
+				newOutputMatrix.block(0, 0, networkOutputMatrix.rows(), networkOutputMatrix.cols()) = networkOutputMatrix;
+				newInputMatrix.block(0, networkInputMatrix.cols(), networkInputMatrix.rows(), status_0) = networkInputMatrix;
+				newOutputMatrix.block(0, networkOutputMatrix.cols(), networkOutputMatrix.rows(),status_0 ) = networkOutputMatrix;
+				networkInputMatrix = newInputMatrix;
+				networkOutputMatrix = newOutputMatrix;
+				networkInputDim[1] = networkInputMatrix.cols();
+				networkOutputDim[1] = networkOutputMatrix.cols();
 			}
 		}
 	}
+
 	int numTData = static_cast<int>(trainingPercent * networkInputMatrix.cols() /100.0);
 	int numVData = static_cast<int>(networkInputMatrix.cols()) - numTData;
 
@@ -134,6 +159,10 @@ void NeuralNetworkMPI::fit()
 		
 		if ((logger.log_level >= LOG_LEVEL_INFO) && (rank == 0))
 			logger << "Step " << i << " out of " << MaxNumSteps << " steps " << std::endl;
+
+		// Exchanging data between ranks.
+		if (exchangeNEvery > 0 && !(i % exchangeNEvery))
+			exchange();
 		
 		std::array<double, 2> lossLocal = { 0.0,0.0 };
 		std::array<double, 2> loss = { 0.0, 0.0 };
