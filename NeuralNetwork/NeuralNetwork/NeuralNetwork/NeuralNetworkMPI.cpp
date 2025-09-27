@@ -16,8 +16,15 @@ NeuralNetworkMPI::NeuralNetworkMPI(Logger& logger_, const string& networkInputFi
 	fOutputMode = AVG;
 	fOutputMode |= PERRANK;
 		
-	trainLossFileName = "training-loss-rank-" + std::to_string(rank) + ".dat";
-	validationLossFileName = "validation-loss-rank-" + std::to_string(rank) + ".dat";
+
+	if (rank == 0) {
+		trainLossFileName = "training-loss-perRank.dat";
+		validationLossFileName = "validation-loss-perRank.dat";
+		TVLossAllFileName = "TVLosses.dat";
+		TVLossAllFile.open(TVLossAllFileName, std::ios::out | std::ios::trunc);
+		if (!TVLossAllFile.is_open())
+			logger << "Warning: Cannot open the RVLossAllFile" << std::endl;
+	}
 
 }
 
@@ -25,6 +32,21 @@ void NeuralNetworkMPI::initializeInputPtr()
 {
 	inputPtr = std::make_unique<InputMPI>(logger,networkDataFileName,numTargetCols);
 	testPtr = std::make_unique<InputMPI>(logger,networkTestFileName, 0);
+}
+
+void NeuralNetworkMPI::initializeOutputs()
+{
+	NeuralNetwork::initializeOutputs();
+	if (rank == 0 && fOutputMode & AVG) {
+		std::cout << "Opening the file: " << TVLossAllFileName  << std::endl;
+
+		// Check if the file name is initialized
+		if (TVLossAllFileName.size()) {
+			TVLossAllFile.open(TVLossAllFileName, std::ios::out | std::ios::trunc);
+			if (!trainLossFile.is_open())
+				logger << "Warning: Cannot open the file " << TVLossAllFileName << std::endl;
+		}
+	}
 }
 
 void NeuralNetworkMPI::fit()
@@ -40,6 +62,8 @@ void NeuralNetworkMPI::fit()
 	
 	trainingLoss.reserve(MaxNumSteps);
 	validationLoss.reserve(MaxNumSteps);
+
+	// Close these files on other ranks.. We use just one MPI_Gather and then write all the data in one file.....
 
 	// The number of steps in which the training loss reduces while the validation loss increases (sign of overfitting)
 	int TDownVUp = 0;
@@ -59,9 +83,11 @@ void NeuralNetworkMPI::fit()
 		{
 			file << i;
 		};
-	if ((fOutputMode & AVG) || (fOutputMode & PERBATCH)) {
-		header_lambda(trainLossFile, numTBatchs);
-		header_lambda(validationLossFile, numVBatchs);
+	if (rank == 0) {
+		if ((fOutputMode & AVG) || (fOutputMode & PERBATCH)) {
+			header_lambda(trainLossFile, numTBatchs);
+			header_lambda(validationLossFile, numVBatchs);
+		}
 	}
 
 
@@ -78,6 +104,12 @@ void NeuralNetworkMPI::fit()
 		std::array<double, 2> lossLocal = { 0.0,0.0 };
 		std::array<double, 2> loss = { 0.0, 0.0 };
 
+		std::vector<double> lossTGather;
+		std::vector<double> lossVGather;
+		// resize puts zero into the vector --> no need to push_back despite the reserve
+		lossTGather.resize(size);
+		lossVGather.resize(size);
+
 		int numDataLocal[2] = {numTData,numVData};
 		int numData[2] = {0,0};
 
@@ -90,6 +122,8 @@ void NeuralNetworkMPI::fit()
 
 		MPI_Allreduce(lossLocal.data(), loss.data(), 2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 		MPI_Allreduce(numDataLocal,numData,2,MPI_INT,MPI_SUM,MPI_COMM_WORLD);
+		MPI_Gather(&lossLocal[0], 1, MPI_DOUBLE, lossTGather.data(), 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+		MPI_Gather(&lossLocal[1], 1, MPI_DOUBLE, lossVGather.data(), 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 		loss[0] /= static_cast<int>(numData[0]*numFeatures);
 		loss[1] /= static_cast<int>(numData[1]*numFeatures);
 		
@@ -107,9 +141,12 @@ void NeuralNetworkMPI::fit()
 		trainingLoss.push_back(loss[0]);
 		validationLoss.push_back(loss[1]);
 		
-		if (fOutputMode & AVG) {
-			trainLossFile << "," << loss[0] << endl;
-			validationLossFile << "," << loss[1] << endl;
+		if (rank == 0 && fOutputMode & AVG) {
+			for (int i = 0; i < size; i++) {
+				trainLossFile << "," << lossTGather[i] << endl;
+				validationLossFile << "," << lossVGather[i] << endl;
+			}
+			TVLossAllFile << loss[0] << "," << loss[1] << std::endl;
 		}
 
 		// some double checking we should never reach here!!!

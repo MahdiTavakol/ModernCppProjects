@@ -32,7 +32,7 @@ public:
 		const int& numTargetCols_, const int& maxNumLayers_ = 10,
 		const int& batchsize_ = -1);
 	virtual void initializeInputPtr();
-	void initializeOutputs();
+	virtual void initializeOutputs();
 	void readInputData();
 	void addLayer(const int& inputDim_, const int& outputDim_,
 		const ActivationType& activType_ = ActivationType::RELU,

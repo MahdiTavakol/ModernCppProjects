@@ -29,12 +29,18 @@ void NeuralNetwork::initializeOutputs()
 {
 	if ((fOutputMode & AVG) || (fOutputMode & PERBATCH)) {
 		std::cout << "Opening the files: " << trainLossFileName << " and " << validationLossFileName << std::endl; 
-		trainLossFile.open(trainLossFileName, std::ios::out | std::ios::trunc);
-		validationLossFile.open(validationLossFileName, std::ios::out | std::ios::trunc);
-		if (!trainLossFile.is_open())
-			logger << "Warning: Cannot open the traininglossfile" << std::endl;
-		if (!validationLossFile.is_open())
-			logger << "Warning: Cannot open the validationlossfile" << std::endl;
+		
+		// Check if the file name is initialized
+		if (trainLossFileName.size()) {
+			trainLossFile.open(trainLossFileName, std::ios::out | std::ios::trunc);
+			if (!trainLossFile.is_open())
+				logger << "Warning: Cannot open the traininglossfile" << std::endl;
+		}
+		if (validationLossFileName.size()) {
+			validationLossFile.open(validationLossFileName, std::ios::out | std::ios::trunc);
+			if (!validationLossFile.is_open())
+				logger << "Warning: Cannot open the validationlossfile" << std::endl;
+		}
 	}
 }
 

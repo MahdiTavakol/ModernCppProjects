@@ -12,6 +12,7 @@ public:
 		const int& numTargetCols_,
 		const int& maxNumLayers_ = 10, const int& batchsize_ = -1);
 	void initializeInputPtr() override;
+	void initializeOutputs() override;
 	void fit() override;
 
 protected:
@@ -20,4 +21,7 @@ protected:
 
 private:
 	int rank, size;
+
+	std::string TVLossAllFileName;
+	std::ofstream TVLossAllFile;
 };
