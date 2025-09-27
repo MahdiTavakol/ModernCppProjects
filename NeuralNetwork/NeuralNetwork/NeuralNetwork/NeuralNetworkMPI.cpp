@@ -1,9 +1,11 @@
 #include "NeuralNetworkMPI.h"
+#include <numeric>
 
 NeuralNetworkMPI::NeuralNetworkMPI(Logger& logger_, const string& networkInputFileName_, const string& networkTestFileName_,
 	const int& numTargetCols_,
-	const int& maxNumLayers_, const int& batchsize_):
-	NeuralNetwork{logger_, networkInputFileName_, networkTestFileName_, numTargetCols_, maxNumLayers_ , batchsize_}
+	const int& maxNumLayers_, const int& batchsize_, const int& exchangeNEvery_):
+	NeuralNetwork{logger_, networkInputFileName_, networkTestFileName_, numTargetCols_, maxNumLayers_ , batchsize_},
+	exchangeNEvery{exchangeNEvery_}
 {
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -47,6 +49,37 @@ void NeuralNetworkMPI::initializeOutputs()
 
 void NeuralNetworkMPI::fit()
 {
+	if (exchangeNEvery > 0) {
+		int nColsLastRank;
+		int nColsFirstRank;
+		int status_0 = -1;
+
+		if (rank == 0) {
+			MPI_Status status;
+			MPI_Recv(&nColsLastRank,1,MPI_INT,size-1,0,MPI_COMM_WORLD,&status);
+		}
+		else if (rank == size - 1) {
+			nColsLastRank = networkOutputDim[1];
+			MPI_Ssend(&nColsLastRank, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+		}
+		if (rank == 0) {
+			nColsFirstRank = networkOutputDim[1];
+			if (nColsFirstRank == nColsLastRank)
+				status_0 = nColsFirstRank - nColsLastRank;
+		}
+		if (rank == 0) {
+			MPI_Ssend(&status_0, 1, MPI_INT, size - 1, 1, MPI_COMM_WORLD);
+		}
+		else if (rank == size - 1) {
+			MPI_Status status;
+			MPI_Recv(&status_0, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
+		}
+		if (status_0 > 0) {
+			if (rank == 0) {
+				
+			}
+		}
+	}
 	int numTData = static_cast<int>(trainingPercent * networkInputMatrix.cols() /100.0);
 	int numVData = static_cast<int>(networkInputMatrix.cols()) - numTData;
 
@@ -200,4 +233,45 @@ void NeuralNetworkMPI::backwardBatch(const MatrixXd& output_)
 		gradientAvg = gradientAvg.unaryExpr([&](double v) {return v / size; });
 		layer->updateGradients(std::move(gradientAvg));
 	}
+}
+
+
+void NeuralNetworkMPI::exchange()
+{
+	std::vector<int> sendRanks(size);
+	// Since random numbers are involved the shuffle must be done on one rank and then transfered to other ranks.
+	if (rank == 0) {
+		std::random_device rd;
+		std::mt19937_64 gen(rd());
+		std::iota(sendRanks.begin(), sendRanks.end(), 0);
+		std::shuffle(sendRanks.begin(), sendRanks.end(), gen);
+	}
+	// inside the if it would cause a deadlock!
+	MPI_Bcast(sendRanks.data(), size, MPI_INT, 0, MPI_COMM_WORLD);
+	int recvRanki;
+	int sendRanki;
+	sendRanki = sendRanks[rank];
+	auto it = std::find(sendRanks.begin(), sendRanks.end(), rank);
+	if (it == sendRanks.end()) throw std::runtime_error("Something weird happened!");
+	recvRanki = static_cast<int>(std::distance(sendRanks.begin(), it));
+
+	// self transfer
+	if (sendRanki == rank && recvRanki == rank) return;
+
+	MPI_Request requests[4];
+	MPI_Status statuses[4];
+	const int numInputData = networkInputDim[0] * networkInputDim[1];
+	MatrixXd newInputMatrix{networkInputMatrix.rows(),networkInputMatrix.cols() };
+	MPI_Irecv(newInputMatrix.data(), numInputData, MPI_DOUBLE, recvRanki, rank, MPI_COMM_WORLD, &requests[0]);
+	MPI_Isend(networkInputMatrix.data(), numInputData, MPI_DOUBLE, sendRanki, sendRanki, MPI_COMM_WORLD,&requests[1]);
+	const int numOutputData = networkOutputDim[0] * networkOutputDim[1];
+	MatrixXd newOutputMatrix{ networkOutputMatrix.rows(),networkOutputMatrix.cols() };
+	MPI_Irecv(newOutputMatrix.data(), numOutputData, MPI_DOUBLE, recvRanki, 2*rank, MPI_COMM_WORLD,&requests[2]);
+	MPI_Isend(networkOutputMatrix.data(), numOutputData, MPI_DOUBLE, sendRanki, 2*sendRanki, MPI_COMM_WORLD, &requests[3]);
+
+	for (int i = 0; i < 4; i++)
+		MPI_Wait(&requests[i], &statuses[i]);
+
+	networkInputMatrix = newInputMatrix;
+	networkOutputMatrix = newOutputMatrix;
 }

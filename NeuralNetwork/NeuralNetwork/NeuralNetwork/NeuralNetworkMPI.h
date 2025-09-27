@@ -10,7 +10,7 @@ class NeuralNetworkMPI final : public NeuralNetwork
 public:
 	NeuralNetworkMPI(Logger& logger_, const string& networkInputFileName_, const string& networkTestFileName_, 
 		const int& numTargetCols_,
-		const int& maxNumLayers_ = 10, const int& batchsize_ = -1);
+		const int& maxNumLayers_ = 10, const int& batchsize_ = -1, const int& exchangeNEvery_=0);
 	void initializeInputPtr() override;
 	void initializeOutputs() override;
 	void fit() override;
@@ -24,4 +24,7 @@ private:
 
 	std::string TVLossAllFileName;
 	std::ofstream TVLossAllFile;
+
+	int exchangeNEvery;
+	void exchange();
 };
