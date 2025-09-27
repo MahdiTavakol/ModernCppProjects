@@ -21,11 +21,7 @@ NeuralNetworkMPI::NeuralNetworkMPI(Logger& logger_, const string& networkInputFi
 		trainLossFileName = "training-loss-perRank.dat";
 		validationLossFileName = "validation-loss-perRank.dat";
 		TVLossAllFileName = "TVLosses.dat";
-		TVLossAllFile.open(TVLossAllFileName, std::ios::out | std::ios::trunc);
-		if (!TVLossAllFile.is_open())
-			logger << "Warning: Cannot open the RVLossAllFile" << std::endl;
 	}
-
 }
 
 void NeuralNetworkMPI::initializeInputPtr()
@@ -157,6 +153,8 @@ void NeuralNetworkMPI::fit()
 				trainLossFile << "," << lossTGather[i]/static_cast<double>(nDataTGather[i] * numFeatures);
 				validationLossFile << "," << lossVGather[i]/static_cast<double>(nDataVGather[i] * numFeatures);
 			}
+			trainLossFile << std::endl;
+			validationLossFile << std::endl;
 			TVLossAllFile << loss[0] << "," << loss[1] << std::endl;
 		}
 
