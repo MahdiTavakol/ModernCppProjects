@@ -77,7 +77,7 @@ protected:
 
 	// Control parameters
 	const double trainingPercent = 70.0;
-	const int MaxNumSteps = 1000;
+	const int MaxNumSteps = 10000;
 	const int batchsize = -1;
 	const int maxTDownVUp = 10;
 	int numLayers = 0;
