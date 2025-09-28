@@ -50,58 +50,7 @@ void NeuralNetworkMPI::initializeOutputs()
 void NeuralNetworkMPI::fit()
 {
 	if (exchangeNEvery > 0) {
-		int nColsLastRank;
-		int nColsFirstRank;
-		int status_0 = -1;
-
-		if (rank == 0) {
-			MPI_Status status;
-			MPI_Recv(&nColsLastRank,1,MPI_INT,size-1,0,MPI_COMM_WORLD,&status);
-		}
-		else if (rank == size - 1) {
-			nColsLastRank = networkOutputDim[1];
-			MPI_Ssend(&nColsLastRank, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
-		}
-		if (rank == 0) {
-			nColsFirstRank = networkOutputDim[1];
-			status_0 = nColsFirstRank - nColsLastRank;
-		}
-		if (rank == 0) {
-			MPI_Ssend(&status_0, 1, MPI_INT, size - 1, 1, MPI_COMM_WORLD);
-		}
-		else if (rank == size - 1) {
-			MPI_Status status;
-			MPI_Recv(&status_0, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
-		}
-		if (status_0 > 0) {
-			if (rank == 0) {
-				int numDataIn = networkInputMatrix.rows() * status_0;
-				int numDataOut = networkOutputMatrix.rows() * status_0;
-				MatrixXd tranferMatInput = networkInputMatrix.block(0, 0, networkInputMatrix.rows(), status_0);
-				MatrixXd tranferMatOutput = networkOutputMatrix.block(0, 0, networkOutputMatrix.rows(), status_0);
-				MPI_Ssend(tranferMatInput.data(), numDataIn, MPI_DOUBLE, size - 1, 2, MPI_COMM_WORLD);
-				MPI_Ssend(tranferMatOutput.data(), numDataOut, MPI_DOUBLE, size - 1, 3, MPI_COMM_WORLD);
-			}
-			else if (rank == size - 1) {
-				MPI_Status status[2];
-				int numDataIn = networkInputMatrix.rows() * status_0;
-				int numDataOut = networkOutputMatrix.rows() * status_0;
-				MatrixXd tranferMatInput = networkInputMatrix.block(0, 0, networkInputMatrix.rows(), status_0);
-				MatrixXd tranferMatOutput = networkOutputMatrix.block(0, 0, networkOutputMatrix.rows(), status_0);
-				MPI_Recv(tranferMatInput.data(), numDataIn, MPI_DOUBLE, 0, 2, MPI_COMM_WORLD, &status[0]);
-				MPI_Recv(tranferMatOutput.data(), numDataOut, MPI_DOUBLE, 0, 3, MPI_COMM_WORLD, &status[1]);
-				MatrixXd newInputMatrix{ networkInputMatrix.rows(),networkInputMatrix.cols() + status_0 };
-				MatrixXd newOutputMatrix{ networkOutputMatrix.rows(),networkOutputMatrix.cols() + status_0 };
-				newInputMatrix.block(0, 0, networkInputMatrix.rows(), networkInputMatrix.cols()) = networkInputMatrix;
-				newOutputMatrix.block(0, 0, networkOutputMatrix.rows(), networkOutputMatrix.cols()) = networkOutputMatrix;
-				newInputMatrix.block(0, networkInputMatrix.cols(), networkInputMatrix.rows(), status_0) = networkInputMatrix;
-				newOutputMatrix.block(0, networkOutputMatrix.cols(), networkOutputMatrix.rows(),status_0 ) = networkOutputMatrix;
-				networkInputMatrix = newInputMatrix;
-				networkOutputMatrix = newOutputMatrix;
-				networkInputDim[1] = networkInputMatrix.cols();
-				networkOutputDim[1] = networkOutputMatrix.cols();
-			}
-		}
+		setLastBatch();
 	}
 
 	int numTData = static_cast<int>(trainingPercent * networkInputMatrix.cols() /100.0);
@@ -242,8 +191,6 @@ void NeuralNetworkMPI::fit()
 		}
 
 	}
-	
-	
 }
 
 void NeuralNetworkMPI::backwardBatch(const MatrixXd& output_)
@@ -263,6 +210,54 @@ void NeuralNetworkMPI::backwardBatch(const MatrixXd& output_)
 	}
 }
 
+void NeuralNetworkMPI::setLastBatch() {
+
+	int status_0 = -1;
+
+	if (rank != 0 && rank != size - 1) {
+		return;
+	} else if (rank == 0) {
+		MPI_Status status;
+		MPI_Recv(&status_0, 1, MPI_INT, size - 1, 0, MPI_COMM_WORLD, &status);
+	} else if (rank == size - 1) {
+		int nCols;
+		nCols = networkInputDim[1];
+		status_0 = batchsize - nCols;
+		MPI_Ssend(&status_0, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+	}
+
+	if (rank == 0) {
+		MatrixXd& inMat = networkInputMatrix;
+		MatrixXd& ouMat = networkOutputMatrix;
+		int nDataIn = inMat.rows() * status_0;
+		int nDataOu = ouMat.rows() * status_0;
+		MatrixXd tranferMatIn = inMat.block(0, 0, inMat.rows(), status_0);
+		MatrixXd tranferMatOu = ouMat.block(0, 0, ouMat.rows(), status_0);
+		MPI_Ssend(tranferMatIn.data(), nDataIn, MPI_DOUBLE, size - 1, 2, MPI_COMM_WORLD);
+		MPI_Ssend(tranferMatOu.data(), nDataOu, MPI_DOUBLE, size - 1, 3, MPI_COMM_WORLD);
+	} else if (rank == size - 1) {
+		MPI_Status status[2];
+		MatrixXd& inMat = networkInputMatrix;
+		MatrixXd& ouMat = networkOutputMatrix;
+		MatrixXd newIn{ inMat.rows(),inMat.cols() + status_0 };
+		MatrixXd newOu{ ouMat.rows(),ouMat.cols() + status_0 };
+		int nDataIn = inMat.rows() * status_0;
+		int nDataOu = ouMat.rows() * status_0;
+		MatrixXd transferMatIn{ inMat.rows(),status_0 };
+		MatrixXd transferMatOu{ ouMat.rows(),status_0 };
+		MPI_Recv(transferMatIn.data(), nDataIn, MPI_DOUBLE, 0, 2, MPI_COMM_WORLD, &status[0]);
+		MPI_Recv(transferMatOu.data(), nDataOu, MPI_DOUBLE, 0, 3, MPI_COMM_WORLD, &status[1]);
+		newIn.block(0, 0, inMat.rows(), inMat.cols()) = inMat;
+		newOu.block(0, 0, ouMat.rows(), ouMat.cols()) = ouMat;
+		newIn.block(0, inMat.cols(), inMat.rows(), status_0) = transferMatIn;
+		newOu.block(0, ouMat.cols(), ouMat.rows(), status_0) = transferMatOu;
+		inMat = newIn;
+		ouMat = newOu;
+		networkInputDim[1] = inMat.cols();
+		networkOutputDim[1] = ouMat.cols();
+	}
+	return;
+}
 
 void NeuralNetworkMPI::exchange()
 {

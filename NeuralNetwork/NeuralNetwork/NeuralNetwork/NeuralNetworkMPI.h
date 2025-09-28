@@ -26,5 +26,6 @@ private:
 	std::ofstream TVLossAllFile;
 
 	int exchangeNEvery;
+	void setLastBatch();
 	void exchange();
 };
