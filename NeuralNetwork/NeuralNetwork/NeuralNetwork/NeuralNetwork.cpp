@@ -244,14 +244,14 @@ void NeuralNetwork::fit()
 		if (logger.log_level >= LOG_LEVEL_DEBUG)
 			logger << "\tTraining data on the training set" << std::endl;
 		trainBatches(0, numTData, numTrainingBatchs, tLossVal, true);
-		tLossVal /= static_cast<double>(numTData*numFeatures);
+		//tLossVal /= static_cast<double>(numTData*numFeatures);
 		if (logger.log_level >= LOG_LEVEL_DEBUG)
 			logger << "\tTraining loss: " << tLossVal << std::endl;
 
 		if (logger.log_level >= LOG_LEVEL_DEBUG)
 			logger << "\tTesting the data on the validating set" << std::endl;
 		trainBatches(numTData, numVData, numValidationBatchs, vLossVal, false);
-		vLossVal /= static_cast<double>(numVData*numFeatures);
+		//vLossVal /= static_cast<double>(numVData*numFeatures);
 		if (logger.log_level >= LOG_LEVEL_DEBUG)
 			logger << "\tValidation loss: " << vLossVal << std::endl;
 

@@ -135,14 +135,17 @@ void NeuralNetworkMPI::fit()
 			logger << "\tTesting the data on the validating set" << std::endl;
 		trainBatches(numTData, numVData, numVBatchs, lossLocal[1], false);
 
+		lossLocal[0] *= numTData;
+		lossLocal[1] *= numVData;
+
 		MPI_Allreduce(lossLocal.data(), loss.data(), 2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 		MPI_Allreduce(numDataLocal,numData,2,MPI_INT,MPI_SUM,MPI_COMM_WORLD);
 		MPI_Gather(&lossLocal[0], 1, MPI_DOUBLE, lossTGather.data(), 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 		MPI_Gather(&lossLocal[1], 1, MPI_DOUBLE, lossVGather.data(), 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 		MPI_Gather(&numDataLocal[0], 1, MPI_INT, nDataTGather.data(), 1, MPI_INT, 0, MPI_COMM_WORLD);
 		MPI_Gather(&numDataLocal[1], 1, MPI_INT, nDataVGather.data(), 1, MPI_INT, 0, MPI_COMM_WORLD);
-		loss[0] /= static_cast<double>(numData[0]*numFeatures);
-		loss[1] /= static_cast<double>(numData[1]*numFeatures);
+		loss[0] /= static_cast<double>(numData[0]);
+		loss[1] /= static_cast<double>(numData[1]);
 		
 		if (logger.log_level >= LOG_LEVEL_WARN) {
 			if (numData[0] == 0 || numData[1] == 0 || numFeatures == 0)
