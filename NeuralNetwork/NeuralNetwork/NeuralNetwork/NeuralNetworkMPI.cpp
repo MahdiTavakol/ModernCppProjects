@@ -163,8 +163,8 @@ void NeuralNetworkMPI::fit()
 		
 		if (rank == 0 && fOutputMode & AVG) {
 			for (int i = 0; i < size; i++) {
-				trainLossFile << "," << lossTGather[i]/static_cast<double>(nDataTGather[i] * numFeatures);
-				validationLossFile << "," << lossVGather[i]/static_cast<double>(nDataVGather[i] * numFeatures);
+				trainLossFile << "," << lossTGather[i]/static_cast<double>(nDataTGather[i]);
+				validationLossFile << "," << lossVGather[i]/static_cast<double>(nDataVGather[i]);
 			}
 			trainLossFile << std::endl;
 			validationLossFile << std::endl;
