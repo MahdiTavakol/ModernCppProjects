@@ -9,7 +9,7 @@ double MSE::operator()(const MatrixXd& output_, const MatrixXd& real_)
 
 MatrixXd MSE::diff(const MatrixXd& output_, const MatrixXd& real_)
 {
-	MatrixXd difference = 2.0 * (output_ - real_)/output_.cols();
+	MatrixXd difference = 2.0 * (output_ - real_)/output_.size();
 	return difference;
 }
 
