@@ -40,7 +40,7 @@ int main(int argc, char** argv)
 		std::ref(std::cout),
 		std::ref(logFile)
 	};
-	Logger logger{logger_ref};
+	Logger logger{ logger_ref };
 
 
 	RunType runType = RunType::MPI;
@@ -51,18 +51,18 @@ int main(int argc, char** argv)
 		logger << "Initializing the program" << std::endl;
 		logger << "Creating the Neural Network" << std::endl;
 	}
-	
+
 	switch (runType)
 	{
 	case RunType::SERIAL:
 		// trainfiles, n_in (input_cols) , n_out
-		neuralNetworkPtr = std::make_unique<NeuralNetwork>(logger,trainFile,testFile,1,13,32);
+		neuralNetworkPtr = std::make_unique<NeuralNetwork>(logger, trainFile, testFile, 1, 13, 32);
 		break;
 	case RunType::MPI:
-		neuralNetworkPtr = std::make_unique<NeuralNetworkMPI>(logger,trainFile, testFile, 1,13, 32);
+		neuralNetworkPtr = std::make_unique<NeuralNetworkMPI>(logger, trainFile, testFile, 1, 13, 32);
 		break;
 	case RunType::OPENMP:
-		neuralNetworkPtr = std::make_unique<NeuralNetworkOpenMP>(logger,trainFile, testFile,1, 13, 32);
+		neuralNetworkPtr = std::make_unique<NeuralNetworkOpenMP>(logger, trainFile, testFile, 1, 13, 32);
 		break;
 	default:
 		throw std::invalid_argument("Uknown run type");
@@ -72,25 +72,25 @@ int main(int argc, char** argv)
 	neuralNetworkPtr->initializeOutputs();
 	neuralNetworkPtr->readInputData();
 	neuralNetworkPtr->addLayer(100, 90);
-	neuralNetworkPtr->addDropout(90,0.2);
-	neuralNetworkPtr->addLayer(90,  80);
-	neuralNetworkPtr->addDropout(80,0.2);
-	neuralNetworkPtr->addLayer(80,  70);
-	neuralNetworkPtr->addDropout(70,0.2);
-	neuralNetworkPtr->addLayer(70,  50);
-	neuralNetworkPtr->addDropout(50,0.2);
+	neuralNetworkPtr->addDropout(90, 0.2);
+	neuralNetworkPtr->addLayer(90, 80);
+	neuralNetworkPtr->addDropout(80, 0.2);
+	neuralNetworkPtr->addLayer(80, 70);
+	neuralNetworkPtr->addDropout(70, 0.2);
+	neuralNetworkPtr->addLayer(70, 50);
+	neuralNetworkPtr->addDropout(50, 0.2);
 	neuralNetworkPtr->addLayer(50, 30);
-	neuralNetworkPtr->addDropout(30,0.2);
+	neuralNetworkPtr->addDropout(30, 0.2);
 	neuralNetworkPtr->addLayer(30, 10);
-	neuralNetworkPtr->addDropout(10,0.2);
+	neuralNetworkPtr->addDropout(10, 0.2);
 	neuralNetworkPtr->addLayer(10, 2);
-	neuralNetworkPtr->addDropout(2,0.2);
+	neuralNetworkPtr->addDropout(2, 0.2);
 	neuralNetworkPtr->addLastLayer(2, 1);
 	neuralNetworkPtr->initializeLayers();
 	neuralNetworkPtr->fit();
-	//neuralNetworkPtr->transform();
+	neuralNetworkPtr->transform();
 
-	
+
 	MPI_Finalize();
 
 	return 0;
