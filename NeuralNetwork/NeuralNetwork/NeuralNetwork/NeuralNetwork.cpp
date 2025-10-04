@@ -14,9 +14,9 @@ NeuralNetwork::NeuralNetwork(Logger& logger_, const string& networkDataFileName_
 	validationLossFileName{"validation-loss.dat"},
 	networkDataFileName{ networkDataFileName_ },
 	networkTestFileName{ networkTestFileName_ },
-	numTargetCols{ numTargetCols_ },
-	maxNumLayers{ maxNumLayers_ }, batchsize{ batchsize_ },
-	trainingPercent{ 70.0 }
+	numTargetCols{ numTargetCols_ }, batchsize{ batchsize_ },
+	trainingPercent{ 70.0 },
+	maxNumLayers{ maxNumLayers_ }
 {}
 
 void NeuralNetwork::initializeOptandLoss(const OptimizerType& optType_,

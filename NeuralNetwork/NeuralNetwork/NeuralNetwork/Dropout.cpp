@@ -43,7 +43,7 @@ MatrixXd Dropout::backward(MatrixXd& nextDiff_)
 	return nextDiff_.cwiseProduct(mask_full);
 }
 
-void Dropout::update(const std::unique_ptr<Optimizer>& OptFuncPtr_)
+void Dropout::update(const std::unique_ptr<Optimizer>& /*OptFuncPtr_*/)
 {
  	// do nothing.
 }
