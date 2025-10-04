@@ -67,7 +67,7 @@ add_executable(${APP_TARGET} main.cpp)
 target_link_libraries(${APP_TARGET} PRIVATE ${CORE_TARGET})
 
 # ---------- Catch2 tests ----------
-option(BUILD_TESTS "Build Catch2 tests" OFF)
+option(BUILD_TESTS "Build Catch2 tests" ON)
 if(BUILD_TESTS)
   include(FetchContent)
   # Use lowercase handle; FetchContent exposes catch2_SOURCE_DIR / _BINARY_DIR
@@ -81,7 +81,7 @@ if(BUILD_TESTS)
   enable_testing()
 
   add_executable(${TEST_TARGET}
-    tests/test_basic.cpp
+    tests/test_1.cpp
     # add more test files here
   )
   target_link_libraries(${TEST_TARGET} PRIVATE
