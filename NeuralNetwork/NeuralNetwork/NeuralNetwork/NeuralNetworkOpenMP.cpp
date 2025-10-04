@@ -23,8 +23,8 @@ void NeuralNetworkOpenMP::fit()
 	int numVData = networkInputDim[1] - numTData;
 
 
-	int numTrainingBatchs = (numTData + batchsize - 1) / batchsize;
-	int numValidationBatchs = (numVData + batchsize - 1) / batchsize;
+	int numTBatchs = (numTData + batchsize - 1) / batchsize;
+	int numVBatchs = (numVData + batchsize - 1) / batchsize;
 
 	trainingLoss.reserve(MaxNumSteps);
 	validationLoss.reserve(MaxNumSteps);
@@ -38,8 +38,8 @@ void NeuralNetworkOpenMP::fit()
 		double vLossVal = 0.0;
 
 
-		trainBatches(0, numTData, numTrainingBatchs, tLossVal, true);
-		trainBatches(numTData, numVData, numValidationBatchs, vLossVal, false);
+		trainBatches(0, numTData, numTBatchs, tLossVal, true);
+		trainBatches(numTData, numVData, numVBatchs, vLossVal, false);
 
 		trainingLoss.push_back(tLossVal);
 		validationLoss.push_back(vLossVal);

@@ -135,8 +135,6 @@ void NeuralNetworkMPI::fit()
 			logger << "\tTesting the data on the validating set" << std::endl;
 		trainBatches(numTData, numVData, numVBatchs, lossLocal[1], false);
 
-		lossLocal[0] *= numTData;
-		lossLocal[1] *= numVData;
 
 		MPI_Allreduce(lossLocal.data(), loss.data(), 2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 		MPI_Allreduce(numDataLocal,numData,2,MPI_INT,MPI_SUM,MPI_COMM_WORLD);
