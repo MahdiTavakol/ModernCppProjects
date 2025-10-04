@@ -19,7 +19,7 @@ NeuralNetwork::NeuralNetwork(Logger& logger_, const string& networkDataFileName_
 	trainingPercent{ 70.0 }
 {}
 
-void NeuralNetwork::initOptAndLoss(const OptimizerType& optType_,
+void NeuralNetwork::initializeOptandLoss(const OptimizerType& optType_,
 	                               const double& learningRate_,
 	                               const LossType& lossType_)
 {

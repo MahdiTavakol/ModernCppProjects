@@ -143,6 +143,7 @@
     <ClCompile Include="Neuron.cpp" />
     <ClCompile Include="Optimizers.cpp" />
     <ClCompile Include="Scaler.cpp" />
+    <ClCompile Include="tests\test_1.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Activations.h" />

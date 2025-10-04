@@ -74,6 +74,7 @@ int main(int argc, char** argv)
 
 	neuralNetworkPtr->initializeInputFilePtr();
 	neuralNetworkPtr->initializeOutputs();
+	neuralNetworkPtr->initializeOptandLoss();
 	neuralNetworkPtr->readInputFileData();
 	for (auto& layerI : Layers) {
 		int inDim = layerI.intputDim;
