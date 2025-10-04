@@ -1,6 +1,6 @@
 #pragma once
 #include "NeuralNetwork.h"
-#include "InputMPI.h"
+#include "InputMPIFile.h"
 #include "Logger.h"
 
 #include <mpi.h>
@@ -8,10 +8,10 @@
 class NeuralNetworkMPI final : public NeuralNetwork
 {
 public:
-	NeuralNetworkMPI(Logger& logger_, const string& networkInputFileName_, const string& networkTestFileName_, 
+	NeuralNetworkMPI(Logger& logger_, const string& networkInputFileFileName_, const string& networkTestFileName_, 
 		const int& numTargetCols_,
 		const int& maxNumLayers_ = 10, const int& batchsize_ = -1, const int& exchangeNEvery_=0);
-	void initializeInputPtr() override;
+	void initializeInputFilePtr() override;
 	void initializeOutputs() override;
 	void fit() override;
 

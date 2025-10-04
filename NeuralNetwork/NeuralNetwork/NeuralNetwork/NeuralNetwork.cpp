@@ -19,10 +19,10 @@ NeuralNetwork::NeuralNetwork(Logger& logger_, const string& networkDataFileName_
 	trainingPercent{ 70.0 }
 {}
 
-void NeuralNetwork::initializeInputPtr()
+void NeuralNetwork::initializeInputFilePtr()
 {
-	inputPtr = std::make_unique<Input>(logger, networkDataFileName, numTargetCols);
-	testPtr = std::make_unique<Input>(logger, networkTestFileName, 0);
+	InputFilePtr = std::make_unique<InputFile>(logger, networkDataFileName, numTargetCols);
+	testPtr = std::make_unique<InputFile>(logger, networkTestFileName, 0);
 }
 
 void NeuralNetwork::initializeOutputs()
@@ -44,33 +44,33 @@ void NeuralNetwork::initializeOutputs()
 	}
 }
 
-void NeuralNetwork::readInputData()
+void NeuralNetwork::readInputFileData()
 {
-	if (inputPtr == nullptr) {
-		std::cout << "InputPtr is empty, returning!" << std::endl;
+	if (InputFilePtr == nullptr) {
+		std::cout << "InputFilePtr is empty, returning!" << std::endl;
 		return;
 	}
-	inputPtr->init();
-	inputPtr->read();
-	inputPtr->return_data(networkInputDim, networkOutputDim, networkInputMatrix, networkOutputMatrix);
-	inputPtr.reset();
+	InputFilePtr->init();
+	InputFilePtr->read();
+	InputFilePtr->return_data(networkInputFileDim, networkOutputDim, networkInputFileMatrix, networkOutputMatrix);
+	InputFilePtr.reset();
 
-	auto swap_array_2 = [](std::array<int, 2>& input)
+	auto swap_array_2 = [](std::array<int, 2>& InputFile)
 		{
-			int dum = input[0];
-			input[0] = input[1];
-			input[1] = dum;
+			int dum = InputFile[0];
+			InputFile[0] = InputFile[1];
+			InputFile[1] = dum;
 		};
 
-	swap_array_2(networkInputDim);
+	swap_array_2(networkInputFileDim);
 	swap_array_2(networkOutputDim);
-	networkInputMatrix.transposeInPlace();
+	networkInputFileMatrix.transposeInPlace();
 	networkOutputMatrix.transposeInPlace();
 
-	if (networkInputDim[1] != networkOutputDim[1]) {
+	if (networkInputFileDim[1] != networkOutputDim[1]) {
 		std::ostringstream oss;
-		oss << "The number of data in the input ("
-			<< networkInputDim[1]
+		oss << "The number of data in the InputFile ("
+			<< networkInputFileDim[1]
 			<< ") and output data ("
 			<< networkOutputDim[1]
 			<< ") are not the same!";
@@ -80,14 +80,14 @@ void NeuralNetwork::readInputData()
 
 	// Scaling the data
 	scaler = std::make_unique<ZScoreScaler>();
-	networkInputMatrix = (*scaler)(networkInputMatrix);
+	networkInputFileMatrix = (*scaler)(networkInputFileMatrix);
 	//networkOutputMatrix = (*scaler)(networkOutputMatrix);
 
 	// reserving the layers
 	Layers.reserve(maxNumLayers);
 }
 
-void NeuralNetwork::addLayer(const int& inputDim_, const int& outputDim_,
+void NeuralNetwork::addLayer(const int& InputFileDim_, const int& outputDim_,
 	const ActivationType& activType_,
 	const OptimizerType& optType_,
 	const double& learningRate_)
@@ -95,19 +95,19 @@ void NeuralNetwork::addLayer(const int& inputDim_, const int& outputDim_,
 	// The first layer does not have any previous layer so we need to check if there is any previous layers
 	if (Layers.size())
 	{
-		int prevLayerOutputDim = Layers.back()->returnInputOutputDims()[1];
-		if (inputDim_ != prevLayerOutputDim) throw std::invalid_argument("Incompatible with the previous layer!");
+		int prevLayerOutputDim = Layers.back()->returnInputFileOutputDims()[1];
+		if (InputFileDim_ != prevLayerOutputDim) throw std::invalid_argument("Incompatible with the previous layer!");
 	}
 	if (batchsize == -1) {
 		/* I do not put the default value of the batch size here
 		* on purpose so that the Layers decides on the default value
 		* avoiding having a mismatch between the two default values
 		*/
-		Layers.push_back(std::make_unique<LayerBatchEfficient>(logger, inputDim_, outputDim_,
+		Layers.push_back(std::make_unique<LayerBatchEfficient>(logger, InputFileDim_, outputDim_,
 			activType_, optType_, learningRate_));
 	}
 	else if (batchsize > 0) {
-		Layers.push_back(std::make_unique<LayerBatchEfficient>(logger, batchsize, inputDim_, outputDim_,
+		Layers.push_back(std::make_unique<LayerBatchEfficient>(logger, batchsize, InputFileDim_, outputDim_,
 			activType_, optType_, learningRate_));
 	}
 	else
@@ -118,7 +118,7 @@ void NeuralNetwork::addLayer(const int& inputDim_, const int& outputDim_,
 	numLayers++;
 }
 
-void NeuralNetwork::addLastLayer(const int& inputDim_, const int& outputDim_,
+void NeuralNetwork::addLastLayer(const int& InputFileDim_, const int& outputDim_,
 	const ActivationType& activType_,
 	const OptimizerType& optType_,
 	const double& learningRate_,
@@ -127,19 +127,19 @@ void NeuralNetwork::addLastLayer(const int& inputDim_, const int& outputDim_,
 	// It might be the only layer
 	if (Layers.size())
 	{
-		int prevLayerOutputDim = Layers.back()->returnInputOutputDims()[1];
-		if (inputDim_ != prevLayerOutputDim) throw std::invalid_argument("Incompatible with the previous layer!");
+		int prevLayerOutputDim = Layers.back()->returnInputFileOutputDims()[1];
+		if (InputFileDim_ != prevLayerOutputDim) throw std::invalid_argument("Incompatible with the previous layer!");
 	}
 	if (batchsize == -1) {
 		/* I do not put the default value of the batch size here
 		 * on purpose so that the Layers decides on the default value
 		 * avoiding having a mismatch between the two default values
 		 */
-		Layers.push_back(std::make_unique<LastLayerBatchEfficient>(logger, inputDim_, outputDim_,
+		Layers.push_back(std::make_unique<LastLayerBatchEfficient>(logger, InputFileDim_, outputDim_,
 			activType_, optType_, learningRate_, lossType_));
 	}
 	else if (batchsize > 0) {
-		Layers.push_back(std::make_unique<LastLayerBatchEfficient>(logger, batchsize, inputDim_, outputDim_,
+		Layers.push_back(std::make_unique<LastLayerBatchEfficient>(logger, batchsize, InputFileDim_, outputDim_,
 			activType_, optType_, learningRate_, lossType_));
 	}
 	else
@@ -152,7 +152,7 @@ void NeuralNetwork::addDropout(const int& dim_, const double& dropRate_, const d
 	// checking if the size is the same is the previous layer
 	if (Layers.size())
 	{
-		int prevLayerOutputDim = Layers.back()->returnInputOutputDims()[1];
+		int prevLayerOutputDim = Layers.back()->returnInputFileOutputDims()[1];
 		if (dim_ != prevLayerOutputDim) throw std::invalid_argument("Incompatible with the previous layer!");
 	}
 	// The first layer cannot be a dropout as there is no previous weights to drop out!
@@ -201,13 +201,13 @@ void NeuralNetwork::initializeLayers()
 
 void NeuralNetwork::fit()
 {
-	int numTData = static_cast<int>(trainingPercent * networkInputDim[1] / 100.0);
-	int numVData = networkInputDim[1] - numTData;
+	int numTData = static_cast<int>(trainingPercent * networkInputFileDim[1] / 100.0);
+	int numVData = networkInputFileDim[1] - numTData;
 
 	int numTrainingBatchs = (numTData + batchsize - 1) / batchsize;
 	int numValidationBatchs = (numVData + batchsize - 1) / batchsize;
 	
-	int numFeatures = static_cast<int>(networkInputMatrix.rows());
+	int numFeatures = static_cast<int>(networkInputFileMatrix.rows());
 
 	trainingLoss.reserve(MaxNumSteps);
 	validationLoss.reserve(MaxNumSteps);
@@ -304,18 +304,18 @@ MatrixXd NeuralNetwork::transform()
 
 	networkTestMatrix.transposeInPlace();
 
-	if (networkInputDim[0] != networkTestDim[0])
+	if (networkInputFileDim[0] != networkTestDim[0])
 		throw std::invalid_argument("The number of feature for the test data is different than the training data!");
 
 	return forwardBatch(networkTestMatrix,false);
 }
 
-MatrixXd NeuralNetwork::forwardBatch(const MatrixXd& input_, const bool& trainMode)
+MatrixXd NeuralNetwork::forwardBatch(const MatrixXd& InputFile_, const bool& trainMode)
 {
-	MatrixXd outputMatrixBatch = input_;
+	MatrixXd outputMatrixBatch = InputFile_;
 	int i = 0;
 	if (logger.log_level >= LOG_LEVEL_TRACE)
-		logger << "\t\tInput Matrix dims for forwardBatch = " << input_.rows() << "X" << input_.cols() << std::endl;
+		logger << "\t\tInputFile Matrix dims for forwardBatch = " << InputFile_.rows() << "X" << InputFile_.cols() << std::endl;
 	for (auto& layer : Layers)
 	{
 		if (logger.log_level >= LOG_LEVEL_VERBOSE)
@@ -331,7 +331,7 @@ void NeuralNetwork::backwardBatch(const MatrixXd& expected_)
 {
 	MatrixXd prevDiffBatch = expected_;
 	if (logger.log_level >= LOG_LEVEL_TRACE)
-		logger << "\t\tInput Matrix dims for backwardBatch = " << expected_.rows() << "X" << expected_.cols() << std::endl;
+		logger << "\t\tInputFile Matrix dims for backwardBatch = " << expected_.rows() << "X" << expected_.cols() << std::endl;
 	for (int i = numLayers - 1; i >= 0; i--)
 	{
 		if (logger.log_level >= LOG_LEVEL_VERBOSE)
@@ -377,15 +377,15 @@ void NeuralNetwork::trainBatches(const int& firstData, const int& numData, const
 		int lastCol = std::min(firstCol+batchsize,numData+firstData);
 		int numCols = lastCol - firstCol;
 
-		MatrixXd inputBatch = networkInputMatrix.block(0, firstCol, networkInputMatrix.rows(), numCols);
+		MatrixXd InputFileBatch = networkInputFileMatrix.block(0, firstCol, networkInputFileMatrix.rows(), numCols);
 		MatrixXd expectedBatch = networkOutputMatrix.block(0, firstCol, networkOutputMatrix.rows(), numCols);
 
 		if (logger.log_level >= LOG_LEVEL_TRACE) {
-			logger << "\t\tInput Matrix dims = " << inputBatch.rows() << "X" << inputBatch.cols() << std::endl;
+			logger << "\t\tInputFile Matrix dims = " << InputFileBatch.rows() << "X" << InputFileBatch.cols() << std::endl;
 			logger << "\t\tBatch Cols = " << firstCol << " , " << lastCol << " and numData = " << numData << std::endl;
 		}
 
-		outputBatch = forwardBatch(inputBatch,doBack);
+		outputBatch = forwardBatch(InputFileBatch,doBack);
 		if (doBack) {
 			backwardBatch(expectedBatch);
 			updateBatch();
@@ -414,17 +414,17 @@ void NeuralNetwork::trainBatches(const int& firstData, const int& numData, const
 		}
 	}
 	
-	array<int,2> lastDims = LastLayerRawPtr->returnInputOutputDims();
+	array<int,2> lastDims = LastLayerRawPtr->returnInputFileOutputDims();
 }
 
 void NeuralNetwork::enterTestXy()
 {
-	networkInputDim[0] = 2;
-	networkInputDim[1] = 4;
+	networkInputFileDim[0] = 2;
+	networkInputFileDim[1] = 4;
 	networkOutputDim[0] = 1;
 	networkOutputDim[1] = 4;
-	networkInputMatrix.resize(2, 4);
-	networkInputMatrix << 0, 1, 0, 1,
+	networkInputFileMatrix.resize(2, 4);
+	networkInputFileMatrix << 0, 1, 0, 1,
                       0, 0, 1, 1;
 
 	networkOutputMatrix.resize(1, 4);

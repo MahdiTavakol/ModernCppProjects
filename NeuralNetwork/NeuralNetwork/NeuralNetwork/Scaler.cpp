@@ -4,23 +4,23 @@
 using std::cout;
 using std::endl;
 
-MatrixXd MinMaxScaler::operator()(MatrixXd& input_)
+MatrixXd MinMaxScaler::operator()(MatrixXd& InputFile_)
 {
 	double etol = 1e-6;
-	VectorXd rowMin = input_.rowwise().minCoeff();
-	VectorXd rowRange = input_.rowwise().maxCoeff()-rowMin;
+	VectorXd rowMin = InputFile_.rowwise().minCoeff();
+	VectorXd rowRange = InputFile_.rowwise().maxCoeff()-rowMin;
 	rowRange = rowRange.unaryExpr([&](double x) {return x > etol ? x : 1.0; });
-	MatrixXd centered = input_.colwise() - rowMin;
+	MatrixXd centered = InputFile_.colwise() - rowMin;
 	MatrixXd scaled = centered.array().colwise() / rowRange.array();
 	
 	return scaled;
 }
 
-MatrixXd ZScoreScaler::operator()(MatrixXd& input_)
+MatrixXd ZScoreScaler::operator()(MatrixXd& InputFile_)
 {
 	double etol = 1e-6;
-	VectorXd rowMean = input_.rowwise().mean();  // size = num_features
-    	MatrixXd centered = input_.colwise() - rowMean; // broadcast subtraction
+	VectorXd rowMean = InputFile_.rowwise().mean();  // size = num_features
+    	MatrixXd centered = InputFile_.colwise() - rowMean; // broadcast subtraction
     
 	// variance = mean of squared deviations across columns
 	VectorXd rowVar = (centered.array().square().rowwise().mean()).matrix();

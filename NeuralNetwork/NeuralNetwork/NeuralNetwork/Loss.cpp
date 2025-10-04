@@ -37,17 +37,17 @@ MatrixXd Huber::diff(const MatrixXd& output_, const MatrixXd& real_)
 	return difference;
 }
 
-double Huber::lFunction(const double& input_)
+double Huber::lFunction(const double& InputFile_)
 {
-	if (std::abs(input_) <= delta)
-		return 0.5 * input_ * input_;
-	return delta * (std::abs(input_) - 0.5 * delta);
+	if (std::abs(InputFile_) <= delta)
+		return 0.5 * InputFile_ * InputFile_;
+	return delta * (std::abs(InputFile_) - 0.5 * delta);
 }
 
-double Huber::lFunctionDiff(const double& input_)
+double Huber::lFunctionDiff(const double& InputFile_)
 {
-	if (std::abs(input_) <= delta)
-		return input_;
-	return delta * input_ / std::abs(input_);
+	if (std::abs(InputFile_) <= delta)
+		return InputFile_;
+	return delta * InputFile_ / std::abs(InputFile_);
 }
 

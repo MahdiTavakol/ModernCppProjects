@@ -40,11 +40,11 @@ public:
     Logger& operator=(Logger&&) = delete;
     ~Logger() = default;
 
-    void print(const std::string& input_, const int log_level_ = LOG_LEVEL_ERROR) const {
+    void print(const std::string& InputFile_, const int log_level_ = LOG_LEVEL_ERROR) const {
         if (rank == 0) {
             for (size_t i = 0; i < strm_vec.size(); ++i) {
                 if (log_level_ >= log_levels[i])
-                    strm_vec[i].get() << input_ << std::endl;
+                    strm_vec[i].get() << InputFile_ << std::endl;
             }
         }
     }

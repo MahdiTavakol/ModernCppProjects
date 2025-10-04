@@ -8,7 +8,7 @@
 #include "LayerBatchEfficient.h"
 #include "LastLayerBatchEfficient.h"
 #include "Loss.h"
-#include "Input.h"
+#include "InputFile.h"
 #include "Logger.h"
 #include "Scaler.h"
 
@@ -31,14 +31,14 @@ public:
 	NeuralNetwork(Logger& logger_, const string& networkDataFileName_, const string& networkTestFileName_,
 		const int& numTargetCols_, const int& maxNumLayers_ = 10,
 		const int& batchsize_ = -1);
-	virtual void initializeInputPtr();
+	virtual void initializeInputFilePtr();
 	virtual void initializeOutputs();
-	void readInputData();
-	void addLayer(const int& inputDim_, const int& outputDim_,
+	void readInputFileData();
+	void addLayer(const int& InputFileDim_, const int& outputDim_,
 		const ActivationType& activType_ = ActivationType::RELU,
 		const OptimizerType& optType_ = OptimizerType::SGD,
 		const double& learningRate_ = 0.5);
-	void addLastLayer(const int& inputDim_, const int& outputDim_,
+	void addLastLayer(const int& InputFileDim_, const int& outputDim_,
 		const ActivationType& activType_ = ActivationType::SIGMOID,
 		const OptimizerType& optType_ = OptimizerType::SGD,
 		const double& learningRate_ = 0.5,
@@ -61,19 +61,19 @@ protected:
 
 	string networkDataFileName;
 	string networkTestFileName;
-	std::unique_ptr<Input> inputPtr;
-	std::unique_ptr<Input> testPtr;
+	std::unique_ptr<InputFile> InputFilePtr;
+	std::unique_ptr<InputFile> testPtr;
 	const int numTargetCols;
 
 
 	/*
-	 * In the MPI version the networkInputMatrix dimensions is not the 
-	 * same as the networkInputDim as the former is the local matrix
+	 * In the MPI version the networkInputFileMatrix dimensions is not the 
+	 * same as the networkInputFileDim as the former is the local matrix
 	 * and the latter is the dimension of the global matrix.
 	 */
-	array<int, 2> networkInputDim;
+	array<int, 2> networkInputFileDim;
 	array<int, 2> networkOutputDim;
-	MatrixXd networkInputMatrix;
+	MatrixXd networkInputFileMatrix;
 	MatrixXd networkOutputMatrix;
 
 	// Control parameters
@@ -86,7 +86,7 @@ protected:
 	int maxNumLayers;
 	vector <std::unique_ptr<LayerBatchEfficient>> Layers;
 
-	MatrixXd forwardBatch(const MatrixXd& input_,const bool& trainMode);
+	MatrixXd forwardBatch(const MatrixXd& InputFile_,const bool& trainMode);
 	virtual void backwardBatch(const MatrixXd& expected_);
 	void updateBatch();
 

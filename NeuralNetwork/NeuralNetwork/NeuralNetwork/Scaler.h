@@ -12,7 +12,7 @@ class Scaler
 {
 public:
 	Scaler() = default;
-	virtual MatrixXd operator()(MatrixXd& input_) = 0;
+	virtual MatrixXd operator()(MatrixXd& InputFile_) = 0;
 	virtual ~Scaler() = default;
 };
 
@@ -20,7 +20,7 @@ class MinMaxScaler final: public Scaler
 {
 public:
 	MinMaxScaler() = default;
-	MatrixXd operator()(MatrixXd& input_) override;
+	MatrixXd operator()(MatrixXd& InputFile_) override;
 
 private:
 };
@@ -29,6 +29,6 @@ class ZScoreScaler final: public Scaler
 {
 public:
 	ZScoreScaler() = default;
-	MatrixXd operator()(MatrixXd& input_) override;
+	MatrixXd operator()(MatrixXd& InputFile_) override;
 private:
 };

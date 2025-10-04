@@ -2,23 +2,23 @@
 #include <iostream>
 
 LastLayerBatchEfficientSoftMax::LastLayerBatchEfficientSoftMax(Logger& logger_, const int& batchsize_,
-	const int& inputDim_, const int& outputDim_,
+	const int& InputFileDim_, const int& outputDim_,
 	const ActivationType& activType_, const OptimizerType& optType_,
 	const double& learningRate_, const LossType& lossType_) :
-	LastLayerBatchEfficient{logger_, batchsize_,inputDim_,outputDim_,activType_,optType_,learningRate_,lossType_ }
+	LastLayerBatchEfficient{logger_, batchsize_,InputFileDim_,outputDim_,activType_,optType_,learningRate_,lossType_ }
 {}
 
-LastLayerBatchEfficientSoftMax::LastLayerBatchEfficientSoftMax(Logger& logger_, const int& inputDim_, const int& outputDim_,
+LastLayerBatchEfficientSoftMax::LastLayerBatchEfficientSoftMax(Logger& logger_, const int& InputFileDim_, const int& outputDim_,
 	const ActivationType& activType_, const OptimizerType& optType_,
 	const double& learningRate_, const LossType& lossType_) :
-	LastLayerBatchEfficient{logger_,32,inputDim_, outputDim_, activType_, optType_, learningRate_, lossType_ }
+	LastLayerBatchEfficient{logger_,32,InputFileDim_, outputDim_, activType_, optType_, learningRate_, lossType_ }
 {}
 
-vector<MatrixXd>  LastLayerBatchEfficientSoftMax::active_diff(const MatrixXd& input_)
+vector<MatrixXd>  LastLayerBatchEfficientSoftMax::active_diff(const MatrixXd& InputFile_)
 {
-	input = input_;
-	//  (outputDimXinputDim)  X  (inputDimXBatchSize) -> outputDimXbatchsize
-	MatrixXd linear = weights.block(0, 0, weights.rows(), weights.cols() - 1) * input;
+	InputFile = InputFile_;
+	//  (outputDimXInputFileDim)  X  (InputFileDimXBatchSize) -> outputDimXbatchsize
+	MatrixXd linear = weights.block(0, 0, weights.rows(), weights.cols() - 1) * InputFile;
 	//  (outputDimX1).replicate(1,batchsize) -> outputDimXbatchsize
 	MatrixXd bias = weights.block(0, weights.cols() - 1, weights.rows(), 1).replicate(1, batchsize);
 	// outputDimXbatchsize + outputDimXbatchsize -> outputDimXbatchsize
@@ -33,7 +33,7 @@ MatrixXd LastLayerBatchEfficientSoftMax::backward(MatrixXd& expectedValue_)
 	if (activType != ActivationType::SOFTMAX)
 		throw std::invalid_argument("Warning: This last layer is just for the softmax activation function!");
 	// dActivation_doutput
-	vector<MatrixXd> dActive_dz = active_diff(input);
+	vector<MatrixXd> dActive_dz = active_diff(InputFile);
 
 	// dLoss_dz
 	MatrixXd dLoss_dz{outputDim,batchsize};
@@ -43,7 +43,7 @@ MatrixXd LastLayerBatchEfficientSoftMax::backward(MatrixXd& expectedValue_)
 		dLoss_dz.col(k) = dActive_dz[k] * dLoss_doutput.col(k);
 
 
-	dLoss_dweights.block(0, 0, weights.rows(), weights.cols() - 1) = dLoss_dz * input.transpose();
+	dLoss_dweights.block(0, 0, weights.rows(), weights.cols() - 1) = dLoss_dz * InputFile.transpose();
 	dLoss_dweights.block(0, weights.cols() - 1, weights.rows(), 1) = dLoss_dz.rowwise().sum();
 
 	// previous_diff

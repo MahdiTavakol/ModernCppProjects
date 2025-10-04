@@ -35,6 +35,6 @@ public:
 	MatrixXd diff(const MatrixXd& output_, const MatrixXd& real_) override;
 private:
 	double delta;
-	double lFunction(const double& input_);
-	double lFunctionDiff(const double& input_);
+	double lFunction(const double& InputFile_);
+	double lFunctionDiff(const double& InputFile_);
 };

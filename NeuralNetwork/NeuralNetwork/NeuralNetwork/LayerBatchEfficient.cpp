@@ -4,15 +4,15 @@
 #include <iostream>
 
 
-LayerBatchEfficient::LayerBatchEfficient(Logger& logger_, const int& batchsize_, const int& inputDim_, const int& outputDim_,
+LayerBatchEfficient::LayerBatchEfficient(Logger& logger_, const int& batchsize_, const int& InputFileDim_, const int& outputDim_,
 	const ActivationType& activType_, const OptimizerType& optType_, const double& learningRate_) :
 	logger{ logger_ },
 	batchsize{ batchsize_ },
-	inputDim{ inputDim_ }, outputDim{ outputDim_ },
-	input{ inputDim_, batchsize_ }, output{ outputDim_,batchsize_ },
+	InputFileDim{ InputFileDim_ }, outputDim{ outputDim_ },
+	InputFile{ InputFileDim_, batchsize_ }, output{ outputDim_,batchsize_ },
 	dActive_dz{ outputDim_,batchsize_ },
-	weights{ outputDim_,inputDim_ + 1 }, dLoss_dweights{ outputDim_, inputDim_ + 1 },
-	prev_diff{ inputDim_,batchsize_ },
+	weights{ outputDim_,InputFileDim_ + 1 }, dLoss_dweights{ outputDim_, InputFileDim_ + 1 },
+	prev_diff{ InputFileDim_,batchsize_ },
 	activType{ activType_ },
 	optType{ optType_ }, learningRate{ learningRate_ }
 {
@@ -69,9 +69,9 @@ LayerBatchEfficient::LayerBatchEfficient(Logger& logger_, const int& batchsize_,
 
 }
 
-LayerBatchEfficient::LayerBatchEfficient(Logger& logger_, const int& inputDim_, const int& outputDim_, const ActivationType& activType_,
+LayerBatchEfficient::LayerBatchEfficient(Logger& logger_, const int& InputFileDim_, const int& outputDim_, const ActivationType& activType_,
 	const OptimizerType& optType_, const double& learningRate_) :
-	LayerBatchEfficient{ logger_,32,inputDim_,outputDim_,activType_,optType_,learningRate_ }
+	LayerBatchEfficient{ logger_,32,InputFileDim_,outputDim_,activType_,optType_,learningRate_ }
 {}
 
 void LayerBatchEfficient::initialize()
@@ -86,8 +86,8 @@ void LayerBatchEfficient::initialize()
 	case ActivationType::SIGMOID:
 	{
 		type = 2;
-		mean = -std::sqrt(6.0 / static_cast<double>(inputDim + outputDim));
-		std = std::sqrt(6.0 / static_cast<double>(inputDim + outputDim));
+		mean = -std::sqrt(6.0 / static_cast<double>(InputFileDim + outputDim));
+		std = std::sqrt(6.0 / static_cast<double>(InputFileDim + outputDim));
 		break;
 	}
 	case ActivationType::NONE:
@@ -99,20 +99,20 @@ void LayerBatchEfficient::initialize()
 	{
 		type = 4;
 		mean = 0.0;
-		std = std::sqrt(2.0 / inputDim);
+		std = std::sqrt(2.0 / InputFileDim);
 		break;
 	}
 	case ActivationType::SELU:
 	{
 		type = 5;
 		mean = 0.0;
-		std = 1.0 / inputDim;
+		std = 1.0 / InputFileDim;
 		break;
 	}
 	default:
 		throw std::invalid_argument("Unknown activation funtion type!");
 	}
-	std::cout << "Activation function type= " << type << " and inptDim = " << inputDim << std::endl;
+	std::cout << "Activation function type= " << type << " and inptDim = " << InputFileDim << std::endl;
 	
 	gen.seed(rd());
 	distPtr = std::make_unique<std::normal_distribution<double>>(mean,std);
@@ -126,11 +126,11 @@ void LayerBatchEfficient::initialize()
 	//double weights_avg = weights.sum(); // /static_cast<double>(weights.cols()*weights.rows());
 }
 
-MatrixXd LayerBatchEfficient::forward(const MatrixXd& input_, const bool /*do not use*/)
+MatrixXd LayerBatchEfficient::forward(const MatrixXd& InputFile_, const bool /*do not use*/)
 {
-	input = input_;
-	//  (outputDimXinputDim)  X  (inputDimXBatchSize) -> outputDimXbatchsize
-	MatrixXd linear = weights.block(0, 0, weights.rows(), weights.cols() - 1) * input;
+	InputFile = InputFile_;
+	//  (outputDimXInputFileDim)  X  (InputFileDimXBatchSize) -> outputDimXbatchsize
+	MatrixXd linear = weights.block(0, 0, weights.rows(), weights.cols() - 1) * InputFile;
 	//  (outputDimX1).replicate(1,batchsize) -> outputDimXbatchsize
 	// For the last batch the number of data (linear.cols()) is less than the batchsize 
 	int batch_len = static_cast<int>(linear.cols());
@@ -154,13 +154,13 @@ MatrixXd LayerBatchEfficient::forward(const MatrixXd& input_, const bool /*do no
 	double linear_avg  = linear.sum()/static_cast<double>(linear.cols()*linear.rows());
 	double bias_avg = bias.sum()/static_cast<double>(bias.cols()*bias.rows());
 	double z_avg = z.sum()/static_cast<double>(z.cols()*z.rows());
-	double input_avg = input.sum()/static_cast<double>(input.cols()*input.rows());
+	double InputFile_avg = InputFile.sum()/static_cast<double>(InputFile.cols()*InputFile.rows());
 	double dActive_dz_avg = dActive_dz.sum()/static_cast<double>(dActive_dz.cols()*dActive_dz.rows());
 	double weights_avg = weights.sum()/static_cast<double>(weights.cols()*weights.rows());
 	std::cout << "linear_avg inside the layer= " << linear_avg << std::endl;
 	std::cout << "bias_avg inside the layer= " << bias_avg << std::endl;
 	std::cout << "z_avg inside the layer= " << z_avg << std::endl;
-	std::cout << "input_avg inside the layer= " << input_avg << std::endl;
+	std::cout << "InputFile_avg inside the layer= " << InputFile_avg << std::endl;
 	std::cout << "dActive_dz_avg inside the layer= " << dActive_dz_avg << std::endl;
 	std::cout << "weights_avg inside the layer= " << weights_avg << std::endl;
 	*/
@@ -172,17 +172,17 @@ MatrixXd LayerBatchEfficient::forward(const MatrixXd& input_, const bool /*do no
 // outputDim * batchsize
 MatrixXd LayerBatchEfficient::backward(MatrixXd& nextDiff_)
 {
-	// output = Active(z) = Active(weights * input + bias)
+	// output = Active(z) = Active(weights * InputFile + bias)
 	// here was are intested in three different diffs
 	// 1 --> dLoss_dweigths (to optimize this layer weights)
 	// 2 --> dLoss_dbiass (to optimize this layer bias)
-	// 3 --> dLoss_dinput (prev_diff : to be passed as the nextDiff_ for the previous layer)
+	// 3 --> dLoss_dInputFile (prev_diff : to be passed as the nextDiff_ for the previous layer)
 	// dActivation_dz has been calculated in the forward step
 
 	// dLoss_dz (z is the output before the activation function is applied)
 	MatrixXd dLoss_dz = nextDiff_.cwiseProduct(dActive_dz);
 
-	dLoss_dweights.block(0, 0, weights.rows(), weights.cols() - 1) = (dLoss_dz * input.transpose())/static_cast<double>(input.cols());
+	dLoss_dweights.block(0, 0, weights.rows(), weights.cols() - 1) = (dLoss_dz * InputFile.transpose())/static_cast<double>(InputFile.cols());
 	dLoss_dweights.block(0, weights.cols() - 1, weights.rows(), 1) = dLoss_dz.rowwise().mean();
 	
 	// Add the L2 regularization
@@ -197,18 +197,18 @@ MatrixXd LayerBatchEfficient::backward(MatrixXd& nextDiff_)
 	double nextdiff_avg  = nextDiff_.sum()/static_cast<double>(nextDiff_.cols()*nextDiff_.rows());
 	double dactive_dz_avg = dActive_dz.sum()/static_cast<double>(dActive_dz.cols()*dActive_dz.rows());
 	double dloss_dz_avg = dLoss_dz.sum()/static_cast<double>(dLoss_dz.cols()*dLoss_dz.rows());
-	double input_avg = input.sum()/static_cast<double>(input.cols()*input.rows());
+	double InputFile_avg = InputFile.sum()/static_cast<double>(InputFile.cols()*InputFile.rows());
 	*/
 	// double avg = dLoss_dweights.sum()/(static_cast<double>(dLoss_dweights.cols())*static_cast<double>(dLoss_dweights.rows()));
 	/*
 	std::cout << "dLoss_dweights_avg inside the layer= " << avg << std::endl;
-	std::cout << "Input_avg inside the layer= " << input_avg << std::endl;
+	std::cout << "InputFile_avg inside the layer= " << InputFile_avg << std::endl;
 	std::cout << "dloss_dz_avg inside the layer= " << dloss_dz_avg << std::endl;
 	std::cout << "dactive_dz_avg inside the layer= " << dactive_dz_avg << std::endl;
 	std::cout << "nextdiff_avg inside the layer= " << nextdiff_avg  << std::endl;
 	*/
 	/*if (std::abs(avg) > 0.01)
-		std::cout << "dloss_dweights_avg inside the layer= " << avg << "The layerdims =" << inputDim << "," << outputDim << std::endl;
+		std::cout << "dloss_dweights_avg inside the layer= " << avg << "The layerdims =" << InputFileDim << "," << outputDim << std::endl;
 	*/
 
 	return prev_diff;
@@ -229,10 +229,10 @@ MatrixXd LayerBatchEfficient::returnGradients()
 	return dLoss_dweights;
 }
 
-array<int, 2> LayerBatchEfficient::returnInputOutputDims()
+array<int, 2> LayerBatchEfficient::returnInputFileOutputDims()
 {
 	array<int, 2> output;
-	output[0] = inputDim;
+	output[0] = InputFileDim;
 	output[1] = outputDim;
 	return output;
 }

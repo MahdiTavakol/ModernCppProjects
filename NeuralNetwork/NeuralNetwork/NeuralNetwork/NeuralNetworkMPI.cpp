@@ -1,10 +1,10 @@
 #include "NeuralNetworkMPI.h"
 #include <numeric>
 
-NeuralNetworkMPI::NeuralNetworkMPI(Logger& logger_, const string& networkInputFileName_, const string& networkTestFileName_,
+NeuralNetworkMPI::NeuralNetworkMPI(Logger& logger_, const string& networkInputFileFileName_, const string& networkTestFileName_,
 	const int& numTargetCols_,
 	const int& maxNumLayers_, const int& batchsize_, const int& exchangeNEvery_):
-	NeuralNetwork{logger_, networkInputFileName_, networkTestFileName_, numTargetCols_, maxNumLayers_ , batchsize_},
+	NeuralNetwork{logger_, networkInputFileFileName_, networkTestFileName_, numTargetCols_, maxNumLayers_ , batchsize_},
 	exchangeNEvery{exchangeNEvery_}
 {
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -26,10 +26,10 @@ NeuralNetworkMPI::NeuralNetworkMPI(Logger& logger_, const string& networkInputFi
 	}
 }
 
-void NeuralNetworkMPI::initializeInputPtr()
+void NeuralNetworkMPI::initializeInputFilePtr()
 {
-	inputPtr = std::make_unique<InputMPI>(logger,networkDataFileName,numTargetCols);
-	testPtr = std::make_unique<InputMPI>(logger,networkTestFileName, 0);
+	InputFilePtr = std::make_unique<InputMPIFile>(logger,networkDataFileName,numTargetCols);
+	testPtr = std::make_unique<InputMPIFile>(logger,networkTestFileName, 0);
 }
 
 void NeuralNetworkMPI::initializeOutputs()
@@ -54,13 +54,13 @@ void NeuralNetworkMPI::fit()
 	}
 	
 
-	int numTData = static_cast<int>(trainingPercent * networkInputMatrix.cols() /100.0);
-	int numVData = static_cast<int>(networkInputMatrix.cols()) - numTData;
+	int numTData = static_cast<int>(trainingPercent * networkInputFileMatrix.cols() /100.0);
+	int numVData = static_cast<int>(networkInputFileMatrix.cols()) - numTData;
 
 	int numTBatchs = (numTData + batchsize - 1) / batchsize;
 	int numVBatchs = (numVData + batchsize - 1) / batchsize;
 	
-	int numFeatures = static_cast<int>(networkInputMatrix.rows());
+	int numFeatures = static_cast<int>(networkInputFileMatrix.rows());
 
 	
 	trainingLoss.reserve(MaxNumSteps);
@@ -223,13 +223,13 @@ void NeuralNetworkMPI::setLastBatch() {
 		MPI_Recv(&status_0, 1, MPI_INT, size - 1, 0, MPI_COMM_WORLD, &status);
 	} else if (rank == size - 1) {
 		int nCols;
-		nCols = networkInputDim[1];
+		nCols = networkInputFileDim[1];
 		status_0 = batchsize - nCols;
 		MPI_Ssend(&status_0, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
 	}
 
 	if (rank == 0) {
-		MatrixXd& inMat = networkInputMatrix;
+		MatrixXd& inMat = networkInputFileMatrix;
 		MatrixXd& ouMat = networkOutputMatrix;
 		int nDataIn = inMat.rows() * status_0;
 		int nDataOu = ouMat.rows() * status_0;
@@ -239,7 +239,7 @@ void NeuralNetworkMPI::setLastBatch() {
 		MPI_Ssend(tranferMatOu.data(), nDataOu, MPI_DOUBLE, size - 1, 3, MPI_COMM_WORLD);
 	} else if (rank == size - 1) {
 		MPI_Status status[2];
-		MatrixXd& inMat = networkInputMatrix;
+		MatrixXd& inMat = networkInputFileMatrix;
 		MatrixXd& ouMat = networkOutputMatrix;
 		MatrixXd newIn{ inMat.rows(),inMat.cols() + status_0 };
 		MatrixXd newOu{ ouMat.rows(),ouMat.cols() + status_0 };
@@ -255,7 +255,7 @@ void NeuralNetworkMPI::setLastBatch() {
 		newOu.block(0, ouMat.cols(), ouMat.rows(), status_0) = transferMatOu;
 		inMat = newIn;
 		ouMat = newOu;
-		networkInputDim[1] = inMat.cols();
+		networkInputFileDim[1] = inMat.cols();
 		networkOutputDim[1] = ouMat.cols();
 	}
 	return;
@@ -285,10 +285,10 @@ void NeuralNetworkMPI::exchange()
 
 	MPI_Request requests[4];
 	MPI_Status statuses[4];
-	const int numInputData = networkInputDim[0] * networkInputDim[1];
-	MatrixXd newInputMatrix{networkInputMatrix.rows(),networkInputMatrix.cols() };
-	MPI_Irecv(newInputMatrix.data(), numInputData, MPI_DOUBLE, recvRanki, rank, MPI_COMM_WORLD, &requests[0]);
-	MPI_Isend(networkInputMatrix.data(), numInputData, MPI_DOUBLE, sendRanki, sendRanki, MPI_COMM_WORLD,&requests[1]);
+	const int numInputFileData = networkInputFileDim[0] * networkInputFileDim[1];
+	MatrixXd newInputFileMatrix{networkInputFileMatrix.rows(),networkInputFileMatrix.cols() };
+	MPI_Irecv(newInputFileMatrix.data(), numInputFileData, MPI_DOUBLE, recvRanki, rank, MPI_COMM_WORLD, &requests[0]);
+	MPI_Isend(networkInputFileMatrix.data(), numInputFileData, MPI_DOUBLE, sendRanki, sendRanki, MPI_COMM_WORLD,&requests[1]);
 	const int numOutputData = networkOutputDim[0] * networkOutputDim[1];
 	MatrixXd newOutputMatrix{ networkOutputMatrix.rows(),networkOutputMatrix.cols() };
 	MPI_Irecv(newOutputMatrix.data(), numOutputData, MPI_DOUBLE, recvRanki, 2*rank, MPI_COMM_WORLD,&requests[2]);
@@ -297,6 +297,6 @@ void NeuralNetworkMPI::exchange()
 	for (int i = 0; i < 4; i++)
 		MPI_Wait(&requests[i], &statuses[i]);
 
-	networkInputMatrix = newInputMatrix;
+	networkInputFileMatrix = newInputFileMatrix;
 	networkOutputMatrix = newOutputMatrix;
 }

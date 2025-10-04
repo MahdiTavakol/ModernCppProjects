@@ -24,23 +24,23 @@ Neuron::Neuron(const ActivationType& activType_, const double& learningRate_):
 
 }
 
-void Neuron::reset(const VectorXd& weights_, const VectorXd& input_)
+void Neuron::reset(const VectorXd& weights_, const VectorXd& InputFile_)
 {
 	weights = weights_;
-	input = input_;
+	InputFile = InputFile_;
 }
 
 double Neuron::forward()
 {
-	return (*activationFunction)(weights.dot(input) + bias);
+	return (*activationFunction)(weights.dot(InputFile) + bias);
 }
 
 void Neuron::backward(const double& diffPrevious)
 {
 	// dActivation_dz
-	double dActive_dz = activationFunction->diff(weights.dot(input) + bias);
+	double dActive_dz = activationFunction->diff(weights.dot(InputFile) + bias);
 	// dzi_dweights
-	VectorXd dzi_dweights = input;
+	VectorXd dzi_dweights = InputFile;
 	// doutput_dwi
 	VectorXd doutput_dweights = dActive_dz * dzi_dweights;
 	// dLoss_dwi

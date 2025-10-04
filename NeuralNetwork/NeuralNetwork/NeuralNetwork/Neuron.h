@@ -20,14 +20,14 @@ class Neuron
 {
 public:
 	Neuron(const ActivationType& activType_, const double& learningRate_);
-	void reset(const VectorXd& weights_, const VectorXd& input_);
+	void reset(const VectorXd& weights_, const VectorXd& InputFile_);
 	double forward();
 	void backward(const double& diffPrevious);
 	void update();
 
 private:
 	double learningRate;
-	VectorXd input, dLoss_dweights;
+	VectorXd InputFile, dLoss_dweights;
 	VectorXd weights;
 	double bias, dLoss_dbias;
 	ActivationType activType;

@@ -39,19 +39,19 @@ enum class OptimizerType
 class LayerBatchEfficient
 {
 public:
-	LayerBatchEfficient(Logger& logger_, const int& batchsize_, const int& inputDim_, const int& outputDim_, const ActivationType& activType_,
+	LayerBatchEfficient(Logger& logger_, const int& batchsize_, const int& InputFileDim_, const int& outputDim_, const ActivationType& activType_,
 		const OptimizerType& optType_, const double& learningRate_);
-	LayerBatchEfficient(Logger& logger_, const int& inputDim_, const int& outputDim_, const ActivationType& activType,
+	LayerBatchEfficient(Logger& logger_, const int& InputFileDim_, const int& outputDim_, const ActivationType& activType,
 		const OptimizerType& optType_, const double& learningRate_);
 	virtual ~LayerBatchEfficient() = default;
 	virtual void initialize();
-	virtual MatrixXd forward(const MatrixXd& input_, const bool trainMode ); // outputDim X batchsize --> inputDim X batchsize
+	virtual MatrixXd forward(const MatrixXd& InputFile_, const bool trainMode ); // outputDim X batchsize --> InputFileDim X batchsize
 	virtual MatrixXd backward(MatrixXd& nextDiff_);
 	virtual void update();
 	// To be used by MPI and possibly other parallelization approaches
 	MatrixXd&& moveGradients();
 	MatrixXd returnGradients();
-	array<int, 2> returnInputOutputDims();
+	array<int, 2> returnInputFileOutputDims();
 	array<int, 2> returnGradientSize();
 	void updateGradients(MatrixXd&& gradients_);
 	double returnDLoss_deweights(const int& i, const int& j) {
@@ -62,16 +62,16 @@ protected:
 	Logger& logger;
 	int batchsize;
 
-	int inputDim, outputDim;
-	MatrixXd input, output; // inputDim X batchsize , outputDim X batchsize
+	int InputFileDim, outputDim;
+	MatrixXd InputFile, output; // InputFileDim X batchsize , outputDim X batchsize
 	MatrixXd dActive_dz; // outputDim X batchsize
 
 	// these are updated when each batch is fed into the layer!
-	MatrixXd weights; // outputDim X (inputDim + 1)
-	MatrixXd dLoss_dweights; // outputDim X (inputDim + 1)
+	MatrixXd weights; // outputDim X (InputFileDim + 1)
+	MatrixXd dLoss_dweights; // outputDim X (InputFileDim + 1)
 
 
-	MatrixXd prev_diff; // inputDim X batchsize
+	MatrixXd prev_diff; // InputFileDim X batchsize
 
 	std::unique_ptr<Activation> activationFunction;
 	ActivationType activType;

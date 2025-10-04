@@ -1,9 +1,9 @@
 #include "NeuralNetworkOpenMP.h"
 
-NeuralNetworkOpenMP::NeuralNetworkOpenMP(Logger& logger_, const string& networkInputFileName_, const string& networkTestFileName_,
+NeuralNetworkOpenMP::NeuralNetworkOpenMP(Logger& logger_, const string& networkInputFileFileName_, const string& networkTestFileName_,
 	const int& numTargetCols_,
 	const int& maxNumLayers_, const int& batchsize_) :
-	NeuralNetwork{logger_, networkInputFileName_, networkTestFileName_,numTargetCols_,maxNumLayers_ , batchsize_ }
+	NeuralNetwork{logger_, networkInputFileFileName_, networkTestFileName_,numTargetCols_,maxNumLayers_ , batchsize_ }
 {
 #pragma omp single private(num_threads)
 	{
@@ -19,8 +19,8 @@ NeuralNetworkOpenMP::NeuralNetworkOpenMP(Logger& logger_, const string& networkI
 
 void NeuralNetworkOpenMP::fit()
 {
-	int numTData = static_cast<int>(trainingPercent * networkInputDim[1]);
-	int numVData = networkInputDim[1] - numTData;
+	int numTData = static_cast<int>(trainingPercent * networkInputFileDim[1]);
+	int numVData = networkInputFileDim[1] - numTData;
 
 
 	int numTBatchs = (numTData + batchsize - 1) / batchsize;
@@ -97,10 +97,10 @@ void NeuralNetworkOpenMP::trainBatches(const int& firstData_, const int& numData
 			int numCols = lastCol - firstCol + 1;
 
 
-			MatrixXd input = networkInputMatrix.block(0, firstCol, networkInputMatrix.rows(), numCols);
+			MatrixXd InputFile = networkInputFileMatrix.block(0, firstCol, networkInputFileMatrix.rows(), numCols);
 			MatrixXd expected = networkOutputMatrix.block(0, firstCol, networkOutputMatrix.rows(), numCols);
 
-			outputBatch = forwardBatch(input,doBack_);
+			outputBatch = forwardBatch(InputFile,doBack_);
 			if (doBack_) {
 				MatrixXd prevDiffBatch = outputBatch;
 				for (int i = numLayers - 1; i >= 0; i--)

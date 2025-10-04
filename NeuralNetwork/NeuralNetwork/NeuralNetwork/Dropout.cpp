@@ -17,24 +17,24 @@ void Dropout::initialize()
 	gen.seed(rd());
 	bern_keep = std::make_unique<std::bernoulli_distribution>(1.0 - dropRate);
 	scaleRate = 1.0 / (1.0 - dropRate);
-	mask_vec.resize(inputDim);
+	mask_vec.resize(InputFileDim);
 	mask_full.resize(0, 0);
 }
 
-MatrixXd Dropout::forward(const MatrixXd& input_, const bool trainMode)
+MatrixXd Dropout::forward(const MatrixXd& InputFile_, const bool trainMode)
 {
 	if (!trainMode)
-		return input_;
+		return InputFile_;
 
 
 	// A new sets of weights
 	if (trainMode) {
 		this->resetMask();
-		mask_full = mask_vec.rowwise().replicate(input_.cols());
-		return input_.cwiseProduct(mask_full);
+		mask_full = mask_vec.rowwise().replicate(InputFile_.cols());
+		return InputFile_.cwiseProduct(mask_full);
 	} else {
 		// do not change in the transforming mode
-		return input_;
+		return InputFile_;
 	}
 }
 
@@ -50,9 +50,9 @@ void Dropout::update()
 }
 
 void Dropout::resetMask() {
-	if (mask_vec.size() != inputDim) mask_vec.resize(inputDim);
+	if (mask_vec.size() != InputFileDim) mask_vec.resize(InputFileDim);
 
-	for (int i = 0; i < inputDim; i++) {
+	for (int i = 0; i < InputFileDim; i++) {
 		mask_vec[i] = (*bern_keep)(gen) ? scaleRate : 0.0;
 	}
 }

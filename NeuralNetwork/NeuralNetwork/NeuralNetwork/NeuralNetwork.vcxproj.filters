@@ -36,13 +36,13 @@
     <ClCompile Include="Optimizers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Input.cpp">
+    <ClCompile Include="InputFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NeuralNetworkMPI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="InputMPI.cpp">
+    <ClCompile Include="InputMPIFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
@@ -61,6 +61,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Scaler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InputArgs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -86,13 +89,13 @@
     <ClInclude Include="Optimizers.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Input.h">
+    <ClInclude Include="InputFile.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="NeuralNetworkMPI.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="InputMPI.h">
+    <ClInclude Include="InputMPIFile.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="NeuralNetworkOpenMP.h">
@@ -108,6 +111,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Scaler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InputArgs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
