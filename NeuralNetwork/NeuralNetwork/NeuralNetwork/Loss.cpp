@@ -9,7 +9,7 @@ double MSE::operator()(const MatrixXd& output_, const MatrixXd& real_)
 
 MatrixXd MSE::diff(const MatrixXd& output_, const MatrixXd& real_)
 {
-	MatrixXd difference = 2.0 * (output_ - real_)/output_.size();
+	MatrixXd difference = 2.0 * (output_ - real_)/output_.cols();
 	return difference;
 }
 
@@ -21,7 +21,7 @@ double MAE::operator()(const MatrixXd& output_, const MatrixXd& real_)
 
 MatrixXd MAE::diff(const MatrixXd& output_, const MatrixXd& real_)
 {
-	MatrixXd difference = (output_ - real_).unaryExpr([&](double v) {return v / std::abs(v); })/output_.size();
+	MatrixXd difference = (output_ - real_).unaryExpr([&](double v) {return v / std::abs(v); })/output_.cols();
 	return difference;
 }
 
