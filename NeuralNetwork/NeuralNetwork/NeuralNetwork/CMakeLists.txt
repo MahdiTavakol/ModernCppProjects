@@ -14,7 +14,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # Debug flags (only active if CMAKE_BUILD_TYPE=Debug)
-set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -fno-omit-frame-pointer")
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -fno-omit-frame-pointer")
 
 # Manually enable Intel OpenMP support for mpiicpx
 set(OpenMP_CXX_FLAGS "-qopenmp")

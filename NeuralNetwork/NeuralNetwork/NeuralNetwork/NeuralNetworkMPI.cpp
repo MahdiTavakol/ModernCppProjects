@@ -52,6 +52,7 @@ void NeuralNetworkMPI::fit()
 	if (exchangeNEvery > 0) {
 		setLastBatch();
 	}
+	
 
 	int numTData = static_cast<int>(trainingPercent * networkInputMatrix.cols() /100.0);
 	int numVData = static_cast<int>(networkInputMatrix.cols()) - numTData;

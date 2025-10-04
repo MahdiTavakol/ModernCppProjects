@@ -80,7 +80,7 @@ protected:
 	OptimizerType  optType;
 
 	double learningRate;
-	double L2regFactor = 1e-5;
+	double L2regFactor = 0.0; //1e-5;
 
 private:
 	std::random_device rd;

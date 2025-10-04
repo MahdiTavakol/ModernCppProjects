@@ -46,6 +46,10 @@ void NeuralNetwork::initializeOutputs()
 
 void NeuralNetwork::readInputData()
 {
+	if (inputPtr == nullptr) {
+		std::cout << "InputPtr is empty, returning!" << std::endl;
+		return;
+	}
 	inputPtr->init();
 	inputPtr->read();
 	inputPtr->return_data(networkInputDim, networkOutputDim, networkInputMatrix, networkOutputMatrix);
@@ -412,3 +416,18 @@ void NeuralNetwork::trainBatches(const int& firstData, const int& numData, const
 	
 	array<int,2> lastDims = LastLayerRawPtr->returnInputOutputDims();
 }
+
+void NeuralNetwork::enterTestXy()
+{
+	networkInputDim[0] = 2;
+	networkInputDim[1] = 4;
+	networkOutputDim[0] = 1;
+	networkOutputDim[1] = 4;
+	networkInputMatrix.resize(2, 4);
+	networkInputMatrix << 0, 1, 0, 1,
+                      0, 0, 1, 1;
+
+	networkOutputMatrix.resize(1, 4);
+	networkOutputMatrix << 0, 1, 1, 0;
+}
+

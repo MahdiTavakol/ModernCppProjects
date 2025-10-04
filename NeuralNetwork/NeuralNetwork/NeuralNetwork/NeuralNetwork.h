@@ -37,16 +37,17 @@ public:
 	void addLayer(const int& inputDim_, const int& outputDim_,
 		const ActivationType& activType_ = ActivationType::RELU,
 		const OptimizerType& optType_ = OptimizerType::SGD,
-		const double& learningRate_ = 0.1);
+		const double& learningRate_ = 0.5);
 	void addLastLayer(const int& inputDim_, const int& outputDim_,
 		const ActivationType& activType_ = ActivationType::SIGMOID,
 		const OptimizerType& optType_ = OptimizerType::SGD,
-		const double& learningRate_ = 0.05,
+		const double& learningRate_ = 0.5,
 		const LossType& lossType_ = LossType::MSE);
 	void addDropout(const int& dim_, const double& dropRate_, const double& learningRate_ = 0.1);
 	void initializeLayers();
 	virtual void fit();
 	MatrixXd transform();
+	void enterTestXy();
 
 protected:
 	// output parameters

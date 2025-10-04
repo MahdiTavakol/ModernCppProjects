@@ -182,11 +182,11 @@ MatrixXd LayerBatchEfficient::backward(MatrixXd& nextDiff_)
 	// dLoss_dz (z is the output before the activation function is applied)
 	MatrixXd dLoss_dz = nextDiff_.cwiseProduct(dActive_dz);
 
-	dLoss_dweights.block(0, 0, weights.rows(), weights.cols() - 1) = dLoss_dz * input.transpose();
-	dLoss_dweights.block(0, weights.cols() - 1, weights.rows(), 1) = dLoss_dz.rowwise().sum();
+	dLoss_dweights.block(0, 0, weights.rows(), weights.cols() - 1) = (dLoss_dz * input.transpose())/static_cast<double>(input.cols());
+	dLoss_dweights.block(0, weights.cols() - 1, weights.rows(), 1) = dLoss_dz.rowwise().mean();
 	
 	// Add the L2 regularization
-	dLoss_dweights += -L2regFactor*weights;
+	dLoss_dweights += L2regFactor*weights;
 
 	// previous_diff
 	prev_diff = weights.block(0, 0, weights.rows(), weights.cols() - 1).transpose() * dLoss_dz;
