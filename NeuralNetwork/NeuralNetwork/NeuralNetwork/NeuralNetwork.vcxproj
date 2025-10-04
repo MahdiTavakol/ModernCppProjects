@@ -132,7 +132,6 @@
     <ClCompile Include="InputArgs.cpp" />
     <ClCompile Include="InputFile.cpp" />
     <ClCompile Include="InputMPIFile.cpp" />
-    <ClCompile Include="LastLayerBatchEfficient.cpp" />
     <ClCompile Include="LastLayerBatchEfficientSoftMax.cpp" />
     <ClCompile Include="LayerBatchEfficient.cpp" />
     <ClCompile Include="Logger.cpp" />
@@ -151,7 +150,6 @@
     <ClInclude Include="InputArgs.h" />
     <ClInclude Include="InputFile.h" />
     <ClInclude Include="InputMPIFile.h" />
-    <ClInclude Include="LastLayerBatchEfficient.h" />
     <ClInclude Include="LastLayerBatchEfficientSoftMax.h" />
     <ClInclude Include="LayerBatchEfficient.h" />
     <ClInclude Include="Logger.h" />

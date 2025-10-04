@@ -9,7 +9,7 @@
 using std::array;
 using std::vector;
 
-enum { LAYER= 0, LASTLAYER= 1, DROPLAYER=2 };
+enum { LAYER= 0, DROPLAYER=1 };
 
 union layerUnion
 {

@@ -28,20 +28,18 @@ InputArgs::InputArgs(int argc, char** argv)
 			layerData layerI;
 			std::string type = std::string(argv[iarg]);
 			int inputDim = std::stoi(argv[iarg + 1]);
-			if (type == "Layer" || type == "Last") {
+			if (type == "Layer") {
 				int outputDim = std::stoi(argv[iarg + 2]);
-				if (type == "Layer")
-					layerI.layerType = LAYER;
-				else
-					layerI.layerType = LASTLAYER;
+				layerI.layerType = LAYER;
 				layerI.info.outputDim = outputDim;
 				
 			}
 			else if (type == "Drop") {
-				int dropRate = std::stod(argv[iarg + 2]);
+				double dropRate = std::stod(argv[iarg + 2]);
 				layerI.layerType = DROPLAYER;
 				layerI.info.dropRate = dropRate;
 			}
+			layerI.intputDim = inputDim;
 			Layers.push_back(layerI);
 			iarg += 3;
 		}
@@ -143,7 +141,7 @@ void InputArgs::defaultArgs()
 	dataI.intputDim = 2;
 	dataI.info.dropRate = 0.2;
 	Layers.push_back(dataI);
-	dataI.layerType = LASTLAYER;
+	dataI.layerType = LAYER;
 	dataI.intputDim = 2;
 	dataI.info.outputDim = 1;
 	Layers.push_back(dataI);

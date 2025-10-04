@@ -6,7 +6,6 @@
 
 #include "Activations.h"
 #include "LayerBatchEfficient.h"
-#include "LastLayerBatchEfficient.h"
 #include "Loss.h"
 #include "InputFile.h"
 #include "Logger.h"
@@ -25,24 +24,38 @@ enum fileOutputMode {
 	PERRANK = 1<<2
 };
 
+enum class LossType
+{
+	MSE,
+	MAE,
+	Huber
+};
+
+enum class OptimizerType
+{
+	NONE,
+	SGD,
+	SGDMOMENUM,
+	RMSPROP,
+	ADAM,
+	ADAGRAD
+};
+
+
 class NeuralNetwork
 {
 public:
 	NeuralNetwork(Logger& logger_, const string& networkDataFileName_, const string& networkTestFileName_,
 		const int& numTargetCols_, const int& maxNumLayers_ = 10,
 		const int& batchsize_ = -1);
+	void initOptAndLoss(const OptimizerType& optType_ = OptimizerType::SGD,
+		                const double& learningRate_ = 0.5, 
+		                const LossType& lossType_ = LossType::MSE);
 	virtual void initializeInputFilePtr();
 	virtual void initializeOutputs();
 	void readInputFileData();
 	void addLayer(const int& InputFileDim_, const int& outputDim_,
-		const ActivationType& activType_ = ActivationType::RELU,
-		const OptimizerType& optType_ = OptimizerType::SGD,
-		const double& learningRate_ = 0.5);
-	void addLastLayer(const int& InputFileDim_, const int& outputDim_,
-		const ActivationType& activType_ = ActivationType::SIGMOID,
-		const OptimizerType& optType_ = OptimizerType::SGD,
-		const double& learningRate_ = 0.5,
-		const LossType& lossType_ = LossType::MSE);
+		const ActivationType& activType_ = ActivationType::RELU);
 	void addDropout(const int& dim_, const double& dropRate_, const double& learningRate_ = 0.1);
 	void initializeLayers();
 	virtual void fit();
@@ -82,6 +95,7 @@ protected:
 	const int batchsize = -1;
 	const int maxTDownVUp = 10;
 	int numLayers = 0;
+	int fOutputMode = AVG;
 
 	int maxNumLayers;
 	vector <std::unique_ptr<LayerBatchEfficient>> Layers;
@@ -89,8 +103,6 @@ protected:
 	MatrixXd forwardBatch(const MatrixXd& InputFile_,const bool& trainMode);
 	virtual void backwardBatch(const MatrixXd& expected_);
 	void updateBatch();
-
-
 	virtual void trainBatches(const int& firstData_, const int& numData_,
 		const int& numBatchs_, double& lossValue_, const bool& doBack_);
 
@@ -98,5 +110,6 @@ protected:
 	vector<double> trainingLoss;
 	vector<double> validationLoss;
 
-	int fOutputMode = AVG;
+	std::unique_ptr<Optimizer> OptFuncPtr;
+	std::unique_ptr<Loss> LossFuncPtr;
 };

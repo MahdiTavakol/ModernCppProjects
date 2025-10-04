@@ -2,7 +2,6 @@
 #include "InputArgs.h"
 #include "InputFile.h"
 #include "InputMPIFile.h"
-#include "LastLayerBatchEfficient.h"
 #include "LayerBatchEfficient.h"
 #include "Loss.h"
 #include "Logger.h"
@@ -78,18 +77,16 @@ int main(int argc, char** argv)
 	neuralNetworkPtr->readInputFileData();
 	for (auto& layerI : Layers) {
 		int inDim = layerI.intputDim;
+		int ouDim = 0;
+		double dropRate = 0.0;
 		switch (layerI.layerType) {
 		case LAYER:
-			int ouDim = layerI.info.outputDim;
+			ouDim = layerI.info.outputDim;
 			neuralNetworkPtr->addLayer(inDim, ouDim);
 			break;
 		case DROPLAYER:
-			double dropRate = layerI.info.dropRate;
+			dropRate = layerI.info.dropRate;
 			neuralNetworkPtr->addDropout(inDim, dropRate);
-		case LASTLAYER:
-			int ouDim = layerI.info.outputDim;
-			neuralNetworkPtr->addLastLayer(inDim, ouDim);
-			break;
 		default:
 			throw std::runtime_error("Unknown layertype!");
 		}

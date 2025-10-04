@@ -19,6 +19,52 @@ NeuralNetwork::NeuralNetwork(Logger& logger_, const string& networkDataFileName_
 	trainingPercent{ 70.0 }
 {}
 
+void NeuralNetwork::initOptAndLoss(const OptimizerType& optType_,
+	                               const double& learningRate_,
+	                               const LossType& lossType_)
+{
+	switch (optType_)
+	{
+	case OptimizerType::NONE:
+		OptFuncPtr = std::make_unique<NoneOpt>(learningRate_);
+		break;
+	case OptimizerType::SGD:
+		OptFuncPtr = std::make_unique<SGD>(learningRate_);
+		break;
+	case OptimizerType::SGDMOMENUM:
+		OptFuncPtr = std::make_unique<SGDMomentum>(learningRate_);
+		break;
+	case OptimizerType::RMSPROP:
+		OptFuncPtr = std::make_unique<RMSProp>(learningRate_);
+		break;
+	case OptimizerType::ADAM:
+		OptFuncPtr = std::make_unique<Adam>(learningRate_);
+		break;
+	case OptimizerType::ADAGRAD:
+		OptFuncPtr = std::make_unique<AdaGrad>(learningRate_);
+		break;
+	default:
+		throw std::invalid_argument("Unknown optimizer type!");
+	}
+
+
+	switch (lossType_)
+	{
+	case LossType::MSE:
+		LossFuncPtr = std::make_unique<MSE>();
+		break;
+	case LossType::MAE:
+		LossFuncPtr = std::make_unique<MAE>();
+		break;
+	case LossType::Huber:
+		LossFuncPtr = std::make_unique<Huber>();
+		break;
+	default:
+		throw std::invalid_argument("Wrong loss function type");
+	}
+
+}
+
 void NeuralNetwork::initializeInputFilePtr()
 {
 	InputFilePtr = std::make_unique<InputFile>(logger, networkDataFileName, numTargetCols);
@@ -88,9 +134,7 @@ void NeuralNetwork::readInputFileData()
 }
 
 void NeuralNetwork::addLayer(const int& InputFileDim_, const int& outputDim_,
-	const ActivationType& activType_,
-	const OptimizerType& optType_,
-	const double& learningRate_)
+	const ActivationType& activType_)
 {
 	// The first layer does not have any previous layer so we need to check if there is any previous layers
 	if (Layers.size())
@@ -104,11 +148,11 @@ void NeuralNetwork::addLayer(const int& InputFileDim_, const int& outputDim_,
 		* avoiding having a mismatch between the two default values
 		*/
 		Layers.push_back(std::make_unique<LayerBatchEfficient>(logger, InputFileDim_, outputDim_,
-			activType_, optType_, learningRate_));
+			activType_));
 	}
 	else if (batchsize > 0) {
 		Layers.push_back(std::make_unique<LayerBatchEfficient>(logger, batchsize, InputFileDim_, outputDim_,
-			activType_, optType_, learningRate_));
+			activType_));
 	}
 	else
 	{
@@ -118,34 +162,6 @@ void NeuralNetwork::addLayer(const int& InputFileDim_, const int& outputDim_,
 	numLayers++;
 }
 
-void NeuralNetwork::addLastLayer(const int& InputFileDim_, const int& outputDim_,
-	const ActivationType& activType_,
-	const OptimizerType& optType_,
-	const double& learningRate_,
-	const LossType& lossType_)
-{
-	// It might be the only layer
-	if (Layers.size())
-	{
-		int prevLayerOutputDim = Layers.back()->returnInputFileOutputDims()[1];
-		if (InputFileDim_ != prevLayerOutputDim) throw std::invalid_argument("Incompatible with the previous layer!");
-	}
-	if (batchsize == -1) {
-		/* I do not put the default value of the batch size here
-		 * on purpose so that the Layers decides on the default value
-		 * avoiding having a mismatch between the two default values
-		 */
-		Layers.push_back(std::make_unique<LastLayerBatchEfficient>(logger, InputFileDim_, outputDim_,
-			activType_, optType_, learningRate_, lossType_));
-	}
-	else if (batchsize > 0) {
-		Layers.push_back(std::make_unique<LastLayerBatchEfficient>(logger, batchsize, InputFileDim_, outputDim_,
-			activType_, optType_, learningRate_, lossType_));
-	}
-	else
-		throw std::invalid_argument("The batchsize must be > 0");
-	numLayers++;
-}
 
 void NeuralNetwork::addDropout(const int& dim_, const double& dropRate_, const double& learningRate_)
 {
@@ -165,10 +181,10 @@ void NeuralNetwork::addDropout(const int& dim_, const double& dropRate_, const d
 		* on purpose so that the Layers decides on the default value
 		* avoiding having a mismatch between the two default values
 		*/
-		Layers.push_back(std::make_unique<Dropout>(logger, dim_, learningRate_, dropRate_));
+		Layers.push_back(std::make_unique<Dropout>(logger, dim_,dropRate_));
 	}
 	else if (batchsize > 0) {
-		Layers.push_back(std::make_unique<Dropout>(logger, batchsize, dim_, learningRate_, dropRate_));
+		Layers.push_back(std::make_unique<Dropout>(logger, batchsize, dim_, dropRate_));
 	}
 	else
 	{
@@ -207,7 +223,6 @@ void NeuralNetwork::fit()
 	int numTrainingBatchs = (numTData + batchsize - 1) / batchsize;
 	int numValidationBatchs = (numVData + batchsize - 1) / batchsize;
 	
-	int numFeatures = static_cast<int>(networkInputFileMatrix.rows());
 
 	trainingLoss.reserve(MaxNumSteps);
 	validationLoss.reserve(MaxNumSteps);
@@ -327,11 +342,11 @@ MatrixXd NeuralNetwork::forwardBatch(const MatrixXd& InputFile_, const bool& tra
 	return outputMatrixBatch;
 }
 
-void NeuralNetwork::backwardBatch(const MatrixXd& expected_)
+void NeuralNetwork::backwardBatch(const MatrixXd& lastDiff_)
 {
-	MatrixXd prevDiffBatch = expected_;
+	MatrixXd prevDiffBatch = lastDiff_;
 	if (logger.log_level >= LOG_LEVEL_TRACE)
-		logger << "\t\tInputFile Matrix dims for backwardBatch = " << expected_.rows() << "X" << expected_.cols() << std::endl;
+		logger << "\t\tInputFile Matrix dims for backwardBatch = " << lastDiff_.rows() << "X" << lastDiff_.cols() << std::endl;
 	for (int i = numLayers - 1; i >= 0; i--)
 	{
 		if (logger.log_level >= LOG_LEVEL_VERBOSE)
@@ -351,7 +366,7 @@ void NeuralNetwork::updateBatch()
 	{
 		if (logger.log_level >= LOG_LEVEL_VERBOSE)
 			logger << "\t\t\tUpdating the layer " << i++ << std::endl;
-		layer->update();
+		layer->update(OptFuncPtr);
 		if (logger.log_level >= LOG_LEVEL_VERBOSE) {
 			double testdLoss_deweights = layer->returnDLoss_deweights(0, 1);
 			logger << "\t\t\tdLoss_dweights(0,1)=" << testdLoss_deweights << std::endl;
@@ -363,8 +378,6 @@ void NeuralNetwork::trainBatches(const int& firstData, const int& numData, const
 {
 	lossValue = 0.0;
 	
-	LastLayerBatchEfficient* LastLayerRawPtr = dynamic_cast<LastLayerBatchEfficient*> (Layers.back().get());
-	if (!LastLayerRawPtr) throw std::runtime_error("The last layer type is wrong!");
 	
 	for (int j = 0; j < numBatchs; j++)
 	{
@@ -387,12 +400,13 @@ void NeuralNetwork::trainBatches(const int& firstData, const int& numData, const
 
 		outputBatch = forwardBatch(InputFileBatch,doBack);
 		if (doBack) {
-			backwardBatch(expectedBatch);
+			MatrixXd lastDiff = LossFuncPtr->diff(outputBatch,expectedBatch);
+			backwardBatch(lastDiff);
 			updateBatch();
 		}
 
 
-		double lossValueBatch = LastLayerRawPtr->loss(outputBatch, expectedBatch);
+		double lossValueBatch = (*LossFuncPtr)(outputBatch, expectedBatch);
 		lossValue += lossValueBatch*numCols;
 
 
@@ -413,8 +427,7 @@ void NeuralNetwork::trainBatches(const int& firstData, const int& numData, const
 				validationLossFile << "," << lossValueBatch;
 		}
 	}
-	
-	array<int,2> lastDims = LastLayerRawPtr->returnInputFileOutputDims();
+
 }
 
 void NeuralNetwork::enterTestXy()

@@ -5,7 +5,7 @@
 
 
 LayerBatchEfficient::LayerBatchEfficient(Logger& logger_, const int& batchsize_, const int& InputFileDim_, const int& outputDim_,
-	const ActivationType& activType_, const OptimizerType& optType_, const double& learningRate_) :
+	const ActivationType& activType_) :
 	logger{ logger_ },
 	batchsize{ batchsize_ },
 	InputFileDim{ InputFileDim_ }, outputDim{ outputDim_ },
@@ -13,8 +13,7 @@ LayerBatchEfficient::LayerBatchEfficient(Logger& logger_, const int& batchsize_,
 	dActive_dz{ outputDim_,batchsize_ },
 	weights{ outputDim_,InputFileDim_ + 1 }, dLoss_dweights{ outputDim_, InputFileDim_ + 1 },
 	prev_diff{ InputFileDim_,batchsize_ },
-	activType{ activType_ },
-	optType{ optType_ }, learningRate{ learningRate_ }
+	activType{ activType_ }
 {
 	switch (activType)
 	{
@@ -43,35 +42,12 @@ LayerBatchEfficient::LayerBatchEfficient(Logger& logger_, const int& batchsize_,
 		throw std::invalid_argument("Unknown loss type!");
 	}
 
-	switch (optType)
-	{
-	case OptimizerType::NONE:
-		optFunction = std::make_unique<NoneOpt>(learningRate);
-		break;
-	case OptimizerType::SGD:
-		optFunction = std::make_unique<SGD>(learningRate);
-		break;
-	case OptimizerType::SGDMOMENUM:
-		optFunction = std::make_unique<SGDMomentum>(learningRate);
-		break;
-	case OptimizerType::RMSPROP:
-		optFunction = std::make_unique<RMSProp>(learningRate);
-		break;
-	case OptimizerType::ADAM:
-		optFunction = std::make_unique<Adam>(learningRate);
-		break;
-	case OptimizerType::ADAGRAD:
-		optFunction = std::make_unique<AdaGrad>(learningRate);
-		break;
-	default:
-		throw std::invalid_argument("Unknown optimizer type!");
-	}
+
 
 }
 
-LayerBatchEfficient::LayerBatchEfficient(Logger& logger_, const int& InputFileDim_, const int& outputDim_, const ActivationType& activType_,
-	const OptimizerType& optType_, const double& learningRate_) :
-	LayerBatchEfficient{ logger_,32,InputFileDim_,outputDim_,activType_,optType_,learningRate_ }
+LayerBatchEfficient::LayerBatchEfficient(Logger& logger_, const int& InputFileDim_, const int& outputDim_, const ActivationType& activType_) :
+	LayerBatchEfficient{ logger_,32,InputFileDim_,outputDim_,activType_}
 {}
 
 void LayerBatchEfficient::initialize()
@@ -214,9 +190,9 @@ MatrixXd LayerBatchEfficient::backward(MatrixXd& nextDiff_)
 	return prev_diff;
 }
 
-void LayerBatchEfficient::update()
+void LayerBatchEfficient::update(const std::unique_ptr<Optimizer>& OptFuncPtr_)
 {
-	optFunction->update(weights, dLoss_dweights);
+	OptFuncPtr_->update(weights, dLoss_dweights);
 }
 
 MatrixXd&& LayerBatchEfficient::moveGradients()

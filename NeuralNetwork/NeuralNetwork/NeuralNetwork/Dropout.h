@@ -10,12 +10,12 @@ using Eigen::MatrixXd;
 class Dropout : public LayerBatchEfficient
 {
 public:
-	Dropout(Logger& logger_, const int& batchsize_, const int& Dim_, const double& learningRate_, const double& dropRate_);
-	Dropout(Logger& logger_, const int& Dim_, const double& learningRate_, const double& dropRate_);
+	Dropout(Logger& logger_, const int& batchsize_, const int& Dim_,const double& dropRate_);
+	Dropout(Logger& logger_, const int& Dim_, const double& dropRate_);
 	void initialize() override;
 	MatrixXd forward(const MatrixXd& InputFile_, const bool trainMode = true) override;
 	MatrixXd backward(MatrixXd& nextDiff_) override;
-	void update() override;
+	void update(const std::unique_ptr<Optimizer>& OptFuncPtr_) override;
 private:
 	double dropRate;
 	double scaleRate;

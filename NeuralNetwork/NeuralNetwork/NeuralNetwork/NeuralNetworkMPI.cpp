@@ -161,9 +161,9 @@ void NeuralNetworkMPI::fit()
 		validationLoss.push_back(loss[1]);
 		
 		if (rank == 0 && fOutputMode & AVG) {
-			for (int i = 0; i < size; i++) {
-				trainLossFile << "," << lossTGather[i]/static_cast<double>(nDataTGather[i]);
-				validationLossFile << "," << lossVGather[i]/static_cast<double>(nDataVGather[i]);
+			for (int rank_i = 0; rank_i < size; rank_i++) {
+				trainLossFile << "," << lossTGather[rank_i]/static_cast<double>(nDataTGather[rank_i]);
+				validationLossFile << "," << lossVGather[rank_i]/static_cast<double>(nDataVGather[rank_i]);
 			}
 			trainLossFile << std::endl;
 			validationLossFile << std::endl;
@@ -231,8 +231,8 @@ void NeuralNetworkMPI::setLastBatch() {
 	if (rank == 0) {
 		MatrixXd& inMat = networkInputFileMatrix;
 		MatrixXd& ouMat = networkOutputMatrix;
-		int nDataIn = inMat.rows() * status_0;
-		int nDataOu = ouMat.rows() * status_0;
+		int nDataIn = static_cast<int>(inMat.rows()) * status_0;
+		int nDataOu = static_cast<int>(ouMat.rows()) * status_0;
 		MatrixXd tranferMatIn = inMat.block(0, 0, inMat.rows(), status_0);
 		MatrixXd tranferMatOu = ouMat.block(0, 0, ouMat.rows(), status_0);
 		MPI_Ssend(tranferMatIn.data(), nDataIn, MPI_DOUBLE, size - 1, 2, MPI_COMM_WORLD);
@@ -243,8 +243,8 @@ void NeuralNetworkMPI::setLastBatch() {
 		MatrixXd& ouMat = networkOutputMatrix;
 		MatrixXd newIn{ inMat.rows(),inMat.cols() + status_0 };
 		MatrixXd newOu{ ouMat.rows(),ouMat.cols() + status_0 };
-		int nDataIn = inMat.rows() * status_0;
-		int nDataOu = ouMat.rows() * status_0;
+		int nDataIn = static_cast<int>(inMat.rows()) * status_0;
+		int nDataOu = static_cast<int>(ouMat.rows()) * status_0;
 		MatrixXd transferMatIn{ inMat.rows(),status_0 };
 		MatrixXd transferMatOu{ ouMat.rows(),status_0 };
 		MPI_Recv(transferMatIn.data(), nDataIn, MPI_DOUBLE, 0, 2, MPI_COMM_WORLD, &status[0]);
@@ -255,8 +255,8 @@ void NeuralNetworkMPI::setLastBatch() {
 		newOu.block(0, ouMat.cols(), ouMat.rows(), status_0) = transferMatOu;
 		inMat = newIn;
 		ouMat = newOu;
-		networkInputFileDim[1] = inMat.cols();
-		networkOutputDim[1] = ouMat.cols();
+		networkInputFileDim[1] = static_cast<int>(inMat.cols());
+		networkOutputDim[1] = static_cast<int>(ouMat.cols());
 	}
 	return;
 }

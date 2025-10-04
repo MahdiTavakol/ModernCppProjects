@@ -102,7 +102,7 @@ void NeuralNetworkOpenMP::trainBatches(const int& firstData_, const int& numData
 
 			outputBatch = forwardBatch(InputFile,doBack_);
 			if (doBack_) {
-				MatrixXd prevDiffBatch = outputBatch;
+				MatrixXd prevDiffBatch = LossFuncPtr->diff(outputBatch,expected);
 				for (int i = numLayers - 1; i >= 0; i--)
 				{
 					auto& layer = Layers[i];
@@ -110,7 +110,7 @@ void NeuralNetworkOpenMP::trainBatches(const int& firstData_, const int& numData
 					gradientAvgThreads[thread_id][i] += layer->returnGradients();
 				}
 				for (auto& layer : Layers)
-					layer->update();
+					layer->update(OptFuncPtr);
 			}
 			//lossVal += lossBatch(outputBatch, expected);
 		}

@@ -27,9 +27,6 @@
     <ClCompile Include="LayerBatchEfficient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LastLayerBatchEfficient.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="NeuralNetwork.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -78,9 +75,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="LayerBatchEfficient.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LastLayerBatchEfficient.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="NeuralNetwork.h">

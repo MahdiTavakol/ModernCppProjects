@@ -1,22 +1,21 @@
 #include "Dropout.h"
 
-Dropout::Dropout(Logger& logger_, const int& batchsize_, const int& Dim_, const double& learningRate_, const double& dropRate_):
-	LayerBatchEfficient{logger_,batchsize_,Dim_,Dim_,ActivationType::NONE,OptimizerType::NONE,learningRate_}, dropRate{dropRate_}
+Dropout::Dropout(Logger& logger_, const int& batchsize_, const int& Dim_, const double& dropRate_):
+	LayerBatchEfficient{logger_,batchsize_,Dim_,Dim_,ActivationType::NONE}, dropRate{dropRate_}
 {
 	if (dropRate < 0.0 || dropRate >= 1.0)
 		throw std::invalid_argument("The rate value must be in the (0,1] range!");
-	
+	scaleRate = 1.0 / (1.0 - dropRate);
 }
 
-Dropout::Dropout(Logger& logger_, const int& Dim_, const double& learningRate_, const double& dropRate_) :
-	Dropout(logger_, 32, Dim_, learningRate_, dropRate_) {}
+Dropout::Dropout(Logger& logger_, const int& Dim_, const double& dropRate_) :
+	Dropout(logger_, 32, Dim_, dropRate_) {}
 
 
 void Dropout::initialize()
 {
 	gen.seed(rd());
 	bern_keep = std::make_unique<std::bernoulli_distribution>(1.0 - dropRate);
-	scaleRate = 1.0 / (1.0 - dropRate);
 	mask_vec.resize(InputFileDim);
 	mask_full.resize(0, 0);
 }
@@ -44,7 +43,7 @@ MatrixXd Dropout::backward(MatrixXd& nextDiff_)
 	return nextDiff_.cwiseProduct(mask_full);
 }
 
-void Dropout::update()
+void Dropout::update(const std::unique_ptr<Optimizer>& OptFuncPtr_)
 {
  	// do nothing.
 }
