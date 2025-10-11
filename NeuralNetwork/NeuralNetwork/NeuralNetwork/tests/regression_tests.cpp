@@ -1,0 +1,238 @@
+#define CATCH_CONFIG_MAIN
+#include "catch.hpp"
+
+
+#include "../Activations.h"
+#include "../InputArgs.h"
+#include "../InputFile.h"
+#include "../InputMPIFile.h"
+#include "../LayerBatchEfficient.h"
+#include "../Loss.h"
+#include "../Logger.h"
+#include "../NeuralNetwork.h"
+#include "../NeuralNetworkMPI.h"
+#include "../NeuralNetworkOpenMP.h"
+#include "../Optimizers.h"
+
+#include <memory>
+#include <string>
+#include <iostream>
+#include <Eigen/Dense>
+
+#define logger (*loggerPtr)
+
+using std::ostream;
+using std::endl;
+using std::string;
+using std::vector;
+using std::unique_ptr;
+using std::make_unique;
+using Eigen::MatrixXd;
+
+static int testNumber = 0;
+static constexpr double eps = 1e-8;
+static unique_ptr<Logger> loggerPtr;
+static constexpr int seed = 12345678;
+
+static void Compare_Eigen_MatrixXds(const MatrixXd& a_, const MatrixXd& b_)
+{
+	// It the sizes are not the same comparison cannot be made.
+	int aRows = static_cast<int>(a_.rows());
+	int aCols = static_cast<int>(a_.cols());
+	int bRows = static_cast<int>(b_.rows());
+	int bCols = static_cast<int>(b_.cols());
+	REQUIRE(aRows == bRows);
+	REQUIRE(aCols == bCols);
+
+	MatrixXd c = a_ - b_;
+	double max_abs = c.cwiseAbs().maxCoeff();
+
+	// Let's see if each element is the same!
+	CHECK(max_abs <= eps);
+}
+
+static void Setup()
+{
+	vector<std::reference_wrapper<ostream>> logger_ref =
+	{
+		std::ref(std::cout)
+	};
+	loggerPtr = make_unique<Logger>( logger_ref );
+	loggerPtr->log_level >= LOG_LEVEL_ERROR;
+}
+
+TEST_CASE("Setting up the global variables for tests")
+{
+	Setup();
+	SUCCEED("Finished setting up");
+}
+
+TEST_CASE("Comparing the MPI result with SERIAL case for a 1 batch system")
+{
+	logger << "Running test #" << testNumber++ << endl;
+
+	string trainFileName = "train-1.csv";
+	string testFileName = "test-1.csv";
+
+
+	int nMaxLayers = 4;
+	int nTargetCols = 1;
+	int inDim = 2;
+	int bSize = 32;
+
+	
+
+	std::unique_ptr<NeuralNetwork> nnSerialPtr, nnMPIPtr;
+	MatrixXd serialResult, mpiResult;
+
+	logger << "Training the serial network" << endl;
+	nnSerialPtr = make_unique<NeuralNetwork>(logger, trainFileName, testFileName, nTargetCols, nMaxLayers, bSize);
+	nnSerialPtr->initializeInputFilePtr();
+	nnSerialPtr->initializeOutputs();
+	nnSerialPtr->initializeOptandLoss();
+	nnSerialPtr->readInputFileData();
+	nnSerialPtr->addLayer(2, 4);
+	nnSerialPtr->addLayer(4, 8);
+	nnSerialPtr->addLayer(8, 4);
+	nnSerialPtr->addLayer(4, 1);
+	nnSerialPtr->initializeLayers(seed);
+	logger << "Transforming the serial network" << endl;
+	nnSerialPtr->fit();
+	serialResult = nnSerialPtr->transform();
+
+	logger << "Training the MPI network" << endl;
+	nnMPIPtr = make_unique<NeuralNetworkMPI>(logger, trainFileName, testFileName, nTargetCols, nMaxLayers, bSize);
+	nnMPIPtr->initializeInputFilePtr();
+	nnMPIPtr->initializeOutputs();
+	nnMPIPtr->initializeOptandLoss();
+	nnMPIPtr->readInputFileData();
+	nnMPIPtr->addLayer(2, 4);
+	nnMPIPtr->addLayer(4, 8);
+	nnMPIPtr->addLayer(8, 4);
+	nnMPIPtr->addLayer(4, 1);
+	nnMPIPtr->initializeLayers(seed);
+	nnMPIPtr->fit();
+	logger << "Transforming the MPI network" << endl;
+	mpiResult = nnMPIPtr->transform();
+
+	logger << "Comparing the results" << endl;
+	Compare_Eigen_MatrixXds(serialResult, mpiResult);
+}
+
+
+TEST_CASE("Comparing the MPI result for various batchsizes")
+{
+	logger << "Running test #" << testNumber++ << endl;
+
+	string trainFileName = "train-1.csv";
+	string testFileName = "test-1.csv";
+
+
+	int nMaxLayers = 4;
+	int nTargetCols = 1;
+	int inDim = 2;
+	int bSize0 = 32;
+	vector<int> bSizes = { 2,4,8,16,32,64,128 };
+
+	logger.log_level >= LOG_LEVEL_ERROR;
+
+	std::unique_ptr<NeuralNetwork>  nnMPIPtr;
+	MatrixXd mpiResult0, mpiResult;
+
+	logger << "Training the base network with batch size of " << bSize0 << endl;
+	logger << "Training the MPI network" << endl;
+	nnMPIPtr = make_unique<NeuralNetworkMPI>(logger, trainFileName, testFileName, nTargetCols, nMaxLayers, bSize0);
+	nnMPIPtr->initializeInputFilePtr();
+	nnMPIPtr->initializeOutputs();
+	nnMPIPtr->initializeOptandLoss();
+	nnMPIPtr->readInputFileData();
+	nnMPIPtr->addLayer(2, 4);
+	nnMPIPtr->addLayer(4, 8);
+	nnMPIPtr->addLayer(8, 4);
+	nnMPIPtr->addLayer(4, 1);
+	nnMPIPtr->initializeLayers(seed);
+	nnMPIPtr->fit();
+	logger << "Transforming the base network with the batch size of " << bSize0 << endl;
+	mpiResult0 = nnMPIPtr->transform();
+
+
+	for (const int& bSize : bSizes)
+	{
+		logger << "Training the MPI network with batch size of " << bSize << endl;
+		nnMPIPtr = make_unique<NeuralNetworkMPI>(logger, trainFileName, testFileName, nTargetCols, nMaxLayers, bSize);
+		nnMPIPtr->initializeInputFilePtr();
+		nnMPIPtr->initializeOutputs();
+		nnMPIPtr->initializeOptandLoss();
+		nnMPIPtr->readInputFileData();
+		nnMPIPtr->addLayer(2, 4);
+		nnMPIPtr->addLayer(4, 8);
+		nnMPIPtr->addLayer(8, 4);
+		nnMPIPtr->addLayer(4, 1);
+		nnMPIPtr->initializeLayers(seed);
+		nnMPIPtr->fit();
+		logger << "Transforming the network with the batch size of " << bSize << endl;
+		mpiResult = nnMPIPtr->transform();
+
+		logger << "Comparing results with the base network" << endl;
+		Compare_Eigen_MatrixXds(mpiResult0, mpiResult);
+	}
+}
+
+TEST_CASE("Comparing the MPI result for various seed numbers")
+{
+	logger << "Running test #" << testNumber++ << endl;
+
+	string trainFileName = "train-1.csv";
+	string testFileName = "test-1.csv";
+
+
+	int nMaxLayers = 4;
+	int nTargetCols = 1;
+	int inDim = 2;
+	int bSize = 32;
+	vector<int> seeds = { 1135,1245,2928,8769,8239,456,111 };
+
+	logger.log_level >= LOG_LEVEL_ERROR;
+
+	std::unique_ptr<NeuralNetwork>  nnMPIPtr;
+	MatrixXd mpiResult0, mpiResult;
+
+	logger << "Training the base network with seed value of " << seed << endl;
+	logger << "Training the MPI network" << endl;
+	nnMPIPtr = make_unique<NeuralNetworkMPI>(logger, trainFileName, testFileName, nTargetCols, nMaxLayers, bSize);
+	nnMPIPtr->initializeInputFilePtr();
+	nnMPIPtr->initializeOutputs();
+	nnMPIPtr->initializeOptandLoss();
+	nnMPIPtr->readInputFileData();
+	nnMPIPtr->addLayer(2, 4);
+	nnMPIPtr->addLayer(4, 8);
+	nnMPIPtr->addLayer(8, 4);
+	nnMPIPtr->addLayer(4, 1);
+	nnMPIPtr->initializeLayers(seed);
+	nnMPIPtr->fit();
+	logger << "Transforming the base network with the seed of " << seed << endl;
+	mpiResult0 = nnMPIPtr->transform();
+
+
+	for (const int& sd : seeds)
+	{
+		logger << "Training the MPI network with batch size of " << bSize << endl;
+		nnMPIPtr = make_unique<NeuralNetworkMPI>(logger, trainFileName, testFileName, nTargetCols, nMaxLayers, bSize);
+		nnMPIPtr->initializeInputFilePtr();
+		nnMPIPtr->initializeOutputs();
+		nnMPIPtr->initializeOptandLoss();
+		nnMPIPtr->readInputFileData();
+		nnMPIPtr->addLayer(2, 4);
+		nnMPIPtr->addLayer(4, 8);
+		nnMPIPtr->addLayer(8, 4);
+		nnMPIPtr->addLayer(4, 1);
+		nnMPIPtr->initializeLayers(sd);
+		nnMPIPtr->fit();
+		logger << "Transforming the network with the seed of " << sd << endl;
+		mpiResult = nnMPIPtr->transform();
+
+		logger << "Comparing results with the base network" << endl;
+		Compare_Eigen_MatrixXds(mpiResult0, mpiResult);
+	}
+}
+

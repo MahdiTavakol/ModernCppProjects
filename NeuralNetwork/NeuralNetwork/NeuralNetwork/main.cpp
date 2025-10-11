@@ -89,7 +89,7 @@ int main(int argc, char** argv)
 			dropRate = layerI.info.dropRate;
 			neuralNetworkPtr->addDropout(inDim, dropRate);
 		default:
-			throw std::runtime_error("Unknown layertype!");
+			throw std::runtime_error("Unknown layer type!");
 		}
 	}
 	neuralNetworkPtr->initializeLayers();

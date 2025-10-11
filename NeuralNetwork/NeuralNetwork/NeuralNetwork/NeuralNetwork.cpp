@@ -194,7 +194,7 @@ void NeuralNetwork::addDropout(const int& dim_, const double& dropRate_, const d
 	numLayers++;
 }
 
-void NeuralNetwork::initializeLayers()
+void NeuralNetwork::initializeLayers(const int& seed_)
 {
 	// Checking the last layer type
 	//LayerBatchEfficient* LastLayerRawPtr = Layers.back().get();
@@ -211,7 +211,14 @@ void NeuralNetwork::initializeLayers()
 	{
 		if (logger.log_level >= LOG_LEVEL_DEBUG)
 			logger << "Initializing the layer " << ++layerNumber << std::endl;
-		layer->initialize();
+		if (seed_ == -1)
+		{
+			if (logger.log_level >= LOG_LEVEL_INFO)
+				logger << "No random seed is provided: Using random_device as a seed value" << std::endl;
+			layer->initialize();
+		}
+		else
+			layer->initialize(seed_);
 	}
 }
 

@@ -52,6 +52,12 @@ LayerBatchEfficient::LayerBatchEfficient(Logger& logger_, const int& InputFileDi
 
 void LayerBatchEfficient::initialize()
 {
+	int seed = rd();
+	initialize(seed);
+}
+
+void LayerBatchEfficient::initialize(const int& seed_)
+{
 	double mean, std;
 	int type = 0;
 	switch (activType)
@@ -90,7 +96,7 @@ void LayerBatchEfficient::initialize()
 	}
 	std::cout << "Activation function type= " << type << " and inptDim = " << InputFileDim << std::endl;
 	
-	gen.seed(rd());
+	gen.seed(seed_);
 	distPtr = std::make_unique<std::normal_distribution<double>>(mean,std);
 
 	// Just weights has to be initialized not bias values

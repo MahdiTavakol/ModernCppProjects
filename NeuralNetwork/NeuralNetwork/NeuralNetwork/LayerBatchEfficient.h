@@ -35,6 +35,7 @@ public:
 	LayerBatchEfficient(Logger& logger_, const int& InputFileDim_, const int& outputDim_, 
 		const ActivationType& activType);
 	virtual ~LayerBatchEfficient() = default;
+	virtual void initialize(const int& seed);
 	virtual void initialize();
 	virtual MatrixXd forward(const MatrixXd& InputFile_, const bool trainMode ); // outputDim X batchsize --> InputFileDim X batchsize
 	virtual MatrixXd backward(MatrixXd& nextDiff_);
