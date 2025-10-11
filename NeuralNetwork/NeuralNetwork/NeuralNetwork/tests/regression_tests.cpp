@@ -37,7 +37,7 @@ static constexpr int seed = 12345678;
 static const struct Data {
 	string trainFileName, testFileName;
 	int nMaxLayers, nTargetCols, inDim, bSize;
-	int maxNumSteps
+	int maxNumSteps;
 } settings[] = {
 	{ "../tests/train_1.csv", "../tests/test_1.csv", 4, 1, 2, 32,1000}
 };
