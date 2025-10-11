@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Neuron.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Activations.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -68,9 +65,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Neuron.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="Activations.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -113,5 +107,9 @@
     <ClInclude Include="InputArgs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="tests\test_1.csv" />
+    <None Include="tests\train_1.csv" />
   </ItemGroup>
 </Project>

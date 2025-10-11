@@ -140,7 +140,6 @@
     <ClCompile Include="NeuralNetwork.cpp" />
     <ClCompile Include="NeuralNetworkMPI.cpp" />
     <ClCompile Include="NeuralNetworkOpenMP.cpp" />
-    <ClCompile Include="Neuron.cpp" />
     <ClCompile Include="Optimizers.cpp" />
     <ClCompile Include="Scaler.cpp" />
     <ClCompile Include="tests\regression_tests.cpp" />
@@ -158,9 +157,12 @@
     <ClInclude Include="NeuralNetwork.h" />
     <ClInclude Include="NeuralNetworkMPI.h" />
     <ClInclude Include="NeuralNetworkOpenMP.h" />
-    <ClInclude Include="Neuron.h" />
     <ClInclude Include="Optimizers.h" />
     <ClInclude Include="Scaler.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="tests\test_1.csv" />
+    <None Include="tests\train_1.csv" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

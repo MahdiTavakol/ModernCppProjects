@@ -43,7 +43,6 @@ set(COMMON_SOURCES
   Scaler.cpp
   NeuralNetwork.cpp
   NeuralNetworkOpenMP.cpp
-  Neuron.cpp
   Optimizers.cpp
 )
 
