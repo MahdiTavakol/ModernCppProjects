@@ -50,6 +50,7 @@ static void Compare_Eigen_MatrixXds(const MatrixXd& a_, const MatrixXd& b_)
 	int aCols = static_cast<int>(a_.cols());
 	int bRows = static_cast<int>(b_.rows());
 	int bCols = static_cast<int>(b_.cols());
+	logger << aCols << "," << aRows << "," << bCols << "," << bRows << endl;
 	REQUIRE(aRows == bRows);
 	REQUIRE(aCols == bCols);
 
