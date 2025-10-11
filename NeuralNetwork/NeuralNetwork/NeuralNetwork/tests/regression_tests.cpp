@@ -76,8 +76,7 @@ static void Setup()
 	{
 		std::ref(std::cout)
 	};
-	vector<int> log_levels = { LOG_LEVEL_ERROR };
-	loggerPtr = make_unique<Logger>( logger_ref, log_levels);
+	loggerPtr = make_unique<Logger>( logger_ref, LOG_LEVEL_ERROR);
 }
 
 void SetupFiles(const int& indx)
