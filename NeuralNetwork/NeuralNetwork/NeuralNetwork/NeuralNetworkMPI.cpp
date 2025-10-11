@@ -279,14 +279,17 @@ MatrixXd NeuralNetworkMPI::transform()
 	MatrixXd result;
 	int numRows = numRowsLocal;
 	int numData = std::accumulate(recvCountVector.begin(), recvCountVector.end(), 0);
+	assert(numRows > 0);
+	assert(numData % numRows == 0 && "Global elements not divisible by numRows");
 	int numCols = numData / numRows;
 	result.resize(numRows, numCols);
 
 	std::vector<int> dispVector;
-	dispVector.push_back(0.0);
+	dispVector.push_back(0);
 	std::partial_sum(recvCountVector.begin(), recvCountVector.end()-1,std::back_inserter(dispVector));
 	MPI_Allgatherv(resultLocal.data(), numDataLocal, MPI_DOUBLE,
 		result.data(), recvCountVector.data(), dispVector.data(),MPI_DOUBLE,MPI_COMM_WORLD);
+
 
 	return result;
 }

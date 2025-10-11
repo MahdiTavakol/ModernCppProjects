@@ -316,6 +316,8 @@ MatrixXd NeuralNetwork::transform()
 	MatrixXd networkTestMatrix;
 	MatrixXd networkDummyMatrix;
 	MatrixXd output;
+	int numData;
+	int numFeatures;
 
 	testPtr->init();
 	testPtr->read();
@@ -332,9 +334,12 @@ MatrixXd NeuralNetwork::transform()
 	if (networkInputFileDim[0] != networkTestDim[0])
 		throw std::invalid_argument("The number of feature for the test data is different than the training data!");
 
-	output.resize(numTargetCols, networkTestDim[1]);
+	numData = static_cast<int>(networkTestMatrix.cols());
+	numFeatures = static_cast<int>(networkTestMatrix.rows());
 
-	int numBatchs = (networkTestDim[1] + batchsize - 1) / batchsize;
+	output.resize(numTargetCols, numData);
+
+	int numBatchs = (numData + batchsize - 1) / batchsize;
 
 	for (int j = 0; j < numBatchs; j++)
 	{
@@ -343,8 +348,8 @@ MatrixXd NeuralNetwork::transform()
 		MatrixXd outputBatch;
 
 		int firstCol = batchsize * j;
-		if (firstCol >= networkTestDim[1]) break;
-		int lastCol = std::min(firstCol + batchsize, networkTestDim[1]);
+		if (firstCol >= numData) break;
+		int lastCol = std::min(firstCol + batchsize, numData);
 		int numCols = lastCol - firstCol;
 
 		MatrixXd TestFileBatch = networkTestMatrix.block(0, firstCol, networkTestMatrix.rows(), numCols);
