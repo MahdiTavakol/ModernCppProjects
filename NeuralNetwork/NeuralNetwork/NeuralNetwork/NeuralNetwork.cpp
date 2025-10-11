@@ -343,7 +343,7 @@ MatrixXd NeuralNetwork::transform()
 		MatrixXd outputBatch;
 
 		int firstCol = batchsize * j;
-		if (firstCol >= networkTestDim[1]) return;
+		if (firstCol >= networkTestDim[1]) break;
 		int lastCol = std::min(firstCol + batchsize, networkTestDim[1]);
 		int numCols = lastCol - firstCol;
 
