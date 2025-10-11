@@ -48,7 +48,17 @@ static void Compare_Eigen_MatrixXds(const MatrixXd& a_, const MatrixXd& b_)
 	double max_abs = c.cwiseAbs().maxCoeff();
 
 	// Let's see if each element is the same!
-	CHECK(max_abs <= eps);
+	CHECKED_IF(max_abs <= eps)
+	{
+		SUCCEED("Test passed!");
+	}
+	CHECKED_ELSE(max_abs <= eps)
+	{
+		Eigen::Index i, j;
+		c.cwiseAbs().maxCoeff(&i, &j);
+		INFO("Max diff at (" << i << "," << j << ") "
+			<< "a=" << a_(i, j) << " b=" << b_(i, j) << " diff=" << c(i, j));
+	}
 }
 
 static void Setup()
