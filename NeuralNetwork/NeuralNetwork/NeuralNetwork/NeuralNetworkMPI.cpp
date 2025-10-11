@@ -273,11 +273,12 @@ MatrixXd NeuralNetworkMPI::transform()
 	int numDataLocal = numRowsLocal * numColsLocal;
 
 	std::vector<int> recvCountVector;
+	recvCountVector.resize(size);
 	MPI_Allgather(&numDataLocal, 1, MPI_INT, recvCountVector.data(), 1, MPI_INT, MPI_COMM_WORLD);
 	
 	MatrixXd result;
 	int numRows = numRowsLocal;
-	int numData = std::accumulate(recvCountVector.begin(), recvCountVector.end(), 0.0);
+	int numData = std::accumulate(recvCountVector.begin(), recvCountVector.end(), 0);
 	int numCols = numData / numRows;
 	result.resize(numRows, numCols);
 
