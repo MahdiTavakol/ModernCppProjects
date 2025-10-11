@@ -34,12 +34,13 @@ static constexpr double eps = 1e-8;
 static unique_ptr<Logger> loggerPtr;
 static constexpr int seed = 12345678;
 
-static const struct data {
+static const struct Data {
 	string trainFileName, testFileName;
 	int nMaxLayers, nTargetCols, inDim, bSize;
-} settings[] = {"../tests/train-1.csv","../tests/test-1.csv",
-             4,1,2,32};
-static data setting;
+} settings[] = {
+	{ "../tests/train-1.csv", "../tests/test-1.csv", 4, 1, 2, 32 }
+};
+static Data setting;
 
 static void Compare_Eigen_MatrixXds(const MatrixXd& a_, const MatrixXd& b_)
 {
