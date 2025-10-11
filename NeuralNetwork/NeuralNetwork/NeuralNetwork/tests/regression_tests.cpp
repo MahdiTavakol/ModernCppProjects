@@ -89,12 +89,15 @@ void SetupFiles(const int& indx)
 
 TEST_CASE("Setting up the global variables for tests")
 {
+	logger << endl << endl;
 	Setup();
 	SUCCEED("Finished setting up");
+	logger << endl << endl;
 }
 
 TEST_CASE("Comparing the MPI result with SERIAL case for a 1 batch system")
 {
+	logger << endl << endl;
 	logger << "Running test #" << testNumber++ << endl;
 	SetupFiles(0);
 
@@ -139,11 +142,13 @@ TEST_CASE("Comparing the MPI result with SERIAL case for a 1 batch system")
 
 	logger << "Comparing the results" << endl;
 	Compare_Eigen_MatrixXds(serialResult, mpiResult);
+	logger << endl << endl;
 }
 
 
 TEST_CASE("Comparing the MPI result for various batchsizes")
 {
+	logger << endl << endl;
 	logger << "Running test #" << testNumber++ << endl;
 	SetupFiles(0);
 	vector<int> bSizes = { 2,4,8,16,32,64,128 };
@@ -195,10 +200,12 @@ TEST_CASE("Comparing the MPI result for various batchsizes")
 		logger << "Comparing results with the base network" << endl;
 		Compare_Eigen_MatrixXds(mpiResult0, mpiResult);
 	}
+	logger << endl << endl;
 }
 
 TEST_CASE("Comparing the MPI result for various seed numbers")
 {
+	logger << endl << endl;
 	logger << "Running test #" << testNumber++ << endl;
 	SetupFiles(0);
 	vector<int> seeds = { 1135,1245,2928,8769,8239,456,111 };
@@ -250,11 +257,14 @@ TEST_CASE("Comparing the MPI result for various seed numbers")
 		logger << "Comparing results with the base network" << endl;
 		Compare_Eigen_MatrixXds(mpiResult0, mpiResult);
 	}
+	logger << endl << endl;
 }
 
 TEST_CASE("Cleaning up!")
 {
+	logger << endl << endl;
 	MPI_Finalize();
 	SUCCEED("Finished cleaning up!");
+	logger << endl << endl;
 }
 

@@ -14,7 +14,9 @@ InputMPIFile::InputMPIFile(Logger& logger_, const string& dataFileName_, const i
 
 void InputMPIFile::read()
 {
-	if (rank == 0) logger << "Reading the file" << std::endl;
+	if (rank == 0)
+		if (logger.log_level >= LOG_LEVEL_INFO)
+			logger << "Reading the file" << std::endl;
 	localInputFileDim = InputFileDim;
 	localOutputDim = outputDim;
 
