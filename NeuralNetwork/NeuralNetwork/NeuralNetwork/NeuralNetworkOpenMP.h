@@ -14,7 +14,7 @@ public:
 protected:
 	void backwardBatch(const MatrixXd& /*output_*/) override {}
 
-	void trainBatches(const int& firstData_, const int& numData_,
+	void trainBatches(const int& /*firstData_*/, const int& /*numData_*/,
 		const int& numBatchs_, double& lossValue_, const bool& doBack_) override;
 
 private:

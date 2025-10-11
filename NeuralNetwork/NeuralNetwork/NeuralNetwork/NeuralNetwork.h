@@ -56,7 +56,7 @@ public:
 	void readInputFileData();
 	void addLayer(const int& InputFileDim_, const int& outputDim_,
 		const ActivationType& activType_ = ActivationType::RELU);
-	void addDropout(const int& dim_, const double& dropRate_, const double& learningRate_ = 0.1);
+	void addDropout(const int& dim_, const double& dropRate_);
 	void initializeLayers(const int& seed_ = -1);
 	virtual void fit();
 	MatrixXd transform();

@@ -15,7 +15,6 @@ NeuralNetwork::NeuralNetwork(Logger& logger_, const string& networkDataFileName_
 	networkDataFileName{ networkDataFileName_ },
 	networkTestFileName{ networkTestFileName_ },
 	numTargetCols{ numTargetCols_ }, batchsize{ batchsize_ },
-	trainingPercent{ 70.0 },
 	maxNumLayers{ maxNumLayers_ }
 {}
 
@@ -163,7 +162,7 @@ void NeuralNetwork::addLayer(const int& InputFileDim_, const int& outputDim_,
 }
 
 
-void NeuralNetwork::addDropout(const int& dim_, const double& dropRate_, const double& learningRate_)
+void NeuralNetwork::addDropout(const int& dim_, const double& dropRate_)
 {
 	// checking if the size is the same is the previous layer
 	if (Layers.size())

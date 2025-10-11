@@ -88,6 +88,7 @@ int main(int argc, char** argv)
 		case DROPLAYER:
 			dropRate = layerI.info.dropRate;
 			neuralNetworkPtr->addDropout(inDim, dropRate);
+			break;
 		default:
 			throw std::runtime_error("Unknown layer type!");
 		}

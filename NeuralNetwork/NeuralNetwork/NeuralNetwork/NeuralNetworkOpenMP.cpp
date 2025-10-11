@@ -54,7 +54,7 @@ void NeuralNetworkOpenMP::fit()
 	}
 }
 
-void NeuralNetworkOpenMP::trainBatches(const int& firstData_, const int& numData_,
+void NeuralNetworkOpenMP::trainBatches(const int& /*firstData_*/, const int& /*numData_*/,
 	const int& numBatchs_, double& lossValue_, const bool& doBack_)
 {
 	double lossVal = 0.0;
