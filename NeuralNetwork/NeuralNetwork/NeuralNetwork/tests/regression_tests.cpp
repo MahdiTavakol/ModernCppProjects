@@ -101,10 +101,10 @@ TEST_CASE("Comparing the MPI result with SERIAL case for a 1 batch system")
 	nnSerialPtr->initializeOutputs();
 	nnSerialPtr->initializeOptandLoss();
 	nnSerialPtr->readInputFileData();
-	nnSerialPtr->addLayer(2, 4);
+	nnSerialPtr->addLayer(inDim, 4);
 	nnSerialPtr->addLayer(4, 8);
 	nnSerialPtr->addLayer(8, 4);
-	nnSerialPtr->addLayer(4, 1);
+	nnSerialPtr->addLayer(4, nTargetCols);
 	nnSerialPtr->initializeLayers(seed);
 	logger << "Transforming the serial network" << endl;
 	nnSerialPtr->fit();
@@ -116,10 +116,10 @@ TEST_CASE("Comparing the MPI result with SERIAL case for a 1 batch system")
 	nnMPIPtr->initializeOutputs();
 	nnMPIPtr->initializeOptandLoss();
 	nnMPIPtr->readInputFileData();
-	nnMPIPtr->addLayer(2, 4);
+	nnMPIPtr->addLayer(inDim, 4);
 	nnMPIPtr->addLayer(4, 8);
 	nnMPIPtr->addLayer(8, 4);
-	nnMPIPtr->addLayer(4, 1);
+	nnMPIPtr->addLayer(4, nTargetCols);
 	nnMPIPtr->initializeLayers(seed);
 	nnMPIPtr->fit();
 	logger << "Transforming the MPI network" << endl;
@@ -155,10 +155,10 @@ TEST_CASE("Comparing the MPI result for various batchsizes")
 	nnMPIPtr->initializeOutputs();
 	nnMPIPtr->initializeOptandLoss();
 	nnMPIPtr->readInputFileData();
-	nnMPIPtr->addLayer(2, 4);
+	nnMPIPtr->addLayer(inDim, 4);
 	nnMPIPtr->addLayer(4, 8);
 	nnMPIPtr->addLayer(8, 4);
-	nnMPIPtr->addLayer(4, 1);
+	nnMPIPtr->addLayer(4, nTargetCols);
 	nnMPIPtr->initializeLayers(seed);
 	nnMPIPtr->fit();
 	logger << "Transforming the base network with the batch size of " << bSize0 << endl;
@@ -173,10 +173,10 @@ TEST_CASE("Comparing the MPI result for various batchsizes")
 		nnMPIPtr->initializeOutputs();
 		nnMPIPtr->initializeOptandLoss();
 		nnMPIPtr->readInputFileData();
-		nnMPIPtr->addLayer(2, 4);
+		nnMPIPtr->addLayer(inDim, 4);
 		nnMPIPtr->addLayer(4, 8);
 		nnMPIPtr->addLayer(8, 4);
-		nnMPIPtr->addLayer(4, 1);
+		nnMPIPtr->addLayer(4, nTargetCols);
 		nnMPIPtr->initializeLayers(seed);
 		nnMPIPtr->fit();
 		logger << "Transforming the network with the batch size of " << bSize << endl;
@@ -201,7 +201,6 @@ TEST_CASE("Comparing the MPI result for various seed numbers")
 	int bSize = 32;
 	vector<int> seeds = { 1135,1245,2928,8769,8239,456,111 };
 
-	logger.log_level >= LOG_LEVEL_ERROR;
 
 	std::unique_ptr<NeuralNetwork>  nnMPIPtr;
 	MatrixXd mpiResult0, mpiResult;
@@ -213,10 +212,10 @@ TEST_CASE("Comparing the MPI result for various seed numbers")
 	nnMPIPtr->initializeOutputs();
 	nnMPIPtr->initializeOptandLoss();
 	nnMPIPtr->readInputFileData();
-	nnMPIPtr->addLayer(2, 4);
+	nnMPIPtr->addLayer(inDim, 4);
 	nnMPIPtr->addLayer(4, 8);
 	nnMPIPtr->addLayer(8, 4);
-	nnMPIPtr->addLayer(4, 1);
+	nnMPIPtr->addLayer(4, nTargetCols);
 	nnMPIPtr->initializeLayers(seed);
 	nnMPIPtr->fit();
 	logger << "Transforming the base network with the seed of " << seed << endl;
@@ -231,10 +230,10 @@ TEST_CASE("Comparing the MPI result for various seed numbers")
 		nnMPIPtr->initializeOutputs();
 		nnMPIPtr->initializeOptandLoss();
 		nnMPIPtr->readInputFileData();
-		nnMPIPtr->addLayer(2, 4);
+		nnMPIPtr->addLayer(inDim, 4);
 		nnMPIPtr->addLayer(4, 8);
 		nnMPIPtr->addLayer(8, 4);
-		nnMPIPtr->addLayer(4, 1);
+		nnMPIPtr->addLayer(4, nTargetCols);
 		nnMPIPtr->initializeLayers(sd);
 		nnMPIPtr->fit();
 		logger << "Transforming the network with the seed of " << sd << endl;
