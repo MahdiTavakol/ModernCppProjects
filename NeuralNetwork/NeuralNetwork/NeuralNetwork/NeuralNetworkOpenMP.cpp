@@ -2,8 +2,9 @@
 
 NeuralNetworkOpenMP::NeuralNetworkOpenMP(Logger& logger_, const string& networkInputFileFileName_, const string& networkTestFileName_,
 	const int& numTargetCols_,
-	const int& maxNumLayers_, const int& batchsize_) :
-	NeuralNetwork{logger_, networkInputFileFileName_, networkTestFileName_,numTargetCols_,maxNumLayers_ , batchsize_ }
+	const int& maxNumLayers_, const int& batchsize_, const int& maxNumSteps_) :
+	NeuralNetwork{logger_, networkInputFileFileName_, networkTestFileName_,
+	numTargetCols_,maxNumLayers_ , batchsize_, maxNumSteps_}
 {
 #pragma omp single private(num_threads)
 	{

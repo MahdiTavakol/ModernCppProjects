@@ -8,13 +8,15 @@
 
 NeuralNetwork::NeuralNetwork(Logger& logger_, const string& networkDataFileName_, const string& networkTestFileName_,
 	const int& numTargetCols_, const int& maxNumLayers_,
-	const int& batchsize_) :
+	const int& batchsize_, const int& MaxNumSteps) :
 	logger{ logger_ },
 	trainLossFileName{"training-loss.dat"},
 	validationLossFileName{"validation-loss.dat"},
 	networkDataFileName{ networkDataFileName_ },
 	networkTestFileName{ networkTestFileName_ },
-	numTargetCols{ numTargetCols_ }, batchsize{ batchsize_ },
+	numTargetCols{ numTargetCols_ }, 
+	MaxNumSteps{MaxNumSteps},
+	batchsize{ batchsize_ },
 	maxNumLayers{ maxNumLayers_ }
 {}
 

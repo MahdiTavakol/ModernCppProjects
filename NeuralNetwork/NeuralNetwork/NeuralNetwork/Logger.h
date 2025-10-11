@@ -28,7 +28,7 @@ public:
     }
 
     Logger(const std::vector<std::reference_wrapper<std::ostream>>& strms, const int level_) :
-        strm_vec{ strms }, log_level{ level_ }
+        log_level{ level_ }, strm_vec{ strms }, log_levels{std::vector<int>(strms.size(),level_)}
     {
         MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     }

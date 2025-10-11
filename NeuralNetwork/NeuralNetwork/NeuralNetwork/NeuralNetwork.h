@@ -47,7 +47,7 @@ class NeuralNetwork
 public:
 	NeuralNetwork(Logger& logger_, const string& networkDataFileName_, const string& networkTestFileName_,
 		const int& numTargetCols_, const int& maxNumLayers_ = 10,
-		const int& batchsize_ = -1);
+		const int& batchsize_ = -1, const int& MaxNumSteps = 10000);
 	void initializeOptandLoss(const OptimizerType& optType_ = OptimizerType::SGD,
 		                const double& learningRate_ = 0.5, 
 		                const LossType& lossType_ = LossType::MSE);
@@ -91,7 +91,7 @@ protected:
 
 	// Control parameters
 	const double trainingPercent = 70.0;
-	const int MaxNumSteps = 10000;
+	const int MaxNumSteps;
 	const int batchsize = -1;
 	const int maxTDownVUp = 10;
 	int numLayers = 0;
