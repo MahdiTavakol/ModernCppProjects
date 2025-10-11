@@ -89,7 +89,6 @@ void SetupFiles(const int& indx)
 
 TEST_CASE("Setting up the global variables for tests")
 {
-	logger << endl << endl;
 	Setup();
 	SUCCEED("Finished setting up");
 	logger << endl << endl;
