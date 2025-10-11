@@ -14,6 +14,7 @@ public:
 	void initializeInputFilePtr() override;
 	void initializeOutputs() override;
 	void fit() override;
+	MatrixXd transform() override;
 
 protected:
 	void backwardBatch(const MatrixXd& output_) override;

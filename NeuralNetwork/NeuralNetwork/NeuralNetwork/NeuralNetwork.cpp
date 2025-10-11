@@ -256,7 +256,7 @@ void NeuralNetwork::fit()
 		header_lambda(validationLossFile, numValidationBatchs);
 	}
 
-	int numStepsTrainLossDownValidLossUp = 0;
+	int TDownVUp = 0;
 
 	for (int i = 0; i < MaxNumSteps; i++)
 	{
@@ -296,12 +296,12 @@ void NeuralNetwork::fit()
 		}
 
 		if (!trainingLoss.empty() && tLossVal < trainingLoss.back() && vLossVal > validationLoss.back())
-			numStepsTrainLossDownValidLossUp++;
+			TDownVUp++;
 		else
-			numStepsTrainLossDownValidLossUp = 0;
-		if (numStepsTrainLossDownValidLossUp >= maxTDownVUp) {
+			TDownVUp = 0;
+		if (TDownVUp >= maxTDownVUp) {
 			if (logger.log_level >= LOG_LEVEL_WARN)
-				logger << "\tIn " << numStepsTrainLossDownValidLossUp 
+				logger << "\tIn " << TDownVUp
 				<< " steps the training loss reduced while the validation loss increased!" 
 				<< std::endl << " Stopping the iteration!" << std::endl;
 			break;
@@ -315,6 +315,7 @@ MatrixXd NeuralNetwork::transform()
 	array<int, 2> networkDummyDim;
 	MatrixXd networkTestMatrix;
 	MatrixXd networkDummyMatrix;
+	MatrixXd output;
 
 	testPtr->init();
 	testPtr->read();
@@ -331,7 +332,24 @@ MatrixXd NeuralNetwork::transform()
 	if (networkInputFileDim[0] != networkTestDim[0])
 		throw std::invalid_argument("The number of feature for the test data is different than the training data!");
 
-	return forwardBatch(networkTestMatrix,false);
+	output.resize(numTargetCols, networkTestDim[1]);
+
+	int numBatchs = (networkTestDim[1] + batchsize - 1) / batchsize;
+
+	for (int j = 0; j < numBatchs; j++)
+	{
+		if (logger.log_level >= LOG_LEVEL_TRACE)
+			logger << "\t\tWorking on the batch " << j << std::endl;
+		MatrixXd outputBatch;
+
+		int firstCol = batchsize * j;
+		if (firstCol >= networkTestDim[1]) return;
+		int lastCol = std::min(firstCol + batchsize, networkTestDim[1]);
+		int numCols = lastCol - firstCol;
+
+		MatrixXd TestFileBatch = networkTestMatrix.block(0, firstCol, networkTestMatrix.rows(), numCols);
+		output.block(0,firstCol,output.rows(),numCols) = forwardBatch(TestFileBatch, false);
+	}
 }
 
 MatrixXd NeuralNetwork::forwardBatch(const MatrixXd& InputFile_, const bool& trainMode)

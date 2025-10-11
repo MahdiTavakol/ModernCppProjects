@@ -59,7 +59,7 @@ public:
 	void addDropout(const int& dim_, const double& dropRate_);
 	void initializeLayers(const int& seed_ = -1);
 	virtual void fit();
-	MatrixXd transform();
+	virtual MatrixXd transform();
 	void enterTestXy();
 
 protected:

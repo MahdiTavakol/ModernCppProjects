@@ -197,6 +197,8 @@ void NeuralNetworkMPI::fit()
 	}
 }
 
+
+
 void NeuralNetworkMPI::backwardBatch(const MatrixXd& output_)
 {
 	MatrixXd prevDiffBatch = output_;
@@ -261,6 +263,31 @@ void NeuralNetworkMPI::setLastBatch() {
 		networkOutputDim[1] = static_cast<int>(ouMat.cols());
 	}
 	return;
+}
+
+MatrixXd NeuralNetworkMPI::transform()
+{
+	MatrixXd resultLocal = NeuralNetwork::transform();
+	int numRowsLocal = static_cast<int>(resultLocal.rows());
+	int numColsLocal = static_cast<int>(resultLocal.cols());
+	int numDataLocal = numRowsLocal * numColsLocal;
+
+	std::vector<int> recvCountVector;
+	MPI_Allgather(&numDataLocal, 1, MPI_INT, recvCountVector.data(), 1, MPI_INT, MPI_COMM_WORLD);
+	
+	MatrixXd result;
+	int numRows = numRowsLocal;
+	int numData = std::accumulate(recvCountVector.begin(), recvCountVector.end(), 0.0);
+	int numCols = numData / numRows;
+	result.resize(numRows, numCols);
+
+	std::vector<int> dispVector;
+	dispVector.push_back(0.0);
+	std::partial_sum(recvCountVector.begin(), recvCountVector.end()-1,std::back_inserter(dispVector));
+	MPI_Allgatherv(resultLocal.data(), numDataLocal, MPI_DOUBLE,
+		result.data(), recvCountVector.data(), dispVector.data(),MPI_DOUBLE,MPI_COMM_WORLD);
+
+	return result;
 }
 
 void NeuralNetworkMPI::exchange()
