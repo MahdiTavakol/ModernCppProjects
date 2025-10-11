@@ -38,7 +38,7 @@ static const struct Data {
 	string trainFileName, testFileName;
 	int nMaxLayers, nTargetCols, inDim, bSize;
 } settings[] = {
-	{ "../tests/train-1.csv", "../tests/test-1.csv", 4, 1, 2, 32 }
+	{ "../tests/train_1.csv", "../tests/test_1.csv", 4, 1, 2, 32 }
 };
 static Data setting;
 

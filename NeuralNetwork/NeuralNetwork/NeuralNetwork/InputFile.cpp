@@ -11,7 +11,6 @@ InputFile::InputFile(Logger& logger_, const string& dataFileName_, const int& nu
 	logger{ logger_ }, dataFile{ dataFileName_ }, numTargetCols{ numTargetCols_ }
 {
 	std::filesystem::path dataPath{ dataFileName_ };
-	logger << "Current Path is " << std::filesystem::current_path() << std::endl;
 	if (!std::filesystem::exists(dataPath))
 		throw std::invalid_argument("Cannot open the file " + dataFileName_);
 	logger << "Opening the " << dataFileName_ << std::endl;
