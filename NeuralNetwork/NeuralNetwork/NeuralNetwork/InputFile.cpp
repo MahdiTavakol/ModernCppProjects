@@ -13,7 +13,8 @@ InputFile::InputFile(Logger& logger_, const string& dataFileName_, const int& nu
 	std::filesystem::path dataPath{ dataFileName_ };
 	if (!std::filesystem::exists(dataPath))
 		throw std::invalid_argument("Cannot open the file " + dataFileName_);
-	logger << "Opening the " << dataFileName_ << std::endl;
+	if (logger.log_level >= LOG_LEVEL_INFO)
+		logger << "Opening the " << dataFileName_ << std::endl;
 }
 
 void InputFile::resetFileName(const string& dataFileName_)

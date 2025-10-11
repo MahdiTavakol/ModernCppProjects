@@ -75,7 +75,8 @@ void NeuralNetwork::initializeInputFilePtr()
 void NeuralNetwork::initializeOutputs()
 {
 	if ((fOutputMode & AVG) || (fOutputMode & PERBATCH)) {
-		std::cout << "Opening the files: " << trainLossFileName << " and " << validationLossFileName << std::endl; 
+		if (logger.log_level >= LOG_LEVEL_INFO)
+			std::cout << "Opening the files: " << trainLossFileName << " and " << validationLossFileName << std::endl; 
 		
 		// Check if the file name is initialized
 		if (trainLossFileName.size()) {

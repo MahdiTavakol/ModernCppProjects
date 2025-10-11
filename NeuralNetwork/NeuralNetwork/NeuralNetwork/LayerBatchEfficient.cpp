@@ -94,7 +94,8 @@ void LayerBatchEfficient::initialize(const int& seed_)
 	default:
 		throw std::invalid_argument("Unknown activation funtion type!");
 	}
-	std::cout << "Activation function type= " << type << " and inptDim = " << InputFileDim << std::endl;
+	if (logger.log_level >= LOG_LEVEL_INFO)
+		std::cout << "Activation function type= " << type << " and inptDim = " << InputFileDim << std::endl;
 	
 	gen.seed(seed_);
 	distPtr = std::make_unique<std::normal_distribution<double>>(mean,std);

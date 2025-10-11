@@ -36,5 +36,7 @@ void InputMPIFile::read()
 	dataFile.seekg(0);        // go back to the beginning
 	readCSVFile(dataFile, InputFileMatrix, outputMatrix, localInputFileDim, localOutputDim, InputFileRange);
 
-	if (rank == 0) logger << "Finished reading the file" << std::endl;
+	if (rank == 0)
+		if (logger.log_level >= LOG_LEVEL_INFO)
+			logger << "Finished reading the file" << std::endl;
 }
