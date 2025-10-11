@@ -1,4 +1,6 @@
-#include <catch2/catch_test_macros.hpp>
+#define CATCH_CONFIG_MAIN
+#include "catch.hpp"
+
 
 #include "../Activations.h"
 #include "../InputArgs.h"
@@ -17,13 +19,19 @@
 #include <string>
 #include <iostream>
 
+using std::ostream;
+using std::string;
+using std::vector;
+using std::unique_ptr;
+using std::make_unique;
+
 
 TEST_CASE("1 Batch system with SERIAL")
 {
-	std::string trainFileName = "train-1.csv";
-	std::string testFileName = "test-1.csv";
+	string trainFileName = "train-1.csv";
+	string testFileName = "test-1.csv";
 
-	std::vector<std::reference_wrapper<ostream>> logger_ref =
+	vector<std::reference_wrapper<ostream>> logger_ref =
 	{
 		std::ref(std::cout)
 	};
@@ -37,7 +45,7 @@ TEST_CASE("1 Batch system with SERIAL")
 	logger.log_level >= LOG_LEVEL_ERROR;
 
 	std::unique_ptr<NeuralNetwork> neuralNetworkPtr;
-	NeuralNetworkPtr = std::make_unique<NeuralNetwork>(logger, trainFileName, testFileName, nTargetCols, nMaxLayers, bSize);
+	neuralNetworkPtr = std::make_unique<NeuralNetwork>(logger, trainFileName, testFileName, nTargetCols, nMaxLayers, bSize);
 
 
 	neuralNetworkPtr->initializeInputFilePtr();
@@ -45,9 +53,9 @@ TEST_CASE("1 Batch system with SERIAL")
 	neuralNetworkPtr->initializeOptandLoss();
 	neuralNetworkPtr->readInputFileData();
 	neuralNetworkPtr->addLayer(2, 4);
-	NeuralNetworkPtr->addLayer(4, 8);
-	NeuralNetworkPtr->addLayer(8, 4);
-	NeuralNetworkPtr->addLayer(4, 1);
+	neuralNetworkPtr->addLayer(4, 8);
+	neuralNetworkPtr->addLayer(8, 4);
+	neuralNetworkPtr->addLayer(4, 1);
 	neuralNetworkPtr->initializeLayers();
 	neuralNetworkPtr->fit();
 	neuralNetworkPtr->transform();
