@@ -57,8 +57,8 @@ static void Setup()
 	{
 		std::ref(std::cout)
 	};
-	loggerPtr = make_unique<Logger>( logger_ref );
-	loggerPtr->log_level >= LOG_LEVEL_ERROR;
+	vector<int> log_levels = { LOG_LEVEL_ERROR };
+	loggerPtr = make_unique<Logger>( logger_ref, log_levels);
 }
 
 TEST_CASE("Setting up the global variables for tests")
@@ -134,7 +134,6 @@ TEST_CASE("Comparing the MPI result for various batchsizes")
 	int bSize0 = 32;
 	vector<int> bSizes = { 2,4,8,16,32,64,128 };
 
-	logger.log_level >= LOG_LEVEL_ERROR;
 
 	std::unique_ptr<NeuralNetwork>  nnMPIPtr;
 	MatrixXd mpiResult0, mpiResult;
