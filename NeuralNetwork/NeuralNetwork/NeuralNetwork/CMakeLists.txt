@@ -10,15 +10,17 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 # Build switches
-option(BUILD_APP   "Build main application" ON)
-option(BUILD_TESTS "Build unit tests"       OFF)   # OFF by default
-option(ENABLE_MPI  "Build MPI components"   ON)
+option(BUILD_APP   "Build main application"         ON)
+option(BUILD_TESTS "Build unit tests"              OFF)   # OFF by default
+option(ENABLE_MPI  "Build MPI components"           ON)
 
-# Warnings
+
+# Generate debug symbols only in Debug config (works for VS & Make/Ninja)
 if(MSVC)
-  add_compile_options(/W4 /permissive-)
+  add_compile_options("$<$<CONFIG:Debug>:/Zi>")
+  add_link_options("$<$<CONFIG:Debug>:/DEBUG:FULL>")
 else()
-  add_compile_options(-Wall -Wextra -Wpedantic)
+  add_compile_options("$<$<CONFIG:Debug>:-g3>")
 endif()
 
 # Deps
