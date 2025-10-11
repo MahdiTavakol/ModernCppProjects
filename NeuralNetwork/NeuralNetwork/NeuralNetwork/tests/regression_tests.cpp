@@ -63,6 +63,7 @@ static void Compare_Eigen_MatrixXds(const MatrixXd& a_, const MatrixXd& b_)
 
 static void Setup()
 {
+	MPI_Init(NULL, NULL);
 	vector<std::reference_wrapper<ostream>> logger_ref =
 	{
 		std::ref(std::cout)
@@ -242,5 +243,11 @@ TEST_CASE("Comparing the MPI result for various seed numbers")
 		logger << "Comparing results with the base network" << endl;
 		Compare_Eigen_MatrixXds(mpiResult0, mpiResult);
 	}
+}
+
+TEST_CASE("Cleaning up!")
+{
+	MPI_Finalize();
+	SUCCEED("Finished cleaning up!");
 }
 
