@@ -350,6 +350,7 @@ MatrixXd NeuralNetwork::transform()
 		MatrixXd TestFileBatch = networkTestMatrix.block(0, firstCol, networkTestMatrix.rows(), numCols);
 		output.block(0,firstCol,output.rows(),numCols) = forwardBatch(TestFileBatch, false);
 	}
+	return output;
 }
 
 MatrixXd NeuralNetwork::forwardBatch(const MatrixXd& InputFile_, const bool& trainMode)
