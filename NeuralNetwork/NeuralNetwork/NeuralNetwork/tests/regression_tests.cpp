@@ -34,6 +34,13 @@ static constexpr double eps = 1e-8;
 static unique_ptr<Logger> loggerPtr;
 static constexpr int seed = 12345678;
 
+static const struct data {
+	string trainFileName, testFileName;
+	int nMaxLayers, nTargetCols, inDim, bSize;
+} settings[] = {"../tests/train-1.csv","../tests/test-1.csv",
+             4,1,2,32};
+static data setting;
+
 static void Compare_Eigen_MatrixXds(const MatrixXd& a_, const MatrixXd& b_)
 {
 	// It the sizes are not the same comparison cannot be made.
@@ -72,6 +79,13 @@ static void Setup()
 	loggerPtr = make_unique<Logger>( logger_ref, log_levels);
 }
 
+void SetupFiles(const int& indx)
+{
+	if (indx >= static_cast<int>(sizeof(settings) / sizeof(setting)))
+		throw std::invalid_argument("No such a file");
+	setting = settings[indx];
+}
+
 TEST_CASE("Setting up the global variables for tests")
 {
 	Setup();
@@ -81,46 +95,38 @@ TEST_CASE("Setting up the global variables for tests")
 TEST_CASE("Comparing the MPI result with SERIAL case for a 1 batch system")
 {
 	logger << "Running test #" << testNumber++ << endl;
-
-	string trainFileName = "train-1.csv";
-	string testFileName = "test-1.csv";
-
-
-	int nMaxLayers = 4;
-	int nTargetCols = 1;
-	int inDim = 2;
-	int bSize = 32;
-
-	
+	SetupFiles(0);
 
 	std::unique_ptr<NeuralNetwork> nnSerialPtr, nnMPIPtr;
 	MatrixXd serialResult, mpiResult;
 
 	logger << "Training the serial network" << endl;
-	nnSerialPtr = make_unique<NeuralNetwork>(logger, trainFileName, testFileName, nTargetCols, nMaxLayers, bSize);
+	nnSerialPtr = make_unique<NeuralNetwork>(logger, 
+		setting.trainFileName, setting.testFileName, setting.nTargetCols, setting.nMaxLayers, setting.bSize);
 	nnSerialPtr->initializeInputFilePtr();
 	nnSerialPtr->initializeOutputs();
 	nnSerialPtr->initializeOptandLoss();
 	nnSerialPtr->readInputFileData();
-	nnSerialPtr->addLayer(inDim, 4);
+	nnSerialPtr->addLayer(setting.inDim, 4);
 	nnSerialPtr->addLayer(4, 8);
 	nnSerialPtr->addLayer(8, 4);
-	nnSerialPtr->addLayer(4, nTargetCols);
+	nnSerialPtr->addLayer(4, setting.nTargetCols);
 	nnSerialPtr->initializeLayers(seed);
 	logger << "Transforming the serial network" << endl;
 	nnSerialPtr->fit();
 	serialResult = nnSerialPtr->transform();
 
 	logger << "Training the MPI network" << endl;
-	nnMPIPtr = make_unique<NeuralNetworkMPI>(logger, trainFileName, testFileName, nTargetCols, nMaxLayers, bSize);
+	nnMPIPtr = make_unique<NeuralNetworkMPI>(logger,
+		setting.trainFileName, setting.testFileName, setting.nTargetCols, setting.nMaxLayers, setting.bSize);
 	nnMPIPtr->initializeInputFilePtr();
 	nnMPIPtr->initializeOutputs();
 	nnMPIPtr->initializeOptandLoss();
 	nnMPIPtr->readInputFileData();
-	nnMPIPtr->addLayer(inDim, 4);
+	nnMPIPtr->addLayer(setting.inDim, 4);
 	nnMPIPtr->addLayer(4, 8);
 	nnMPIPtr->addLayer(8, 4);
-	nnMPIPtr->addLayer(4, nTargetCols);
+	nnMPIPtr->addLayer(4, setting.nTargetCols);
 	nnMPIPtr->initializeLayers(seed);
 	nnMPIPtr->fit();
 	logger << "Transforming the MPI network" << endl;
@@ -134,50 +140,44 @@ TEST_CASE("Comparing the MPI result with SERIAL case for a 1 batch system")
 TEST_CASE("Comparing the MPI result for various batchsizes")
 {
 	logger << "Running test #" << testNumber++ << endl;
-
-	string trainFileName = "train-1.csv";
-	string testFileName = "test-1.csv";
-
-
-	int nMaxLayers = 4;
-	int nTargetCols = 1;
-	int inDim = 2;
-	int bSize0 = 32;
+	SetupFiles(0);
 	vector<int> bSizes = { 2,4,8,16,32,64,128 };
 
 
 	std::unique_ptr<NeuralNetwork>  nnMPIPtr;
 	MatrixXd mpiResult0, mpiResult;
 
-	logger << "Training the base network with batch size of " << bSize0 << endl;
+	logger << "Training the base network with batch size of " << setting.bSize << endl;
 	logger << "Training the MPI network" << endl;
-	nnMPIPtr = make_unique<NeuralNetworkMPI>(logger, trainFileName, testFileName, nTargetCols, nMaxLayers, bSize0);
+	nnMPIPtr = make_unique<NeuralNetworkMPI>(logger,
+		setting.trainFileName, setting.testFileName, setting.nTargetCols, setting.nMaxLayers, setting.bSize);
 	nnMPIPtr->initializeInputFilePtr();
 	nnMPIPtr->initializeOutputs();
 	nnMPIPtr->initializeOptandLoss();
 	nnMPIPtr->readInputFileData();
-	nnMPIPtr->addLayer(inDim, 4);
+	nnMPIPtr->addLayer(setting.inDim, 4);
 	nnMPIPtr->addLayer(4, 8);
 	nnMPIPtr->addLayer(8, 4);
-	nnMPIPtr->addLayer(4, nTargetCols);
+	nnMPIPtr->addLayer(4, setting.nTargetCols);
 	nnMPIPtr->initializeLayers(seed);
 	nnMPIPtr->fit();
-	logger << "Transforming the base network with the batch size of " << bSize0 << endl;
+	logger << "Transforming the base network with the batch size of " << setting.bSize << endl;
 	mpiResult0 = nnMPIPtr->transform();
 
 
 	for (const int& bSize : bSizes)
 	{
 		logger << "Training the MPI network with batch size of " << bSize << endl;
-		nnMPIPtr = make_unique<NeuralNetworkMPI>(logger, trainFileName, testFileName, nTargetCols, nMaxLayers, bSize);
+		nnMPIPtr = make_unique<NeuralNetworkMPI>(logger,
+			setting.trainFileName, setting.testFileName, setting.nTargetCols, setting.nMaxLayers, bSize);
 		nnMPIPtr->initializeInputFilePtr();
 		nnMPIPtr->initializeOutputs();
 		nnMPIPtr->initializeOptandLoss();
 		nnMPIPtr->readInputFileData();
-		nnMPIPtr->addLayer(inDim, 4);
+		nnMPIPtr->addLayer(setting.inDim, 4);
 		nnMPIPtr->addLayer(4, 8);
 		nnMPIPtr->addLayer(8, 4);
-		nnMPIPtr->addLayer(4, nTargetCols);
+		nnMPIPtr->addLayer(4, setting.nTargetCols);
 		nnMPIPtr->initializeLayers(seed);
 		nnMPIPtr->fit();
 		logger << "Transforming the network with the batch size of " << bSize << endl;
@@ -191,15 +191,7 @@ TEST_CASE("Comparing the MPI result for various batchsizes")
 TEST_CASE("Comparing the MPI result for various seed numbers")
 {
 	logger << "Running test #" << testNumber++ << endl;
-
-	string trainFileName = "train-1.csv";
-	string testFileName = "test-1.csv";
-
-
-	int nMaxLayers = 4;
-	int nTargetCols = 1;
-	int inDim = 2;
-	int bSize = 32;
+	SetupFiles(0);
 	vector<int> seeds = { 1135,1245,2928,8769,8239,456,111 };
 
 
@@ -208,15 +200,16 @@ TEST_CASE("Comparing the MPI result for various seed numbers")
 
 	logger << "Training the base network with seed value of " << seed << endl;
 	logger << "Training the MPI network" << endl;
-	nnMPIPtr = make_unique<NeuralNetworkMPI>(logger, trainFileName, testFileName, nTargetCols, nMaxLayers, bSize);
+	nnMPIPtr = make_unique<NeuralNetworkMPI>(logger,
+		setting.trainFileName, setting.testFileName, setting.nTargetCols, setting.nMaxLayers, setting.bSize);
 	nnMPIPtr->initializeInputFilePtr();
 	nnMPIPtr->initializeOutputs();
 	nnMPIPtr->initializeOptandLoss();
 	nnMPIPtr->readInputFileData();
-	nnMPIPtr->addLayer(inDim, 4);
+	nnMPIPtr->addLayer(setting.inDim, 4);
 	nnMPIPtr->addLayer(4, 8);
 	nnMPIPtr->addLayer(8, 4);
-	nnMPIPtr->addLayer(4, nTargetCols);
+	nnMPIPtr->addLayer(4, setting.nTargetCols);
 	nnMPIPtr->initializeLayers(seed);
 	nnMPIPtr->fit();
 	logger << "Transforming the base network with the seed of " << seed << endl;
@@ -225,16 +218,17 @@ TEST_CASE("Comparing the MPI result for various seed numbers")
 
 	for (const int& sd : seeds)
 	{
-		logger << "Training the MPI network with batch size of " << bSize << endl;
-		nnMPIPtr = make_unique<NeuralNetworkMPI>(logger, trainFileName, testFileName, nTargetCols, nMaxLayers, bSize);
+		logger << "Training the MPI network with batch size of " << setting.bSize << endl;
+		nnMPIPtr = make_unique<NeuralNetworkMPI>(logger,
+			setting.trainFileName, setting.testFileName, setting.nTargetCols, setting.nMaxLayers, setting.bSize);
 		nnMPIPtr->initializeInputFilePtr();
 		nnMPIPtr->initializeOutputs();
 		nnMPIPtr->initializeOptandLoss();
 		nnMPIPtr->readInputFileData();
-		nnMPIPtr->addLayer(inDim, 4);
+		nnMPIPtr->addLayer(setting.inDim, 4);
 		nnMPIPtr->addLayer(4, 8);
 		nnMPIPtr->addLayer(8, 4);
-		nnMPIPtr->addLayer(4, nTargetCols);
+		nnMPIPtr->addLayer(4, setting.nTargetCols);
 		nnMPIPtr->initializeLayers(sd);
 		nnMPIPtr->fit();
 		logger << "Transforming the network with the seed of " << sd << endl;
