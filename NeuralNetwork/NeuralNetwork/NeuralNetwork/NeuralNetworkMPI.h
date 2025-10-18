@@ -12,7 +12,7 @@ public:
 		             const int& numTargetCols_, const int& maxNumLayers_ = 10, const int& batchsize_ = -1,
 		             const int& MaxNumSteps_ = 1000, const int& exchangeNEvery_=0, 
 		             const string& fileNameExtension_ = "");
-	void initializeInputFilePtr() override;
+	void initializeInputFilePtr(const int& shuffleMode_ = NO_SHUFFLE, const int& shuffleSeed_ = 123) override;
 	void initializeOutputs() override;
 	void fit() override;
 	MatrixXd transform() override;

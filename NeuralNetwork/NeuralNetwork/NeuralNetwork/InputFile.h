@@ -14,11 +14,14 @@ using Eigen::VectorXd;
 using Eigen::RowVectorXd;
 using std::ifstream;
 
+enum {NO_SHUFFLE = 0, SHUFFLE = 1 << 0};
+
 class InputFile
 {
 public:
-	InputFile(Logger& logger_, const int& numTargetCols_);
-	InputFile(Logger& logger_, const string& dataFileName_, const int& numTargetCols_);
+	InputFile(Logger& logger_, const int& numTargetCols_, const int& shuffleMode_ = NO_SHUFFLE, const int& shuffleSeed_ = 123);
+	InputFile(Logger& logger_, const string& dataFileName_, const int& numTargetCols_,
+		const int& shuffleMode_ = NO_SHUFFLE, const int& shuffleSeed_ = 123);
 	void resetFileName(const string& dataFileName_);
 	void init();
 	virtual void read();
@@ -30,6 +33,9 @@ public:
 	virtual ~InputFile() = default;
 protected:
 	Logger& logger;
+	int shuffleMode;
+	int shuffleSeed;
+	std::vector<int> shuffleIndex;
 	ifstream dataFile;
 	const int numTargetCols;
 	array<int, 2> fileDim;

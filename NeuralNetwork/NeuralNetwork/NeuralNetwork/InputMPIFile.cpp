@@ -1,12 +1,14 @@
 #include "InputMPIFile.h"
 #include <iostream>
 
-InputMPIFile::InputMPIFile(Logger& logger_, const int& numTargetCols_) :
-	InputFile{logger_, numTargetCols_ }
+InputMPIFile::InputMPIFile(Logger& logger_, const int& numTargetCols_, 
+	                       const int& shuffleMode_, const int& shuffleSeed_) :
+	InputFile{logger_, numTargetCols_, shuffleMode_, shuffleSeed_}
 {}
 
-InputMPIFile::InputMPIFile(Logger& logger_, const string& dataFileName_, const int& numTargetCols_):
-	InputFile{ logger_,dataFileName_,numTargetCols_}
+InputMPIFile::InputMPIFile(Logger& logger_, const string& dataFileName_, const int& numTargetCols_,
+	                       const int& shuffleMode_, const int& shuffleSeed_):
+	InputFile{ logger_,dataFileName_,numTargetCols_,shuffleMode_,shuffleSeed_}
 {
 	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 	MPI_Comm_size(MPI_COMM_WORLD,&size);

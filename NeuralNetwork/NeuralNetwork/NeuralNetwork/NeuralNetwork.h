@@ -52,7 +52,7 @@ public:
 	void initializeOptandLoss(const OptimizerType& optType_ = OptimizerType::SGD,
 		                const double& learningRate_ = 0.1, 
 		                const LossType& lossType_ = LossType::MSE);
-	virtual void initializeInputFilePtr();
+	virtual void initializeInputFilePtr(const int& shuffleMode_=NO_SHUFFLE, const int& shuffleSeed_=123);
 	virtual void initializeOutputs();
 	void readInputFileData();
 	void addLayer(const int& InputFileDim_, const int& outputDim_,

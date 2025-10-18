@@ -1,14 +1,17 @@
 #include "InputFile.h"
 #include <iostream>
 #include <filesystem>
+#include <numeric>
 
-InputFile::InputFile(Logger& logger_, const int& numTargetCols_) :
-	logger{ logger_ }, numTargetCols{ numTargetCols_ }
+InputFile::InputFile(Logger& logger_, const int& numTargetCols_, const int& shuffleMode_, const int& shuffleSeed_) :
+	logger{ logger_ }, shuffleMode{ shuffleMode_ }, shuffleSeed{ shuffleSeed_ }, numTargetCols{ numTargetCols_ }
 {
 }
 
-InputFile::InputFile(Logger& logger_, const string& dataFileName_, const int& numTargetCols_) :
-	logger{ logger_ }, dataFile{ dataFileName_ }, numTargetCols{ numTargetCols_ }
+InputFile::InputFile(Logger& logger_, const string& dataFileName_, const int& numTargetCols_,
+	const int& shuffleMode_, const int& shuffleSeed_) :
+	logger{ logger_ }, shuffleMode{ shuffleMode_ }, shuffleSeed{ shuffleSeed_ }, 
+	dataFile{ dataFileName_ }, numTargetCols{ numTargetCols_ }
 {
 	std::filesystem::path dataPath{ dataFileName_ };
 	if (!std::filesystem::exists(dataPath))
@@ -47,6 +50,15 @@ void InputFile::init()
 			<< InputFileDim[1]
 			<< "!"
 			<< std::endl;
+	}
+
+	// If no shuffle it just prints 0 to inputDim
+	// ---> one to one mapping 
+	shuffleIndex.resize(fileDim[0]);
+	std::iota(shuffleIndex.begin(), shuffleIndex.end(), 0);
+
+	if (shuffleMode & SHUFFLE) {
+		std::shuffle(shuffleIndex.begin(), shuffleIndex.end(), shuffleSeed);
 	}
 }
 
@@ -145,10 +157,22 @@ void InputFile::readCSVFile(ifstream& file_, MatrixXd& InputFileData_, MatrixXd&
 	while (std::getline(file_, line))
 	{
 		lineNumber++;
-		if (lineNumber < indxRange_[0])
-			continue;
-		if (lineNumber > indxRange_[1])
+
+		if (lineNumber - indxRange_[0] < 0 ||
+			lineNumber - indxRange_[0] >= InputFileDim_[0] ||
+			lineNumber - indxRange_[0] >= outputDim_[0])
+			throw std::runtime_error("Out of range error: You should never have reached here!!!");
+
+		const int indx = shuffleIndex[lineNumber] - indxRange_[0];
+		if (indx > indxRange_[1] - indxRange_[0] && (shuffleMode & NO_SHUFFLE))
 			break;
+		else if ( (indx < 0 && (shuffleMode & NO_SHUFFLE)) ||
+			      (indx < 0 && (shuffleMode & SHUFFLE)) ||
+		          (indx > indxRange_[1] - indxRange_[0] && (shuffleMode & SHUFFLE)) )
+			continue;
+		else
+			throw std::runtime_error("You never should have reached here!");
+
 		int readInt;
 		std::string readIntStr;
 		int countReadInt = 0;
@@ -190,11 +214,7 @@ void InputFile::readCSVFile(ifstream& file_, MatrixXd& InputFileData_, MatrixXd&
 				"Ignoring the rest!" << std::endl;
 			break;
 		}
-		if (lineNumber - indxRange_[0] < 0 ||
-			lineNumber - indxRange_[0] >= InputFileDim_[0] ||
-			lineNumber - indxRange_[0] >= outputDim_[0])
-			throw std::runtime_error("Out of range error: You should never have reached here!!!");
-		InputFileData_.row(lineNumber - indxRange_[0]) = InputFileRow;
-		outputData_.row(lineNumber - indxRange_[0]) = outputRow;
+		InputFileData_.row(indx) = InputFileRow;
+		outputData_.row(indx) = outputRow;
 	}
 }

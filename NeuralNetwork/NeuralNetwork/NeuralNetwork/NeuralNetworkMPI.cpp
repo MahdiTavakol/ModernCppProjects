@@ -28,10 +28,10 @@ NeuralNetworkMPI::NeuralNetworkMPI(Logger& logger_, const string& networkInputFi
 	}
 }
 
-void NeuralNetworkMPI::initializeInputFilePtr()
+void NeuralNetworkMPI::initializeInputFilePtr(const int& shuffleMode_, const int& shuffleSeed_)
 {
-	InputFilePtr = std::make_unique<InputMPIFile>(logger,networkDataFileName,numTargetCols);
-	testPtr = std::make_unique<InputMPIFile>(logger,networkTestFileName, 0);
+	InputFilePtr = std::make_unique<InputMPIFile>(logger,networkDataFileName,numTargetCols,shuffleMode_,shuffleSeed_);
+	testPtr = std::make_unique<InputMPIFile>(logger,networkTestFileName, 0,NO_SHUFFLE);
 }
 
 void NeuralNetworkMPI::initializeOutputs()

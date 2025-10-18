@@ -66,10 +66,10 @@ void NeuralNetwork::initializeOptandLoss(const OptimizerType& optType_,
 
 }
 
-void NeuralNetwork::initializeInputFilePtr()
+void NeuralNetwork::initializeInputFilePtr(const int& shuffleMode_, const int& shuffleSeed_)
 {
-	InputFilePtr = std::make_unique<InputFile>(logger, networkDataFileName, numTargetCols);
-	testPtr = std::make_unique<InputFile>(logger, networkTestFileName, 0);
+	InputFilePtr = std::make_unique<InputFile>(logger, networkDataFileName, numTargetCols, shuffleMode_, shuffleSeed_);
+	testPtr = std::make_unique<InputFile>(logger, networkTestFileName, 0, NO_SHUFFLE);
 }
 
 void NeuralNetwork::initializeOutputs()
