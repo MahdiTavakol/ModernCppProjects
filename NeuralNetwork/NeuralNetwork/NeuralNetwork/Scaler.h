@@ -38,5 +38,5 @@ public:
 	void fit(MatrixXd& InputMat_) override;
 	MatrixXd transform(MatrixXd& InputFile_) const override;
 private:
-	MatrixXd rowMean;
+	VectorXd rowMean;
 };
