@@ -50,7 +50,7 @@ public:
 		const int& batchsize_ = -1, const int& MaxNumSteps_ = 10000,
 		const string& fileNameExtension_="");
 	void initializeOptandLoss(const OptimizerType& optType_ = OptimizerType::SGD,
-		                const double& learningRate_ = 0.5, 
+		                const double& learningRate_ = 0.1, 
 		                const LossType& lossType_ = LossType::MSE);
 	virtual void initializeInputFilePtr();
 	virtual void initializeOutputs();
