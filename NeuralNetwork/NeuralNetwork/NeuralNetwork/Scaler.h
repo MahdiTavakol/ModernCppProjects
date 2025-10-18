@@ -28,7 +28,7 @@ public:
 	MatrixXd transform(MatrixXd& InputFile_) const override;
 
 private:
-	VectorXd rowMin{ 0 }, rowRange{ 0 };
+	VectorXd rowMin, rowRange;
 };
 
 class ZScoreScaler final: public Scaler
@@ -38,5 +38,5 @@ public:
 	void fit(MatrixXd& InputMat_) override;
 	MatrixXd transform(MatrixXd& InputFile_) const override;
 private:
-	MatrixXd rowMean{ 0 };
+	MatrixXd rowMean;
 };
