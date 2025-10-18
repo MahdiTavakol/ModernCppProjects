@@ -166,12 +166,6 @@ void InputFile::readCSVFile(ifstream& file_, MatrixXd& InputFileData_, MatrixXd&
 		else if ( (indx < 0 ) ||
 		          (indx > indxRange_[1] - indxRange_[0] && (shuffleMode & SHUFFLE)) )
 			continue;
-		else {
-			std::string error("You should have never reached here! - ");
-			error += "-" + std::to_string(indx) + "-" + std::to_string(indxRange_[1] - indxRange_[0]);
-			error += "-" + std::to_string(shuffleMode);
-			throw std::runtime_error(error.c_str());
-		}
 
 		int readInt;
 		std::string readIntStr;
