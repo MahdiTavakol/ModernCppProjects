@@ -106,12 +106,12 @@ TEST_CASE("Testing the convergence of neural network MPI for a simple data")
 	SetupFiles(0);
 	int bSize = 32;
 
-	std::unique_ptr<NeuralNetwork>  nnMPIPtr;
-	MatrixXd mpiResult0, mpiResult;
+	std::unique_ptr<NeuralNetwork>  nnMPIPtr, nnSerialPtr;
+	MatrixXd mpiResult, serialResult;
 
 	logger << "Training the base network with batch size of " << setting.bSize << endl;
 	logger << "Training the MPI network" << endl;
-	string extension = "-test-" + std::to_string(testNumber);
+	string extension = "-test-" + std::to_string(testNumber) + "-mpi";
 	nnMPIPtr = make_unique<NeuralNetworkMPI>(logger,
 		setting.trainFileName, setting.testFileName,
 		setting.nTargetCols, setting.nMaxLayers,
@@ -127,7 +127,27 @@ TEST_CASE("Testing the convergence of neural network MPI for a simple data")
 	nnMPIPtr->initializeLayers(seed);
 	nnMPIPtr->fit();
 	logger << "Transforming the base network with the batch size of " << setting.bSize << endl;
-	mpiResult0 = nnMPIPtr->transform();
+	mpiResult = nnMPIPtr->transform();
+
+	logger << "Training the base network with batch size of " << setting.bSize << endl;
+	logger << "Training the serial network" << endl;
+	string extension = "-test-" + std::to_string(testNumber) + "-serial";
+	nnSerialPtr = make_unique<NeuralNetwork>(logger,
+		setting.trainFileName, setting.testFileName,
+		setting.nTargetCols, setting.nMaxLayers,
+		setting.bSize, setting.maxNumSteps, 0, extension);
+	nnSerialPtr->initializeInputFilePtr();
+	nnSerialPtr->initializeOutputs();
+	nnSerialPtr->initializeOptandLoss();
+	nnSerialPtr->readInputFileData();
+	nnSerialPtr->addLayer(setting.inDim, 4);
+	nnSerialPtr->addLayer(4, 8);
+	nnSerialPtr->addLayer(8, 4);
+	nnSerialPtr->addLayer(4, setting.nTargetCols);
+	nnSerialPtr->initializeLayers(seed);
+	nnSerialPtr->fit();
+	logger << "Transforming the base network with the batch size of " << setting.bSize << endl;
+	serialResult = nnSerialPtr->transform();
 
 	logger << endl << endl;
 

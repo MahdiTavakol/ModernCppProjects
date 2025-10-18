@@ -36,7 +36,8 @@ void NeuralNetworkMPI::initializeInputFilePtr()
 
 void NeuralNetworkMPI::initializeOutputs()
 {
-	NeuralNetwork::initializeOutputs();
+	if (rank == 0)
+		NeuralNetwork::initializeOutputs();
 	if (rank == 0 && fOutputMode & AVG) {
 		if (logger.log_level >= LOG_LEVEL_INFO)
 			std::cout << "Opening the file: " << TVLossAllFileName  << std::endl;
