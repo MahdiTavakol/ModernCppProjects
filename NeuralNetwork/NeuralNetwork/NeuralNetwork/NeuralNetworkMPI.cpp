@@ -2,9 +2,9 @@
 #include <numeric>
 
 NeuralNetworkMPI::NeuralNetworkMPI(Logger& logger_, const string& networkInputFileFileName_, const string& networkTestFileName_,
-	                               const int& numTargetCols_, const int& maxNumLayers_ = 10, const int& batchsize_ = -1,
-	                               const int& MaxNumSteps_ = 1000, const int& exchangeNEvery_ = 0,
-	                               const string& fileNameExtension_ = "") :
+	                               const int& numTargetCols_, const int& maxNumLayers_, const int& batchsize_,
+	                               const int& MaxNumSteps_, const int& exchangeNEvery_,
+	                               const string& fileNameExtension_)  :
 	NeuralNetwork{logger_, networkInputFileFileName_, networkTestFileName_,
 	              numTargetCols_, maxNumLayers_ , batchsize_, MaxNumSteps_,fileNameExtension_},
 	exchangeNEvery{exchangeNEvery_}
