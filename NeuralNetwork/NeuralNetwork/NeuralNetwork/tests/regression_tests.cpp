@@ -35,7 +35,7 @@ TEST_CASE("Testing the convergence of neural network MPI for a simple data")
 	nnMPIPtr = make_unique<NeuralNetworkMPI>(logger,
 		setting.trainFileName, setting.testFileName,
 		setting.nTargetCols, setting.nMaxLayers,
-		setting.bSize, setting.maxNumSteps,extension);
+		setting.bSize, setting.maxNumSteps,0,extension);
 	nnMPIPtr->initializeInputFilePtr();
 	nnMPIPtr->initializeOutputs();
 	nnMPIPtr->initializeOptandLoss();
