@@ -10,18 +10,6 @@
 #include <Eigen/Dense>
 
 
-using std::ostream;
-using std::endl;
-using std::string;
-using std::vector;
-using std::unique_ptr;
-using std::make_unique;
-using Eigen::MatrixXd;
-
-static int testNumber = 0;
-static constexpr double eps = 1e-8;
-static constexpr int seed = 12345678;
-
 
 TEST_CASE("Setting up the global variables for tests")
 {

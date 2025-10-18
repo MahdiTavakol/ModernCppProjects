@@ -14,8 +14,22 @@
 
 #include <memory>
 
+using std::ostream;
+using std::endl;
+using std::string;
+using std::vector;
+using std::unique_ptr;
+using std::make_unique;
+using Eigen::MatrixXd;
+
+
 static std::unique_ptr<Logger> loggerPtr;
 auto& logger = *loggerPtr;
+
+
+static int testNumber = 0;
+static constexpr double eps = 1e-8;
+static constexpr int seed = 12345678;
 
 static const struct Data {
 	string trainFileName, testFileName;
