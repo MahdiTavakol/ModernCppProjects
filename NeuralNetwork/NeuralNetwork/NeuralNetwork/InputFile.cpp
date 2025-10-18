@@ -161,10 +161,10 @@ void InputFile::readCSVFile(ifstream& file_, MatrixXd& InputFileData_, MatrixXd&
 		lineNumber++;
 	
 		const int indx = shuffleIndex[lineNumber] - indxRange_[0];
-		if (indx > indxRange_[1] - indxRange_[0] && (shuffleMode & NO_SHUFFLE))
+		if (indx >= indxRange_[1] - indxRange_[0] && (shuffleMode & NO_SHUFFLE))
 			break;
 		else if ( (indx < 0 ) ||
-		          (indx > indxRange_[1] - indxRange_[0] && (shuffleMode & SHUFFLE)) )
+		          (indx >= indxRange_[1] - indxRange_[0] && (shuffleMode & SHUFFLE)) )
 			continue;
 
 		int readInt;
