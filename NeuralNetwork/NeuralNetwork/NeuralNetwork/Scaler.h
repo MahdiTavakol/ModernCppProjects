@@ -25,7 +25,7 @@ class MinMaxScaler final: public Scaler
 public:
 	MinMaxScaler() = default;
 	void fit(MatrixXd& InputMat_) override;
-	MatrixXd transform(MatrixXd& InputFile_) const override;
+	MatrixXd transform(MatrixXd& InputMat_) const override;
 
 private:
 	VectorXd rowMin, rowRange;
@@ -36,7 +36,7 @@ class ZScoreScaler final: public Scaler
 public:
 	ZScoreScaler() = default;
 	void fit(MatrixXd& InputMat_) override;
-	MatrixXd transform(MatrixXd& InputFile_) const override;
+	MatrixXd transform(MatrixXd& InputMat_) const override;
 private:
 	VectorXd rowMean;
 };

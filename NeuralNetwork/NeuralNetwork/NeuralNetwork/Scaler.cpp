@@ -8,8 +8,8 @@ static constexpr double etol = 1e-6;
 
 void MinMaxScaler::fit(MatrixXd& InputMat_)
 {
-	VectorXd rowMin = InputMat_.rowwise().minCoeff();
-	VectorXd rowRange = InputMat_.rowwise().maxCoeff()-rowMin;
+	rowMin = InputMat_.rowwise().minCoeff();
+	rowRange = InputMat_.rowwise().maxCoeff()-rowMin;
 	rowRange = rowRange.unaryExpr([&](double x) {return x > etol ? x : 1.0; });
 }
 
@@ -19,13 +19,14 @@ MatrixXd MinMaxScaler::transform(MatrixXd& InputMat_) const
 		throw std::invalid_argument("The transformer has not been fitted into any data yet!");
 	MatrixXd centered = InputMat_.colwise() - rowMin;
 	MatrixXd scaled = centered.array().colwise() / rowRange.array();
-	return scaled;
+	return scaled.matrix();
 }
 
 void ZScoreScaler::fit(MatrixXd& InputMat_)
 {
 	rowMean = InputMat_.rowwise().mean();  // size = num_features
 }
+
 MatrixXd ZScoreScaler::transform(MatrixXd& InputMat_) const {
 	if (rowMean.size() == 0)
 		throw std::invalid_argument("The transformer has not been fitted into any data yet!");
@@ -38,11 +39,11 @@ MatrixXd ZScoreScaler::transform(MatrixXd& InputMat_) const {
 
 	// inverse std with safe epsilon
 	VectorXd rowStdInv = rowStd.unaryExpr([&](double x) {
-	        return std::abs(x) > etol ? 1.0 / x : 1.0;
+	        return std::abs(x) > etol ? 1.0 / x : 0.0;
 	});
 
 	// scale: divide each row by its std
 	MatrixXd scaled = centered.array().colwise() * rowStdInv.array();
 	
-	return scaled;
+	return scaled.matrix();
 }
