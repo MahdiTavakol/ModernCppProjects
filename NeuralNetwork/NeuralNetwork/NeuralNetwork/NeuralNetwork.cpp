@@ -12,14 +12,13 @@ NeuralNetwork::NeuralNetwork(Logger& logger_, const string& networkDataFileName_
 	logger{ logger_ },
 	networkDataFileName{ networkDataFileName_ },
 	networkTestFileName{ networkTestFileName_ },
+	trainLossFileName{ "training-loss-" + fileNameExtension_ + ".dat" },
+	validationLossFileName{ "validation-loss-" + fileNameExtension_ + ".dat" },
 	numTargetCols{ numTargetCols_ }, 
 	MaxNumSteps{MaxNumSteps_},
 	batchsize{ batchsize_ },
 	maxNumLayers{ maxNumLayers_ }
-{
-	trainLossFileName = "training-loss-" + fileNameExtension_ + ".dat";
-	validationLossFileName = "validation-loss-" + fileNameExtension_ + ".dat";
-}
+{}
 
 void NeuralNetwork::initializeOptandLoss(const OptimizerType& optType_,
 	                               const double& learningRate_,
@@ -84,11 +83,17 @@ void NeuralNetwork::initializeOutputs()
 			trainLossFile.open(trainLossFileName, std::ios::out | std::ios::trunc);
 			if (!trainLossFile.is_open())
 				logger << "Warning: Cannot open the traininglossfile" << std::endl;
+		} else {
+			logger << "Error: The trainLossFileName variable is not set!" << std::endl;
+			throw std::runtime_error("Error: The trainLossFileName variable is not set!");
 		}
 		if (validationLossFileName.size()) {
 			validationLossFile.open(validationLossFileName, std::ios::out | std::ios::trunc);
 			if (!validationLossFile.is_open())
 				logger << "Warning: Cannot open the validationlossfile" << std::endl;
+		} else {
+			logger << "Error: The trainValidationFileName variable is not set!" << std::endl;
+			throw std::runtime_error("Error: The trainValidationFileName variable is not set!");
 		}
 	}
 }
