@@ -230,8 +230,11 @@ void InputFile::readCSVFile(ifstream& file_, MatrixXd& InputFileData_, MatrixXd&
 		}
 		if (count < numCols) throw std::invalid_argument("Not enough data in the line");
 
+
+
 		// finally write the rows
 		InputFileData_.row(idx) = inputRow;
 		outputData_.row(idx) = outputRow;
+
 	}
 }
