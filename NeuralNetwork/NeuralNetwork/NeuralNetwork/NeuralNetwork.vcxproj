@@ -142,7 +142,6 @@
     <ClCompile Include="NeuralNetworkOpenMP.cpp" />
     <ClCompile Include="Optimizers.cpp" />
     <ClCompile Include="Scaler.cpp" />
-    <ClCompile Include="tests\error-test.cpp" />
     <ClCompile Include="tests\regression_tests.cpp" />
   </ItemGroup>
   <ItemGroup>
