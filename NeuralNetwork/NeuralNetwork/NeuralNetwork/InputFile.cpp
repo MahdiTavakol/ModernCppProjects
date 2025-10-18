@@ -214,8 +214,10 @@ void InputFile::readCSVFile(ifstream& file_, MatrixXd& InputFileData_, MatrixXd&
 		}
 		const int iFileNData = static_cast<int> (InputFileData_.rows());
 		const int oFileNData = static_cast<int> (outputData_.rows());
-		if (indx < 0 || indx>= iFileNData || indx>= oFileNData) 
-			throw std::runtime_error("Out of range error: You should never have reached here!!!");
+		if (indx < 0 || indx >= iFileNData || indx >= oFileNData) {
+			std::string error_test("Out of range error: You should never have reached here!!! " + std::to_string(indx));
+			throw std::runtime_error(error_test.c_str());
+		}
 		InputFileData_.row(indx) = InputFileRow;
 		outputData_.row(indx) = outputRow;
 	}
