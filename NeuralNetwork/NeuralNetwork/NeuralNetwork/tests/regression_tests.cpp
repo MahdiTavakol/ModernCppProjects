@@ -131,7 +131,7 @@ TEST_CASE("Testing the convergence of neural network MPI for a simple data")
 
 	logger << "Training the base network with batch size of " << setting.bSize << endl;
 	logger << "Training the serial network" << endl;
-	string extension = "-test-" + std::to_string(testNumber) + "-serial";
+	extension = "-test-" + std::to_string(testNumber) + "-serial";
 	nnSerialPtr = make_unique<NeuralNetwork>(logger,
 		setting.trainFileName, setting.testFileName,
 		setting.nTargetCols, setting.nMaxLayers,
