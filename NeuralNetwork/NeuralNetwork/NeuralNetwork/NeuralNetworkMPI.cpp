@@ -71,7 +71,6 @@ void NeuralNetworkMPI::fit()
 	MatrixXd TDataXd = networkInputFileMatrix.block(0, 0, numFeatures, numTData);
 	scaler->fit(TDataXd);
 	networkInputFileMatrix = (*scaler)(networkInputFileMatrix);
-	networkOutputMatrix = (*scaler)(networkOutputMatrix);
 	
 	
 

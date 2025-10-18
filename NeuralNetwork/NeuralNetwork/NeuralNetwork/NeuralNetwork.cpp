@@ -239,7 +239,6 @@ void NeuralNetwork::fit()
 	MatrixXd TDataXd = networkInputFileMatrix.block(0, 0, networkInputFileMatrix.rows(), numTData);
 	scaler->fit(TDataXd);
 	networkInputFileMatrix = (*scaler)(networkInputFileMatrix);
-	networkOutputMatrix = (*scaler)(networkOutputMatrix);
 	
 
 	trainingLoss.reserve(MaxNumSteps);
