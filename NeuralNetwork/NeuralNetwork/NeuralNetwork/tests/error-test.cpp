@@ -20,7 +20,6 @@ using Eigen::MatrixXd;
 static int testNumber = 0;
 static constexpr int seed = 12345678;
 
-static int testNumber = 0;
 
 TEST_CASE("Setting up the global variables for tests")
 {

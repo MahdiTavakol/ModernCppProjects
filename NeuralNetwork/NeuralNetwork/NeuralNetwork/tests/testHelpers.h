@@ -27,7 +27,6 @@ static std::unique_ptr<Logger> loggerPtr;
 auto& logger = *loggerPtr;
 
 static constexpr double eps = 1e-8;
-static constexpr int seed = 12345678;
 
 static const struct Data {
 	string trainFileName, testFileName;
