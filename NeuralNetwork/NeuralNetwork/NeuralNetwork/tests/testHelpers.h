@@ -14,6 +14,8 @@
 
 #include <memory>
 
+#define logger *loggerPtr
+
 using std::ostream;
 using std::endl;
 using std::string;
@@ -24,7 +26,6 @@ using Eigen::MatrixXd;
 
 
 static std::unique_ptr<Logger> loggerPtr;
-
 
 static constexpr double eps = 1e-8;
 

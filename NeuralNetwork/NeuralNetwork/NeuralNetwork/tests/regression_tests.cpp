@@ -4,7 +4,6 @@
 
 #include "testHelpers.h"
 
-#define logger *loggerPtr
 
 #include <memory>
 #include <string>
