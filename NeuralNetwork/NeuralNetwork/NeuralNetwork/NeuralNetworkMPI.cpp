@@ -22,8 +22,8 @@ NeuralNetworkMPI::NeuralNetworkMPI(Logger& logger_, const string& networkInputFi
 		
 
 	if (rank == 0) {
-		trainLossFileName = "training-loss-perRank.dat";
-		validationLossFileName = "validation-loss-perRank.dat";
+		trainLossFileName = "training-loss-perRank-" + fileNameExtension_ +".dat";
+		validationLossFileName = "validation-loss-perRank-" + fileNameExtension_ +".dat";
 		TVLossAllFileName = "TVLosses.dat";
 	}
 }
