@@ -7,8 +7,8 @@ class NeuralNetworkOpenMP final : public NeuralNetwork
 {
 public:
 	NeuralNetworkOpenMP(Logger& logger_, const string& networkInputFileFileName_, const string& networkTestFileName_, 
-		const int& numTargetCols_,
-		const int& maxNumLayers_ = 10, const int& batchsize_ = -1, const int& MaxNumSteps = 10000);
+		                const int& numTargetCols_, const int& maxNumLayers_ = 10, const int& batchsize_ = -1, 
+		                const int& MaxNumSteps = 10000, const string& fileNameExtension_="");
 	void fit() override;
 
 protected:

@@ -26,16 +26,16 @@ TEST_CASE("Testing the convergence of neural network MPI for a simple data")
 	SetupFiles(0);
 	int bSize = 32;
 
-
 	std::unique_ptr<NeuralNetwork>  nnMPIPtr;
 	MatrixXd mpiResult0, mpiResult;
 
 	logger << "Training the base network with batch size of " << setting.bSize << endl;
 	logger << "Training the MPI network" << endl;
+	string extension = "-test-" + std::to_string(testNumber);
 	nnMPIPtr = make_unique<NeuralNetworkMPI>(logger,
 		setting.trainFileName, setting.testFileName,
 		setting.nTargetCols, setting.nMaxLayers,
-		setting.bSize, setting.maxNumSteps);
+		setting.bSize, setting.maxNumSteps,extension);
 	nnMPIPtr->initializeInputFilePtr();
 	nnMPIPtr->initializeOutputs();
 	nnMPIPtr->initializeOptandLoss();
@@ -50,6 +50,8 @@ TEST_CASE("Testing the convergence of neural network MPI for a simple data")
 	mpiResult0 = nnMPIPtr->transform();
 
 	logger << endl << endl;
+
+	SUCCEED("Finished setting up");
 }
 
 TEST_CASE("Comparing the MPI result with SERIAL case for a 1 batch system")

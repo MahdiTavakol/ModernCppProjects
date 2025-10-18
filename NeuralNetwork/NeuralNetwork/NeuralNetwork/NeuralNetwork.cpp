@@ -8,17 +8,18 @@
 
 NeuralNetwork::NeuralNetwork(Logger& logger_, const string& networkDataFileName_, const string& networkTestFileName_,
 	const int& numTargetCols_, const int& maxNumLayers_,
-	const int& batchsize_, const int& MaxNumSteps) :
+	const int& batchsize_, const int& MaxNumSteps_, const string& fileNameExtension_) :
 	logger{ logger_ },
-	trainLossFileName{"training-loss.dat"},
-	validationLossFileName{"validation-loss.dat"},
 	networkDataFileName{ networkDataFileName_ },
 	networkTestFileName{ networkTestFileName_ },
 	numTargetCols{ numTargetCols_ }, 
-	MaxNumSteps{MaxNumSteps},
+	MaxNumSteps{MaxNumSteps_},
 	batchsize{ batchsize_ },
 	maxNumLayers{ maxNumLayers_ }
-{}
+{
+	trainLossFileName = "training-loss-" + fileNameExtension_ + ".dat";
+	validationLossFileName = "validation-loss-" + fileNameExtension_ + ".dat";
+}
 
 void NeuralNetwork::initializeOptandLoss(const OptimizerType& optType_,
 	                               const double& learningRate_,
