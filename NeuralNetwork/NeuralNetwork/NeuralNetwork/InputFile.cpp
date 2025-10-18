@@ -2,6 +2,7 @@
 #include <iostream>
 #include <filesystem>
 #include <numeric>
+#include <random>
 
 InputFile::InputFile(Logger& logger_, const int& numTargetCols_, const int& shuffleMode_, const int& shuffleSeed_) :
 	logger{ logger_ }, shuffleMode{ shuffleMode_ }, shuffleSeed{ shuffleSeed_ }, numTargetCols{ numTargetCols_ }
@@ -58,7 +59,8 @@ void InputFile::init()
 	std::iota(shuffleIndex.begin(), shuffleIndex.end(), 0);
 
 	if (shuffleMode & SHUFFLE) {
-		std::shuffle(shuffleIndex.begin(), shuffleIndex.end(), shuffleSeed);
+		std::mt19937_64 gen(shuffleSeed);
+		std::shuffle(shuffleIndex.begin(), shuffleIndex.end(), gen);
 	}
 }
 
