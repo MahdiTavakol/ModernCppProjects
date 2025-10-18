@@ -24,7 +24,7 @@ using Eigen::MatrixXd;
 
 
 static std::unique_ptr<Logger> loggerPtr;
-auto& logger = *loggerPtr;
+
 
 static constexpr double eps = 1e-8;
 
