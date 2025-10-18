@@ -1,4 +1,4 @@
-#include "InputFile.h"
+﻿#include "InputFile.h"
 #include <iostream>
 #include <filesystem>
 #include <numeric>
@@ -156,66 +156,82 @@ void InputFile::readCSVFile(ifstream& file_, MatrixXd& InputFileData_, MatrixXd&
 
 
 	int lineNumber = -1;
-	while (std::getline(file_, line))
-	{
-		lineNumber++;
-	
-		const int indx = shuffleIndex[lineNumber] - indxRange_[0];
-		if (indx >= indxRange_[1] - indxRange_[0] && (shuffleMode & NO_SHUFFLE))
-			break;
-		else if ( (indx < 0 ) ||
-		          (indx >= indxRange_[1] - indxRange_[0] && (shuffleMode & SHUFFLE)) )
-			continue;
+	while (std::getline(file_, line)) {
+		++lineNumber;
 
-		int readInt;
-		std::string readIntStr;
-		int countReadInt = 0;
-		RowVectorXd InputFileRow{ InputFileDim_[1] };
-		RowVectorXd outputRow{ outputDim_[1] };
-		std::stringstream iss(line);
-		std::ostringstream oss;
-		std::getline(iss, readIntStr, ',');
-		while (std::getline(iss, readIntStr, ','))
-		{
-			try
-			{
-				readInt = std::stoi(readIntStr);
+		const int start = indxRange_[0];
+		const int end = indxRange_[1];             // inclusive
+		const int len = end - start + 1;           // number of rows in this range
+		int idx;
+
+		// Fast path for NO_SHUFFLE: skip before start, stop after end
+		if (shuffleMode & NO_SHUFFLE) {
+			if (lineNumber < start) continue;
+			if (lineNumber > end) break;
+
+			idx = lineNumber - start;      // 0..len-1
+			// sanity guard against shape mistakes
+			if (idx < 0 || idx >= InputFileData_.rows() || idx >= outputData_.rows())
+				throw std::runtime_error("Index out of range (NO_SHUFFLE)");
+			// ... parse tokens and write into row `idx` ...
+			// (keep your parsing code below; use `idx` instead of `indx`)
+			// ---------------- parsing block below will use `rowIndex = idx`
+			// continue to token parsing...
+			// (fall through after this block)
+		} else { // SHUFFLE
+			const int shuffled = shuffleIndex[lineNumber];
+
+			// If this shuffled sample is not ours, skip
+			if (shuffled < start || shuffled > end) {
+				continue;
 			}
-			catch (std::invalid_argument& e)
-			{
-				oss << "Wrong InputFile value (" << readIntStr << ") in the csv file! " << e.what();
+
+			idx = shuffled - start;        // 0..len-1
+			if (idx < 0 || idx >= len) {
+				throw std::runtime_error("Index mapping bug (SHUFFLE)");
+			}
+			if (idx >= InputFileData_.rows() || idx >= outputData_.rows()) {
+				throw std::runtime_error("Destination matrix row out of range (SHUFFLE)");
+			}
+			// ... parse tokens and write into row `idx` ...
+			// (keep your parsing code below; use `idx` instead of `indx`)
+		}
+
+		// ↓↓↓ keep your existing token parsing, but write into `rowIndex = idx`
+		// Example (unchanged except the target row variable):
+		int numCols = fileDim[1];
+		std::string tok;
+		int count = 0;
+		RowVectorXd inputRow(InputFileDim_[1]);
+		RowVectorXd outputRow(outputDim_[1]);
+
+		std::stringstream iss(line);
+		std::getline(iss, tok, ','); // skip id
+
+		while (std::getline(iss, tok, ',')) {
+			// if your CSV can have floats, prefer std::stod
+			int val = 0;
+			try { val = std::stoi(tok); }
+			catch (const std::invalid_argument& e) {
+				std::ostringstream oss;
+				oss << "Bad numeric value (" << tok << "): " << e.what();
 				throw std::invalid_argument(oss.str());
 			}
-			countReadInt++;
+			++count;
 
-			if (countReadInt <= InputFileDim_[1])
-				InputFileRow[countReadInt - 1] = readInt;
-			else if (countReadInt <= InputFileDim_[1] + outputDim_[1])
-				outputRow[countReadInt - InputFileDim_[1] - 1] = readInt;
-			else if (countReadInt > numCols)
-			{
+			if (count <= InputFileDim_[1])           inputRow[count - 1] = val;
+			else if (count <= InputFileDim_[1] + outputDim_[1])
+				outputRow[count - InputFileDim_[1] - 1] = val;
+			else if (count > numCols) {
 				if (logger.log_level >= LOG_LEVEL_WARN)
-					logger << "Warning: The number of data in this line is larger than the dim" << std::endl;
+					logger << "Warning: extra columns ignored\n";
 				break;
 			}
 		}
-		if (countReadInt < numCols)
-			throw std::invalid_argument("Not enough data in the line");
-		if (lineNumber >= numData) {
-			if (logger.log_level >= LOG_LEVEL_WARN)
-				logger << "Warning: The number of data in this file is larger " <<
-				"than the number of data read from the first line: " <<
-				"Ignoring the rest!" << std::endl;
-			break;
-		}
-		const int iFileNData = static_cast<int> (InputFileData_.rows());
-		const int oFileNData = static_cast<int> (outputData_.rows());
-		if (indx < 0 || indx >= iFileNData || indx >= oFileNData) {
-			std::string error_test("Out of range error: You should never have reached here!!! " + std::to_string(indx));
-			error_test += " " + std::to_string(iFileNData) + "  " + std::to_string(oFileNData);
-			throw std::runtime_error(error_test.c_str());
-		}
-		InputFileData_.row(indx) = InputFileRow;
-		outputData_.row(indx) = outputRow;
+		if (count < numCols) throw std::invalid_argument("Not enough data in the line");
+
+		// finally write the rows
+		InputFileData_.row(idx) = inputRow;
+		outputData_.row(idx) = outputRow;
 	}
 }
