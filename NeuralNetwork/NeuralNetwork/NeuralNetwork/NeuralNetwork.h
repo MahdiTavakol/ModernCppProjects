@@ -48,7 +48,7 @@ public:
 	NeuralNetwork(Logger& logger_, const string& networkDataFileName_, const string& networkTestFileName_,
 		const int& numTargetCols_, const int& maxNumLayers_ = 10,
 		const int& batchsize_ = -1, const int& MaxNumSteps_ = 10000,
-		const string& fileNameExtension_="");
+		const string& fileNameExtension_=" ");
 	void initializeOptandLoss(const OptimizerType& optType_ = OptimizerType::SGD,
 		                const double& learningRate_ = 0.5, 
 		                const LossType& lossType_ = LossType::MSE);
