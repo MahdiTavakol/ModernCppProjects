@@ -159,11 +159,7 @@ void InputFile::readCSVFile(ifstream& file_, MatrixXd& InputFileData_, MatrixXd&
 	while (std::getline(file_, line))
 	{
 		lineNumber++;
-
-		if (lineNumber - indxRange_[0] < 0 ||
-			lineNumber - indxRange_[0] >= InputFileDim_[0] ||
-			lineNumber - indxRange_[0] >= outputDim_[0])
-			throw std::runtime_error("Out of range error: You should never have reached here!!!");
+	
 
 		const int indx = shuffleIndex[lineNumber] - indxRange_[0];
 		if (indx > indxRange_[1] - indxRange_[0] && (shuffleMode & NO_SHUFFLE))
@@ -216,6 +212,8 @@ void InputFile::readCSVFile(ifstream& file_, MatrixXd& InputFileData_, MatrixXd&
 				"Ignoring the rest!" << std::endl;
 			break;
 		}
+		if (indx < 0 || indx>= InputFileDim_[0]) 
+			throw std::runtime_error("Out of range error: You should never have reached here!!!");
 		InputFileData_.row(indx) = InputFileRow;
 		outputData_.row(indx) = outputRow;
 	}
