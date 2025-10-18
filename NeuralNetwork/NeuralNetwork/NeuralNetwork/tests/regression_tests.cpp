@@ -135,7 +135,7 @@ TEST_CASE("Testing the convergence of neural network MPI for a simple data")
 	nnSerialPtr = make_unique<NeuralNetwork>(logger,
 		setting.trainFileName, setting.testFileName,
 		setting.nTargetCols, setting.nMaxLayers,
-		setting.bSize, setting.maxNumSteps, 0, extension);
+		setting.bSize, setting.maxNumSteps,  extension);
 	nnSerialPtr->initializeInputFilePtr();
 	nnSerialPtr->initializeOutputs();
 	nnSerialPtr->initializeOptandLoss();
