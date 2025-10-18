@@ -4,23 +4,33 @@
 using std::cout;
 using std::endl;
 
-MatrixXd MinMaxScaler::operator()(MatrixXd& InputFile_)
+static constexpr double etol = 1e-6;
+
+void MinMaxScaler::fit(MatrixXd& InputMat_)
 {
-	double etol = 1e-6;
-	VectorXd rowMin = InputFile_.rowwise().minCoeff();
-	VectorXd rowRange = InputFile_.rowwise().maxCoeff()-rowMin;
+	VectorXd rowMin = InputMat_.rowwise().minCoeff();
+	VectorXd rowRange = InputMat_.rowwise().maxCoeff()-rowMin;
 	rowRange = rowRange.unaryExpr([&](double x) {return x > etol ? x : 1.0; });
-	MatrixXd centered = InputFile_.colwise() - rowMin;
+}
+
+MatrixXd MinMaxScaler::transform(MatrixXd& InputMat_) const
+{
+	if (rowMin.size() == 0 || rowRange.size() == 0)
+		throw std::invalid_argument("The transformer has not been fitted into any data yet!");
+	MatrixXd centered = InputMat_.colwise() - rowMin;
 	MatrixXd scaled = centered.array().colwise() / rowRange.array();
-	
 	return scaled;
 }
 
-MatrixXd ZScoreScaler::operator()(MatrixXd& InputFile_)
+void ZScoreScaler::fit(MatrixXd& InputMat_)
 {
-	double etol = 1e-6;
-	VectorXd rowMean = InputFile_.rowwise().mean();  // size = num_features
-    	MatrixXd centered = InputFile_.colwise() - rowMean; // broadcast subtraction
+	rowMean = InputMat_.rowwise().mean();  // size = num_features
+}
+MatrixXd ZScoreScaler::transform(MatrixXd& InputMat_) const {
+	if (rowMean.size() == 0)
+		throw std::invalid_argument("The transformer has not been fitted into any data yet!");
+
+    MatrixXd centered = InputMat_.colwise() - rowMean; // broadcast subtraction
     
 	// variance = mean of squared deviations across columns
 	VectorXd rowVar = (centered.array().square().rowwise().mean()).matrix();

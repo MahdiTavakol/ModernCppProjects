@@ -41,9 +41,6 @@ LayerBatchEfficient::LayerBatchEfficient(Logger& logger_, const int& batchsize_,
 	default:
 		throw std::invalid_argument("Unknown loss type!");
 	}
-
-
-
 }
 
 LayerBatchEfficient::LayerBatchEfficient(Logger& logger_, const int& InputFileDim_, const int& outputDim_, const ActivationType& activType_) :

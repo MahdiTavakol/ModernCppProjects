@@ -63,8 +63,17 @@ void NeuralNetworkMPI::fit()
 
 	int numTBatchs = (numTData + batchsize - 1) / batchsize;
 	int numVBatchs = (numVData + batchsize - 1) / batchsize;
-	
+
 	int numFeatures = static_cast<int>(networkInputFileMatrix.rows());
+
+	// Scaling the data
+	scaler = std::make_unique<ZScoreScaler>();
+	MatrixXd TDataXd = networkInputFileMatrix.block(0, 0, numFeatures, numTData);
+	scaler->fit(TDataXd);
+	networkInputFileMatrix = (*scaler)(networkInputFileMatrix);
+	networkOutputMatrix = (*scaler)(networkOutputMatrix);
+	
+	
 
 	
 	trainingLoss.reserve(MaxNumSteps);
@@ -161,8 +170,7 @@ void NeuralNetworkMPI::fit()
 		if (logger.log_level >= LOG_LEVEL_DEBUG && (rank == 0))
 			logger << "\tValidation loss: " << loss[1] << std::endl;
 
-		trainingLoss.push_back(loss[0]);
-		validationLoss.push_back(loss[1]);
+
 		
 		if (rank == 0 && fOutputMode & AVG) {
 			for (int rank_i = 0; rank_i < size; rank_i++) {
@@ -177,6 +185,11 @@ void NeuralNetworkMPI::fit()
 		// some double checking we should never reach here!!!
 		int stop_one = 0, stop_all;
 		// We have averaged the loss over all the ranks with MPI_Allreduce so these vectors are the same in all the ranks
+		double tLossPrev = trainingLoss.empty() ? std::numeric_limits<double>::infinity() : trainingLoss.back();
+		double vLossPrev = validationLoss.empty() ? -std::numeric_limits<double>::infinity() : validationLoss.back();
+		trainingLoss.push_back(loss[0]);
+		validationLoss.push_back(loss[1]);
+		if (loss[0] < trainingLoss.back() && loss[1] > validationLoss.back())
 		if (!trainingLoss.empty() && loss[0] < trainingLoss.back() && loss[1] > validationLoss.back())
 			TDownVUp++;
 		else

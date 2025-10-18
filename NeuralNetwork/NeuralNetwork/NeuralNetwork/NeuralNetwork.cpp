@@ -132,10 +132,6 @@ void NeuralNetwork::readInputFileData()
 		throw std::invalid_argument(oss.str());
 	}
 
-	// Scaling the data
-	scaler = std::make_unique<ZScoreScaler>();
-	networkInputFileMatrix = (*scaler)(networkInputFileMatrix);
-	//networkOutputMatrix = (*scaler)(networkOutputMatrix);
 
 	// reserving the layers
 	Layers.reserve(maxNumLayers);
@@ -235,8 +231,15 @@ void NeuralNetwork::fit()
 	int numTData = static_cast<int>(trainingPercent * networkInputFileDim[1] / 100.0);
 	int numVData = networkInputFileDim[1] - numTData;
 
-	int numTrainingBatchs = (numTData + batchsize - 1) / batchsize;
-	int numValidationBatchs = (numVData + batchsize - 1) / batchsize;
+	int numTBatchs = (numTData + batchsize - 1) / batchsize;
+	int numVBatchs = (numVData + batchsize - 1) / batchsize;
+
+	// Scaling the data
+	scaler = std::make_unique<ZScoreScaler>();
+	MatrixXd TDataXd = networkInputFileMatrix.block(0, 0, networkInputFileMatrix.rows(), numTData);
+	scaler->fit(TDataXd);
+	networkInputFileMatrix = (*scaler)(networkInputFileMatrix);
+	networkOutputMatrix = (*scaler)(networkOutputMatrix);
 	
 
 	trainingLoss.reserve(MaxNumSteps);
@@ -258,8 +261,8 @@ void NeuralNetwork::fit()
 			file << stepNumber;
 		};
 	if ((fOutputMode & AVG) || (fOutputMode & PERBATCH)) {
-		header_lambda(trainLossFile, numTrainingBatchs);
-		header_lambda(validationLossFile, numValidationBatchs);
+		header_lambda(trainLossFile, numTBatchs);
+		header_lambda(validationLossFile, numVBatchs);
 	}
 
 	int TDownVUp = 0;
@@ -277,7 +280,7 @@ void NeuralNetwork::fit()
 
 		if (logger.log_level >= LOG_LEVEL_DEBUG)
 			logger << "\tTraining data on the training set" << std::endl;
-		trainBatches(0, numTData, numTrainingBatchs, tLossVal, true);
+		trainBatches(0, numTData, numTBatchs, tLossVal, true);
 		tLossVal /= static_cast<double>(numTData);
 		//tLossVal /= static_cast<double>(numTData*numFeatures);
 		if (logger.log_level >= LOG_LEVEL_DEBUG)
@@ -285,7 +288,7 @@ void NeuralNetwork::fit()
 
 		if (logger.log_level >= LOG_LEVEL_DEBUG)
 			logger << "\tTesting the data on the validating set" << std::endl;
-		trainBatches(numTData, numVData, numValidationBatchs, vLossVal, false);
+		trainBatches(numTData, numVData, numVBatchs, vLossVal, false);
 		vLossVal /= static_cast<double>(numVData);
 		//vLossVal /= static_cast<double>(numVData*numFeatures);
 		if (logger.log_level >= LOG_LEVEL_DEBUG)
@@ -293,15 +296,18 @@ void NeuralNetwork::fit()
 
 		if (logger.log_level >= LOG_LEVEL_DEBUG)
 			logger << "\tAppending to the loss vectors and outputing values into files" << std::endl;
-		trainingLoss.push_back(tLossVal);
-		validationLoss.push_back(vLossVal);
+
 		//These two should be replaces with an instance of the Logger
 		if (fOutputMode & AVG) {
 			trainLossFile << "," << tLossVal << endl;
 			validationLossFile << "," << vLossVal << endl;
 		}
 
-		if (!trainingLoss.empty() && tLossVal < trainingLoss.back() && vLossVal > validationLoss.back())
+		double tLossPrev = trainingLoss.empty() ? std::numeric_limits<double>::infinity() : trainingLoss.back();
+		double vLossPrev = validationLoss.empty() ? -std::numeric_limits<double>::infinity() : validationLoss.back();
+		trainingLoss.push_back(tLossVal);
+		validationLoss.push_back(vLossVal);
+		if (tLossVal < trainingLoss.back() && vLossVal > validationLoss.back())
 			TDownVUp++;
 		else
 			TDownVUp = 0;
@@ -416,13 +422,12 @@ void NeuralNetwork::updateBatch()
 void NeuralNetwork::trainBatches(const int& firstData, const int& numData, const int& numBatchs, double& lossValue, const bool& doBack)
 {
 	lossValue = 0.0;
-	
+	MatrixXd outputBatch;
 	
 	for (int j = 0; j < numBatchs; j++)
 	{
 		if (logger.log_level >= LOG_LEVEL_TRACE)
 			logger << "\t\tWorking on the batch " << j << std::endl;
-		MatrixXd outputBatch;
 
 		int firstCol = firstData + batchsize * j;
 		if (firstCol-firstData >= numData) return;

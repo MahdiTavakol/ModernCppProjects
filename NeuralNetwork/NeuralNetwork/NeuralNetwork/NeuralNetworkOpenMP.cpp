@@ -44,10 +44,12 @@ void NeuralNetworkOpenMP::fit()
 		trainBatches(0, numTData, numTBatchs, tLossVal, true);
 		trainBatches(numTData, numVData, numVBatchs, vLossVal, false);
 
+		double tLossPrev = trainingLoss.empty() ? std::numeric_limits<double>::infinity() : trainingLoss.back();
+		double vLossPrev = validationLoss.empty() ? -std::numeric_limits<double>::infinity() : validationLoss.back();
 		trainingLoss.push_back(tLossVal);
 		validationLoss.push_back(vLossVal);
 
-		if (!trainingLoss.empty() && tLossVal < trainingLoss.back() && vLossVal > validationLoss.back())
+		if (tLossVal < tLossPrev && vLossVal > vLossPrev)
 			TDownVUp++;
 		else
 			TDownVUp = 0;
