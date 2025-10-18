@@ -27,7 +27,7 @@ static std::unique_ptr<Logger> loggerPtr;
 auto& logger = *loggerPtr;
 
 
-static int testNumber = 0;
+
 static constexpr double eps = 1e-8;
 static constexpr int seed = 12345678;
 

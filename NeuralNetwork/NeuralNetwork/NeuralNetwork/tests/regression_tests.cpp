@@ -9,7 +9,7 @@
 #include <iostream>
 #include <Eigen/Dense>
 
-
+static int testNumber = 0;
 
 TEST_CASE("Setting up the global variables for tests")
 {
