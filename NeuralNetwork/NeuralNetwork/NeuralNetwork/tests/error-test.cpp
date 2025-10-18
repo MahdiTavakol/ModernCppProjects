@@ -1,18 +1,6 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
-
-#include "../Activations.h"
-#include "../InputArgs.h"
-#include "../InputFile.h"
-#include "../InputMPIFile.h"
-#include "../LayerBatchEfficient.h"
-#include "../Loss.h"
-#include "../Logger.h"
-#include "../NeuralNetwork.h"
-#include "../NeuralNetworkMPI.h"
-#include "../NeuralNetworkOpenMP.h"
-#include "../Optimizers.h"
 #include "testHelpers.h"
 
 #include <memory>
