@@ -107,9 +107,6 @@
     <ClInclude Include="InputArgs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tests\testHelpers.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="tests\test_1.csv" />

@@ -159,7 +159,6 @@
     <ClInclude Include="NeuralNetworkOpenMP.h" />
     <ClInclude Include="Optimizers.h" />
     <ClInclude Include="Scaler.h" />
-    <ClInclude Include="tests\testHelpers.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="tests\test_1.csv" />
