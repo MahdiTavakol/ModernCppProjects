@@ -2,7 +2,6 @@
 #include "catch.hpp"
 
 
-
 #include <memory>
 #include <string>
 #include <iostream>
@@ -105,6 +104,7 @@ TEST_CASE("Testing the convergence of neural network MPI for a simple data")
 	logger << "Running test #" << testNumber++ << endl;
 	SetupFiles(0);
 	int bSize = 32;
+	int randomSeed = 98765;
 
 	std::unique_ptr<NeuralNetwork>  nnMPIPtr, nnSerialPtr;
 	MatrixXd mpiResult, serialResult;
@@ -116,7 +116,7 @@ TEST_CASE("Testing the convergence of neural network MPI for a simple data")
 		setting.trainFileName, setting.testFileName,
 		setting.nTargetCols, setting.nMaxLayers,
 		setting.bSize, setting.maxNumSteps,0,extension);
-	nnMPIPtr->initializeInputFilePtr();
+	nnMPIPtr->initializeInputFilePtr(SHUFFLE,randomSeed);
 	nnMPIPtr->initializeOutputs();
 	nnMPIPtr->initializeOptandLoss();
 	nnMPIPtr->readInputFileData();
@@ -136,7 +136,7 @@ TEST_CASE("Testing the convergence of neural network MPI for a simple data")
 		setting.trainFileName, setting.testFileName,
 		setting.nTargetCols, setting.nMaxLayers,
 		setting.bSize, setting.maxNumSteps,  extension);
-	nnSerialPtr->initializeInputFilePtr();
+	nnSerialPtr->initializeInputFilePtr(SHUFFLE,randomSeed);
 	nnSerialPtr->initializeOutputs();
 	nnSerialPtr->initializeOptandLoss();
 	nnSerialPtr->readInputFileData();
