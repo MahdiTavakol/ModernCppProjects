@@ -1,6 +1,11 @@
 #include "run_mandelbrot.h"
 #include <chrono>
 
+run_mandelbrot::run_mandelbrot(std::string _info, const Mesh_type& mesh_type_, const Run_type& run_type_,  const allocation_mode alloc_mode_, const bounds& bnds_,
+		const int& x_size_, const int& y_size_, const thread_config& thread_config_, double& area_):
+			info{_info}, mesh_type{mesh_type_}, run_type{run_type_}, alloc_mod{alloc_mode}, bnds{bnds_}, x_size{x_size_}, y_size{y_size_},
+			thread_config{thread_config_}, area{area_}
+{}
 
 void run_mandelbrot::run()
 {
