@@ -74,6 +74,7 @@ Each implementation renders a segment of the Mandelbrot set into a file (e.g., C
 ## 📌 Future Plans
 
 * Complete redesign of `mandelbrot_???` classes for layout-agnostic rendering
+* Adding MPI and threads support to compare their performance with Openmp
 * Integrate PPM/PGM export support
 * Visual comparison of layout access performance
 * Interactive CLI for resolution, bounds, and layout switching
