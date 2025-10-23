@@ -104,6 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp23</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -129,13 +130,11 @@
   <ItemGroup>
     <ClInclude Include="array.h" />
     <ClInclude Include="array_allocator.h" />
-    <ClInclude Include="array_cpp_x_major.h" />
-    <ClInclude Include="array_cpp_y_major.h" />
-    <ClInclude Include="array_c_modern_y_major.h" />
-    <ClInclude Include="array_c_x_major.h" />
-    <ClInclude Include="array_c_y_major.h" />
+    <ClInclude Include="array_c.h" />
+    <ClInclude Include="array_cpp.h" />
+    <ClInclude Include="array_mdspan.h" />
+    <ClInclude Include="array_modern.h" />
     <ClInclude Include="complex.h" />
-    <ClInclude Include="array_c_modern_x_major.h" />
     <ClInclude Include="definitions.h" />
     <ClInclude Include="mandelbrot.h" />
     <ClInclude Include="mandelbrot_xmesh.h" />
@@ -148,12 +147,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="array.cpp" />
-    <ClCompile Include="array_cpp_x_major.cpp" />
-    <ClCompile Include="array_cpp_y_major.cpp" />
-    <ClCompile Include="array_c_modern_y_major.cpp" />
-    <ClCompile Include="array_c_x_major.cpp" />
-    <ClCompile Include="array_c_y_major.cpp" />
-    <ClCompile Include="array_c_modern_x_major.cpp" />
+    <ClCompile Include="array_allocator.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mandelbrot.cpp" />
     <ClCompile Include="mandelbrot_xmesh.cpp" />

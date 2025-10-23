@@ -45,6 +45,7 @@ mandelbrot::~mandelbrot()
 	{
 
 	}
+
 void mandelbrot::calculate(const double& _scale)
 	{
 		// Row bases similar to our allocation

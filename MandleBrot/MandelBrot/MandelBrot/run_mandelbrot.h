@@ -16,14 +16,18 @@ enum class Mesh_type { SERIAL, XMESH_INNER_LOOP, XMESH_OUTER_LOOP, YMESH_INNER_L
 class run_mandelbrot
 {
 public:
-	run_mandelbrot(std::string _info, const Mesh_type& mesh_type, const Run_type& run_type,  const allocation_mode alloc_mode_, const bounds& _bnds,
+	run_mandelbrot(std::string _info, const Mesh_type& mesh_type, const Run_type& run_type, 
+		const allocation_mode alloc_mode_, const allocation_major alloc_major_, 
+		const bounds& _bnds,
 		const int& _x_size, const int& _y_size, const thread_config& _thread_config, double& area);
+	run_mandelbrot(const bounds& _bnds);
 
 	void run();
 
 private:
 	std::string info;
 	allocation_mode alloc_mode;
+	allocation_major alloc_major;
 	Mesh_type mesh_type;
 	bounds bnds;
 	int x_size;
@@ -35,12 +39,13 @@ private:
 
 	std::map<std::string, double> timings;
 	std::map<std::string, double> areas;
+	double lastTiming{ 0.0 };
 
 
 	void run_timing();
+	void generate_timing_info();
 	void generate_animation(const complex& _center, int frame_init = 0, int num_frames = 100);
 	void animate(std::string _file_name, const complex& _center, const double& _scale);
 	void writeMaps(std::string _info_file_name, std::map<std::string, double>& _timings, std::map<std::string, double>& _areas);
-	void generate_timing_info();
 
 };

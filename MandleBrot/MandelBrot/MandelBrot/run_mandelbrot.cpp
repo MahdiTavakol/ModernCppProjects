@@ -1,13 +1,20 @@
 #include "run_mandelbrot.h"
 #include <chrono>
 
-run_mandelbrot::run_mandelbrot(std::string _info, const Mesh_type& mesh_type_, const Run_type& run_type_,  const allocation_mode alloc_mode_, const bounds& bnds_,
-		const int& x_size_, const int& y_size_, const thread_config& thread_config_, double& area_):
-			info{_info}, mesh_type{mesh_type_}, run_type{run_type_}, alloc_mod{alloc_mode}, bnds{bnds_}, x_size{x_size_}, y_size{y_size_},
-			thread_config{thread_config_}, area{area_}
+run_mandelbrot::run_mandelbrot(std::string _info, const Mesh_type& mesh_type_, const Run_type& run_type_,  
+	    const allocation_mode alloc_mode_, const allocation_major alloc_major_, 
+	    const bounds& bnds_,
+		const int& x_size_, const int& y_size_, const thread_config& thread_cfg_, double& area_):
+			info{_info}, mesh_type{mesh_type_}, run_type{run_type_}, alloc_mode{alloc_mode_}, bnds{bnds_}, x_size{x_size_}, y_size{y_size_},
+			thread_cfg{thread_cfg_}, area{area_}
 {
-	array_allocator(alloc_mode_, bnds_.x, bnds_.y, output_name_);
+	double dx = bnds_.x_max - bnds_.x_min;
+	double dy = bnds_.y_max - bnds_.y_min;
+	std::string output_name = "test.dat";
+	array_allocator(alloc_mode, alloc_major_, dx, dy, output_name);
 }
+
+run_mandelbrot::run_mandelbrot(const bounds& _bnds) : bnds{ _bnds } {}
 
 void run_mandelbrot::run()
 {
@@ -208,135 +215,64 @@ void run_mandelbrot::generate_timing_info()
 	trd_cnfg_y_meshes.threads_y = num_threads;
 
 
+	auto run_diff_thread_configs = [&]()
+		{
+			mesh_type = Mesh_type::SERIAL;
+			run_timing();
+
+			thread_cfg = trd_cnfg_x_meshes;
+			mesh_type = Mesh_type::XMESH_OUTER_LOOP;
+			run_timing();
+
+			mesh_type = Mesh_type::XMESH_INNER_LOOP;
+			run_timing();
+
+			thread_cfg = trd_cnfg_y_meshes;
+			mesh_type = Mesh_type::YMESH_OUTER_LOOP;
+			run_timing();
+
+			mesh_type = Mesh_type::YMESH_INNER_LOOP;
+			run_timing();
+		};
+
 	std::string timing_area_info_file("timing-area.csv");
 
 
-
-	mesh_type = Mesh_type::SERIAL;
-	alloc_mode = allocation_mode::C_X_MAJOR;
+	// C
+	alloc_mode = allocation_mode::C;
+	alloc_major = allocation_major::X_MAJOR;
 	info = std::string("C_X_MAJOR");
-	run_timing();
-
-	thread_cfg = trd_cnfg_x_meshes;
-	mesh_type = Mesh_type::XMESH_OUTER_LOOP;
-	run_timing();
-
-	mesh_type = Mesh_type::XMESH_INNER_LOOP;
-	run_timing();
-
-	thread_cfg = trd_cnfg_y_meshes;
-	mesh_type = Mesh_type::YMESH_OUTER_LOOP;
-	run_timing();
-
-	mesh_type = Mesh_type::YMESH_INNER_LOOP;
-	run_timing();
-
-	alloc_mode = allocation_mode::C_Y_MAJOR;
+	run_diff_thread_configs();
+	alloc_major = allocation_major::Y_MAJOR;
 	info = std::string("C_Y_MAJOR");
-	run_timing();
+	run_diff_thread_configs();
 
-	thread_cfg = trd_cnfg_x_meshes;
-	mesh_type = Mesh_type::XMESH_OUTER_LOOP;
-	run_timing();
-
-	mesh_type = Mesh_type::XMESH_INNER_LOOP;
-	run_timing();
-
-	thread_cfg = trd_cnfg_y_meshes;
-	mesh_type = Mesh_type::YMESH_OUTER_LOOP;
-	run_timing();
-
-	mesh_type = Mesh_type::YMESH_INNER_LOOP;
-	run_timing();
-
-	alloc_mode = allocation_mode::CPP_X_MAJOR;
+	// CPP
+	alloc_mode = allocation_mode::CPP;
+	alloc_major = allocation_major::X_MAJOR;
 	info = std::string("CPP_X_MAJOR");
-	run_timing();
-
-	thread_cfg = trd_cnfg_x_meshes;
-	mesh_type = Mesh_type::XMESH_OUTER_LOOP;
-	run_timing();
-
-	mesh_type = Mesh_type::XMESH_INNER_LOOP;
-	run_timing();
-
-	thread_cfg = trd_cnfg_y_meshes;
-	mesh_type = Mesh_type::YMESH_OUTER_LOOP;
-	run_timing();
-
-	mesh_type = Mesh_type::YMESH_INNER_LOOP;
-	run_timing();
-
-	alloc_mode = allocation_mode::CPP_Y_MAJOR;
+	run_diff_thread_configs();
+	alloc_major = allocation_major::Y_MAJOR;
 	info = std::string("CPP_Y_MAJOR");
-	run_timing();
+	run_diff_thread_configs();
 
-	thread_cfg = trd_cnfg_x_meshes;
-	mesh_type = Mesh_type::XMESH_OUTER_LOOP;
-	run_timing();
+	// modern
+	alloc_mode = allocation_mode::MODERN;
+	alloc_major = allocation_major::X_MAJOR;
+	info = std::string("MODERN_X_MAJOR");
+	run_diff_thread_configs();
+	alloc_major = allocation_major::Y_MAJOR;
+	info = std::string("MODERN_Y_MAJOR");
+	run_diff_thread_configs();
 
-	mesh_type = Mesh_type::XMESH_INNER_LOOP;
-	run_timing();
-
-	allocation_mode = C_Y_MAJOR;
-	info = "4-C_Y_MAJOR---X_MESHES";
-	timing = run_mandelbrot<mandelbrot_xmesh>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_x_meshes, area);
-
-	info = "5-C_Y_MAJOR---Y_MESHES";
-	timing = run_mandelbrot<mandelbrot_ymesh>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_y_meshes, area);
-
-	allocation_mode = CPP_X_MAJOR;
-	info = "6-CPP_X_MAJOR---serial";
-	timing = run_mandelbrot<mandelbrot>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_serial, area);
-
-	info = "7-CPP_X_MAJOR---X_MESHES";
-	timing = run_mandelbrot<mandelbrot_xmesh>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_x_meshes, area);
-
-	info = "8-CPP_X_MAJOR---Y_MESHES";
-	timing = run_mandelbrot<mandelbrot_ymesh>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_y_meshes, area);
-
-	allocation_mode = CPP_Y_MAJOR;
-	info = "9-CPP_Y_MAJOR---X_MESHES";
-	timing = run_mandelbrot<mandelbrot_xmesh>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_x_meshes, area);
-;
-	info = "10-CPP_Y_MAJOR---Y_MESHES";
-	timing = run_mandelbrot<mandelbrot_ymesh>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_y_meshes, area);
-
-	allocation_mode = C_X_MAJOR;
-	info = "11-C_X_MAJOR---X_MESHES---OMP_INNER";
-	timing = run_mandelbrot<mandelbrot_xmesh_innerloop>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_x_meshes, area);
-
-	info = "12-C_X_MAJOR---Y_MESHES---OMP_INNER";
-	timing = run_mandelbrot<mandelbrot_ymesh_innerloop>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_y_meshes, area);
-
-	allocation_mode = C_Y_MAJOR;
-	info = "13-C_Y_MAJOR---X_MESHES---OMP_INNER";
-	timing = run_mandelbrot<mandelbrot_xmesh_innerloop>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_x_meshes, area);
-	timings[info] = timing;
-	areas[info] = area;
-	info = "14-C_Y_MAJOR---Y_MESHES---OMP_INNER";
-	timing = run_mandelbrot<mandelbrot_ymesh_innerloop>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_y_meshes, area);
-	timings[info] = timing;
-	areas[info] = area;
-	allocation_mode = CPP_X_MAJOR;
-	info = "15-CPP_X_MAJOR---X_MESHES---OMP_INNER";
-	timing = run_mandelbrot<mandelbrot_xmesh_innerloop>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_x_meshes, area);
-	timings[info] = timing;
-	areas[info] = area;
-	info = "16-CPP_X_MAJOR---Y_MESHES---OMP_INNER";
-	timing = run_mandelbrot<mandelbrot_ymesh_innerloop>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_y_meshes, area);
-	timings[info] = timing;
-	areas[info] = area;
-	allocation_mode = CPP_Y_MAJOR;
-	info = "17-CPP_Y_MAJOR---X_MESHES---OMP_INNER";
-	timing = run_mandelbrot<mandelbrot_xmesh_innerloop>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_x_meshes, area);
-	timings[info] = timing;
-	areas[info] = area;
-	info = "18-CPP_Y_MAJOR---Y_MESHES---OMP_INNER";
-	timing = run_mandelbrot<mandelbrot_ymesh_innerloop>(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_y_meshes, area);
-	timings[info] = timing;
-	areas[info] = area;
-
+	// mdspan
+	alloc_mode = allocation_mode::MDSPAN;
+	alloc_major = allocation_major::X_MAJOR;
+	info = std::string("MDSPAN_X_MAJOR");
+	run_diff_thread_configs();
+	alloc_major = allocation_major::Y_MAJOR;
+	info = std::string("MDSPAN_Y_MAJOR");
+	run_diff_thread_configs();
 
 	writeMaps(timing_area_info_file, timings, areas);
 

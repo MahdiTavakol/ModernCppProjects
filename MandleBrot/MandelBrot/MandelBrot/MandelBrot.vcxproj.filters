@@ -39,24 +39,6 @@
     <ClInclude Include="mandelbrot_ymesh_innerloop.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="array_c_x_major.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="array_c_y_major.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="array_cpp_x_major.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="array_cpp_y_major.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="array_c_modern_x_major.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="array_c_modern_y_major.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="array_allocator.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -67,6 +49,18 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="run_mandelbrot.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="array_c.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="array_cpp.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="array_modern.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="array_mdspan.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -92,24 +86,6 @@
     <ClCompile Include="mandelbrot_ymesh_innerloop.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="array_c_x_major.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="array_c_y_major.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="array_cpp_x_major.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="array_cpp_y_major.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="array_c_modern_x_major.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="array_c_modern_y_major.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="mandelbrot_xmesh_outerloop.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -117,6 +93,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="run_mandelbrot.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="array_allocator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

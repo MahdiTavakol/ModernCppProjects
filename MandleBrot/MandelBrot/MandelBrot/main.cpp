@@ -15,6 +15,7 @@
 #include "mandelbrot_ymesh.h"
 #include "mandelbrot_xmesh_innerloop.h"
 #include "mandelbrot_ymesh_innerloop.h"
+#include "run_mandelbrot.h"
 
 
 
@@ -38,7 +39,15 @@ void generate_timing_info()
 	int x_size = 1920;
 	int y_size = 1080;
 
-	int allocation_mode;
+	auto run_mandelbrot_ptr = std::make_unique<run_mandelbrot>(bnds);
+	run_mandelbrot_ptr->generate_tim
+
+	allocation_mode mode;
+	allocation_major major;
+	Mesh_type mtype;
+	Run_type rtype;
+
+	
 
 	int num_threads;
 #pragma omp parallel
@@ -58,11 +67,13 @@ void generate_timing_info()
 	std::string timing_area_info_file("timing-area.csv");
 
 
-
 	double timing, area;
-	allocation_mode = C_X_MAJOR;
+	mode = allocation_mode::C;
+	major = allocation_major::X_MAJOR;
+	mtype = Mesh_type::SERIAL;
+	rtype = Run_type::TIMING;
 	std::string info("1-C_X_MAJOR---serial");
-	timing = run_mandelbrot(info, allocation_mode, bnds, x_size, y_size, trd_cnfg_serial, area);
+	timing = run_mandelbrot(info, mtype, rtype, mode, major, bnds, x_size, y_size, trd_cnfg_serial, area);
 	timings[info] = timing;
 	areas[info] = area;
 	info = "2-C_X_MAJOR---X_MESHES";
