@@ -1,5 +1,7 @@
 #include "array.h"
 
+using namespace Array_NS;
+
 void array::write_data(const int& _xhi, const int& _yhi)
 {
 	if (!output || !output->is_open()) {

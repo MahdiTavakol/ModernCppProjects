@@ -128,35 +128,35 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="array.h" />
-    <ClInclude Include="array_allocator.h" />
-    <ClInclude Include="array_c.h" />
-    <ClInclude Include="array_cpp.h" />
-    <ClInclude Include="array_mdspan.h" />
-    <ClInclude Include="array_modern.h" />
-    <ClInclude Include="complex.h" />
+    <ClInclude Include="Algorithm\mandelbrot.h" />
+    <ClInclude Include="Algorithm\mandelbrot_xmesh.h" />
+    <ClInclude Include="Algorithm\mandelbrot_xmesh_innerloop.h" />
+    <ClInclude Include="Algorithm\mandelbrot_xmesh_outerloop.h" />
+    <ClInclude Include="Algorithm\mandelbrot_ymesh.h" />
+    <ClInclude Include="Algorithm\mandelbrot_ymesh_innerloop.h" />
+    <ClInclude Include="Algorithm\mandelbrot_ymesh_outerloop.h" />
+    <ClInclude Include="Algorithm\run_mandelbrot.h" />
+    <ClInclude Include="Array\array.h" />
+    <ClInclude Include="Array\array_allocator.h" />
+    <ClInclude Include="Array\array_c.h" />
+    <ClInclude Include="Array\array_cpp.h" />
+    <ClInclude Include="Array\array_mdspan.h" />
+    <ClInclude Include="Array\array_modern.h" />
     <ClInclude Include="definitions.h" />
-    <ClInclude Include="mandelbrot.h" />
-    <ClInclude Include="mandelbrot_xmesh.h" />
-    <ClInclude Include="mandelbrot_xmesh_innerloop.h" />
-    <ClInclude Include="mandelbrot_xmesh_outerloop.h" />
-    <ClInclude Include="mandelbrot_ymesh.h" />
-    <ClInclude Include="mandelbrot_ymesh_innerloop.h" />
-    <ClInclude Include="mandelbrot_ymesh_outerloop.h" />
-    <ClInclude Include="run_mandelbrot.h" />
+    <ClInclude Include="Numerical\complex.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="array.cpp" />
-    <ClCompile Include="array_allocator.cpp" />
+    <ClCompile Include="Algorithm\mandelbrot.cpp" />
+    <ClCompile Include="Algorithm\mandelbrot_xmesh.cpp" />
+    <ClCompile Include="Algorithm\mandelbrot_xmesh_innerloop.cpp" />
+    <ClCompile Include="Algorithm\mandelbrot_xmesh_outerloop.cpp" />
+    <ClCompile Include="Algorithm\mandelbrot_ymesh.cpp" />
+    <ClCompile Include="Algorithm\mandelbrot_ymesh_innerloop.cpp" />
+    <ClCompile Include="Algorithm\mandelbrot_ymesh_outerloop.cpp" />
+    <ClCompile Include="Algorithm\run_mandelbrot.cpp" />
+    <ClCompile Include="Array\array.cpp" />
+    <ClCompile Include="Array\array_allocator.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="mandelbrot.cpp" />
-    <ClCompile Include="mandelbrot_xmesh.cpp" />
-    <ClCompile Include="mandelbrot_xmesh_innerloop.cpp" />
-    <ClCompile Include="mandelbrot_xmesh_outerloop.cpp" />
-    <ClCompile Include="mandelbrot_ymesh.cpp" />
-    <ClCompile Include="mandelbrot_ymesh_innerloop.cpp" />
-    <ClCompile Include="mandelbrot_ymesh_outerloop.cpp" />
-    <ClCompile Include="run_mandelbrot.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

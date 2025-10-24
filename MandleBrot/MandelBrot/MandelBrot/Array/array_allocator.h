@@ -6,13 +6,16 @@
 #include "array_cpp.h"
 #include "array_modern.h"
 #include "array_mdspan.h"
+#include "../definitions.h"
 
-enum class allocation_mode {C,CPP,MODERN,MDSPAN};
+using namespace Array_NS;
+
+
 
 class array_allocator
 {
 public:
-	array_allocator(allocation_mode mode_,const allocation_major& major_, 
+	array_allocator(::allocation_mode mode_,const allocation_major& major_, 
 		const int& n_xs_, const int& n_ys_, const std::string& output_name_)
 		: mode{ mode_ }, major{major_}, 
 		  n_xs{ n_xs }, n_ys{ n_ys }, 
