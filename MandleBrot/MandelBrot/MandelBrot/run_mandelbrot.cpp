@@ -1,59 +1,11 @@
 #include "run_mandelbrot.h"
 #include <chrono>
 
-run_mandelbrot::run_mandelbrot(std::string _info, const Mesh_type& mesh_type_, const Run_type& run_type_,  
-	    const allocation_mode alloc_mode_, const allocation_major alloc_major_, 
-	    const bounds& bnds_,
-		const int& x_size_, const int& y_size_, const thread_config& thread_cfg_, double& area_):
-			info{_info}, mesh_type{mesh_type_}, run_type{run_type_}, alloc_mode{alloc_mode_}, bnds{bnds_}, x_size{x_size_}, y_size{y_size_},
-			thread_cfg{thread_cfg_}, area{area_}
-{
-	double dx = bnds_.x_max - bnds_.x_min;
-	double dy = bnds_.y_max - bnds_.y_min;
-	std::string output_name = "test.dat";
-	array_allocator(alloc_mode, alloc_major_, dx, dy, output_name);
-}
 
-run_mandelbrot::run_mandelbrot(const bounds& _bnds) : bnds{ _bnds } {}
 
-void run_mandelbrot::run()
-{
-	complex center(-0.743643887037151, 0.131825904205330);
-	switch (run_type)
-	{
-		case Run_type::TIMING:
-			run_timing();
-			return;
-			break;
-		case Run_type::ANIMATE_1:
-		{
-			center = complex(-0.743643887037151, 0.131825904205330);
-			break;
-		}
-		case Run_type::ANIMATE_2:
-		{
-			center = complex(-0.1015, 0.633);
-			break;
-		}
-		case Run_type::ANIMATE_4:
-		{
-			center = complex(-1.4011551890, 0);
-			break;
-		}
-		case Run_type::ANIMATE_5:
-		{
-			center = complex(-0.39054, 0.58679);
-			break;
-		}
-		default:
-			std::cerr << "Unknown run type!" << std::endl;
-			exit(EXIT_FAILURE);
-			break;
-	}
-	generate_animation(center);
-}
 
-void run_mandelbrot::run_timing()
+template<Run_type run_type>
+void run_mandelbrot<run_type>::run_timing()
 {
 	std::cout << "Allocating the " << info << " mandlebrot pointer" << std::endl;
 	std::string file_name("Mandelbrot_" + info + ".dat");
@@ -111,8 +63,8 @@ void run_mandelbrot::run_timing()
 
 }
 
-
-void run_mandelbrot::generate_animation(const complex& _center, int frame_init, int num_frames)
+template<Run_type run_type>
+void run_mandelbrot<run_type>::generate_animation(const complex& _center, int frame_init, int num_frames)
 {
 	double S0 = 1.0;
 	double decay_rate = 1.05;
@@ -129,7 +81,8 @@ void run_mandelbrot::generate_animation(const complex& _center, int frame_init, 
 }
 
 
-void run_mandelbrot::animate(std::string _file_name, const complex& _center, const double& _scale)
+template<Run_type run_type>
+void run_mandelbrot<run_type>::animate(std::string _file_name, const complex& _center, const double& _scale)
 {
 	bounds bnds;
 	bnds.x_min = _center.real - (2.665 / _scale);
@@ -164,7 +117,8 @@ void run_mandelbrot::animate(std::string _file_name, const complex& _center, con
 	mandelbrot_ptr->output();
 }
 
-void run_mandelbrot::writeMaps(std::string _info_file_name, std::map<std::string, double>& _timings, std::map<std::string, double>& _areas)
+template<Run_type run_type>
+void run_mandelbrot<run_type>::writeMaps(std::string _info_file_name, std::map<std::string, double>& _timings, std::map<std::string, double>& _areas)
 {
 	std::cout << "Writing the timing info file " << std::endl;
 	std::ofstream info_file(_info_file_name);
@@ -188,7 +142,8 @@ void run_mandelbrot::writeMaps(std::string _info_file_name, std::map<std::string
 	std::cout << "Finished writing the timging info file " << std::endl;
 }
 
-void run_mandelbrot::generate_timing_info()
+template<Run_type run_type>
+void run_mandelbrot<run_type>::generate_timing_info()
 
 {
 	bounds bnds;
