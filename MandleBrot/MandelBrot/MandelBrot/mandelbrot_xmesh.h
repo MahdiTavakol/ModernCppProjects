@@ -23,7 +23,7 @@ public:
 
 
 	virtual void calculate(const double& _scale) override = 0;
-	virtual void calculate() override = 0;
+
 
 protected:
 

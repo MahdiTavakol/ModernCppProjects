@@ -40,8 +40,3 @@ mandelbrot_ymesh::mandelbrot_ymesh(const allocation_mode& _alloc_mode, const bou
 }
 
 
-void mandelbrot_ymesh::calculate()
-{
-	calculate(2.0);
-}
-

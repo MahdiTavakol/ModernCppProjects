@@ -41,7 +41,3 @@ mandelbrot_xmesh::mandelbrot_xmesh(const allocation_mode& _alloc_mode, const bou
 		}
 	}
 
-void mandelbrot_xmesh::calculate()
-{
-	calculate(2.0);
-}

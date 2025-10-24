@@ -14,6 +14,5 @@ public:
 	mandelbrot_ymesh_outerloop(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys, const int& n_threads_x, const int& _n_threads_y, const std::string& _file_name);
 
 	void calculate(const double& _scale);
-	void calculate();
 
 };

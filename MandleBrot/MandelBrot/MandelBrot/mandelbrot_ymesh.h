@@ -21,7 +21,6 @@ public:
 	~mandelbrot_ymesh() = default;
 
 	virtual void calculate(const double& scale) override = 0;
-	virtual void calculate() override = 0;
 
 protected:
 

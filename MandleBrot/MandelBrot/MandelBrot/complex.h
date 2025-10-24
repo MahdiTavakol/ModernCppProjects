@@ -1,17 +1,19 @@
-#ifndef COMPLEX_H
-#define COMPLEX_H
+#pragma once 
 
 #include <sstream>
 #include <cmath>
+#include <type_traits>
 
+template<typename T>
+requires (std::is_arithmetic_v<T>)
 class complex {
 public:
-    complex() : real(0.0), imag(0.0) {}
-    complex(double _real, double _imag) : real(_real), imag(_imag) {}
-    complex(double _real) : real(_real), imag(0) {}
+    complex() : real(T(0)), imag(T(0)) {}
+    complex(T _real, T _imag) : real(_real), imag(_imag) {}
+    complex(T _real) : real(_real), imag(T(0)) {}
     complex(std::string _complex_number)
     {
-        double real, imag;
+        T real, imag;
         char i_char;
         char i_sign;
         std::stringstream iss(_complex_number);
@@ -39,7 +41,7 @@ public:
         return sqrt(this->real * this->real + this->imag * this->imag);
     }
 
-    double real, imag;  // Real and imaginary parts
+    T real, imag;  // Real and imaginary parts
 };
 
 #endif

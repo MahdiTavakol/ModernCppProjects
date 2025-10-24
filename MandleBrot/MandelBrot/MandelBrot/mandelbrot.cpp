@@ -41,10 +41,7 @@ mandelbrot::mandelbrot(const allocation_mode& _alloc_mode, const bounds& _bnds, 
 	this->area = 0.0;
 
 }
-mandelbrot::~mandelbrot()
-	{
 
-	}
 
 void mandelbrot::calculate(const double& _scale)
 	{

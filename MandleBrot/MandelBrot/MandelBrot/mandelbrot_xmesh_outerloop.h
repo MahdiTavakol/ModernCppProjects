@@ -16,7 +16,6 @@ public:
 
 
 	void calculate(const double& _scale) override;
-	void calculate() override;
 };
 
 

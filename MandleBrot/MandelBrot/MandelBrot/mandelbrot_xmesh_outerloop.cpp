@@ -67,8 +67,3 @@ void mandelbrot_xmesh_outerloop::calculate(const double& _scale)
 			for (int j = 0; j < n_ys; j++)
 				(*(array_alloc_ptr))(i - k * this->n_xs, j) = (*(array_alloc_ptr))(i, j);
 }
-
-void mandelbrot_xmesh_outerloop::calculate()
-{
-	calculate(2.0);
-}

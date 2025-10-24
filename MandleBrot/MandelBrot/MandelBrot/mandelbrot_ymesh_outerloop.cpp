@@ -66,7 +66,4 @@ void mandelbrot_ymesh_outerloop::calculate(const double& _scale)
 				(*(array_alloc_ptr))(i, j - k * this->n_ys) = (*(array_alloc_ptr))(i, j);
 }
 
-void mandelbrot_ymesh_outerloop::calculate()
-{
-	calculate(2.0);
-}
+
