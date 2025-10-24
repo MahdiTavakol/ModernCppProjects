@@ -3,8 +3,10 @@
 #include <sstream>
 #include <cmath>
 #include <type_traits>
+#include <string>
+#include <stdexcept>
 
-template<typename T>
+template<typename T = double>
 requires (std::is_arithmetic_v<T>)
 class complex {
 public:
@@ -13,11 +15,10 @@ public:
     complex(T _real) : real(_real), imag(T(0)) {}
     complex(std::string _complex_number)
     {
-        T real, imag;
         char i_char;
         char i_sign;
         std::stringstream iss(_complex_number);
-        if (!(iss >> real >> i_sign >> i_char >> imag) || (i_sign != '+' && i_sign != '-') || (i_char != 'i' && i_char != 'j'))
+        if (!(iss >> real >> i_sign >> imag >> i_char ) || (i_sign != '+' && i_sign != '-') || (i_char != 'i' && i_char != 'j'))
             throw std::invalid_argument("Invalid complex number format");
     }
 
@@ -44,6 +45,5 @@ public:
     T real, imag;  // Real and imaginary parts
 };
 
-#endif
 
 
