@@ -20,18 +20,18 @@ namespace Array_NS {
 		~array_mdspan() {}
 		void initiate() override {
 			allocate();
-			if (alloc_major == allocation_major::X_MAJOR)
-				mdspn = std::mdspan(data.data(), n_xs, n_ys);
-			else if (alloc_major == allocation_major::Y_MAJOR)
-				mdpsn = std::mdspan(data.data(), n_ys, n_xs);
 		}
 		double& operator()(int x, int y) override {
 			if (bounds_check_flag)
 				bounds_check(x, y); // Check bounds before accessing
-			if (alloc_major == allocation_major::X_MAJOR)
-				return mdpsn[x][y];
-			else if (alloc_major == allocation_major::Y_MAJOR)
-				return mdspn[y][x];
+			if (alloc_major == allocation_major::X_MAJOR) {
+				auto mdspn = std::mdspan(data.data(), n_xs, n_ys);
+				return mdspn[x, y];
+			}
+			else if (alloc_major == allocation_major::Y_MAJOR) {
+				auto mdspn = std::mdspan(data.data(), n_ys, n_xs);
+				return mdspn[y, x];
+			}
 		}
 
 
@@ -46,6 +46,5 @@ namespace Array_NS {
 	private:
 		bool bounds_check_flag = false;
 		std::vector<double> data;
-		std::mdspan mdspn;
 	};
 }
