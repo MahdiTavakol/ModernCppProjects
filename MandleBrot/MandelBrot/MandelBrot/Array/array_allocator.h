@@ -20,7 +20,7 @@ namespace Array_NS {
 		array_allocator(allocation_mode mode_, const allocation_major& major_,
 			const int& n_xs_, const int& n_ys_, const std::string& output_name_)
 			: mode{ mode_ }, major{ major_ },
-			n_xs{ n_xs }, n_ys{ n_ys },
+			n_xs{ n_xs_}, n_ys{ n_ys_},
 			output_name{ output_name_ }
 		{
 			if (major == allocation_major::X_MAJOR)
