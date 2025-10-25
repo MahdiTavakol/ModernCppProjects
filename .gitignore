@@ -369,3 +369,7 @@ FodyWeavers.xsd
 /NeuralNetwork/NeuralNetwork/NeuralNetwork/data/train.csv
 /NeuralNetwork/NeuralNetwork/NeuralNetwork/data/test.csv
 /NeuralNetwork/NeuralNetwork/NeuralNetwork/build/
+
+
+# Mandlebrot temp files
+/MandleBrot/MandelBrot/MandelBrot/temp
