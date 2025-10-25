@@ -8,18 +8,14 @@ project(Mandelbrot LANGUAGES CXX VERSION 0.1.0)
 # -----------------------------
 # Options
 # -----------------------------
-option(USE_MDSPAN "Enable std::mdspan-based arrays (needs C++23-ready library)" ON)
+option(USE_MDSPAN   "Enable std::mdspan-based arrays (needs C++23-ready library)" ON)
 option(USE_FAST_MATH "Enable fast-math optimizations" OFF)
-option(BUILD_DEBUG "Build with debug symbols and lower optimization" OFF)
+option(BUILD_DEBUG   "Build with debug symbols and lower optimization" OFF)
 
 # -----------------------------
-# C++ Standard
+# Global C++ standard (stay on 20 so CMake 3.22 + FindOpenMP works)
 # -----------------------------
-if (USE_MDSPAN)
-  set(CMAKE_CXX_STANDARD 23)
-else()
-  set(CMAKE_CXX_STANDARD 20)
-endif()
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -58,7 +54,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Intel" OR CMAKE_CXX_COMPILER_ID STREQUAL "In
       add_compile_options(-xHost)
     endif()
     if (USE_FAST_MATH)
-      add_compile_options(-ffast-math)   # or -fp-model fast=2 for classic ICC
+      add_compile_options(-ffast-math)   # classic ICC alternative: -fp-model fast=2
     endif()
   endif()
 
@@ -81,7 +77,7 @@ elseif (MSVC)
 endif()
 
 # -----------------------------
-# OpenMP
+# OpenMP  (works with C++20 global standard)
 # -----------------------------
 find_package(OpenMP REQUIRED)
 if (OpenMP_CXX_FOUND)
@@ -143,8 +139,21 @@ target_compile_definitions(mandelbrot PUBLIC
 # -----------------------------
 target_link_libraries(mandelbrot PRIVATE OpenMP::OpenMP_CXX)
 
+# Intel oneAPI on Windows (MSVC mode) sometimes needs this:
 if (MSVC AND (CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM"))
   target_compile_options(mandelbrot PRIVATE /Qopenmp)
+endif()
+
+# -----------------------------
+# Per-target bump to C++23 only when mdspan is ON
+# (avoids CMake 3.22 not knowing CXX23 for IntelLLVM during FindOpenMP)
+# -----------------------------
+if (USE_MDSPAN)
+  if (MSVC)
+    target_compile_options(mandelbrot PRIVATE /std:c++latest)
+  else()
+    target_compile_options(mandelbrot PRIVATE -std=c++23)
+  endif()
 endif()
 
 # -----------------------------
