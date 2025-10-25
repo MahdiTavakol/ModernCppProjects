@@ -155,7 +155,6 @@
     <ClCompile Include="Algorithm\mandelbrot_ymesh_outerloop.cpp" />
     <ClCompile Include="Algorithm\run_mandelbrot.cpp" />
     <ClCompile Include="Array\array.cpp" />
-    <ClCompile Include="Array\array_allocator.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

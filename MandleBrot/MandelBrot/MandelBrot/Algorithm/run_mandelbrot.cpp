@@ -1,6 +1,6 @@
 #include "run_mandelbrot.h"
+#include "../Numerical/complex.h"
 #include <chrono>
-
 
 
 
@@ -42,7 +42,7 @@ void run_mandelbrot<run_type>::run_timing()
 	std::cout << "Starting the " << info << " code" << std::endl;
 	std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
 	mandelbrot_ptr->calculate();
-	std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+	auto end = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double, std::milli> timeRequired = (end - start);
 	//Let's get milliseconds out of that, and report
 	std::cout << "The " << info << " code took " << timeRequired.count() << " milliseconds." << std::endl;
@@ -50,13 +50,9 @@ void run_mandelbrot<run_type>::run_timing()
 	area = mandelbrot_ptr->return_area();
 	std::cout << "The area of the set is " << area << std::endl;
 
-
-
 	std::cout << "Writting the output " << std::endl;
 	mandelbrot_ptr->output();
 	std::cout << "Finished writing the output" << std::endl;
-
-	//std::cout << "Deallocating the " << info << " mandlebrot pointer" << std::endl;
 
 	timings[info + " - " + title] = timeRequired.count();
 	areas[info + " - " + title] = area;
@@ -64,7 +60,7 @@ void run_mandelbrot<run_type>::run_timing()
 }
 
 template<Run_type run_type>
-void run_mandelbrot<run_type>::generate_animation(const complex& _center, int frame_init, int num_frames)
+void run_mandelbrot<run_type>::generate_animation(const complex<double>& _center, int frame_init, int num_frames)
 {
 	double S0 = 1.0;
 	double decay_rate = 1.05;
@@ -82,7 +78,7 @@ void run_mandelbrot<run_type>::generate_animation(const complex& _center, int fr
 
 
 template<Run_type run_type>
-void run_mandelbrot<run_type>::animate(std::string _file_name, const complex& _center, const double& _scale)
+void run_mandelbrot<run_type>::animate(std::string _file_name, const complex<double>& _center, const double& _scale)
 {
 	bounds bnds;
 	bnds.x_min = _center.real - (2.665 / _scale);

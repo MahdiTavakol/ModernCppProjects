@@ -5,45 +5,50 @@
 #include <fstream>
 #include <memory>
 
-#include "complex.h"
-#include "array_allocator.h"
-#include "definitions.h"
+#include "../Numerical/complex.h"
+#include "../Array/array_allocator.h"
+#include "../definitions.h"
+
+using Array_NS::allocation_mode;
+using Array_NS::array_allocator;
+
+namespace Mandelbrot_NS {
+
+	struct bounds {
+		double x_min;
+		double x_max;
+		double y_min;
+		double y_max;
+	};
 
 
-struct bounds {
-	double x_min;
-	double x_max;
-	double y_min;
-	double y_max;
-};
+	class mandelbrot
+	{
+	public:
+		mandelbrot(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys);
+		mandelbrot(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys, const thread_config& _thread_config);
+		mandelbrot(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys, const std::string& _file_name);
+		mandelbrot(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys, const thread_config& _thread_config, const std::string& _file_name);
+		mandelbrot(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys, const int& _n_threads_x, const int& _n_threads_y, const std::string& _file_name);
+		~mandelbrot() = default;
+		void calculate() { calculate(2.0); }
+		virtual void calculate(const double& _scale) = 0;
+		void output();
+		double& return_area();
 
+	protected:
+		allocation_mode alloc_mode;
+		int n_xs, n_ys;
+		int n_threads_x, n_threads_y;
+		double x_min, x_max, y_min, y_max;
+		double area;
+		int num_iterations;
+		std::unique_ptr<array_allocator> array_alloc_ptr;
 
-class mandelbrot
-{
-public:
-	mandelbrot(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys);
-	mandelbrot(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys, const thread_config& _thread_config);
-	mandelbrot(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys, const std::string& _file_name);
-	mandelbrot(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys, const thread_config& _thread_config, const std::string& _file_name);
-	mandelbrot(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys, const int& _n_threads_x, const int& _n_threads_y, const std::string& _file_name);
-	~mandelbrot() = default;
-	void calculate() { calculate(2.0); }
-	virtual void calculate(const double& _scale) = 0;
-	void output();
-	double& return_area();
-
-protected:
-	allocation_mode alloc_mode;
-	int n_xs, n_ys;
-	int n_threads_x, n_threads_y;
-	double x_min, x_max, y_min, y_max;
-	double area;
-	int num_iterations;
-	std::unique_ptr<array_allocator> array_alloc_ptr;
-
-	std::string file_name;
-	std::unique_ptr<std::ofstream> file;
-};
-
+		std::string file_name;
+		std::unique_ptr<std::ofstream> file;
+	};
+}
 
 #endif
+

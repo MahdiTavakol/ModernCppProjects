@@ -1,5 +1,7 @@
 #include "mandelbrot_ymesh.h"
 
+using namespace Mandelbrot_NS;
+using Numerical_NS::complex;
 
 mandelbrot_ymesh::mandelbrot_ymesh(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys)
 	: mandelbrot_ymesh(_alloc_mode, _bnds, _n_xs, _n_ys, (int)1, (int)1, std::string("Mandelbrot_ymesh.dat"))

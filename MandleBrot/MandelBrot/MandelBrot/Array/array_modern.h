@@ -11,10 +11,10 @@ namespace Array_NS {
 		array_modern(const int& _n_xs, const int& _n_ys, const std::string& _output) :
 			array{ _n_xs, _n_ys, _output } {
 		}
-		array_modern(const array_c_y_major& _in) = delete;
-		array_modern& operator=(const array_c_y_major& _in) = delete;
-		array_modern(array_c_y_major&& _in) = default;
-		array_modern& operator=(array_c_y_major&& _in) = default;
+		array_modern(const array_modern& _in) = delete;
+		array_modern& operator=(const array_modern& _in) = delete;
+		array_modern(array_modern&& _in) = default;
+		array_modern& operator=(array_modern&& _in) = default;
 		~array_modern() {}
 		double& operator()(int x, int y) override {
 			if (bounds_check_flag)

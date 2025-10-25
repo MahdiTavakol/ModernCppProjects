@@ -104,8 +104,5 @@
     <ClCompile Include="Array\array.cpp">
       <Filter>Source Files\ARRAY</Filter>
     </ClCompile>
-    <ClCompile Include="Array\array_allocator.cpp">
-      <Filter>Source Files\ARRAY</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>

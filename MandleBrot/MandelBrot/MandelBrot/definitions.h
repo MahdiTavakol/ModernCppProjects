@@ -4,8 +4,6 @@
 #define FLERR __FILE__, __LINE__
 #define ERR __LINE__
 
-enum class allocation_mode { C, CPP, MODERN, MDSPAN };
-
 
 class thread_config {
 public:

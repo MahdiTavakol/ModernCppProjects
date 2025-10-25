@@ -29,7 +29,7 @@ namespace Numerical_NS {
         }
         complex operator*(const complex& arg) const {
             return complex(this->real * arg.real - this->imag * arg.imag,
-                this->real * arg.imag + this->imag * arg.real);
+                           this->real * arg.imag + this->imag * arg.real);
         }
         complex& operator=(const complex& arg) {
             if (this != &arg) {

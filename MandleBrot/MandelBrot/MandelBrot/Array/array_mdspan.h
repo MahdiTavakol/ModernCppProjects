@@ -13,10 +13,10 @@ namespace Array_NS {
 		array_mdspan(const int& _n_xs, const int& _n_ys, const std::string& _output) :
 			array{ _n_xs, _n_ys, _output } {
 		}
-		array_mdspan(const array_c_y_major& _in) = delete;
-		array_mdspan& operator=(const array_c_y_major& _in) = delete;
-		array_mdspan(array_c_y_major&& _in) = default;
-		array_mdspan& operator=(array_c_y_major&& _in) = default;
+		array_mdspan(const array_mdspan& _in) = delete;
+		array_mdspan& operator=(const array_mdspan& _in) = delete;
+		array_mdspan(array_mdspan&& _in) = default;
+		array_mdspan& operator=(array_mdspan&& _in) = default;
 		~array_mdspan() {}
 		void initiate() override {
 			allocate();

@@ -1,18 +1,20 @@
 #pragma once
 #include <map>
 
-#include "array.h"
-#include "array_allocator.h"
+#include "../Array/array.h"
+#include "../Array/array_allocator.h"
 #include "mandelbrot.h"
 #include "mandelbrot_xmesh_innerloop.h"
 #include "mandelbrot_xmesh_outerloop.h"
 #include "mandelbrot_ymesh_innerloop.h"
 #include "mandelbrot_ymesh_outerloop.h"
-#include "definitions.h"
+#include "../definitions.h"
 
 enum class Run_type {TIMING,ANIMATE};
 enum class Animate_type {ANIMATE_1, ANIMATE_2, ANIMATE_3, ANIMATE_4, ANIMATE_5 };
 enum class Mesh_type { SERIAL, XMESH_INNER_LOOP, XMESH_OUTER_LOOP, YMESH_INNER_LOOP, YMESH_OUTER_LOOP };
+
+using Numerical_NS::complex;
 
 template<Run_type run_type>
 class run_mandelbrot
@@ -20,23 +22,22 @@ class run_mandelbrot
 public:
 	// ANIMATE-only ctor
 	run_mandelbrot(std::string info_,
-		const bounds& bnds_,
-		int x_size_, int y_size_,
-		const thread_config& thread_cfg_,
-		Mesh_type mesh_type_,
-		Animate_type ani_type_,
-		allocation_mode alloc_mode_ = allocation_mode::MDSPAN,
-		allocation_major alloc_major_ = allocation_major::X_MAJOR)
+		           const bounds& bnds_,
+		           int x_size_, int y_size_,
+		           const thread_config& thread_cfg_,
+		           Mesh_type mesh_type_,
+		           Animate_type ani_type_,
+		           allocation_mode alloc_mode_ = allocation_mode::MDSPAN,
+		           allocation_major alloc_major_ = allocation_major::X_MAJOR)
 		requires (run_type == Run_type::ANIMATE):
-		info{ std::move(info_) },
-		mesh_type{ mesh_type_ },
-		alloc_mode{ alloc_mode_ },
-		alloc_major{ alloc_major_ },
-		ani_type{ani_type_},
-		bnds{ bnds_ },
-		x_size{ x_size_ },
-		y_size{ y_size_ },
-		thread_cfg{ thread_cfg_ }
+		           info{ std::move(info_) },
+		           mesh_type{ mesh_type_ },
+		           alloc_mode{ alloc_mode_ },
+		           alloc_major{ alloc_major_ },
+		           ani_type{ani_type_},
+		           bnds{ bnds_ },
+		           x_size{ x_size_ }, y_size{ y_size_ },
+		           thread_cfg{ thread_cfg_ }
 	{
 		const double dx = bnds.x_max - bnds.x_min;
 		const double dy = bnds.y_max - bnds.y_min;
@@ -47,8 +48,8 @@ public:
 	run_mandelbrot(const bounds& bnds_,
 				   int x_size_, int y_size_)
 		requires (run_type == Run_type::TIMING) :
-		bnds{ bnds_ }, 
-		x_size{ x_size_ }, y_size{ y_size_ } {}
+		          bnds{ bnds_ }, 
+		          x_size{ x_size_ }, y_size{ y_size_ } {}
 
 	void run()
 	{
@@ -108,9 +109,9 @@ private:
 
 
 	void run_timing();
-	void generate_animation(const complex& _center, int frame_init = 0, int num_frames = 100);
+	void generate_animation(const complex<double>& _center, int frame_init = 0, int num_frames = 100);
 	void generate_timing_info();
-	void animate(std::string _file_name, const complex& _center, const double& _scale);
+	void animate(std::string _file_name, const complex<double>& _center, const double& _scale);
 	static void writeMaps(std::string _info_file_name, 
 						  std::map<std::string, double>& _timings,
 		                  std::map<std::string, double>& _areas);

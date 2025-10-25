@@ -12,10 +12,10 @@ namespace Array_NS {
 			array{ _n_xs, _n_ys, _output }
 		{
 		}
-		array_cpp(const array_c_y_major& _in) = delete;
-		array_cpp& operator=(const array_c_y_major& _in) = delete;
-		array_cpp(array_c_y_major&& _in) = default;
-		array_cpp& operator=(array_c_y_major&& _in) = default;
+		array_cpp(const array_cpp& _in) = delete;
+		array_cpp& operator=(const array_cpp& _in) = delete;
+		array_cpp(array_cpp& _in) = default;
+		array_cpp& operator=(array_cpp&& _in) = default;
 		~array_cpp() {
 			deallocate();
 		}

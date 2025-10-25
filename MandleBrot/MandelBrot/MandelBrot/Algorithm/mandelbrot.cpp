@@ -1,6 +1,9 @@
 #include "mandelbrot.h"
-#include "complex.h"
-#include "array.h"
+#include "../Numerical/complex.h"
+#include "../Array/array.h"
+
+using namespace Mandelbrot_NS;
+using Numerical_NS::complex;
 
 
 mandelbrot::mandelbrot(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys) :
