@@ -22,7 +22,8 @@ mandelbrot_ymesh::mandelbrot_ymesh(/* allocation config */ const allocation_mode
 			last_ranges = std::make_unique<int[]>(omp_num_threads * sizeof(int));
 		}
 		size_per_thread = (this->n_ys + omp_num_threads - 1) / omp_num_threads;
-		int first = thread_id * this->n_ys + thread_id * size_per_thread;
+		//int first = thread_id * this->n_ys + thread_id * size_per_thread;
+		int first = thread_id * size_per_thread;
 		int last = first + size_per_thread;
 		if (last >= this->n_ys * omp_num_threads) last = this->n_ys * omp_num_threads;
 		first_ranges[thread_id] = first;
