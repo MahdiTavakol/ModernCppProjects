@@ -140,6 +140,7 @@ void run_mandelbrot_timing::generate_timing_info()
 	info = std::string("MODERN_Y_MAJOR");
 	run_diff_thread_configs();
 
+#if USE_MDSPAN
 	// mdspan
 	alloc_mode = allocation_mode::MDSPAN;
 	alloc_major = allocation_major::X_MAJOR;
@@ -148,6 +149,7 @@ void run_mandelbrot_timing::generate_timing_info()
 	alloc_major = allocation_major::Y_MAJOR;
 	info = std::string("MDSPAN_Y_MAJOR");
 	run_diff_thread_configs();
+#endif
 
 	writeMaps(timing_area_info_file, timings, areas);
 
