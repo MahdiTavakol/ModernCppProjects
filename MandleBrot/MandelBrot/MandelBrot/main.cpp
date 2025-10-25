@@ -21,7 +21,7 @@
 #include "Runner/run_mandelbrot_animation.h"
 
 
-int main(int argc, char** argv)
+int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 {
 	using Mandelbrot_NS::bounds;
 	using Runner_NS::run_mandelbrot_timing;
@@ -37,15 +37,15 @@ int main(int argc, char** argv)
 		run_mandelbrot_ptr->run();
 	}
 	catch (std::bad_alloc &ae) {
-		std::cout << "C++ allocation failed:" << ae.what() << std::endl;
-		exit(1);
+		std::cerr << "C++ allocation failed:" << ae.what() << std::endl;
+		return EXIT_FAILURE;
 	}
 	catch (std::exception& ae) {
-		std::cout << "Exception: " << ae.what() << std::endl;
-		exit(1);
+		std::cerr << "Exception: " << ae.what() << std::endl;
+		return EXIT_FAILURE;
 	}
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 
