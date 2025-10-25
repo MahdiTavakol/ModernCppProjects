@@ -80,6 +80,11 @@ Mandelbrot/
 > * A compiler with **OpenMP** support (`-fopenmp` GCC/Clang, `/openmp` MSVC).
 > * For `std::mdspan`, a **C++23**-capable standard library (or disable MDSPAN in your build if unavailable).
 
+### Intel OneApi (Linux/macOS)
+> source /opt/intel/oneapi/setvars.sh
+> cmake -S . -B build-intel -DCMAKE_CXX_COMPILER=icpx -DUSE_MDSPAN=ON -DUSE_FAST_MATH=ON
+> cmake --build build-intel -j
+
 ### GCC / Clang (Linux/macOS)
 
 ```bash
