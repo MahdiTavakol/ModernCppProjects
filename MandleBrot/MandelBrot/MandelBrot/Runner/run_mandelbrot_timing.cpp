@@ -15,7 +15,7 @@ void run_mandelbrot_timing::run()
 void run_mandelbrot_timing::run_timing()
 {
 	std::cout << "Allocating the " << info << " mandelbrot pointer" << std::endl;
-	std::string file_name("Mandelbrot_" + info + ".dat");
+	std::string file_name("temp/Mandelbrot_" + info + ".dat");
 	std::string title;
 
 	switch (mesh_type)
