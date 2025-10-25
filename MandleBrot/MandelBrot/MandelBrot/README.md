@@ -28,6 +28,7 @@ This project demonstrates the rendering of the Mandelbrot fractal set using vari
   * `array_cpp<allocation_major::X_MAJOR | Y_MAJOR>`
   * `array_modern<allocation_major::X_MAJOR | Y_MAJOR>` (uses `std::unique_ptr`/`std::vector`)
   * `array_mdspan<allocation_major::X_MAJOR | Y_MAJOR>` (uses `std::mdspan`)
+* Templated array_* and complex_* classes
 * Centralized `array_allocator` factory to safely manage polymorphic array ownership
 * OpenMP (outer-loop and inner-loop variants) to leverage CPU cores
 * File output via `std::ofstream`, with options for layout inspection
