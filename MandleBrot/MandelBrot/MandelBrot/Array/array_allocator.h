@@ -55,9 +55,11 @@ namespace Array_NS {
 				case allocation_mode::MODERN:
 					array_ptr = std::make_unique<array_modern<allocation_major::Y_MAJOR>>(n_xs, n_ys, output_name);
 					break;
+#if USE_MDSPAN
 				case allocation_mode::MDSPAN:
 					array_ptr = std::make_unique<array_mdspan<allocation_major::Y_MAJOR>>(n_xs, n_ys, output_name);
 					break;
+#endif
 				default:
 					throw std::runtime_error("Invalid allocation mode");
 				}
