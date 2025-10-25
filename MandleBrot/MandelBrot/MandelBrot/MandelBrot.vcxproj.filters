@@ -22,6 +22,9 @@
     <Filter Include="Source Files\ARRAY">
       <UniqueIdentifier>{64c05de7-5186-4f21-a00f-e136bd285f46}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Plotting">
+      <UniqueIdentifier>{04959456-e0ea-43f1-b083-3e734da5e199}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="definitions.h">
