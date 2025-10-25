@@ -8,11 +8,11 @@ namespace Mandelbrot_NS {
 	class mandelbrot_ymesh : public mandelbrot
 	{
 	public:
-		mandelbrot_ymesh(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys);
-		mandelbrot_ymesh(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys, const thread_config& _thread_config);
-		mandelbrot_ymesh(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys, const std::string& _file_name);
-		mandelbrot_ymesh(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys, const thread_config& _thread_config, const std::string& _file_name);
-		mandelbrot_ymesh(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys, const int& n_threads_x, const int& _n_threads_y, const std::string& _file_name);
+		mandelbrot_ymesh(
+			/* allocation config */ const allocation_mode& _alloc_mode, const allocation_major& _alloc_major,
+			/* space config */ const bounds& _bnds, const int& _n_xs, const int& _n_ys,
+			/* run config */ const thread_config& thread_cfg_ = thread_config(),
+			/* file name */ const std::string& _file_name = "Mandelbrot.dat");
 
 		mandelbrot_ymesh(const mandelbrot_ymesh& other) = delete;
 		mandelbrot_ymesh& operator=(const mandelbrot_ymesh& other) = delete;
@@ -23,7 +23,7 @@ namespace Mandelbrot_NS {
 		virtual void calculate(const double& scale) override = 0;
 
 	protected:
-
+		int n_threads_x, n_threads_y;
 		int omp_num_threads, thread_id, size_per_thread;
 		std::unique_ptr<int[]> first_ranges, last_ranges;
 

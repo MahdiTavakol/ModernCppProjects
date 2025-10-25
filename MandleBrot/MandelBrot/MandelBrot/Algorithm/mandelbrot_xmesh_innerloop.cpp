@@ -3,24 +3,14 @@
 using namespace Mandelbrot_NS;
 using Numerical_NS::complex;
 
-mandelbrot_xmesh_innerloop::mandelbrot_xmesh_innerloop(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys) :
-	mandelbrot_xmesh(_alloc_mode,_bnds,_n_xs,_n_ys)
-{}
-mandelbrot_xmesh_innerloop::mandelbrot_xmesh_innerloop(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys,
-	const thread_config& _thread_config) :
-	mandelbrot_xmesh(_alloc_mode, _bnds, _n_xs, _n_ys, _thread_config)
-{}
-mandelbrot_xmesh_innerloop::mandelbrot_xmesh_innerloop(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys,
-	const std::string& _file_name) :
-	mandelbrot_xmesh(_alloc_mode,_bnds,_n_xs,_n_ys,_file_name)
-{}
-mandelbrot_xmesh_innerloop::mandelbrot_xmesh_innerloop(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys,
-	const thread_config& _thread_config, const std::string& _file_name):
-	mandelbrot_xmesh(_alloc_mode,_bnds,_n_xs,_n_ys,_thread_config,_file_name)
-{}
-mandelbrot_xmesh_innerloop::mandelbrot_xmesh_innerloop(const allocation_mode& _alloc_mode, const bounds& _bnds, const int& _n_xs, const int& _n_ys,
-	const int& _n_threads_x, const int& _n_threads_y, const std::string& _file_name) :
-	mandelbrot_xmesh(_alloc_mode, _bnds, _n_xs, _n_ys, _n_threads_x, _n_threads_y, _file_name)
+
+
+mandelbrot_xmesh_innerloop::mandelbrot_xmesh_innerloop(
+	/* allocation config */ const allocation_mode& _alloc_mode, const allocation_major& _alloc_major,
+	/* space config */ const bounds& _bnds, const int& _n_xs, const int& _n_ys,
+	/* run config */ const thread_config& thread_cfg_,
+	/* file name */ const std::string& _file_name) :
+	mandelbrot_xmesh{ _alloc_mode,_alloc_major, _bnds, _n_xs, _n_ys, thread_cfg_, _file_name }
 {}
 
 

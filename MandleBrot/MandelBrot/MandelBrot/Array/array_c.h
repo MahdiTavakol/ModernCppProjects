@@ -53,6 +53,6 @@ namespace Array_NS {
 
 	private:
 		bool bounds_check_flag = false;
-		double** data;
+		double** data{ nullptr };
 	};
 }

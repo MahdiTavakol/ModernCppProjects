@@ -1,36 +1,43 @@
-#include "run_mandelbrot.h"
-#include "../Numerical/complex.h"
-#include <chrono>
+#include "run_mandelbrot_timing.h"
 
+using namespace Runner_NS;
 
+run_mandelbrot_timing::run_mandelbrot_timing(const bounds& bnds_, int x_size_, int y_size_) :
+	bnds{ bnds_ }, x_size{ x_size_ }, y_size{ y_size_ } {}
 
-template<Run_type run_type>
-void run_mandelbrot<run_type>::run_timing()
+void run_mandelbrot_timing::run()
 {
-	std::cout << "Allocating the " << info << " mandlebrot pointer" << std::endl;
+	complex center(-0.743643887037151, 0.131825904205330);
+	generate_timing_info();
+	return;
+}
+
+void run_mandelbrot_timing::run_timing()
+{
+	std::cout << "Allocating the " << info << " mandelbrot pointer" << std::endl;
 	std::string file_name("Mandelbrot_" + info + ".dat");
 	std::string title;
 
 	switch (mesh_type)
 	{
 	case Mesh_type::XMESH_INNER_LOOP:
-		mandelbrot_ptr = std::make_unique<mandelbrot_xmesh_innerloop>(alloc_mode, bnds, x_size, y_size, thread_cfg, file_name);
+		mandelbrot_ptr = std::make_unique<mandelbrot_xmesh_innerloop>(alloc_mode, alloc_major, bnds, x_size, y_size, thread_cfg, file_name);
 		title = "X-Mesh Inner Loop";
 		break;
 	case Mesh_type::XMESH_OUTER_LOOP:
 		title = "X-Mesh Outer Loop";
-		mandelbrot_ptr = std::make_unique<mandelbrot_xmesh_outerloop>(alloc_mode, bnds, x_size, y_size, thread_cfg, file_name);
+		mandelbrot_ptr = std::make_unique<mandelbrot_xmesh_outerloop>(alloc_mode, alloc_major, bnds, x_size, y_size, thread_cfg, file_name);
 		break;
 	case Mesh_type::YMESH_INNER_LOOP:
-		mandelbrot_ptr = std::make_unique<mandelbrot_ymesh_innerloop>(alloc_mode, bnds, x_size, y_size, thread_cfg, file_name);
+		mandelbrot_ptr = std::make_unique<mandelbrot_ymesh_innerloop>(alloc_mode, alloc_major, bnds, x_size, y_size, thread_cfg, file_name);
 		title = "Y-Mesh Inner Loop";
 		break;
 	case Mesh_type::YMESH_OUTER_LOOP:
-		mandelbrot_ptr = std::make_unique<mandelbrot_ymesh_outerloop>(alloc_mode, bnds, x_size, y_size, thread_cfg, file_name);
+		mandelbrot_ptr = std::make_unique<mandelbrot_ymesh_outerloop>(alloc_mode, alloc_major, bnds, x_size, y_size, thread_cfg, file_name);
 		title = "Y-Mesh Outer Loop";
 		break;
 	case Mesh_type::SERIAL:
-		mandelbrot_ptr = std::make_unique<mandelbrot>(alloc_mode, bnds, x_size, y_size, thread_cfg, file_name);
+		mandelbrot_ptr = std::make_unique<mandelbrot>(alloc_mode, alloc_major, bnds, x_size, y_size, file_name);
 		title = "Serial";
 		break;
 	default:
@@ -56,91 +63,9 @@ void run_mandelbrot<run_type>::run_timing()
 
 	timings[info + " - " + title] = timeRequired.count();
 	areas[info + " - " + title] = area;
-
 }
 
-template<Run_type run_type>
-void run_mandelbrot<run_type>::generate_animation(const complex<double>& _center, int frame_init, int num_frames)
-{
-	double S0 = 1.0;
-	double decay_rate = 1.05;
-	double S = S0;
-
-
-	for (int i = 0; i < num_frames; i++) {
-		S *= decay_rate;
-		if (i < frame_init) continue;
-		double zoom = S;
-		std::string file_name("frame-" + std::to_string(i));
-		animate(file_name, _center, zoom);
-	}
-}
-
-
-template<Run_type run_type>
-void run_mandelbrot<run_type>::animate(std::string _file_name, const complex<double>& _center, const double& _scale)
-{
-	bounds bnds;
-	bnds.x_min = _center.real - (2.665 / _scale);
-	bnds.x_max = _center.real + (2.665 / _scale);
-	bnds.y_min = _center.imag - (1.5 / _scale);
-	bnds.y_max = _center.imag + (1.5 / _scale);
-
-
-	int x_size = 1920;
-	int y_size = 1080;
-
-	allocation_mode alloc_mode = allocation_mode::MODERN_C_X_MAJOR;
-
-	double area;
-	int num_threads;
-#pragma omp parallel
-	{
-		num_threads = omp_get_num_threads();
-	}
-
-	thread_config  trd_cnfg_y_meshes;
-	trd_cnfg_y_meshes.threads_x = 1;
-	trd_cnfg_y_meshes.threads_y = num_threads;
-
-	std::unique_ptr<mandelbrot> mandelbrot_ptr;
-	mandelbrot_ptr = std::make_unique<mandelbrot_xmesh_outerloop>(alloc_mode, bnds, x_size, y_size, trd_cnfg_y_meshes, _file_name);
-
-
-	std::cout << "Running mandelbrot file " << _file_name << std::endl;
-	mandelbrot_ptr->calculate();
-	std::cout << "Finished running mandelbrot file " << _file_name << std::endl;
-	mandelbrot_ptr->output();
-}
-
-template<Run_type run_type>
-void run_mandelbrot<run_type>::writeMaps(std::string _info_file_name, std::map<std::string, double>& _timings, std::map<std::string, double>& _areas)
-{
-	std::cout << "Writing the timing info file " << std::endl;
-	std::ofstream info_file(_info_file_name);
-
-	if (!info_file.is_open())
-		std::cerr << "Failed to open the " << _info_file_name << " for writing the timing information" << std::endl;
-
-	info_file << "Run_type,area,timing(ms)" << std::endl;
-
-	if (_timings.size() != _areas.size())
-		std::cerr << "The size of the timing (" << _timings.size() << ") and area (" << _areas.size() << ") maps are different which is unexpected" << std::endl;
-
-	auto it1 = _timings.begin();
-	auto it2 = _areas.begin();
-	for (; it1 != _timings.end() && it2 != _areas.end(); it1++, it2++)
-		info_file << it1->first << "," << it2->second << "," << it1->second << std::endl;
-
-	std::cout << "Closing the timing info file " << std::endl;
-
-	info_file.close();
-	std::cout << "Finished writing the timging info file " << std::endl;
-}
-
-template<Run_type run_type>
-void run_mandelbrot<run_type>::generate_timing_info()
-
+void run_mandelbrot_timing::generate_timing_info()
 {
 	bounds bnds;
 	bnds.x_min = -3.56;
@@ -150,7 +75,6 @@ void run_mandelbrot<run_type>::generate_timing_info()
 	int x_size = 1920;
 	int y_size = 1080;
 
-	int allocation_mode;
 
 	int num_threads;
 #pragma omp parallel
@@ -230,4 +154,31 @@ void run_mandelbrot<run_type>::generate_timing_info()
 	std::cout << "All done!" << std::endl;
 
 	return;
+}
+
+
+void run_mandelbrot_timing::writeMaps(std::string _info_file_name,
+	                                  std::map<std::string, double>& _timings,
+	                                  std::map<std::string, double>& _areas)
+{
+	std::cout << "Writing the timing info file " << std::endl;
+	std::ofstream info_file(_info_file_name);
+
+	if (!info_file.is_open())
+		std::cerr << "Failed to open the " << _info_file_name << " for writing the timing information" << std::endl;
+
+	info_file << "Run_type,area,timing(ms)" << std::endl;
+
+	if (_timings.size() != _areas.size())
+		std::cerr << "The size of the timing (" << _timings.size() << ") and area (" << _areas.size() << ") maps are different which is unexpected" << std::endl;
+
+	auto it1 = _timings.begin();
+	auto it2 = _areas.begin();
+	for (; it1 != _timings.end() && it2 != _areas.end(); it1++, it2++)
+		info_file << it1->first << "," << it2->second << "," << it1->second << std::endl;
+
+	std::cout << "Closing the timing info file " << std::endl;
+
+	info_file.close();
+	std::cout << "Finished writing the timging info file " << std::endl;
 }
