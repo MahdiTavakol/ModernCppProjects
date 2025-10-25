@@ -66,6 +66,11 @@ namespace Array_NS {
 			}
 			else
 				throw std::runtime_error("Invalid allocation major");
+			// Allocating arrays
+			if (array_ptr)
+				array_ptr->initiate();
+			else
+				throw std::runtime_error("The array_ptr has not been allocated!\nYou should never have reached here!");
 		}
 		array_allocator(const array_allocator& _in) = delete;
 		array_allocator& operator=(const array_allocator& _in) = delete;

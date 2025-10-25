@@ -26,8 +26,7 @@ namespace Array_NS {
 	public:
 		array(const int& _n_xs, const int& _n_ys, const std::string& output_name_) :
 			n_xs{ _n_xs }, n_ys{ _n_ys },
-			output{ std::make_unique<std::ofstream>(output_name_) } {
-		};
+			output{ std::make_unique<std::ofstream>(output_name_) } {}
 		array(const array& _in) = delete;
 		array& operator=(const array& _in) = delete;
 		~array() {}
