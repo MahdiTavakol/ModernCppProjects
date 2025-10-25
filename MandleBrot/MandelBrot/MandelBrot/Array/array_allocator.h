@@ -5,7 +5,6 @@
 #include "array_c.h"
 #include "array_cpp.h"
 #include "array_modern.h"
-#include "array_mdspan.h"
 #include "../definitions.h"
 
 #if USE_MDSPAN
