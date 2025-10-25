@@ -26,17 +26,6 @@ namespace Runner_NS {
 		void run() override;
 
 	private:
-		std::string info;
-		allocation_mode alloc_mode;
-		allocation_major alloc_major;
-		Mesh_type mesh_type;
-		bounds bnds;
-		int x_size;
-		int y_size;
-		thread_config thread_cfg;
-		double area;
-		std::unique_ptr<mandelbrot> mandelbrot_ptr;
-
 		std::map<std::string, double> timings;
 		std::map<std::string, double> areas;
 

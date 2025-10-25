@@ -49,7 +49,7 @@ void run_mandelbrot_animation::run()
 }
 
 
-void run_mandelbrot_animation::generate_animation(const complex<double>& _center, int frame_init = 0, int num_frames = 100) {
+void run_mandelbrot_animation::generate_animation(const complex<double>& _center, int frame_init, int num_frames) {
 	double S0 = 1.0;
 	double decay_rate = 1.05;
 	double S = S0;
