@@ -3,7 +3,12 @@
 using namespace Runner_NS;
 
 run_mandelbrot_timing::run_mandelbrot_timing(const bounds& bnds_, int x_size_, int y_size_) :
-	run_mandelbrot{bnds_,x_size_,y_size_} {}
+	run_mandelbrot{bnds_,x_size_,y_size_} {
+#pragma omp parallel
+		{
+			num_threads = omp_get_num_threads();
+		}
+}
 
 void run_mandelbrot_timing::run()
 {
@@ -76,11 +81,6 @@ void run_mandelbrot_timing::generate_timing_info()
 	int y_size = 1080;
 
 
-	int num_threads;
-#pragma omp parallel
-	{
-		num_threads = omp_get_num_threads();
-	}
 
 	thread_config trd_cnfg_serial, trd_cnfg_x_meshes, trd_cnfg_y_meshes;
 

@@ -26,6 +26,7 @@ namespace Runner_NS {
 		void run() override;
 
 	private:
+		int num_threads;
 		std::map<std::string, double> timings;
 		std::map<std::string, double> areas;
 

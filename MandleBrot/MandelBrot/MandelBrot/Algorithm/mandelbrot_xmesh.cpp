@@ -11,6 +11,7 @@ mandelbrot_xmesh::mandelbrot_xmesh(/* allocation config */ const allocation_mode
 	n_threads_x{ thread_cfg_.threads_x}, n_threads_y{thread_cfg_.threads_y}
 	{
 		omp_set_num_threads(n_threads_x);
+		array_alloc_ptr = std::make_unique<array_allocator>(alloc_mode, alloc_major, n_threads_x*n_xs, n_ys, file_name);
 #pragma omp parallel
 		{
 			omp_num_threads = omp_get_num_threads();
@@ -22,10 +23,9 @@ mandelbrot_xmesh::mandelbrot_xmesh(/* allocation config */ const allocation_mode
 				last_ranges = std::make_unique<int[]>(omp_num_threads * sizeof(int));
 			}
 			size_per_thread = (this->n_xs + omp_num_threads - 1) / omp_num_threads;
-			int first = thread_id * size_per_thread;
-			//int first = thread_id * this->n_xs + thread_id * size_per_thread;
+			int first = thread_id * this->n_xs + thread_id * size_per_thread;
 			int last = first + size_per_thread;
-			if (last >= this->n_xs * omp_num_threads) last = this->n_xs * omp_num_threads;
+			if (last > this->n_xs * omp_num_threads) last = this->n_xs * omp_num_threads;
 			first_ranges[thread_id] = first;
 			last_ranges[thread_id] = last;
 		}
