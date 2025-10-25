@@ -8,6 +8,10 @@
 #include "array_mdspan.h"
 #include "../definitions.h"
 
+#if USE_MDSPAN
+	#include "array_mdspan.h"
+#endif
+
 
 namespace Array_NS {
 
@@ -32,9 +36,11 @@ namespace Array_NS {
 				case allocation_mode::MODERN:
 					array_ptr = std::make_unique<array_modern<allocation_major::X_MAJOR>>(n_xs, n_ys, output_name);
 					break;
+#if USE_MDSPAN
 				case allocation_mode::MDSPAN:
 					array_ptr = std::make_unique<array_mdspan<allocation_major::X_MAJOR>>(n_xs, n_ys, output_name);
 					break;
+#endif
 				default:
 					throw std::runtime_error("Invalid allocation mode");
 				}
