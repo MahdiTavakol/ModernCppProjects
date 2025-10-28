@@ -15,7 +15,7 @@ public:
 	void initialize() override;
 	MatrixXd forward(const MatrixXd& InputFile_, const bool trainMode = true) override;
 	MatrixXd backward(MatrixXd& nextDiff_) override;
-	void update(const std::unique_ptr<Optimizer>& /*OptFuncPtr_*/) override;
+	void update([[maybe_unused]] const std::unique_ptr<Optimizer>& ) override;
 private:
 	double dropRate;
 	double scaleRate;
