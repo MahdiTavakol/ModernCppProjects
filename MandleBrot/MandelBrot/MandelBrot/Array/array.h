@@ -29,7 +29,7 @@ namespace Array_NS {
 			output{ std::make_unique<std::ofstream>(output_name_) } {}
 		array(const array& _in) = delete;
 		array& operator=(const array& _in) = delete;
-		~array() {}
+		virtual ~array() {}
 		virtual void initiate() { allocate(); }
 		void write_data(const int& _xhi, const int& _yhi);
 		void write_data();

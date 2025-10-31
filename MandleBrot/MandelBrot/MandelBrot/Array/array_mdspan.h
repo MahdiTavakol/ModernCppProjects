@@ -7,7 +7,7 @@
 namespace Array_NS {
 
 	template<allocation_major alloc_major>
-	class array_mdspan : public array
+	class array_mdspan final : public array
 	{
 	public:
 		array_mdspan(const int& _n_xs, const int& _n_ys, const std::string& _output) :
@@ -17,7 +17,7 @@ namespace Array_NS {
 		array_mdspan& operator=(const array_mdspan& _in) = delete;
 		array_mdspan(array_mdspan&& _in) = default;
 		array_mdspan& operator=(array_mdspan&& _in) = default;
-		~array_mdspan() {}
+		~array_mdspan() override {}
 		void initiate() override {
 			allocate();
 		}

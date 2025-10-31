@@ -5,7 +5,7 @@
 namespace Array_NS {
 
 	template<allocation_major alloc_major>
-	class array_c : public array
+	class array_c final : public array
 	{
 	public:
 		array_c(const int& _n_xs, const int& _n_ys, const std::string& _output) :
@@ -15,7 +15,7 @@ namespace Array_NS {
 		array_c& operator=(const array_c& _in) = delete;
 		array_c(array_c&& _in) = default;
 		array_c& operator=(array_c&& _in) = default;
-		~array_c() {
+		~array_c() override {
 			deallocate();
 		}
 		double& operator()(int x, int y) override {

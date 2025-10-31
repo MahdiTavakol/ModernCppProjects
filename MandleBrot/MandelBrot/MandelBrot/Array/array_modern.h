@@ -5,7 +5,7 @@
 namespace Array_NS {
 
 	template<allocation_major alloc_major>
-	class array_modern : public array
+	class array_modern final : public array
 	{
 	public:
 		array_modern(const int& _n_xs, const int& _n_ys, const std::string& _output) :
@@ -15,7 +15,7 @@ namespace Array_NS {
 		array_modern& operator=(const array_modern& _in) = delete;
 		array_modern(array_modern&& _in) = default;
 		array_modern& operator=(array_modern&& _in) = default;
-		~array_modern() {}
+		~array_modern() override {}
 		double& operator()(int x, int y) override {
 			if (bounds_check_flag)
 				bounds_check(x, y); // Check bounds before accessing
