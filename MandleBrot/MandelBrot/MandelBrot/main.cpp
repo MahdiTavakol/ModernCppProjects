@@ -78,7 +78,7 @@ void animation(std::unique_ptr<run_mandelbrot>& run_madelbrot_ptr)
 		tcfg.threads_y = 1;
 	}
 	run_madelbrot_ptr = std::make_unique<run_mandelbrot_animation>(info, bnds, x_size, y_size,
-		Runner_NS::Mesh_type::XMESH_OUTER_LOOP,tcfg);
+		tcfg, Runner_NS::Mesh_type::XMESH_OUTER_LOOP);
 
 }
 
