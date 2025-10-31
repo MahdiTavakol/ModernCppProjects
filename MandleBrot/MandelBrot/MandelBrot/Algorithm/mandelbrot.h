@@ -29,7 +29,11 @@ namespace Mandelbrot_NS {
 		mandelbrot(/* allocation config */ const allocation_mode& _alloc_mode, const allocation_major& _alloc_major,
 			       /* space config */ const bounds& _bnds, const int& _n_xs, const int& _n_ys,
 			       /* file name */ const std::string& _file_name = "Mandelbrot.dat");
-		~mandelbrot() = default;
+		mandelbrot(const mandelbrot&) = delete;
+		mandelbrot& operator=(const mandelbrot&) = delete;
+		mandelbrot(mandelbrot&&) = default;
+		mandelbrot& operator(mandelbrot&&) = default;
+ 		~mandelbrot() = default;
 		void calculate() { calculate(2.0); }
 		virtual void calculate(const double& _scale);
 		void output();
