@@ -77,8 +77,8 @@ void run_mandelbrot_animation::animate(std::string _file_name, const complex<dou
 			}
 
 			thread_config  trd_cnfg_y_meshes;
-			trd_cnfg_y_meshes.threads_x = 1;
-			trd_cnfg_y_meshes.threads_y = num_threads;
+			trd_cnfg_y_meshes.threads_x = num_threads;
+			trd_cnfg_y_meshes.threads_y = 1;
 
 			std::unique_ptr<mandelbrot> mandelbrot_ptr;
 			mandelbrot_ptr = std::make_unique<mandelbrot_xmesh_outerloop>(alloc_mode, alloc_major, bnds, x_size, y_size, trd_cnfg_y_meshes, _file_name);
