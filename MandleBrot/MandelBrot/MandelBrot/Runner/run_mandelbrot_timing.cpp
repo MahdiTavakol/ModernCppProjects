@@ -77,8 +77,6 @@ void run_mandelbrot_timing::generate_timing_info()
 	bnds.x_max = 1.77;
 	bnds.y_min = -1.5;
 	bnds.y_max = 1.5;
-	int x_size = 1920;
-	int y_size = 1080;
 
 
 
