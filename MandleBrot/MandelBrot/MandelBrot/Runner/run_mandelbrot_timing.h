@@ -22,6 +22,7 @@ namespace Runner_NS {
 	{
 	public:
 		run_mandelbrot_timing(const bounds& bnds_, int x_size_, int y_size_);
+		~run_mandelbrot_timing() = default;
 
 		void run() override;
 

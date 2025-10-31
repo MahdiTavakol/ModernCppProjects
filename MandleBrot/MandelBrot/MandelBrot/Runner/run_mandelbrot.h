@@ -49,6 +49,8 @@ namespace Runner_NS {
 				x_size{ x_size_ }, y_size{ y_size_ },
 				thread_cfg{ thread_cfg_ } {}
 
+		virtual ~run_mandelbrot() = default;
+
 		virtual void run() = 0;
 
 	protected:

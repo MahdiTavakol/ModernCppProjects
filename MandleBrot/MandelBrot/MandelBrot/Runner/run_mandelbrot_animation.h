@@ -27,6 +27,8 @@ namespace Runner_NS {
 								 allocation_mode alloc_mode_ = allocation_mode::CPP,
 								 allocation_major alloc_major_ = allocation_major::X_MAJOR);
 
+		~run_mandelbrot_animation() = default;
+
 		void run() override;
 	
 	private:
