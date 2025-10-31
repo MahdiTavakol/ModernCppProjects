@@ -26,7 +26,7 @@ namespace Runner_NS {
 	
 	private:
 		Animate_type ani_type;
-		void generate_animation(const complex<double>& _center, int frame_init = 0, int num_frames = 100);
+		void generate_animation(const complex<double>& _center, int frame_init = 0, int num_frames = 10000);
 		void animate(std::string _file_name, const complex<double>& _center, const double& _scale);
 	};
 }
