@@ -32,7 +32,7 @@ namespace Mandelbrot_NS {
 		mandelbrot(const mandelbrot&) = delete;
 		mandelbrot& operator=(const mandelbrot&) = delete;
 		mandelbrot(mandelbrot&&) = default;
-		mandelbrot& operator(mandelbrot&&) = default;
+		mandelbrot& operator=(mandelbrot&&) = default;
  		~mandelbrot() = default;
 		void calculate() { calculate(2.0); }
 		virtual void calculate(const double& _scale);
