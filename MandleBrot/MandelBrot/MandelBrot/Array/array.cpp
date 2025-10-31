@@ -1,5 +1,6 @@
 #include "array.h"
 #include <sstream>
+#include <iomanip>
 
 using namespace Array_NS;
 
@@ -12,7 +13,7 @@ void array::write_data(const int& _xhi, const int& _yhi)
 	for (int j = 0; j < _yhi; j++)
 	{
 		for (int i = 0; i < _xhi - 1; i++)
-			*output << (*this)(i, j) << ",";
+			*output << std::fixed << std::setprecision(20) << (*this)(i, j) << ",";
 		*output << (*this)(_xhi - 1, j) << std::endl;
 	}
 }
