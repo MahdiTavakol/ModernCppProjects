@@ -1,11 +1,14 @@
 #include "run_mandelbrot_animation.h"
+#include <cstdio>
+#include <thread>
 
 
 using namespace Runner_NS;
 
-run_mandelbrot_animation::run_mandelbrot_animation(const Animate_type& ani_type_ ):
+run_mandelbrot_animation::run_mandelbrot_animation(const Animate_type& ani_type_, bool shouldIRender_):
 	        run_mandelbrot(),
-	        ani_type{ ani_type_ }
+	        ani_type{ ani_type_ },
+			shouldIRender{shouldIRender_}
             {}
 
 void run_mandelbrot_animation::run()
@@ -45,6 +48,33 @@ void run_mandelbrot_animation::generate_animation(const complex<double>& _center
 	double decay_rate = 1.05;
 	double S = S0;
 
+	constexpr int renderingNEvery = 50;
+	constexpr int maxThreads = 8;
+	int nThreads = std::min((num_frames + renderingNEvery - 1) / renderingNEvery,maxThreads);
+	std::vector<std::thread> thrds;
+	thrds.reserve(nThreads);
+	int first_frame = 0;
+	int last_frame;
+	std::array<int, 2> size = { x_size,y_size };
+	std::array<std::string, 2> tmpl = { "frame",".dat" };
+
+	auto async_render = [&]()
+		{
+			int availThreads = nThreads - thrds.size();
+			if (availThreads > 0) {
+				if (first_frame >= num_frames) return;
+				last_frame = first_frame + renderingNEvery - 1;
+				last_frame = last_frame < num_frames-1 ? last_frame : num_frames-1;
+				thrds.push_back(std::thread(svgrender,
+					first_frame, 1, last_frame, size, tmpl));
+				first_frame = last_frame + 1;
+			}
+			else {
+				for (auto& thrd : thrds)
+					thrd.join();
+				thrds.clear();
+			}
+		};
 
 	for (int i = 0; i < num_frames; i++) {
 		S *= decay_rate;
@@ -52,7 +82,23 @@ void run_mandelbrot_animation::generate_animation(const complex<double>& _center
 		double zoom = S;
 		std::string file_name("temp/frame-" + std::to_string(i) + ".dat");
 		animate(file_name, _center, zoom);
+
+		if (shouldIRender && renderingNEvery) {
+			if (i && i % renderingNEvery == 0) {
+				async_render();
+			}
+		}
 	}
+
+	if (shouldIRender && renderingNEvery) {
+		// it is possible that not all the frames have been rendered by now
+		while (first_frame < num_frames) {
+			async_render();
+		}
+	}
+	for (auto& thrd : thrds)
+		thrd.join();
+
 }
 
 void run_mandelbrot_animation::animate(std::string _file_name, const complex<double>& _center, const double& _scale)
@@ -88,4 +134,28 @@ void run_mandelbrot_animation::animate(std::string _file_name, const complex<dou
 			mandelbrot_ptr->calculate();
 			std::cout << "Finished running mandelbrot file " << _file_name << std::endl;
 			mandelbrot_ptr->output();
+}
+
+void run_mandelbrot_animation::svgrender(const int first_frame_, const int stride_, const int last_frame_,
+	const std::array<int, 2> size,
+	std::array<std::string, 2> templates)
+{
+	std::string command("Plotting/Mandelbrot_plot_frames.py temp/" + templates[0] + " ");
+	command += std::to_string(first_frame_) + " ";
+	command += std::to_string(stride_) + " ";
+	command += std::to_string(last_frame_) + " ";
+	command += std::to_string(size[0]) + " ";
+	command += std::to_string(size[1]);
+
+#ifdef _WIN32
+	std::unique_ptr<FILE, decltype(&_pclose)> pipe(_popen(command.c_str(),"r"), _pclose);
+#else
+	std::unique_ptr < FILE, decltype(&pclose) pipe(popen(command.c_str(), "r"), pclose);
+#endif
+	if (!pipe) std::cerr <<"Warning: Cannot run the plotting tool";
+
+	char buf[256];
+	while (fgets(buf, sizeof(buf), pipe.get())) {
+		/*discard everything*/
+	}
 }

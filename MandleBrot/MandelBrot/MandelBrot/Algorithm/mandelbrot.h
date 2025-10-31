@@ -28,7 +28,8 @@ namespace Mandelbrot_NS {
 	public:
 		mandelbrot(/* allocation config */ const allocation_mode& _alloc_mode, const allocation_major& _alloc_major,
 			       /* space config */ const bounds& _bnds, const int& _n_xs, const int& _n_ys,
-			       /* file name */ const std::string& _file_name = "Mandelbrot.dat");
+			       /* file name */ const std::string& _file_name = "Mandelbrot.dat",
+			       /* number of iterations*/ const int& num_iterations_=10000);
 		mandelbrot(const mandelbrot&) = delete;
 		mandelbrot& operator=(const mandelbrot&) = delete;
 		mandelbrot(mandelbrot&&) = default;
