@@ -14,7 +14,7 @@ mandelbrot::mandelbrot(const allocation_mode& _alloc_mode, const allocation_majo
 	file_name{ _file_name }
 {
 	array_alloc_ptr = std::make_unique<array_allocator>(alloc_mode, alloc_major, n_xs, n_ys, file_name);
-	this->num_iterations = 1200;
+	this->num_iterations = 10000;
 	this->area = 0.0;
 }
 
