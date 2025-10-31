@@ -23,9 +23,9 @@ namespace Runner_NS {
 			                     int x_size_, int y_size_,
 			                     const thread_config& thread_cfg_,
 			                     Mesh_type mesh_type_,
-			                     Animate_type ani_type_,
-			                     allocation_mode alloc_mode_ = allocation_mode::MDSPAN,
-			                     allocation_major alloc_major_ = allocation_major::X_MAJOR);
+			                     Animate_type ani_type_ = Animate_type::ANIMATE_1,
+								 allocation_mode alloc_mode_ = allocation_mode::CPP,
+								 allocation_major alloc_major_ = allocation_major::X_MAJOR);
 
 		void run() override;
 	
