@@ -3,17 +3,8 @@
 
 using namespace Runner_NS;
 
-run_mandelbrot_animation::run_mandelbrot_animation(std::string info_,
-	                                               const bounds& bnds_,
-	                                               int x_size_, int y_size_,
-	                                               const thread_config& thread_cfg_,
-	                                               Mesh_type mesh_type_,
-	                                               Animate_type ani_type_,
-	                                               allocation_mode alloc_mode_ ,
-	                                               allocation_major alloc_major_ ):
-	        run_mandelbrot(info_,bnds_,x_size_,y_size_,
-				           thread_cfg_, mesh_type_,
-				           alloc_mode_, alloc_major_),
+run_mandelbrot_animation::run_mandelbrot_animation(const Animate_type& ani_type_ ):
+	        run_mandelbrot(),
 	        ani_type{ ani_type_ }
             {}
 
@@ -79,7 +70,6 @@ void run_mandelbrot_animation::animate(std::string _file_name, const complex<dou
 			allocation_mode alloc_mode = allocation_mode::MODERN;
 			allocation_major alloc_major = allocation_major::X_MAJOR;
 
-			double area;
 			int num_threads;
 #pragma omp parallel
 			{

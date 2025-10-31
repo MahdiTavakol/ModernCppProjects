@@ -34,6 +34,8 @@ namespace Runner_NS {
 			int x_size_, int y_size_) :
 			bnds{ bnds_ }, x_size{ x_size_ }, y_size{ y_size_ } {}
 
+		run_mandelbrot();
+
 		run_mandelbrot(std::string info_,
 			const bounds& bnds_,
 			int x_size_, int y_size_,

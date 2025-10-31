@@ -18,14 +18,7 @@ namespace Runner_NS {
 	class run_mandelbrot_animation : public run_mandelbrot
 	{
 	public:
-		run_mandelbrot_animation(std::string info_,
-			                     const bounds& bnds_,
-			                     int x_size_, int y_size_,
-			                     const thread_config& thread_cfg_,
-			                     Mesh_type mesh_type_,
-			                     Animate_type ani_type_ = Animate_type::ANIMATE_1,
-								 allocation_mode alloc_mode_ = allocation_mode::CPP,
-								 allocation_major alloc_major_ = allocation_major::X_MAJOR);
+		run_mandelbrot_animation(const Animate_type& ani_type_);
 
 		~run_mandelbrot_animation() = default;
 
