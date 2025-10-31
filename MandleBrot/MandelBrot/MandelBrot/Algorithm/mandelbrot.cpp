@@ -9,8 +9,8 @@ mandelbrot::mandelbrot(const allocation_mode& _alloc_mode, const allocation_majo
 	                   const bounds& _bnds, const int& _n_xs, const int& _n_ys,
 	                   const std::string& _file_name):
 	alloc_mode{ _alloc_mode }, alloc_major{_alloc_major},
-	x_min {_bnds.x_min}, x_max{ _bnds.x_max }, y_min{ _bnds.y_min }, y_max{ _bnds.y_max },
 	n_xs{ _n_xs }, n_ys{ _n_ys },
+	x_min {_bnds.x_min}, x_max{ _bnds.x_max }, y_min{ _bnds.y_min }, y_max{ _bnds.y_max },
 	file_name{ _file_name }
 {
 	array_alloc_ptr = std::make_unique<array_allocator>(alloc_mode, alloc_major, n_xs, n_ys, file_name);
