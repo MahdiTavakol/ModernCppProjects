@@ -63,7 +63,7 @@ void timing(std::unique_ptr<run_mandelbrot>& run_mandelbrot_ptr)
 
 void animation(std::unique_ptr<run_mandelbrot>& run_madelbrot_ptr)
 {
-	run_madelbrot_ptr = std::make_unique<run_mandelbrot_animation>(Animate_type::ANIMATE_1,true);
+	run_madelbrot_ptr = std::make_unique<run_mandelbrot_animation>(Animate_type::BURNING_1,true);
 }
 
 

@@ -15,6 +15,7 @@ run_mandelbrot_animation::run_mandelbrot_animation(const Animate_type& ani_type_
 void run_mandelbrot_animation::run()
 {
 	complex center(-0.743643887037151, 0.131825904205330);
+	double decay_rate = 1.05;
 
 	switch (ani_type)
 	{
@@ -37,16 +38,26 @@ void run_mandelbrot_animation::run()
 	case Animate_type::ANIMATE_5:
 		center = complex(-0.39054, 0.58679);
 		break;
+
+	case Animate_type::BURNING_1:
+		center = complex(-1.8, -0.03);
+		decay_rate = 0.95;
+		break;
+
+	case Animate_type::BURNING_2:
+		center = complex(-1.08, -0.03);
+		break;
+
 	default:
 		throw std::invalid_argument("Wrong anitype");
 	}
-	generate_animation(center);
+	generate_animation(center,0,1000,decay_rate);
 }
 
 
-void run_mandelbrot_animation::generate_animation(const complex<double>& _center, int frame_init, int num_frames) {
+void run_mandelbrot_animation::generate_animation(const complex<double>& _center, int frame_init,
+	int num_frames, double decay_rate) {
 	double S0 = 1.0;
-	double decay_rate = 1.05;
 	double S = S0;
 
 	constexpr int renderingNEvery = 50;
@@ -128,7 +139,12 @@ void run_mandelbrot_animation::animate(std::string _file_name, const complex<dou
 			trd_cnfg_y_meshes.threads_y = 1;
 
 			std::unique_ptr<mandelbrot> mandelbrot_ptr;
-			mandelbrot_ptr = std::make_unique<mandelbrot_xmesh_outerloop>(alloc_mode, alloc_major, bnds, x_size, y_size, trd_cnfg_y_meshes, _file_name);
+			if (ani_type != Animate_type::BURNING_1 && ani_type != Animate_type::BURNING_2)
+				mandelbrot_ptr = std::make_unique<mandelbrot_xmesh_outerloop>
+				(alloc_mode, alloc_major, bnds, x_size, y_size, trd_cnfg_y_meshes, _file_name);
+			else if (ani_type == Animate_type::BURNING_1 || ani_type == Animate_type::BURNING_2)
+				mandelbrot_ptr = std::make_unique<burningship_xmesh_outerloop>
+				(alloc_mode, alloc_major, bnds, x_size, y_size, trd_cnfg_y_meshes, _file_name);
 
 
 			std::cout << "Running mandelbrot file " << _file_name << std::endl;

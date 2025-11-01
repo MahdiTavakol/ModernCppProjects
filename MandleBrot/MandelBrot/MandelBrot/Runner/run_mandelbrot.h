@@ -19,6 +19,7 @@
 #include "../Algorithm/mandelbrot_xmesh_outerloop.h"
 #include "../Algorithm/mandelbrot_ymesh_innerloop.h"
 #include "../Algorithm/mandelbrot_ymesh_outerloop.h"
+#include "../Algorithm/burningship_xmesh_outerloop.h"
 #include "../definitions.h"
 
 using Numerical_NS::complex;
