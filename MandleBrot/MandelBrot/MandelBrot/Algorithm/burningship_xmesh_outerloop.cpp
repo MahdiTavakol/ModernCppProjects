@@ -39,14 +39,11 @@ void burningship_xmesh_outerloop::calculate(const double& _scale)
 				complex delta((double)(_i * (this->x_max - this->x_min) / (this->n_xs - 1)), (double)(_j * (this->y_max - this->y_min) / (this->n_ys - 1)));
 				complex c = min + delta;
 				complex z(0.0);
-				// the zprime = abs(realz) + abs(imagz)
-				complex zprime(0.0);
 
 				int k = 0;
 				for (k = 0; k < this->num_iterations; k++)
 				{
-					zprime = complex(std::abs(z.real), std::abs(z.imag));
-					z = zprime * zprime + c;
+					z = z.abs() * z.abs() + c;
 					if (z.abs_complex() > 4.0) break;
 				}
 				if (k == this->num_iterations)

@@ -44,6 +44,10 @@ namespace Numerical_NS {
             return sqrt(this->real * this->real + this->imag * this->imag);
         }
 
+        complex abs() const {
+            return complex<T>(std::abs(this->real), std::abs(this->imag));
+        }
+
         T real, imag;  // Real and imaginary parts
     };
 }
