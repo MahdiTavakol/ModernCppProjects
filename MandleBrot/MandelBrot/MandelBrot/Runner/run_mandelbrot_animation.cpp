@@ -21,6 +21,7 @@ void run_mandelbrot_animation::run()
 {
 	complex center(-0.743643887037151, 0.131825904205330);
 	double decay_rate = 1.05;
+	double scale0 = 1.0;
 
 	switch (ani_type)
 	{
@@ -45,8 +46,9 @@ void run_mandelbrot_animation::run()
 		break;
 
 	case Animate_type::BURNING_1:
-		center = complex(-0.8, -0.03);
-		decay_rate = 0.995;
+		center = complex(-1.516, -0.03);
+		decay_rate = 0.95;
+		scale0 = 10.0;
 		break;
 
 	case Animate_type::BURNING_2:
@@ -56,13 +58,13 @@ void run_mandelbrot_animation::run()
 	default:
 		throw std::invalid_argument("Wrong anitype");
 	}
-	generate_animation(center,0,1000,decay_rate);
+	generate_animation(center,0,1000,decay_rate,scale0);
 }
 
 
 void run_mandelbrot_animation::generate_animation(const complex<double>& _center, int frame_init,
-	int num_frames, double decay_rate) {
-	double S0 = 1.0;
+	int num_frames, double decay_rate, double scale0) {
+	double S0 = scale0;
 	double S = S0;
 
 	int nThreads = std::min((num_frames + renderingNEvery - 1) / renderingNEvery,maxThreads);
