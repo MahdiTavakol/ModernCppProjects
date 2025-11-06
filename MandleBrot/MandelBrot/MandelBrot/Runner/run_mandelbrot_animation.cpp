@@ -116,6 +116,7 @@ void run_mandelbrot_animation::generate_animation(const complex<double>& _center
 
 void run_mandelbrot_animation::animate(std::string _file_name, const complex<double>& _center, const double& _scale)
 {
+	        using namespace Mandelbrot_NS;
 			bounds bnds;
 			bnds.x_min = _center.real - (2.665 / _scale);
 			bnds.x_max = _center.real + (2.665 / _scale);
