@@ -13,7 +13,7 @@ using Array_NS::allocation_mode;
 using Array_NS::array_allocator;
 using Array_NS::allocation_major;
 
-constexpr double escape = 1.0;
+constexpr double escape = 2.0;
 
 namespace Mandelbrot_NS {
 
