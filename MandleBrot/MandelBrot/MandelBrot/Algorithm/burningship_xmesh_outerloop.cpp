@@ -54,8 +54,10 @@ void burningship_xmesh_outerloop::calculate(const double& _scale)
 					val = 0.0;
 					ara++;
 				}
-				else
-					val = static_cast<double>(k) / static_cast<double>(this->num_iterations);
+				else {
+					double mu = k + 1.0 - std::log2(z.abs_complex() / escape);
+					val = mu / static_cast<double>(this->num_iterations);
+				}
 				(*(array_alloc_ptr))(i, j) = val;
 			}
 		}
