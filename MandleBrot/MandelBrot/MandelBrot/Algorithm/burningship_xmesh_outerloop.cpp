@@ -43,6 +43,7 @@ void burningship_xmesh_outerloop::calculate(const double& _scale)
 				complex z(0.0);
 
 				int k = 0;
+				double val;
 				for (k = 0; k < this->num_iterations; k++)
 				{
 					z = z.abs() * z.abs() + c;
@@ -50,9 +51,12 @@ void burningship_xmesh_outerloop::calculate(const double& _scale)
 				}
 				if (k == this->num_iterations)
 				{
+					val = 0.0;
 					ara++;
 				}
-				(*(array_alloc_ptr))(i, j) = static_cast<double>(k) / static_cast<double>(this->num_iterations);
+				else
+					val = static_cast<double>(k) / static_cast<double>(this->num_iterations);
+				(*(array_alloc_ptr))(i, j) = val;
 			}
 		}
 	}
