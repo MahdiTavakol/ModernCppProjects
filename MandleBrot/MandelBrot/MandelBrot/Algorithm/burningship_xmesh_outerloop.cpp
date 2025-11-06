@@ -16,6 +16,7 @@ burningship_xmesh_outerloop::burningship_xmesh_outerloop(
 {
 }
 
+
 void burningship_xmesh_outerloop::calculate(const double& _scale)
 
 {

@@ -22,8 +22,8 @@ mandelbrot_xmesh::mandelbrot_xmesh(/* allocation config */ const allocation_mode
 #pragma omp single
 			{
 				std::cout << "Initiating " << omp_num_threads << " omp threads " << std::endl;
-				first_ranges = std::make_unique<int []>(omp_num_threads * sizeof(int));
-				last_ranges = std::make_unique<int[]>(omp_num_threads * sizeof(int));
+				first_ranges = std::make_unique<int []>(omp_num_threads );
+				last_ranges = std::make_unique<int[]>(omp_num_threads );
 			}
 			size_per_thread = (this->n_xs + omp_num_threads - 1) / omp_num_threads;
 			int first = thread_id * this->n_xs + thread_id * size_per_thread;
