@@ -45,7 +45,7 @@ void run_mandelbrot_animation::run()
 		break;
 
 	case Animate_type::BURNING_2:
-		center = complex(-1.08, -0.03);
+		center = complex(-1.8, -0.03);
 		break;
 
 	default:
@@ -92,6 +92,7 @@ void run_mandelbrot_animation::generate_animation(const complex<double>& _center
 		S *= decay_rate;
 		if (i < frame_init) continue;
 		double zoom = S;
+		std::cout << zoom << std::endl;
 		std::string file_name("temp/frame-" + std::to_string(i) + ".dat");
 		animate(file_name, _center, zoom);
 
