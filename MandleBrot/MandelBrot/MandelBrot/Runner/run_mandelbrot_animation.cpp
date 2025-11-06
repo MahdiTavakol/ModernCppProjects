@@ -140,12 +140,16 @@ void run_mandelbrot_animation::animate(std::string _file_name, const complex<dou
 			trd_cnfg_y_meshes.threads_y = 1;
 
 			std::unique_ptr<mandelbrot> mandelbrot_ptr;
+			int num_iterations = 10000;
+			double gamma = 0.8;
 			if (ani_type != Animate_type::BURNING_1 && ani_type != Animate_type::BURNING_2)
 				mandelbrot_ptr = std::make_unique<mandelbrot_xmesh_outerloop>
-				(alloc_mode, alloc_major, bnds, x_size, y_size, trd_cnfg_y_meshes, _file_name,10000,0.8);
+				(alloc_mode, alloc_major, bnds, x_size, y_size, trd_cnfg_y_meshes, _file_name,
+					num_iterations,gamma);
 			else if (ani_type == Animate_type::BURNING_1 || ani_type == Animate_type::BURNING_2)
 				mandelbrot_ptr = std::make_unique<burningship_xmesh_outerloop>
-				(alloc_mode, alloc_major, bnds, x_size, y_size, trd_cnfg_y_meshes, _file_name,10000,0.8);
+				(alloc_mode, alloc_major, bnds, x_size, y_size, trd_cnfg_y_meshes, _file_name,
+					num_iterations,gamma);
 
 
 			std::cout << "Running mandelbrot file " << _file_name << std::endl;
