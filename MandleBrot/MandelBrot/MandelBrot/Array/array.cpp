@@ -1,6 +1,7 @@
 #include "array.h"
 #include <sstream>
 #include <iomanip>
+#include <cmath>
 
 using namespace Array_NS;
 
