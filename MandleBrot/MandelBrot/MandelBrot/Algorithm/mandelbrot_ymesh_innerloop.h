@@ -12,7 +12,8 @@ namespace Mandelbrot_NS {
 			/* space config */ const bounds& _bnds, const int& _n_xs, const int& _n_ys,
 			/* run config */ const thread_config& thread_cfg_ = thread_config(),
 			/* file name */ const std::string& _file_name = "Mandelbrot.dat",
-			/* number of iterations*/ const int& num_iterations_ = 10000);
+			/* number of iterations*/ const int& num_iterations_ = 10000,
+			/* gamma */ const double& gamma_=1.0);
 
 		void calculate(const double& _scale);
 

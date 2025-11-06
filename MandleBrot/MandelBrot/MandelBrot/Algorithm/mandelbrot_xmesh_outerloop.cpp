@@ -9,8 +9,10 @@ mandelbrot_xmesh_outerloop::mandelbrot_xmesh_outerloop(
 /* space config */ const bounds& _bnds, const int& _n_xs, const int& _n_ys,
 /* run config */ const thread_config& thread_cfg_,
 /* file name */ const std::string& _file_name,
-/* number of iterations*/ const int& num_iterations_) :
-mandelbrot_xmesh{ _alloc_mode,_alloc_major, _bnds, _n_xs, _n_ys, thread_cfg_, _file_name, num_iterations_}
+/* number of iterations*/ const int& num_iterations_,
+/* gamma */ const double& gamma_) :
+mandelbrot_xmesh{ _alloc_mode,_alloc_major, _bnds, _n_xs, _n_ys,
+thread_cfg_, _file_name, num_iterations_,gamma_}
 {}
 
 

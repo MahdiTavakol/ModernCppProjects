@@ -31,8 +31,8 @@ namespace Array_NS {
 		array& operator=(const array& _in) = delete;
 		virtual ~array() {}
 		virtual void initiate() { allocate(); }
-		void write_data(const int& _xhi, const int& _yhi);
-		void write_data();
+		void write_data(const int& _xhi, const int& _yhi, const double& gamma_ = 1.0);
+		void write_data(const double& gamma_ = 1.0);
 		virtual double& operator()(int x, int y) = 0;
 		//double operator()(int& x, int& y) const;
 

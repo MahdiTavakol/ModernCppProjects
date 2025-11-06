@@ -6,10 +6,12 @@
 
 using namespace Runner_NS;
 
-run_mandelbrot_animation::run_mandelbrot_animation(const Animate_type& ani_type_, bool shouldIRender_):
+run_mandelbrot_animation::run_mandelbrot_animation(const Animate_type& ani_type_,
+	bool shouldIRender_, const double& gamma_ ):
 	        run_mandelbrot(),
 	        ani_type{ ani_type_ },
-			shouldIRender{shouldIRender_}
+			shouldIRender{shouldIRender_},
+			gamma{gamma_}
             {}
 
 void run_mandelbrot_animation::run()
@@ -140,10 +142,10 @@ void run_mandelbrot_animation::animate(std::string _file_name, const complex<dou
 			std::unique_ptr<mandelbrot> mandelbrot_ptr;
 			if (ani_type != Animate_type::BURNING_1 && ani_type != Animate_type::BURNING_2)
 				mandelbrot_ptr = std::make_unique<mandelbrot_xmesh_outerloop>
-				(alloc_mode, alloc_major, bnds, x_size, y_size, trd_cnfg_y_meshes, _file_name);
+				(alloc_mode, alloc_major, bnds, x_size, y_size, trd_cnfg_y_meshes, _file_name,0.8);
 			else if (ani_type == Animate_type::BURNING_1 || ani_type == Animate_type::BURNING_2)
 				mandelbrot_ptr = std::make_unique<burningship_xmesh_outerloop>
-				(alloc_mode, alloc_major, bnds, x_size, y_size, trd_cnfg_y_meshes, _file_name);
+				(alloc_mode, alloc_major, bnds, x_size, y_size, trd_cnfg_y_meshes, _file_name,0.8);
 
 
 			std::cout << "Running mandelbrot file " << _file_name << std::endl;

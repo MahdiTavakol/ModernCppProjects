@@ -18,8 +18,10 @@ namespace Array_NS {
 	{
 	public:
 		array_allocator(allocation_mode mode_, const allocation_major& major_,
-			const int& n_xs_, const int& n_ys_, const std::string& output_name_)
+			const int& n_xs_, const int& n_ys_, const std::string& output_name_,
+			const double& gamma_=1.0)
 			: major{ major_ }, mode{ mode_ },
+			gamma{gamma_},
 			n_xs{ n_xs_}, n_ys{ n_ys_},
 			output_name{ output_name_ }
 		{
@@ -85,12 +87,13 @@ namespace Array_NS {
 
 		void write_data(const int& xhi, const int& yhi)
 		{
-			array_ptr->write_data(xhi, yhi);
+			array_ptr->write_data(xhi, yhi,gamma);
 		}
 
 	private:
 		allocation_major major;
 		allocation_mode mode;
+		double gamma;
 		int n_xs, n_ys;
 		std::string output_name;
 		std::unique_ptr<array> array_ptr;

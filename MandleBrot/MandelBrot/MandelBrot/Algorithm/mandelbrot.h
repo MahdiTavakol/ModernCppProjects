@@ -29,7 +29,8 @@ namespace Mandelbrot_NS {
 		mandelbrot(/* allocation config */ const allocation_mode& _alloc_mode, const allocation_major& _alloc_major,
 			       /* space config */ const bounds& _bnds, const int& _n_xs, const int& _n_ys,
 			       /* file name */ const std::string& _file_name = "Mandelbrot.dat",
-			       /* number of iterations*/ const int& num_iterations_=10000);
+			       /* number of iterations*/ const int& num_iterations_=10000,
+		           /* gamma */ const double& gamma = 1.0);
 		mandelbrot(const mandelbrot&) = delete;
 		mandelbrot& operator=(const mandelbrot&) = delete;
 		mandelbrot(mandelbrot&&) = default;
@@ -44,6 +45,7 @@ namespace Mandelbrot_NS {
 	protected:
 		allocation_mode alloc_mode;
 		allocation_major alloc_major;
+		double gamma;
 		int n_xs, n_ys;
 		double x_min, x_max, y_min, y_max;
 		double area;
