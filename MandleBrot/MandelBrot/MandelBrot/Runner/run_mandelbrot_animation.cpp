@@ -41,7 +41,7 @@ void run_mandelbrot_animation::run()
 
 	case Animate_type::BURNING_1:
 		center = complex(-1.75, -0.03);
-		decay_rate = 0.99;
+		decay_rate = 0.90;
 		break;
 
 	case Animate_type::BURNING_2:
@@ -67,7 +67,6 @@ void run_mandelbrot_animation::generate_animation(const complex<double>& _center
 	thrds.reserve(nThreads);
 	int first_frame = 0;
 	int last_frame;
-	std::array<int, 2> size = { x_size,y_size };
 	std::array<std::string, 2> tmpl = { "frame",".dat" };
 
 	auto async_render = [&]()
@@ -122,8 +121,8 @@ void run_mandelbrot_animation::animate(std::string _file_name, const complex<dou
 			bnds.y_max = _center.imag + (1.5 / _scale);
 
 
-			int x_size = 1920;
-			int y_size = 1080;
+			int x_size = size[0];
+			int y_size = size[1];
 
 			allocation_mode alloc_mode = allocation_mode::MODERN;
 			allocation_major alloc_major = allocation_major::X_MAJOR;

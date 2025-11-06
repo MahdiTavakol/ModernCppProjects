@@ -34,5 +34,7 @@ namespace Runner_NS {
 		static void svgrender(const int first_frame_, const int stride_, const int last_frame_,
 			const std::array<int, 2> size,
 			std::array<std::string, 2> templates);
+
+		std::array<int, 2> size{ 1920,1080 };
 	};
 }
