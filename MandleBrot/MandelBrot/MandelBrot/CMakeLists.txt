@@ -95,6 +95,7 @@ set(ALGO_SOURCES
   Algorithm/mandelbrot_ymesh.cpp
   Algorithm/mandelbrot_ymesh_innerloop.cpp
   Algorithm/mandelbrot_ymesh_outerloop.cpp
+  Algorithm/burningship_xmesh_outerloop.cpp
 )
 
 set(ARRAY_SOURCES
