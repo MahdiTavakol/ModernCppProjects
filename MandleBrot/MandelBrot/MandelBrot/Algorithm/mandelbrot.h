@@ -13,6 +13,8 @@ using Array_NS::allocation_mode;
 using Array_NS::array_allocator;
 using Array_NS::allocation_major;
 
+constexpr int escape = 2.0;
+
 namespace Mandelbrot_NS {
 
 	struct bounds {

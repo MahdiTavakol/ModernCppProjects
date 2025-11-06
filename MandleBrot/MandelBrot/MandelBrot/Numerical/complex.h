@@ -41,7 +41,7 @@ namespace Numerical_NS {
 
 
         double abs_complex() const {
-            return sqrt(this->real * this->real + this->imag * this->imag);
+            return std::sqrt(this->real * this->real + this->imag * this->imag);
         }
 
         complex abs() const {

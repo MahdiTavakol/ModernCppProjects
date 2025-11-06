@@ -46,7 +46,7 @@ void burningship_xmesh_outerloop::calculate(const double& _scale)
 				for (k = 0; k < this->num_iterations; k++)
 				{
 					z = z.abs() * z.abs() + c;
-					if (z.abs_complex() > 4.0) break;
+					if (z.abs_complex() > escape) break;
 				}
 				if (k == this->num_iterations)
 				{

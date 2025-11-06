@@ -43,7 +43,7 @@ void mandelbrot_ymesh_outerloop::calculate(const double& _scale)
 				for (k = 0; k < this->num_iterations; k++)
 				{
 					z = z * z + c;
-					if (z.abs_complex() > 4.0) break;
+					if (z.abs_complex() > escape) break;
 				}
 				if (k == this->num_iterations)
 				{
