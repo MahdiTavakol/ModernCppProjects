@@ -6,6 +6,9 @@
 
 using namespace Runner_NS;
 
+constexpr int renderingNEvery = 50;
+constexpr int maxThreads = 8;
+
 run_mandelbrot_animation::run_mandelbrot_animation(const Animate_type& ani_type_,
 	bool shouldIRender_, const double& gamma_ ):
 	        run_mandelbrot(),
@@ -62,8 +65,6 @@ void run_mandelbrot_animation::generate_animation(const complex<double>& _center
 	double S0 = 1.0;
 	double S = S0;
 
-	constexpr int renderingNEvery = 50;
-	constexpr int maxThreads = 8;
 	int nThreads = std::min((num_frames + renderingNEvery - 1) / renderingNEvery,maxThreads);
 	std::vector<std::thread> thrds;
 	thrds.reserve(nThreads);
