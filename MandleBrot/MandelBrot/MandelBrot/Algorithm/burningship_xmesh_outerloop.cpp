@@ -19,6 +19,7 @@ void burningship_xmesh_outerloop::calculate(const double& _scale)
 
 {
 	double ara = 0.0;
+	std::cout << "here " << this->x_min << " , " << this->x_max << std::endl;
 #pragma omp parallel reduction(+:ara) // default(none) shared(n_xs,x_min,x_max,y_min,y_max,y_size,num_iterations,X,first_range,last_range,size_per_thread)
 	{
 		int thread_id = omp_get_thread_num();
