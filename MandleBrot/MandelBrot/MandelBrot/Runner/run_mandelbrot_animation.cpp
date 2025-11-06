@@ -40,8 +40,8 @@ void run_mandelbrot_animation::run()
 		break;
 
 	case Animate_type::BURNING_1:
-		center = complex(-1.75, -0.03);
-		decay_rate = 0.99;
+		center = complex(-0.8, -0.03);
+		decay_rate = 0.99999;
 		break;
 
 	case Animate_type::BURNING_2:
