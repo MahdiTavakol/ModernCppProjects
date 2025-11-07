@@ -145,7 +145,7 @@ void run_mandelbrot_animation::animate(std::string _file_name, const complex<dou
 
 			std::unique_ptr<mandelbrot> mandelbrot_ptr;
 			int num_iterations = 10000;
-			double gamma = 0.8;
+			double gamma = 1.2;
 			if (ani_type != Animate_type::BURNING_1 && ani_type != Animate_type::BURNING_2)
 				mandelbrot_ptr = std::make_unique<mandelbrot_xmesh_outerloop>
 				(alloc_mode, alloc_major, bnds, x_size, y_size, trd_cnfg_y_meshes, _file_name,
@@ -176,7 +176,7 @@ void run_mandelbrot_animation::svgrender(const int first_frame_, const int strid
 #ifdef _WIN32
 	std::unique_ptr<FILE, decltype(&_pclose)> pipe(_popen(command.c_str(),"r"), _pclose);
 #else
-	std::unique_ptr< FILE, decltype(&pclose)> pipe(popen(command.c_str(), "r"), pclose);
+	std::unique_ptr<FILE, decltype(&pclose)>  pipe(popen(command.c_str(), "r"), pclose);
 #endif
 	if (!pipe) std::cerr <<"Warning: Cannot run the plotting tool";
 

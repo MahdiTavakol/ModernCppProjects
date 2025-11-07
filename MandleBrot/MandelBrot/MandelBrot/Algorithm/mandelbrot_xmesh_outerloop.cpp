@@ -43,6 +43,7 @@ void mandelbrot_xmesh_outerloop::calculate(const double& _scale)
 
 
 				int k = 0;
+				double val;
 				for (k = 0; k < this->num_iterations; k++)
 				{
 					z = z * z + c;
@@ -50,9 +51,16 @@ void mandelbrot_xmesh_outerloop::calculate(const double& _scale)
 				}
 				if (k == this->num_iterations)
 				{
+					val = 0.0;
 					ara++;
 				}
-				(*(array_alloc_ptr))(i, j) = static_cast<double>(k) / static_cast<double>(this->num_iterations);
+				else {
+					double mu = k + 1.0 - std::log2(z.abs_complex() / escape);
+					val = mu / static_cast<double>(this->num_iterations);
+				}
+				double mu = k + 1.0 - std::log2(z.abs_complex() / escape);
+				val = mu / static_cast<double>(this->num_iterations);
+				(*(array_alloc_ptr))(i, j) = val;
 			}
 		}
 	}
