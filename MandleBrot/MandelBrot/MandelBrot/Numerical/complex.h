@@ -23,9 +23,21 @@ namespace Numerical_NS {
             if (!(iss >> real >> i_sign >> imag >> i_char) || (i_sign != '+' && i_sign != '-') || (i_char != 'i' && i_char != 'j'))
                 throw std::invalid_argument("Invalid complex number format");
         }
+        complex(const complex& arg) {
+            real = arg.real;
+            imag = arg.imag; 
+        }
+        complex& operator=(complex& arg) {
+            real = arg.real;
+            imag = arg.imag;
+            return *this;
+        } 
 
         complex operator+(const complex& arg) const {
             return complex(this->real + arg.real, this->imag + arg.imag);
+        }
+        complex operator-(const complex& arg) const {
+            return complex(this->real - arg.real, this->imag - arg.imag);
         }
         complex operator*(const complex& arg) const {
             return complex(this->real * arg.real - this->imag * arg.imag,

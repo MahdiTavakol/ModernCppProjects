@@ -91,6 +91,15 @@ void run_mandelbrot_animation::generate_animation(const complex<double>& _center
 				thrds.clear();
 			}
 		};
+		
+	std::string command("mkdir temp");
+#ifdef WIN_32
+	std::unique_ptr<FILE,decltype(&_pclose)> pipe(popen(command.c_str(),"r"),_pclose);
+#else
+	std::unique_ptr<FILE,decltype(&pclose)> pipe(popen(command.c_str(),"r"),pclose);
+#endif
+	char buf[256];
+	while(fgets(buf,sizeof(buf),pipe.get())) {}
 
 	for (int i = 0; i < num_frames; i++) {
 		S *= decay_rate;
