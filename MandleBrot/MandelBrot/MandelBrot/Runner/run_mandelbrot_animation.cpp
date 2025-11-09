@@ -40,10 +40,22 @@ void run_mandelbrot_animation::run()
 	case Animate_type::ANIMATE_4:
 		center = complex(-1.4011551890, 0.0);
 		break;
-
 	case Animate_type::ANIMATE_5:
 		center = complex(-0.39054, 0.58679);
 		break;
+	case Animate_type::ANIMATE_6:
+		center = complex(-0.761574, - 0.0847596);
+		break;
+	case Animate_type::ANIMATE_7:
+		center = complex(-0.7435669, 0.1314023);
+		break;
+	case Animate_type::ANIMATE_8:
+		center = complex(-0.39054, - 0.58679);
+		break;
+	case Animate_type::ANIMATE_9:
+		center = complex(-1.401155,0.0);
+		break;
+
 
 	case Animate_type::BURNING_1:
 		center = complex(-1.516, -0.03);

@@ -13,7 +13,7 @@
 #include "run_mandelbrot.h"
 
 
-enum class Animate_type { ANIMATE_1, ANIMATE_2, ANIMATE_3, ANIMATE_4, ANIMATE_5, BURNING_1, BURNING_2 };
+enum class Animate_type { ANIMATE_1, ANIMATE_2, ANIMATE_3, ANIMATE_4, ANIMATE_5, ANIMATE_6, ANIMATE_7, ANIMATE_8, ANIMATE_9,BURNING_1, BURNING_2 };
 
 namespace Runner_NS {
 	class run_mandelbrot_animation : public run_mandelbrot
