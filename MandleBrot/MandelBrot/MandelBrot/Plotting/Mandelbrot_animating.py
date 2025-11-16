@@ -9,7 +9,10 @@ Example:
 
 import sys
 from pathlib import Path
+import cairosvg
+import numpy as np
 import imageio.v3 as iio
+from io import BytesIO
 
 def main():
     if len(sys.argv) < 6:
@@ -44,7 +47,9 @@ def main():
     frames = []
     for idx, path in enumerate(frame_paths, 1):
         try:
-            img = iio.imread(path)  # imageio handles SVG via ffmpeg/librsvg if available
+            svg_bytes = path.read_bytes()
+            png_bytes = cairosvg.svg2png(bytestring=svg_bytes)
+            img = iio.imread(png_bytes)
             frames.append(img)
             if idx % 20 == 0 or idx == len(frame_paths):
                 print(f"  Loaded {idx}/{len(frame_paths)}")
