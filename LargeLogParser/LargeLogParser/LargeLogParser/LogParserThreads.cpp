@@ -2,28 +2,24 @@
 
 #include <filesystem>
 
-LogParserParallelRunner::LogParserParallelRunner(std::string filePath_, const int& numThreads_) :
-	filePath{ filePath_ }, numThreads{ numThreads }, tot_nums{ {0,0,0} }, num_lines{0}
+LogParserThreads::LogParserThreads(std::string filePath_, const int& numThreads_) :
+	LogParser{ filePath_ }, numThreads{ numThreads }, tot_nums{ {0,0,0} }, num_lines{0}
 {
-	std::filesystem::path p = filePath;
-	if (!std::filesystem::exists(p)) {
-		throw std::runtime_error("File does not exist: " + filePath);
-	}
-	fileLength = std::filesystem::file_size(p);
-
-
 	logParsers.reserve(numThreads);
 	threads.reserve(numThreads);
 }
 
-void LogParserParallelRunner::parseLogs()
+void LogParserThreads::parseLogs()
 {
+
 	for (int i = 0; i < numThreads; i++)
 	{
 		int threadId = i;
-		logParsers.emplace_back(filePath, fileLength, threadId, numThreads);
-		logParsers[i].initialize();
-		threads.emplace_back(&LogParserParallel::readFile, &logParsers[i]);
+		int lengthPerThread = (fileLength + numThreads - 1) / numThreads;
+		int beg = i * lengthPerThread;
+		int end = beg + lengthPerThread >= fileLength ? fileLength : beg + lengthPerThread;
+		logParsers.emplace_back(filePath, fileLength,beg, end);
+		threads.emplace_back(&LogParser::readFile, &logParsers[i]);
 	}
 
 	// waiting for all the threads to finish execution
@@ -47,7 +43,7 @@ void LogParserParallelRunner::parseLogs()
 }
 
 template<ReturnMode returnMode>
-void LogParserParallelRunner::returnLogs(ARRAY_DATA_3& tot_data_)
+void LogParserThreads::returnLogs(ARRAY_DATA_3& tot_data_)
 {
 	switch (returnMode)
 	{
@@ -62,7 +58,7 @@ void LogParserParallelRunner::returnLogs(ARRAY_DATA_3& tot_data_)
 	}
 }
 
-int LogParserParallelRunner::operator()(int& num_infos_, int& num_warns_, int& num_errors_)
+int LogParserThreads::operator()(int& num_infos_, int& num_warns_, int& num_errors_)
 {
 	num_errors_ = tot_nums[0];
 	num_warns_ = tot_nums[1];

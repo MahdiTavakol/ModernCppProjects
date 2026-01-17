@@ -12,10 +12,8 @@
 class LogParser
 {
 public:
-	LogParser(std::string filePath_, std::array<std::string,3> keys);
-	LogParser(std::string filePath_)
-		: LogParser(filePath_, { "[ERROR]", "[WARN]", "[INFO]" }) {}
-	virtual void initialize();
+	LogParser(std::string filePath_, std::array<std::string,3> keys = { "[ERROR]", "[WARN]", "[INFO]" });
+	LogParser(std::string filePath_, const int& file_length_, int beg_, int end_);
 	virtual void readFile();
 	virtual void printProgress(const double& progress);
 	void returnNumErrorWarnInfo(std::array<int,3>& nums);
@@ -24,10 +22,9 @@ public:
 	void returnFileLength(int& fileLength_) { fileLength_ = fileLength; }
 	int operator()(int& num_infos_, int& num_warns_, int& num_errors_);
 
+	static int inquireFileLength(std::string filePath_);
+
 protected:
-
-	int thread_id, num_threads;
-
 	std::string filePath;
 	std::ifstream file;
 	int fileLength, beg, end;

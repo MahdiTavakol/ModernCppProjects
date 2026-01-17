@@ -15,16 +15,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="LogParserParallel.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="LogParser.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="LogParserParallelRunner.h">
+    <ClInclude Include="LogParserThreads.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="LogParserParallelFuture.h">
+    <ClInclude Include="LogParserFuture.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="CreateLargeLogs.h">
@@ -36,18 +33,18 @@
     <ClInclude Include="test.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="shared.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="LogParserParallel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="LogParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LogParserParallelRunner.cpp">
+    <ClCompile Include="LogParserThreads.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LogParserParallelFuture.cpp">
+    <ClCompile Include="LogParserFuture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CreateLargeLogs.cpp">

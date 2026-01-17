@@ -10,25 +10,21 @@ LogParser::LogParser(std::string filePath_, std::array<std::string, 3> keys) :
 	file.open(filePath);
 	if (!file.is_open())
 		throw std::runtime_error("Cannot open the file " + filePath + " for reading!");
+	fileLength = this->inquireFileLength(filePath_);
+	end = fileLength;
 }
 
-void LogParser::initialize()
+LogParser::LogParser(std::string filePath_, const int& file_length_, int beg_, int end_) :
+	LogParser{ filePath_ }
 {
-	std::filesystem::path p = filePath;
-	if (!std::filesystem::exists(p)) {
-		throw std::runtime_error("File does not exist: " + filePath);
-	}
-	fileLength = std::filesystem::file_size(p);
-
-	thread_id = 0;
-	num_threads = 1;
-
-	file.seekg(0, file.beg);
+	fileLength = file_length_;
+	beg = beg_;
+	end = end_;
 }
+
 
 void LogParser::readFile()
 {
-	initialize();
 
 	file.seekg(beg);
 	std::string line;
@@ -113,4 +109,13 @@ int LogParser::operator()(int& num_infos_, int& num_warns_, int& num_errors_)
 	num_warns_ = num_warns;
 	num_errors_ = num_errors;
 	return num_lines;
+}
+
+int LogParser::inquireFileLength(std::string filePath_)
+{
+	std::filesystem::path p = filePath_;
+	if (!std::filesystem::exists(p)) {
+		throw std::runtime_error("File does not exist: " + filePath_);
+	}
+	return std::filesystem::file_size(p);
 }

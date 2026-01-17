@@ -130,19 +130,18 @@
   <ItemGroup>
     <ClInclude Include="catch_amalgamated.hpp" />
     <ClInclude Include="CreateLargeLogs.h" />
-    <ClInclude Include="LogParserParallel.h" />
     <ClInclude Include="LogParser.h" />
-    <ClInclude Include="LogParserParallelFuture.h" />
-    <ClInclude Include="LogParserParallelRunner.h" />
+    <ClInclude Include="LogParserFuture.h" />
+    <ClInclude Include="LogParserThreads.h" />
+    <ClInclude Include="shared.h" />
     <ClInclude Include="test.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="catch_amalgamated.cpp" />
     <ClCompile Include="CreateLargeLogs.cpp" />
-    <ClCompile Include="LogParserParallel.cpp" />
     <ClCompile Include="LogParser.cpp" />
-    <ClCompile Include="LogParserParallelFuture.cpp" />
-    <ClCompile Include="LogParserParallelRunner.cpp" />
+    <ClCompile Include="LogParserFuture.cpp" />
+    <ClCompile Include="LogParserThreads.cpp" />
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,7 +1,8 @@
-#include "LogParserParallelFuture.h"
+#include "LogParserFuture.h"
+#include "shared.h"
 #include <filesystem>
 
-void LogParserParallelFuture::initialize()
+void LogParserFuture::initialize()
 {
 	std::filesystem::path p = filePath;
 	if (!std::filesystem::exists(p)) {
@@ -13,14 +14,14 @@ void LogParserParallelFuture::initialize()
 		throw std::runtime_error("Cannot open the file " + filePath + " for reading!");
 }
 
-void LogParserParallelFuture::readFile()
+void LogParserFuture::readFile()
 {
 	std::vector<std::future<DATA_STRUCT>> ftrs;
 	ftrs.reserve(num_threads);
 
 	for (int i = 0; i < num_threads; i++)
 	{
-		ftrs.push_back(std::async(&LogParserParallelFuture::readChunk,this, i, num_threads));
+		ftrs.push_back(std::async(&LogParserFuture::readChunk,this, i, num_threads));
 	}
 
 	for (auto& ftr : ftrs)
@@ -38,7 +39,7 @@ void LogParserParallelFuture::readFile()
 	}
 }
 
-LogParserParallelFuture::DATA_STRUCT LogParserParallelFuture::readChunk(const int& me_, const int& num_)
+DATA_STRUCT LogParserFuture::readChunk(const int& me_, const int& num_)
 {
 	DATA_STRUCT output_data;
 
