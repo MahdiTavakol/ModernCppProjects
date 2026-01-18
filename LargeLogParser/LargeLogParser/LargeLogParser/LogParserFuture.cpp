@@ -10,7 +10,7 @@ void LogParserFuture::readFile()
 
 	for (int i = 0; i < num_threads; i++)
 	{
-		ftrs.push_back(std::async(&LogParserFuture::readChunk,this, i, num_threads));
+		ftrs.push_back(std::async(std::launch::async, & LogParserFuture::readChunk, this, i, num_threads));
 	}
 
 	for (auto& ftr : ftrs)
@@ -25,12 +25,12 @@ DataStructure LogParserFuture::readChunk(const int& me_, const int& num_)
 	DataStructure output_data;
 
 	int lengthPerThread = static_cast<int>(fileLength / num_);
-	beg = me_ * lengthPerThread;
-	end = beg + lengthPerThread;
-	if (end > fileLength) end = fileLength;
+	int mybeg = me_ * lengthPerThread;
+	int myend = mybeg + lengthPerThread;
+	if (myend > fileLength) myend = fileLength;
 
 	std::unique_ptr<LogParser> logParser =
-		std::make_unique<LogParser>(this->filePath, this->fileLength, this->beg, this->end);
+		std::make_unique<LogParser>(this->filePath, this->fileLength, mybeg, myend);
 
 	logParser->readFile();
 	logParser->returnLogs<ReturnMode::MOVE>(output_data);

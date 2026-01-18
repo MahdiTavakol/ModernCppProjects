@@ -1,7 +1,7 @@
 #include "DataStructure.h"
 #include <exception>
 
-int DataStructure::operator()(int& num_lines_, int& num_errors_, int& num_warns_, int& num_infos_) const
+void DataStructure::operator()(int& num_lines_, int& num_errors_, int& num_warns_, int& num_infos_) const
 {
 	num_lines_ = numLines;
 	num_errors_ = nums[0];
@@ -9,7 +9,7 @@ int DataStructure::operator()(int& num_lines_, int& num_errors_, int& num_warns_
 	num_infos_ = nums[2];
 }
 
-int DataStructure::operator()(std::vector<std::string>& errors_,
+void DataStructure::operator()(std::vector<std::string>& errors_,
 	std::vector<std::string>& warns_,
 	std::vector<std::string>& infos_)
 {

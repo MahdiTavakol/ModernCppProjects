@@ -29,7 +29,6 @@ public:
 	virtual void printProgress(const double& progress);
 	template<ReturnMode returnMode>
 	void returnLogs(DataStructure& data_struct_);
-	int returnNumLines();
 	void returnFileLength(int& fileLength_) { fileLength_ = fileLength; }
 
 

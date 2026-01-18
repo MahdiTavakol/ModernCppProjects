@@ -100,12 +100,6 @@ void LogParser::returnLogs(DataStructure& data_struct_)
 }
 
 
-int LogParser::returnNumLines()
-{
-	return num_lines;
-}
-
-
 int LogParser::inquireFileLength(std::string filePath_)
 {
 	std::filesystem::path p = filePath_;
