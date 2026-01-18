@@ -133,12 +133,13 @@
     <ClInclude Include="LogParser.h" />
     <ClInclude Include="LogParserFuture.h" />
     <ClInclude Include="LogParserThreads.h" />
-    <ClInclude Include="shared.h" />
+    <ClInclude Include="DataStructure.h" />
     <ClInclude Include="test.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="catch_amalgamated.cpp" />
     <ClCompile Include="CreateLargeLogs.cpp" />
+    <ClCompile Include="DataStructure.cpp" />
     <ClCompile Include="LogParser.cpp" />
     <ClCompile Include="LogParserFuture.cpp" />
     <ClCompile Include="LogParserThreads.cpp" />

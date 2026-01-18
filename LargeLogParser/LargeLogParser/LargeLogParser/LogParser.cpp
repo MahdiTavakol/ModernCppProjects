@@ -4,7 +4,6 @@
 
 LogParser::LogParser(std::string filePath_, std::array<std::string, 3> keys) :
 	filePath{ filePath_ }, beg{ 0 }, end{ 0 },
-	num_lines{0}, num_errors{ 0 }, num_warns{ 0 }, num_infos{ 0 },
 	error_key{ keys[0] }, warn_key{ keys[1] }, info_key{ keys[2] }
 {
 	file.open(filePath);
@@ -25,9 +24,17 @@ LogParser::LogParser(std::string filePath_, const int& file_length_, int beg_, i
 
 void LogParser::readFile()
 {
-
 	file.seekg(beg);
 	std::string line;
+
+	std::vector<std::string>& errors = data_struct.returnData()[0];
+	std::vector<std::string>& warns = data_struct.returnData()[1];
+	std::vector<std::string>& infos = data_struct.returnData()[2];
+
+	int& num_lines = data_struct.returnNumLines();
+	int& num_errors = data_struct.returnNums()[0];
+	int& num_warns  = data_struct.returnNums()[1];
+	int& num_infos  = data_struct.returnNums()[2];
 
 	/* It is possible the[ERROR] is in the middle of the line
 	*  something like timestap -> [ERROR] and this thread
@@ -76,40 +83,28 @@ void LogParser::printProgress(const double& progress)
 	std::cout << std::format("Progress {:.2f}%", progress) << std::endl;
 }
 
-void LogParser::returnNumErrorWarnInfo(std::array<int, 3>& nums_)
+template<ReturnMode returnMode>
+void LogParser::returnLogs(DataStructure& data_struct_)
 {
-	nums_[0] = num_errors;
-	nums_[1] = num_warns;
-	nums_[2] = num_infos;
+	switch (returnMode)
+	{
+	case ReturnMode::COPY:
+		data_struct_ = data_struct;
+		return;
+	case ReturnMode::MOVE:
+		data_struct_ = std::move(data_struct);
+		return;
+	default:
+		throw std::invalid_argument("Wrong return mode!");
+	}
 }
+
 
 int LogParser::returnNumLines()
 {
 	return num_lines;
 }
 
-void LogParser::returnErrorWarnInfo(std::array<std::vector<std::string>, 3>& output_)
-{
-	if (errors.empty())
-	{
-		std::cout << "Warning the errors have already been returned, reading the file again!" << std::endl;
-		readFile();
-	}
-	output_[0] = std::move(errors);
-	output_[1] = std::move(warns);
-	output_[2] = std::move(infos);
-	num_errors = 0;
-	num_warns = 0;
-	num_infos = 0;
-}
-
-int LogParser::operator()(int& num_infos_, int& num_warns_, int& num_errors_)
-{
-	num_infos_ = num_infos;
-	num_warns_ = num_warns;
-	num_errors_ = num_errors;
-	return num_lines;
-}
 
 int LogParser::inquireFileLength(std::string filePath_)
 {
