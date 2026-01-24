@@ -3,7 +3,7 @@
 
 CreateLargeLogs::CreateLargeLogs(const std::string& logFileName_, const int& num_lines_, const int& line_length_,
 		const double& info_percent_, const double& warns_percent_, const double& errors_percent_,
-		const bool& keep_temp_ = false):
+		const bool& keep_temp_):
 		 keep_temp{keep_temp_}
 {
 	if (info_percent_ + warns_percent_ + errors_percent_ > 100.0)

@@ -45,15 +45,15 @@ void test_parser(std::string& logFileName, const std::array<int, 4>& expectedVal
 
 	if constexpr (pType == ParserType::SERIAL) {
 		// Serial log parser
-		logParserPtr = std::make_unique<LogParser>{logFileName};
+		logParserPtr = std::make_unique<LogParser>(logFileName);
 	}
 	else if constexpr (pType == ParserType::THREADS) {
 		// Threads log parser
-		logParserPtr = std::make_unique<LogParserThreads>{logFileName,numThreads};
+		logParserPtr = std::make_unique<LogParserThreads>(logFileName,numThreads);
 	}
 	else if constexpr (pType == ParserType::FUTURE) {
 		// Parallel log parser with future
-		logParserPtr = std::make_unique<LogParserFuture>{logFileName,numThreads};
+		logParserPtr = std::make_unique<LogParserFuture>(logFileName,numThreads);
 	}
 	else
 		static_assert(pType != pType,"Wrong argument!");

@@ -1,5 +1,5 @@
 #include "DataStructure.h"
-#include <exception>
+#include <stdexcept>
 
 void DataStructure::operator()(std::array<int,4>& nums_) const
 {
