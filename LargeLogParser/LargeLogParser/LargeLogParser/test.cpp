@@ -58,8 +58,7 @@ const std::vector<int> numThreadsVec = { 1,2,4,6,8 };
 TEST_CASE("Testing empty files with different log parsers")
 {
 	double dummyTiming;
-	
-	test_parser<ParserType::SERIAL,TestingMode::NO_TIMING>
+ 	test_parser<ParserType::SERIAL,TestingMode::NO_TIMING>
 	     (fileWriterPtrZero,dummyTiming, num_threads);
     test_parser<ParserType::THREADS,TestingMode::NO_TIMING>
 	     (fileWriterPtrZero,dummyTiming, num_threads);

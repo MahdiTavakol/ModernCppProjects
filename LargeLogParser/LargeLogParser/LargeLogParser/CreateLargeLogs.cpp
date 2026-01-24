@@ -24,7 +24,8 @@ CreateLargeLogs::~CreateLargeLogs()
 		fileWriterPtr->close();
 		fileWriterPtr->removeFile();
 	}
-}
+	std::cout << "Vegina " << std::endl;
+ }
 
 void CreateLargeLogs::generateLog()
 {
@@ -47,6 +48,7 @@ void CreateLargeLogs::generateLog()
 
 	for (int i = 0; i < num_lines; i++)
 	{
+		std::cout << "line - " << i << std::endl;
 		std::string line;
 		line.reserve(numChars);
 		double typeProbability = typedouble(rng1);
@@ -58,17 +60,20 @@ void CreateLargeLogs::generateLog()
 		if (typeProbability - minProb < info_percent) {
 			line += "[INFO]";
 			nums[0]++;
-		} else minProb += info_percent;
+		} else {
+			minProb += info_percent;
+			if (typeProbability - minProb < warn_percent) {
+				line += "[WARN]";
+				nums[1]++;
+			} else {
+				minProb += warn_percent;
+				if (typeProbability - minProb < error_percent) {
+					line += "[ERROR]";
+					nums[2]++;
+				}
+			}
 
-		if (typeProbability - minProb < warn_percent) {
-			line += "[WARN]";
-			nums[1]++;
-		} else minProb += warn_percent;
-
-		if (typeProbability - minProb < error_percent) {
-			line += "[ERROR]";
-			nums[2]++;
-		} else minProb += error_percent;
+		}
 
 
 		numChars -= static_cast<int>(line.length());
@@ -79,9 +84,10 @@ void CreateLargeLogs::generateLog()
 			line += c;
 		}
 
+
 		fileWriterPtr->writeLine(line);
-		fileWriterPtr->setNums(nums);
 	}
+	fileWriterPtr->setNums(nums);
 }
 
 int CreateLargeLogs::operator()(std::array<int,3>& nums_)

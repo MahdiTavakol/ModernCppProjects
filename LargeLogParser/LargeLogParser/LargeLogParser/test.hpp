@@ -73,11 +73,11 @@ void test_parser(std::string& logFileName, const std::array<int, 4>& expectedVal
  * in advance.
  */
 
-void CreateLogs(const std::string& log_file_name_, 
+void CreateLogs(
 	const std::unique_ptr<fileWriter>& fileWriterPtr,  
 	std::array<int, 4>& expectedValues_)
 {
-	std::unique_ptr<fileWriter> fileWriterPtr2 = fileWriterPtr->clone();
+ 	std::unique_ptr<fileWriter> fileWriterPtr2 = fileWriterPtr->clone();
 	CreateLargeLogs logCreator{std::move(fileWriterPtr2)};
 	logCreator.generateLog();
 	std::array<int,3> nums;
@@ -90,13 +90,13 @@ void CreateLogs(const std::string& log_file_name_,
 
 template<ParserType pType, TestingMode tMode>
 void test_parser(std::unique_ptr<fileWriter>& fileWriter_, 
-                 double& timing_, const int& numThreads_, const std::string& id = "")
+                 double& timing_, const int& numThreads_)
 {
 	std::array<int,4> expectedValues;
-	std::string logFileName = "log-" +  id + ".dat";
-	CreateLogs(logFileName,fileWriter_,expectedValues);
+	CreateLogs(fileWriter_,expectedValues);
+	std::string fileName = fileWriter_->returnFileName();
 	double& duration  = timing_;
-	test_parser<pType,tMode>(logFileName,expectedValues,numThreads_,duration);
+	test_parser<pType,tMode>(fileName,expectedValues,numThreads_,duration);
 }
 
 template<ParserType pType, TestingMode tMode>
@@ -105,6 +105,6 @@ void test_parser(std::vector<std::unique_ptr<fileWriter>>& fileWriterVec_,
 {
 	timings_.resize(fileWriterVec_.size()); // The test_parser doesnot push_back so I need to initialize it with zeros
 	for (int i = 0; i < fileWriterVec_.size(); i++) {
-		test_parser<pType,tMode>(fileWriterVec_[i],timings_[i],numThreads_,std::to_string(i));
+		test_parser<pType,tMode>(fileWriterVec_[i],timings_[i],numThreads_);
 	}
 }

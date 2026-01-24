@@ -4,6 +4,8 @@
 #include <array>
 #include <fstream>
 
+#include <iostream>
+
 using std::string;
 
 class fileWriter
@@ -20,11 +22,12 @@ public:
 		warnPercent{ warnPercent_ }, errorPercent{ errorPercent_ },
 		lineLength{ lineLength_ } 
 	{
-		file.open(fileName_, std::ios::out);
+		file.open(fileName_);
+		std::cout << fileName_ << std::endl;
 	}
 
 	fileWriter(const fileWriter& rhs_): 
-	    fileName{rhs_.fileName + "_2"},
+	    fileName{rhs_.fileName},
 		numLines{rhs_.numLines}, lineLength{rhs_.lineLength},
 		infoPercent{rhs_.infoPercent}, warnPercent{rhs_.warnPercent}, errorPercent{rhs_.errorPercent} {}
 
@@ -49,9 +52,11 @@ public:
 		numInfos = nums_[0]; numWarns = nums_[1]; numErrors = nums_[2];
 	}
 
+	std::string returnFileName() const { return fileName; }
 	virtual void writeLine(const std::string& line_) = 0;
 	void close() {file.close();}
 	void removeFile() {std::filesystem::remove(fileName.c_str());} 
+	void openFile() { file.open(fileName); }
 
 protected:
     // our input 
@@ -78,7 +83,9 @@ public:
 	fileWriterSimple(const fileWriterSimple& rhs_): fileWriter{rhs_} {}
 
 	std::unique_ptr<fileWriter> clone() const override {
-		return std::make_unique<fileWriterSimple>(*this);
+		auto newWriter = std::make_unique<fileWriterSimple>(*this);
+		newWriter->openFile();
+		return newWriter;
 	} 
 
 	void writeLine(const std::string& line_) override

@@ -10,7 +10,7 @@ class CreateLargeLogs
 public:
 	CreateLargeLogs(const std::string& logFileName_, const int& num_lines_, const int& line_length_,
 		const double& info_percent_, const double& warns_percent_, const double& errors_percent_,
-		const bool& keep_temp_ = false);
+		const bool& keep_temp_);
 
 	CreateLargeLogs(std::unique_ptr<fileWriter>&& fileWriterPtr_) :
 	    fileWriterPtr{std::move(fileWriterPtr_)} {}
@@ -25,6 +25,6 @@ private:
     // file 
 	std::unique_ptr<fileWriter> fileWriterPtr;
 
-	bool keep_temp = false;
+	bool keep_temp = true;
 
 };
