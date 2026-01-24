@@ -11,7 +11,7 @@ public:
 		nums[0] = nums[1] = nums[2] = 0;
 	}
 
-	void operator()(int& num_lines_, int& num_errors_, int& num_warns_, int& num_infos_) const;
+	void operator()(std::array<int,4>& nums_) const;
 
 	void operator()(std::vector<std::string>& errors_, 
 		           std::vector<std::string>& warns_, 
