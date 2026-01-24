@@ -13,12 +13,12 @@
 #include <iostream>
 #include <iomanip>
 
-const int line_length = 128;
-const int num_test_sizes = 10;
-const int num_errwarninfo_combinations = 10;
-const int size_step = 100;
-const int num_threads = 4;
-const double file_size_0 = 600.0;
+constexpr int line_length = 128;
+constexpr int num_test_sizes = 10;
+constexpr int num_errwarninfo_combinations = 10;
+constexpr int size_step = 100;
+constexpr int num_threads = 4;
+constexpr double file_size_0 = 600.0;
 
 fileProp file_prop = {1000,line_length, 20.9,10.7,35.5};
 std::vector<fileProp> filePropVec;

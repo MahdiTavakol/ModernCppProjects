@@ -36,6 +36,9 @@
     <ClInclude Include="DataStructure.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="fileProp.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LogParser.cpp">

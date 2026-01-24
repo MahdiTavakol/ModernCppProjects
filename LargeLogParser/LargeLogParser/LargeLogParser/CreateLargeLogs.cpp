@@ -1,17 +1,19 @@
 #include "CreateLargeLogs.h"
+#include <random>
 
 void CreateLargeLogs::generateLog()
 {
 	static std::random_device rd1, rd2;
 	static std::mt19937_64 rng1{ rd1() }, rng2{ rd2() };
-	static std::uniform_int_distribution<int> typeint(0, 10000), letterint(32, 126);
+	static std::uniform_real_distribution<double> typedouble(0, 100);
+	static std::uniform_int_distribution<int> letterint(32, 126);
 
 	for (int i = 0; i < num_lines; i++)
 	{
 		int numChars = 256;
 		std::string line;
 		line.reserve(numChars);
-		double typeProbability = static_cast<double>(typeint(rng1)) / 100.0;
+		double typeProbability = typedouble(rng1);
 
 
 		double minProb = 0.0;

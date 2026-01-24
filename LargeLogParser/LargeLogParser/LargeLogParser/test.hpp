@@ -13,11 +13,7 @@ enum class ParserType
 	PARALLELFUTURE
 };
 
-struct fileProp
-{
-	int numLines, lineLength;
-	double infoPercent, warnPercent, errorPercent;
-};
+
 
 void CreateLogs(const std::string& log_file_name_, const fileProp& file_prop_,  std::array<int, 4>& expectedValues_)
 {
