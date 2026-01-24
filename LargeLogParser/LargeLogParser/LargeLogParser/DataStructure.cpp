@@ -1,12 +1,12 @@
 #include "DataStructure.h"
 #include <exception>
 
-void DataStructure::operator()(int& num_lines_, int& num_errors_, int& num_warns_, int& num_infos_) const
+void DataStructure::operator()(std::array<int,4>& nums_) const
 {
-	num_lines_ = numLines;
-	num_errors_ = nums[0];
-	num_warns_ = nums[1];
-	num_infos_ = nums[2];
+	nums_[0] = numLines;
+	nums_[1] = nums[0];
+	nums_[2] = nums[1];
+	nums_[3] = nums[2];
 }
 
 void DataStructure::operator()(std::vector<std::string>& errors_,

@@ -4,7 +4,6 @@
 #include "DataStructure.h"
 #include "LogParser.h"
 
-#include <future>
 #include <string>
 #include <vector>
 #include <format>

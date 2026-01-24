@@ -130,7 +130,7 @@
   <ItemGroup>
     <ClInclude Include="catch_amalgamated.hpp" />
     <ClInclude Include="CreateLargeLogs.h" />
-    <ClInclude Include="fileProp.h" />
+    <ClInclude Include="fileWriter.h" />
     <ClInclude Include="LogParser.h" />
     <ClInclude Include="LogParserFuture.h" />
     <ClInclude Include="LogParserThreads.h" />

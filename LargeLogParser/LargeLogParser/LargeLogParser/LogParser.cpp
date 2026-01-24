@@ -68,7 +68,7 @@ void LogParser::readFile()
 			num_infos++;
 		}
 
-		int pos = file.tellg();
+		int pos = static_cast<int>(file.tellg());
 		if (pos >= end)
 			break;
 
@@ -106,5 +106,5 @@ int LogParser::inquireFileLength(std::string filePath_)
 	if (!std::filesystem::exists(p)) {
 		throw std::runtime_error("File does not exist: " + filePath_);
 	}
-	return std::filesystem::file_size(p);
+	return static_cast<int>(std::filesystem::file_size(p));
 }

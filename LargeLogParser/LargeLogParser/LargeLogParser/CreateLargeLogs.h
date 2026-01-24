@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fileProp.h"
+#include "fileWriter.h"
 
 #include <string>
 #include <fstream>
