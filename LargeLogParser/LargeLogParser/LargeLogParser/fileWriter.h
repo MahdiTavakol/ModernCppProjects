@@ -51,7 +51,7 @@ public:
 
 	virtual void writeLine(const std::string& line_) = 0;
 	void close() {file.close();}
-	void removeFile() {std::filesystem::remove(fileName);} 
+	void removeFile() {std::filesystem::remove(fileName.c_str());} 
 
 protected:
     // our input 
