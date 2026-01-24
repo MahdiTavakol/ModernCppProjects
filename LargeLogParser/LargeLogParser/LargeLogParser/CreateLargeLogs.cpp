@@ -57,21 +57,21 @@ void CreateLargeLogs::generateLog()
 
 		if (typeProbability - minProb < info_percent) {
 			line += "[INFO]";
-			nums[0];
+			nums[0]++;
 		} else minProb += info_percent;
 
 		if (typeProbability - minProb < warn_percent) {
 			line += "[WARN]";
-			nums[1];
+			nums[1]++;
 		} else minProb += warn_percent;
 
 		if (typeProbability - minProb < error_percent) {
 			line += "[ERROR]";
-			nums[2];
+			nums[2]++;
 		} else minProb += error_percent;
 
 
-		numChars -= line.length();
+		numChars -= static_cast<int>(line.length());
 		// one space is reserved for the std::endl;
 		for (int j = 0; j < numChars - 1; j++)
 		{

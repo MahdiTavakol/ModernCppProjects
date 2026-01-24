@@ -119,7 +119,7 @@ TEST_CASE("Filling the fileWriterVec with multiple combinations")
 					 /* warns */	   warnPercent,
 					 /* errors */	   errorPercent);
 
-		fileWriterVec.push_back(fileWriterPtrI);
+		fileWriterVec.push_back(std::move(fileWriterPtrI));
 	}
 	SUCCEED("The fileWriterVec was filled with mutiple combinations");
 }
@@ -179,7 +179,7 @@ TEST_CASE("Filling the fileWriterVec with multiple file sizes")
 					 /* warns */	   warn_0,
 					 /* errors */	   error_0);
 
-		fileWriterVec.push_back(fileWriterPtrI);
+		fileWriterVec.push_back(std::move(fileWriterPtrI));
 	}
 	SUCCEED("The fileWriterVec was filled with mutiple file sizes");
 }

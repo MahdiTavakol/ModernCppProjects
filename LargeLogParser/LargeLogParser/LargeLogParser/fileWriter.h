@@ -59,7 +59,7 @@ protected:
 	int numLines, lineLength;
 	double infoPercent, warnPercent, errorPercent;
 	// what we will get 
-	int numInfos, numWarns, numErrors;
+	int numInfos{0}, numWarns{0}, numErrors{0};
 
 	std::ofstream file;
 };

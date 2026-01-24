@@ -29,7 +29,20 @@ public:
 	}*/
 	virtual void printProgress(const double& progress);
 	template<ReturnMode returnMode>
-	void returnLogs(DataStructure& data_struct_);
+	void returnLogs(DataStructure& data_struct_)
+	{
+		switch (returnMode)
+		{
+		case ReturnMode::COPY:
+			data_struct_ = data_struct;
+			return;
+		case ReturnMode::MOVE:
+			data_struct_ = std::move(data_struct);
+			return;
+		default:
+			throw std::invalid_argument("Wrong return mode!");
+		}
+	}
 	void returnFileLength(int& fileLength_) { fileLength_ = fileLength; }
 
 

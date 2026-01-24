@@ -83,22 +83,6 @@ void LogParser::printProgress(const double& progress)
 	std::cout << std::format("Progress {:.2f}%", progress) << std::endl;
 }
 
-template<ReturnMode returnMode>
-void LogParser::returnLogs(DataStructure& data_struct_)
-{
-	switch (returnMode)
-	{
-	case ReturnMode::COPY:
-		data_struct_ = data_struct;
-		return;
-	case ReturnMode::MOVE:
-		data_struct_ = std::move(data_struct);
-		return;
-	default:
-		throw std::invalid_argument("Wrong return mode!");
-	}
-}
-
 
 int LogParser::inquireFileLength(std::string filePath_)
 {
