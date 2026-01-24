@@ -1,157 +1,110 @@
 #pragma once
 
+using std::chrono::high_resolution_clock;
+using std::chrono::duration;
+using std::chrono::milliseconds;
+
 enum class TestingMode
 {
-	TIMING_INFO,
-	NO_TIMING_INFO
+	TIMING,
+	NO_TIMING
 };
 
 enum class ParserType
 {
 	SERIAL,
-	PARALLEL,
-	PARALLELFUTURE
+	THREADS,
+	FUTURE
 };
 
 
-
-void CreateLogs(const std::string& log_file_name_, const fileProp& file_prop_,  std::array<int, 4>& expectedValues_)
+template<TestingMode tMode>
+double run_parser(std::unique_ptr<LogParser>& logParserPtr)
 {
-	CreateLargeLogs logCreator{ log_file_name_,file_prop_.numLines,file_prop_.lineLength,
-		file_prop_.infoPercent,file_prop_.warnPercent,file_prop_.errorPercent};
-	logCreator.generateLog();
-	expectedValues_[0] = logCreator(expectedValues_[1], expectedValues_[2], expectedValues_[3]);
-}
-
-template<typename Func, TestingMode tMode>
-double run_parser(Func&& f)
-{
-	if constexpr (tMode == TestingMode::TIMING_INFO)
+	if constexpr (tMode == TestingMode::TIMING)
 	{
 		auto t1 = high_resolution_clock::now();
-		f();
+		logParserPtr->readFile();
 		auto t2 = high_resolution_clock::now();
 		duration<double, std::milli> ms_double = t2 - t1;
 		double duration = ms_double.count();
 		return duration;
 	}
-	else f();
+	else if constexpr (tMode == TestingMode::NO_TIMING)
+		logParserPtr->readFile();
 	return 0.0;
 }
+
 
 template<ParserType pType, TestingMode tMode>
 void test_parser(std::string& logFileName, const std::array<int, 4>& expectedValues,
 	const int& numThreads, double& timingInfo)
 {
 	std::array<int, 4> outputValues;
+	std::unique_ptr<LogParser> logParserPtr;
 
 	if constexpr (pType == ParserType::SERIAL) {
 		// Serial log parser
-		LogParser logParser{ logFileName };
-		// Since the logParserParallelRunner invokes the initialize of the LogParserParallel!
-		auto func = [&]()
-			{
-				logParser.initialize();
-				logParser.readFile();
-			};
-		timingInfo = run_parser<tMode>(func);
-		outputValues[0] = logParser(outputValues[1], outputValues[2], outputValues[3]);
+		logParserPtr = std::make_unique<LogParser>{logFileName};
 	}
-	else if constexpr (pType == ParserType::PARALLEL) {
-		// Parallel log parser
-		LogParserParallelRunner logParserParallelRunner{ logFileName,numThreads };
-		auto func = [&]()
-			{
-				logParserParallelRunner.parseLogs();
-			};
-		timingInfo = run_parser<tMode>(func);
-		outputValues[0] = logParserParallelRunner(outputValues[1], outputValues[2], outputValues[3]);
+	else if constexpr (pType == ParserType::THREADS) {
+		// Threads log parser
+		logParserPtr = std::make_unique<LogParserThreads>{logFileName,numThreads};
 	}
-	else if constexpr (pType == ParserType::PARALLELFUTURE) {
+	else if constexpr (pType == ParserType::FUTURE) {
 		// Parallel log parser with future
-		LogParserParallelFuture logParserParallelFuture{ logFileName, numThreads };
-		auto func = [&]()
-			{
-				logParserParallelFuture.initialize();
-				logParserParallelFuture.readFile();
-			};
-		timingInfo = run_parser<tMode>(func);
-		outputValues[0] = logParserParallelFuture(outputValues[1], outputValues[2], outputValues[3]);
+		logParserPtr = std::make_unique<LogParserFuture>{logFileName,numThreads};
 	}
 	else
-		throw std::invalid_argument("Wrong argument");
+		static_assert(pType != pType,"Wrong argument!");
 
+	DataStructure outputData;
+	timingInfo = run_parser<tMode>(logParserPtr);
+	logParserPtr->returnLogs<ReturnMode::MOVE>(outputData);
+	outputData(outputValues);
 
-	for (int j = 0; j < 4; j++)
-		REQUIRE(expectedValues[j] == outputValues[j]);
+	REQUIRE(expectedValues == outputValues);
 }
 
-template<TestingMode tMode>
-void test_multiple_parsers(const int& num_threads_, const fileProp& fileProp_, std::array<double,3>& timings_)
-{
-	std::array<int, 4> expectedValues;
-	// These dont matter!
-	double infoPercent = 10.0, warnPercent = 20.0, errorPercent = 35.0;
-	int numLines = fileProp_.numLines;
-	std::string logFileName = "test-" + std::to_string(numLines) + "-lines.dat";
-	CreateLogs(logFileName, fileProp_, expectedValues);
+/*
+ * The functions down below are for the cases when 
+ * we themselves create logs rather than reading the log*
+ * whose number of warning, info and error lines we know 
+ * in advance.
+ */
 
-	test_parser<ParserType::SERIAL, tMode>(logFileName, expectedValues, num_threads, timings_[0]);
-	test_parser<ParserType::PARALLEL, tMode>(logFileName, expectedValues, num_threads, timings_[1]);
-	test_parser<ParserType::PARALLELFUTURE, tMode>(logFileName, expectedValues, num_threads, timings_[2]);
+void CreateLogs(const std::string& log_file_name_, 
+	const std::unique_ptr<fileWriter>& fileWriterPtr,  
+	std::array<int, 4>& expectedValues_)
+{
+	std::unique_ptr<fileWriter> fileWriterPtr2 = fileWriterPtr->clone();
+	CreateLargeLogs logCreator{std::move(fileWriterPtr2)};
+	logCreator.generateLog();
+	std::array<int,3> nums;
+	expectedValues_[0] = logCreator(nums);
+	expectedValues_[1] = nums[0];
+	expectedValues_[2] = nums[1];
+	expectedValues_[3] = nums[2];
+}
+
+
+template<ParserType pType, TestingMode tMode>
+void test_parser(std::unique_ptr<fileWriter>& fileWriter_, 
+                 double& timing_, const int& numThreads_, const std::string& id = "")
+{
+	std::array<int,4> expectedValues;
+	std::string logFileName = "log-" +  id + ".dat";
+	CreateLogs(logFileName,fileWriter_,expectedValues);
+	double& duration  = timing_;
+	test_parser<pType,tMode>(logFileName,expectedValues,numThreads_,duration);
 }
 
 template<ParserType pType, TestingMode tMode>
-void test_multiple_file_combinations(std::vector<fileProp>& filePropVec_, std::vector<double>& timings_,
-	const int& numThreads)
+void test_parser(std::vector<std::unique_ptr<fileWriter>>& fileWriterVec_,
+                   std::vector<double>& timings_, const int& numThreads_)
 {
-	std::array<int, 4> expectedValues;
-	timings_.resize(filePropVec_.size());
-	for (int i = 0; i < numTests_; i++)
-	{
-		double fileSize = static_cast<double>(i + 1) * size_step_;
-		int numLines = (fileSize + filePropVec_[i].lineLength - 1) / filePropVec_[i].lineLength;
-		myFileProp.numLines = numLines;
-		std::string logFileName = "log-" + std::to_string(i + 1) + ".dat";
-		CreateLogs(logFileName, filePropVec_[i], expectedValues);
-		double& duration = timings_[i];
-		test_parser<pType, tMode>(logFileName, expectedValues, numThreads_, duration);
-	}
-}
-
-template<ParserType pType, TestingMode tMode>
-void test_multiple_file_sizes(const int& numTests_, std::vector<double>& timings_, 
-	const double& size_step_, const int& numThreads_, const fileProp& fileProp_)
-{
-	std::array<int, 4> expectedValues;
-	timings_.resize(numTests_);
-	fileProp myFileProp = fileProp_;
-	for (int i = 0; i < numTests_; i++)
-	{
-		double fileSize = static_cast<double>(i + 1) * size_step_;
-		int numLines = (fileSize + fileProp_.lineLength - 1) / fileProp_.lineLength;
-		myFileProp.numLines = numLines;
-		std::string logFileName = "log-" + std::to_string(i + 1) + ".dat";
-		CreateLogs(logFileName, myFileProp,  expectedValues);
-		double& duration = timings_[i];
-		test_parser<pType, tMode>(logFileName, expectedValues, numThreads_, duration);
-	}
-}
-
-template<ParserType pType, TestingMode tMode>
-void test_multiple_thread_nums(const std::vector<int>& numThreadsVec_, std::vector<double>& timings_, const fileProp fileProp_)
-{
-	std::array<int, 4> expectedValues;
-	timings_.resize(numThreadsVec_.size());
-	int numLines = (file_size_0 + fileProp_.lineLength - 1) / fileProp_.lineLength;
-	std::string logFileName = "log-size-0.dat";
-	fileProp myFileProp = fileProp_;
-	fileProp_.numLines = numLines;
-	CreateLogs(logFileName, myFileProp,  expectedValues);
-	for (int i = 0; i < numThreadsVec_.size(); i++)
-	{
-		int thread_num = numThreadsVec_[i];
-		double& duration = timing_[i];
-		test_parser<pType, tMode>(logFileName, expectedValues, thread_num, duration);
+	timings_.resize(fileWriterVec_.size()); // The test_parser doesnot push_back so I need to initialize it with zeros
+	for (int i = 0; i < fileWriterVec_.size(); i++) {
+		test_parser<pType,tMode>(fileWriterVec_[i],timings_[i],numThreads_,std::to_string(i));
 	}
 }
