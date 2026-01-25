@@ -42,6 +42,8 @@ public:
 
 	fileInfo(const fileInfo& rhs_) = default;
 
+	std::string returnFileName() const { return fileName; }
+
 protected:
 	// our input 
 	std::string fileName;
@@ -76,7 +78,7 @@ public:
 		numInfos = nums_[0]; numWarns = nums_[1]; numErrors = nums_[2];
 	}
 
-	std::string returnFileName() const { return info->fileName; }
+
 	virtual void writeLine(const std::string& line_) = 0;
 	void close() {file.close();}
 	void removeFile() {std::filesystem::remove(info->fileName.c_str());} 

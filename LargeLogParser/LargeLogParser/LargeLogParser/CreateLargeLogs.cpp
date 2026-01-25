@@ -8,8 +8,9 @@ CreateLargeLogs::CreateLargeLogs(const std::string& logFileName_, const int& num
 {
 	if (info_percent_ + warns_percent_ + errors_percent_ > 100.0)
 		throw std::invalid_argument("The total percent is larger than 100%!");
-	fileWriterPtr = std::make_unique<fileWriterSimple>(logFileName_, num_lines_, info_percent_, 
-	warns_percent_, errors_percent_, line_length_);
+	std::unique_ptr<fileInfo> fileInfoTempPtr = std::make_unique<fileInfo>
+		(logFileName_, num_lines_, info_percent_, warns_percent_, errors_percent_, line_length_);
+	fileWriterPtr = std::make_unique<fileWriterSimple>(fileInfoTempPtr);
 }
 
 CreateLargeLogs::~CreateLargeLogs()
