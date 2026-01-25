@@ -25,7 +25,6 @@ CreateLargeLogs::~CreateLargeLogs()
 		fileWriterPtr->close();
 		fileWriterPtr->removeFile();
 	}
-	std::cout << "Vegina " << std::endl;
  }
 
 void CreateLargeLogs::generateLog()
@@ -49,7 +48,6 @@ void CreateLargeLogs::generateLog()
 
 	for (int i = 0; i < num_lines; i++)
 	{
-		std::cout << "line - " << i << std::endl;
 		std::string line;
 		line.reserve(numChars);
 		double typeProbability = typedouble(rng1);
@@ -76,10 +74,9 @@ void CreateLargeLogs::generateLog()
 
 		}
 
-
-		numChars -= static_cast<int>(line.length());
+		int remainingChars = numChars - static_cast<int>(line.length());
 		// one space is reserved for the std::endl;
-		for (int j = 0; j < numChars - 1; j++)
+		for (int j = 0; j < remainingChars - 1; j++)
 		{
 			char c = letterint(rng2);
 			line += c;

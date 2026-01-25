@@ -82,9 +82,13 @@ void CreateLogs(
 	CreateLargeLogs logCreator{std::move(fileWriterPtr)};
 	logCreator.generateLog();
 	std::array<int,3> nums;
+	// numlines
 	expectedValues_[0] = logCreator(nums);
+	// numinfos
 	expectedValues_[1] = nums[0];
+	// numwarnings
 	expectedValues_[2] = nums[1];
+	// numerrors
 	expectedValues_[3] = nums[2];
 }
 

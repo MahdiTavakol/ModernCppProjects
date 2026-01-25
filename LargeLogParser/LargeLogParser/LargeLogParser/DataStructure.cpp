@@ -4,8 +4,11 @@
 void DataStructure::operator()(std::array<int,4>& nums_) const
 {
 	nums_[0] = numLines;
+	// num infos
 	nums_[1] = nums[0];
+	// num warns
 	nums_[2] = nums[1];
+	// num errors
 	nums_[3] = nums[2];
 }
 

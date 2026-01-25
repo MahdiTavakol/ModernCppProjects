@@ -54,6 +54,18 @@ std::array<std::vector<double>, 3> timingDifferentSizes;
 std::array<std::vector<double>, 2> timingDifferentThreads;
 const std::vector<int> numThreadsVec = { 1,2,4,6,8 };
 
+TEST_CASE("Testing without file generation for different log parsers")
+{
+	std::string fileName("1stTest.dat");
+	std::array<int, 4> expectedValues = { 61, 12 , 4 , 23 };
+	double dummyTiming;
+	test_parser<ParserType::SERIAL, TestingMode::NO_TIMING>
+		(fileName,expectedValues , num_threads, dummyTiming);
+	test_parser<ParserType::THREADS, TestingMode::NO_TIMING>
+		(fileName, expectedValues, num_threads, dummyTiming);
+	test_parser<ParserType::FUTURE, TestingMode::NO_TIMING>
+		(fileName, expectedValues, num_threads, dummyTiming);
+}
 
 TEST_CASE("Testing empty files with different log parsers")
 {
@@ -68,26 +80,33 @@ TEST_CASE("Testing empty files with different log parsers")
 
 TEST_CASE("Testing files with different log parsers")
 {
-	test_parser<ParserType::SERIAL,TestingMode::NO_TIMING>
+	test_parser<ParserType::SERIAL,TestingMode::TIMING>
 	     (fileInfoPtr,timingDifferentParsers[0], num_threads);
-    test_parser<ParserType::THREADS,TestingMode::NO_TIMING>
+    test_parser<ParserType::THREADS,TestingMode::TIMING>
 	     (fileInfoPtr,timingDifferentParsers[1], num_threads);
-    test_parser<ParserType::FUTURE,TestingMode::NO_TIMING>
+    test_parser<ParserType::FUTURE,TestingMode::TIMING>
 	     (fileInfoPtr,timingDifferentParsers[2], num_threads);
 }
 
 TEST_CASE("Printing timing info different parsers")
 {
-	std::cout << "Serial ------------ Parallel ------------- ParallelFuture" << std::endl;
-	std::cout 
-		<< "-------------"
-		<< timingDifferentParsers[0]
-		<< "-------------"
-		<< timingDifferentParsers[1]
-		<< "-------------"
-		<< timingDifferentParsers[2]
+	std::cout << std::endl << std::endl;
+	std::cout << "Timing for different parsers" << std::endl;
+	std::cout << std::left
+		<< std::setw(20) << "Serial"
+		<< std::setw(20) << "Parallel"
+		<< std::setw(20) << "ParallelFuture"
 		<< std::endl;
 
+	std::cout << std::string(60, '-') << '\n';
+
+	std::cout << std::left
+		<< std::setw(20) << timingDifferentParsers[0]
+		<< std::setw(20) << timingDifferentParsers[1]
+		<< std::setw(20) << timingDifferentParsers[2]
+		<< '\n';
+
+	std::cout << std::endl << std::endl;
 	SUCCEED("Timing results printed to console.");
 }
 
@@ -137,18 +156,22 @@ TEST_CASE("Testing the thread log parser with multiple file combinations")
 
 TEST_CASE("Testing the future log parser with multiple file combinations")
 {
-	test_parser<ParserType::SERIAL, TestingMode::TIMING>
+	test_parser<ParserType::FUTURE, TestingMode::TIMING>
 	   (fileInfoVec, timingDifferentCombinations[2], num_threads);
 }
 
 TEST_CASE("Printing timing info different file combinations with 4 threads")
 {
+	std::cout << std::endl << std::endl;
+	std::cout << "Timing info for different file combinations with 4 threads" << std::endl;
 	std::cout << std::left
-		<< std::setw(18) << "File_combination"
+		<< std::setw(18) << "File_Number"
 		<< std::setw(20) << "Serial"
 		<< std::setw(20) << "Threads"
 		<< std::setw(20) << "Future"
 		<< std::endl;
+
+	std::cout << std::string(78, '-') << std::endl;
 
 	for (int i = 0; i < num_errwarninfo_combinations; i++)
 		std::cout << std::left
@@ -157,6 +180,8 @@ TEST_CASE("Printing timing info different file combinations with 4 threads")
 		<< std::setw(20) << timingDifferentCombinations[1][i]
 		<< std::setw(20) << timingDifferentCombinations[2][i]
 		<< std::endl;
+
+	std::cout << std::endl << std::endl;
 	SUCCEED("Timing results printed to console.");
 }
 
@@ -172,11 +197,11 @@ TEST_CASE("Filling the fileInfoVec with multiple file sizes")
 
 		std::unique_ptr<fileInfo> fileInfoPtrI = 
 		    std::make_unique<fileInfo>(
-		             /* filename */    "testFile-" + std::to_string(i) + ".dat",
-                     /* numLines*/     num_lines, 
-					 /* info */		   info_0,
-					 /* warns */	   warn_0,
-					 /* errors */	   error_0);
+		             /* filename */   "testFile-" + std::to_string(i) + ".dat",
+                     /* numLines*/    num_lines, 
+					 /* info */	      info_0,
+					 /* warns */	  warn_0,
+					 /* errors */	  error_0);
 
 		fileInfoVec.push_back(std::move(fileInfoPtrI));
 	}
@@ -203,12 +228,16 @@ TEST_CASE("Testing the future log parser with multiple file sizes")
 
 TEST_CASE("Printing timing info different methods with 4 threads")
 {
+	std::cout << std::endl << std::endl;
+	std::cout << "Timing for different file sizes (4 threads)" << std::endl;
 	std::cout << std::left
 		<< std::setw(18) << "File_size"
 		<< std::setw(20) << "Serial"
-		<< std::setw(20) << "Parallel"
-		<< std::setw(20) << "ParallelFuture"
+		<< std::setw(20) << "Threads"
+		<< std::setw(20) << "Future"
 		<< std::endl;
+
+	std::cout << std::string(78, '-') << std::endl;
 
 	for (int i = 0; i < num_test_sizes; i++)
 		std::cout << std::left
@@ -236,17 +265,23 @@ TEST_CASE("Testing the parallel future log parser with multiple thread numbers")
 
 TEST_CASE("Printing timing info different methods with different threads")
 {
+	std::cout << std::endl << std::endl;
+	std::cout << "Timing for different thread numbers" << std::endl;
 	std::cout << std::left
 		<< std::setw(18) << "Num_threads"
 		<< std::setw(20) << "Threads"
 		<< std::setw(20) << "Future"
 		<< std::endl;
 
-	for (int i = 0; i < num_test_sizes; i++)
+	std::cout << std::string('-', 78) << std::endl;
+
+	for (int i = 0; i < numThreadsVec.size(); i++)
 		std::cout << std::left
 		<< std::setw(18) << numThreadsVec[i]
 		<< std::setw(20) << timingDifferentThreads[0][i]
 		<< std::setw(20) << timingDifferentThreads[1][i]
 		<< std::endl;
+
+	std::cout << std::endl << std::endl;
 	SUCCEED("Timing results printed to console.");
 }

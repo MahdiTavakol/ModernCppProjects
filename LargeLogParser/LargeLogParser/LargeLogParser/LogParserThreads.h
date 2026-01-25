@@ -22,8 +22,8 @@ public:
 	{
 		int id = 0;
 		for (auto& logParser : logParsers) {
-			std::lock_guard<std::mutex> lock(cout_mutex);
-			std::cout << std::format("[Thread {}] Progress: {:.2f}%", id++, progress) << std::endl;
+			//std::lock_guard<std::mutex> lock(cout_mutex);
+			//std::cout << std::format("[Thread {}] Progress: {:.2f}%", id++, progress) << std::endl;
 		}
 	}
 

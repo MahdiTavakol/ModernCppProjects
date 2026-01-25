@@ -57,11 +57,20 @@ public:
 	fileWriter(const std::unique_ptr<fileInfo>& info_) 
 	{
 		info = std::make_unique<fileInfo>(*info_);
+		file.open(info->fileName);
 	}
 
 	// I do not want to reopen the stream!
 	fileWriter(const fileWriter& rhs_) = delete;
 
+	/* C++ itself takes care of closing the file when an object of
+	   this class goes out of scope.. I have just put this here to 
+	   emphasize 
+	*/
+
+	~fileWriter() {
+		file.close();
+	}
 
 	void inputArgs(std::array<int,2>& lineArg, std::array<double, 3>& contntArg) const {
 		lineArg = {info->numLines, info->lineLength};

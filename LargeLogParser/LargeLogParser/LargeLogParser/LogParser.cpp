@@ -31,10 +31,10 @@ void LogParser::readFile()
 	std::vector<std::string>& warns = data_struct.returnData()[1];
 	std::vector<std::string>& infos = data_struct.returnData()[2];
 
-	int& num_lines = data_struct.returnNumLines();
-	int& num_errors = data_struct.returnNums()[0];
-	int& num_warns  = data_struct.returnNums()[1];
-	int& num_infos  = data_struct.returnNums()[2];
+	int& num_lines   = data_struct.returnNumLines();
+	int& num_infos   = data_struct.returnNums()[0];
+	int& num_warns   = data_struct.returnNums()[1];
+	int& num_errors  = data_struct.returnNums()[2];
 
 	/* It is possible the[ERROR] is in the middle of the line
 	*  something like timestap -> [ERROR] and this thread
@@ -80,7 +80,7 @@ void LogParser::readFile()
 
 void LogParser::printProgress(const double& progress)
 {
-	std::cout << std::format("Progress {:.2f}%", progress) << std::endl;
+	//std::cout << std::format("Progress {:.2f}%", progress) << std::endl;
 }
 
 
