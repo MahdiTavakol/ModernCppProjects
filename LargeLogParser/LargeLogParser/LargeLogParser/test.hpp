@@ -63,7 +63,9 @@ void test_parser(std::string& logFileName, const std::array<int, 4>& expectedVal
 	logParserPtr->returnLogs<ReturnMode::MOVE>(outputData);
 	outputData(outputValues);
 
+	std::string failText = std::string("Failed for ") + logFileName;
 	REQUIRE(expectedValues == outputValues);
+	//REQUIRE_MESSAGE(expectedValues == outputValues,failText);
 }
 
 /*
