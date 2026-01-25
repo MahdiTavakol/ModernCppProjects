@@ -25,17 +25,17 @@ constexpr double info_0 = 20.9;
 constexpr double warn_0 = 10.7;
 constexpr double error_0 = 35.5;
 
-// default fileWriters
-std::unique_ptr<fileWriter> fileWriterPtr =
-    std::make_unique<fileWriterSimple>(
+// default fileInfos
+std::unique_ptr<fileInfo> fileInfoPtr =
+    std::make_unique<fileInfo>(
 		             /* filename */    "testFile.dat",
                      /* numLines*/     num_lines_0, 
 					 /* info */		   info_0,
 					 /* warns */	   warn_0,
 					 /* errors */	   error_0);
 
-std::unique_ptr<fileWriter> fileWriterPtrZero = 
-	std::make_unique<fileWriterSimple>(
+std::unique_ptr<fileInfo> fileInfoPtrZero = 
+	std::make_unique<fileInfo>(
 		             /* filename */    "emptyTestFile.dat",
                      /* numLines*/     0, 
 					 /* info */		   0.0,
@@ -43,8 +43,8 @@ std::unique_ptr<fileWriter> fileWriterPtrZero =
 					 /* errors */	   0.0
 					);
 
-// fileWriterVec
-std::vector<std::unique_ptr<fileWriter>> fileWriterVec;
+// fileInfoVec
+std::vector<std::unique_ptr<fileInfo>> fileInfoVec;
 
 
 
@@ -59,21 +59,21 @@ TEST_CASE("Testing empty files with different log parsers")
 {
 	double dummyTiming;
  	test_parser<ParserType::SERIAL,TestingMode::NO_TIMING>
-	     (fileWriterPtrZero,dummyTiming, num_threads);
+	     (fileInfoPtrZero,dummyTiming, num_threads);
     test_parser<ParserType::THREADS,TestingMode::NO_TIMING>
-	     (fileWriterPtrZero,dummyTiming, num_threads);
+	     (fileInfoPtrZero,dummyTiming, num_threads);
     test_parser<ParserType::FUTURE,TestingMode::NO_TIMING>
-	     (fileWriterPtrZero,dummyTiming, num_threads);
+	     (fileInfoPtrZero,dummyTiming, num_threads);
 }
 
 TEST_CASE("Testing files with different log parsers")
 {
 	test_parser<ParserType::SERIAL,TestingMode::NO_TIMING>
-	     (fileWriterPtr,timingDifferentParsers[0], num_threads);
+	     (fileInfoPtr,timingDifferentParsers[0], num_threads);
     test_parser<ParserType::THREADS,TestingMode::NO_TIMING>
-	     (fileWriterPtr,timingDifferentParsers[1], num_threads);
+	     (fileInfoPtr,timingDifferentParsers[1], num_threads);
     test_parser<ParserType::FUTURE,TestingMode::NO_TIMING>
-	     (fileWriterPtr,timingDifferentParsers[2], num_threads);
+	     (fileInfoPtr,timingDifferentParsers[2], num_threads);
 }
 
 TEST_CASE("Printing timing info different parsers")
@@ -91,7 +91,7 @@ TEST_CASE("Printing timing info different parsers")
 	SUCCEED("Timing results printed to console.");
 }
 
-TEST_CASE("Filling the fileWriterVec with multiple combinations")
+TEST_CASE("Filling the fileInfoVec with multiple combinations")
 {
 	static std::random_device rd;
 	static std::mt19937_64 rng{ rd() };
@@ -110,35 +110,35 @@ TEST_CASE("Filling the fileWriterVec with multiple combinations")
 		double warnPercent = vec[1] - vec[0];
 		double errorPercent = vec[2] - vec[1];
 
-		std::unique_ptr<fileWriter> fileWriterPtrI = 
-		    std::make_unique<fileWriterSimple>(
+		std::unique_ptr<fileInfo> fileInfoPtrI = 
+		    std::make_unique<fileInfo>(
 		             /* filename */    "testFile-" + std::to_string(i) + ".dat",
                      /* numLines*/     num_lines_0, 
 					 /* info */		   infoPercent,
 					 /* warns */	   warnPercent,
 					 /* errors */	   errorPercent);
 
-		fileWriterVec.push_back(std::move(fileWriterPtrI));
+		fileInfoVec.push_back(std::move(fileInfoPtrI));
 	}
-	SUCCEED("The fileWriterVec was filled with mutiple combinations");
+	SUCCEED("The fileInfoVec was filled with mutiple combinations");
 }
 
 TEST_CASE("Testing the serial log parser with multiple file combinations")
 {
 	test_parser<ParserType::SERIAL, TestingMode::TIMING>
-	   (fileWriterVec, timingDifferentCombinations[0], num_threads);
+	   (fileInfoVec, timingDifferentCombinations[0], num_threads);
 }
 
 TEST_CASE("Testing the thread log parser with multiple file combinations")
 {
 	test_parser<ParserType::THREADS, TestingMode::TIMING>
-	   (fileWriterVec, timingDifferentCombinations[1], num_threads);
+	   (fileInfoVec, timingDifferentCombinations[1], num_threads);
 }
 
 TEST_CASE("Testing the future log parser with multiple file combinations")
 {
 	test_parser<ParserType::SERIAL, TestingMode::TIMING>
-	   (fileWriterVec, timingDifferentCombinations[2], num_threads);
+	   (fileInfoVec, timingDifferentCombinations[2], num_threads);
 }
 
 TEST_CASE("Printing timing info different file combinations with 4 threads")
@@ -160,9 +160,9 @@ TEST_CASE("Printing timing info different file combinations with 4 threads")
 	SUCCEED("Timing results printed to console.");
 }
 
-TEST_CASE("Filling the fileWriterVec with multiple file sizes")
+TEST_CASE("Filling the fileInfoVec with multiple file sizes")
 {
-	fileWriterVec.clear();
+	fileInfoVec.clear();
 	// I do not want to deallocate.. that is the reason why I did not use the erase method
 
 	for (int i = 0; i < num_test_sizes; i++)
@@ -170,35 +170,35 @@ TEST_CASE("Filling the fileWriterVec with multiple file sizes")
 		int num_lines = (i+1) * size_step + num_lines_0; 
 
 
-		std::unique_ptr<fileWriter> fileWriterPtrI = 
-		    std::make_unique<fileWriterSimple>(
+		std::unique_ptr<fileInfo> fileInfoPtrI = 
+		    std::make_unique<fileInfo>(
 		             /* filename */    "testFile-" + std::to_string(i) + ".dat",
                      /* numLines*/     num_lines, 
 					 /* info */		   info_0,
 					 /* warns */	   warn_0,
 					 /* errors */	   error_0);
 
-		fileWriterVec.push_back(std::move(fileWriterPtrI));
+		fileInfoVec.push_back(std::move(fileInfoPtrI));
 	}
-	SUCCEED("The fileWriterVec was filled with mutiple file sizes");
+	SUCCEED("The fileInfoVec was filled with mutiple file sizes");
 }
 
 TEST_CASE("Testing the serial log parser with multiple file sizes")
 {
 	test_parser<ParserType::SERIAL, TestingMode::TIMING>
-	   (fileWriterVec, timingDifferentSizes[0], num_threads);
+	   (fileInfoVec, timingDifferentSizes[0], num_threads);
 }
 
 TEST_CASE("Testing the threads log parser with multiple file sizes")
 {
 	test_parser<ParserType::THREADS, TestingMode::TIMING>
-	   (fileWriterVec, timingDifferentSizes[1], num_threads);
+	   (fileInfoVec, timingDifferentSizes[1], num_threads);
 }
 
 TEST_CASE("Testing the future log parser with multiple file sizes")
 {
 	test_parser<ParserType::FUTURE, TestingMode::TIMING>
-	   (fileWriterVec, timingDifferentSizes[2], num_threads);
+	   (fileInfoVec, timingDifferentSizes[2], num_threads);
 }
 
 TEST_CASE("Printing timing info different methods with 4 threads")
@@ -224,14 +224,14 @@ TEST_CASE("Testing the threads log parser with multiple thread numbers")
 {
 	for (const auto& numThreads : numThreadsVec) 
 		test_parser<ParserType::THREADS,TestingMode::TIMING>
-			(fileWriterVec,timingDifferentThreads[0],numThreads);
+			(fileInfoVec,timingDifferentThreads[0],numThreads);
 }
 
 TEST_CASE("Testing the parallel future log parser with multiple thread numbers")
 {
 	for (const auto& numThreads : numThreadsVec) 
 		test_parser<ParserType::FUTURE,TestingMode::TIMING>
-			(fileWriterVec,timingDifferentThreads[1],numThreads);
+			(fileInfoVec,timingDifferentThreads[1],numThreads);
 }
 
 TEST_CASE("Printing timing info different methods with different threads")
