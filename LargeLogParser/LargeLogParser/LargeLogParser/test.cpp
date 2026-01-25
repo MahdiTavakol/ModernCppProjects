@@ -273,7 +273,7 @@ TEST_CASE("Printing timing info different methods with different threads")
 		<< std::setw(20) << "Future"
 		<< std::endl;
 
-	std::cout << std::string('-', 78) << std::endl;
+	std::cout << std::string(78,'-') << std::endl;
 
 	for (int i = 0; i < numThreadsVec.size(); i++)
 		std::cout << std::left
