@@ -3,7 +3,7 @@
 using namespace Parser_NS;
 
 LogParserCreaterLazy::LogParserCreaterLazy(const std::vector<std::string>& args_) :
-	args{ args_ }
+	LogParserCreater(), args{ args_ }
 {}
 
 std::unique_ptr<LogParser>&& LogParserCreaterLazy::operator()()

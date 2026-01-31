@@ -11,7 +11,7 @@ namespace Parser_NS {
 	{
 	public:
 		LogParserFuture(std::string filePath_, int num_threads_, bool silentMode_) :
-			LogParser{ filePath_ }
+			LogParser{ filePath_ , silentMode_}
 		{
 			num_threads = num_threads_;
 		}

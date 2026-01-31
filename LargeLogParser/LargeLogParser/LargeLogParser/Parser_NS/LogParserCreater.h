@@ -11,7 +11,6 @@ namespace Parser_NS {
 	
 	class LogParserCreater {
 	public:
-		LogParserCreater(const std::vector<std::string>& args_) {}
 		LogParserCreater() = default;
 		virtual std::unique_ptr<LogParser>&& operator()() {
 			return std::move(logParserPtr);
