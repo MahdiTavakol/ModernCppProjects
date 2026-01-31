@@ -5,51 +5,150 @@
 
 # Log File Parser Benchmark Project
 
-This project generates synthetic log files with various proportions of `[INFO]`, `[WARN]`, and `[ERROR]` messages, then benchmarks different strategies for parsing them:
+This project generates synthetic log files with configurable proportions of `[INFO]`, `[WARN]`, and `[ERROR]` messages, and benchmarks multiple parsing strategies:
 
-- `LogParser`: serial parser.
-- `LogParserThreads`: `std::thread`-based parser that splits the file into chunks.
-- `LogParserFuture`: `std::async`-based parser that reads chunks in parallel.
+- **`LogParser`**: serial parser.
+- **`LogParserThreads`**: `std::thread`-based parser that splits the file into chunks.
+- **`LogParserFuture`**: `std::async`-based parser that reads chunks in parallel.
+- **Creators**: helper classes to build parser configurations / pipelines (`LogParserCreater*`).
+
+---
 
 ## Features
 
-- Synthetic log file generation with configurable message proportions and sizes.
-- Parsing strategies supporting single-threaded and multi-threaded approaches.
-- Performance benchmarks for different file sizes and thread configurations.
+- Synthetic log generation with configurable size and message mix.
+- Multiple parsing implementations (serial + parallel).
+- Benchmarks to compare scaling with file size and thread count.
+- Cross-platform build via **CMake** (Linux + Windows).
 
-## Project Structure
+---
 
-- `CreateLargeLogs.h` / `CreateLargeLogs.cpp`: log file generator.
-- `fileWriter.h`: file metadata and writer utilities used by the generator.
-- `DataStructure.h` / `DataStructure.cpp`: shared container for counts and line storage.
-- `LogParser.h` / `LogParser.cpp`: base serial parser and common parsing logic.
-- `LogParserThreads.h` / `LogParserThreads.cpp`: thread-based parallel parser.
-- `LogParserFuture.h` / `LogParserFuture.cpp`: future-based parallel parser.
-- `test.hpp` / `test.cpp`: Catch2 tests and benchmarks.
+## Project Layout
 
-## Test Framework
+```
+.
+├── main.cpp
+├── Data_NS/
+│   ├── DataStructure.h
+│   └── DataStructure.cpp
+├── Parser_NS/
+│   ├── LogParser.h / .cpp
+│   ├── LogParserThreads.h / .cpp
+│   ├── LogParserFuture.h / .cpp
+│   ├── LogParserCreater.h
+│   ├── LogParserCreaterConc.h / .cpp
+│   └── LogParserCreaterLazy.h / .cpp
+└── Test_NS/
+    ├── test.hpp / test.cpp
+    ├── CreateLargeLogs.h / .cpp
+    ├── fileWriter.h
+    └── catch_amalgamated.hpp / catch_amalgamated.cpp
+```
 
-Unit tests and performance benchmarks use **[Catch2](https://github.com/catchorg/Catch2)** via the single-header amalgamation (`catch_amalgamated.hpp` / `catch_amalgamated.cpp`).
+---
 
-### How to Build and Run Tests
+## Build with CMake
 
-1. **Visual Studio**:
-   - Open `LargeLogParser.vcxproj`.
-   - Ensure the language standard is set to C++20 (required for `<format>`).
-   - Build and run the test target that includes `test.cpp`.
+### Targets
 
-2. **Command line (example)**:
-   ```bash
-   cl /std:c++20 /EHsc test.cpp CreateLargeLogs.cpp DataStructure.cpp LogParser.cpp LogParserThreads.cpp LogParserFuture.cpp catch_amalgamated.cpp
-   ```
+- **`logparser_app`**: builds `main.cpp` + core library.
+- **`unit_tests`**: Catch2-based tests/benchmarks.
 
-3. **Run Tests**:
-   Execute the compiled test binary. Timing and validation output will be printed to the console.
+> If you keep app and tests in one Visual Studio project, you’ll fight “multiple `main()`” issues.  
+> With CMake, you naturally get **two executables** (recommended).
 
-## Test Coverage
+---
 
-The test suite benchmarks and verifies:
-- Parser correctness (counts of `[INFO]`, `[WARN]`, `[ERROR]` lines).
-- Scalability with increasing file sizes.
-- Performance scaling with varying thread counts.
-- Comparison between serial and parallel implementations.
+## Windows (Visual Studio 2026 / MSVC)
+
+From a Developer Command Prompt (or open the folder in Visual Studio and let it configure CMake):
+
+```bat
+cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+cmake --build build --config Release
+ctest --test-dir build -C Release
+```
+
+Run the executables:
+
+```bat
+build\Release\logparser_app.exe
+build\Release\unit_tests.exe
+```
+
+---
+
+## Linux (Intel oneAPI `icpx`)
+
+### Important note about `<format>`
+
+On Ubuntu 22.04 the default GCC is often **11.x**, and **libstdc++ 11 does not provide `<format>`**.
+If your sources include `<format>`, you must use a newer toolchain (recommended):
+
+- **Option A (recommended): install GCC 13** and point `icpx` at it
+- **Option B: use libc++** (requires libc++ packages and flags)
+
+#### Option A — GCC 13 + `icpx`
+
+```bash
+# one-time: install newer GCC toolchain
+sudo apt update
+sudo apt install software-properties-common
+sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+sudo apt update
+sudo apt install gcc-13 g++-13
+```
+
+Configure/build with `icpx` using GCC 13’s libstdc++:
+
+```bash
+source /opt/intel/oneapi/setvars.sh
+
+rm -rf build
+cmake -S . -B build   -DCMAKE_CXX_COMPILER=icpx   -DCMAKE_C_COMPILER=icx   -DCMAKE_CXX_FLAGS="--gcc-install-dir=/usr/lib/gcc/x86_64-linux-gnu/13"   -DCMAKE_BUILD_TYPE=Release
+
+cmake --build build -j
+ctest --test-dir build
+```
+
+#### Option B — libc++ (if you prefer)
+
+```bash
+sudo apt update
+sudo apt install libc++-dev libc++abi-dev
+```
+
+Then configure with flags:
+
+```bash
+source /opt/intel/oneapi/setvars.sh
+
+rm -rf build
+cmake -S . -B build   -DCMAKE_CXX_COMPILER=icpx   -DCMAKE_C_COMPILER=icx   -DCMAKE_CXX_FLAGS="-stdlib=libc++ -isystem /usr/include/c++/v1"   -DCMAKE_EXE_LINKER_FLAGS="-stdlib=libc++"   -DCMAKE_BUILD_TYPE=Release
+
+cmake --build build -j
+ctest --test-dir build
+```
+
+---
+
+## Tests
+
+Tests and benchmarks are implemented with **Catch2** using the **amalgamated** distribution:
+
+- `Test_NS/catch_amalgamated.hpp`
+- `Test_NS/catch_amalgamated.cpp`
+
+To run:
+
+```bash
+./build/unit_tests
+```
+
+---
+
+## Notes
+
+- If you see linker errors about missing/duplicate `main`, it usually means app and tests were linked into the same binary. With CMake, keep them as separate targets (`logparser_app`, `unit_tests`).
+- If Linux compilation fails on `<format>`, it’s almost always a standard-library/toolchain issue (see Linux section above).
+
