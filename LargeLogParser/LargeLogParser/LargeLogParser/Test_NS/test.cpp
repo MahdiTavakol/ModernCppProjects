@@ -64,6 +64,7 @@ TEST_CASE("Testing without file generation for different log parsers")
 
 TEST_CASE("Testing empty files with different log parsers")
 {
+	std::filesystem::create_directory("../temp");
 	double dummyTiming;
  	test_parser<TestingMode::NO_TIMING>
 	     (fileInfoPtrZero,"SERIAL",dummyTiming, num_threads);
@@ -287,7 +288,7 @@ TEST_CASE("Cleaning up the temp directory") {
 	std::cout << "Cleaning up the temp directory" << std::endl;
 
 	if (std::filesystem::exists("../temp")) {
-		std::filesystem::remove_all("../temp");
+		//std::filesystem::remove_all("../temp");
 		SUCCEED("Temp directory removed");
 	}
 
