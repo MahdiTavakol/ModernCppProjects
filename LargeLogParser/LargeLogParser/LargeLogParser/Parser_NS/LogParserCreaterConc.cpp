@@ -5,7 +5,7 @@ using namespace Parser_NS;
 LogParserCreaterConc::LogParserCreaterConc(const std::vector<std::string>& args_):
 	LogParserCreater()
 {
-	std::string filePath = "LogFile.log";
+	std::string filePath = "../Test_NS/1stTest.dat";
 	int numThreads = 1;
 	std::string parserType = "SERIAL";
 	bool silentMode = false;
