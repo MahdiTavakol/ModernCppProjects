@@ -11,6 +11,7 @@ namespace Data_NS {
 		{
 			nums[0] = nums[1] = nums[2] = 0;
 		}
+		DataStructure(const DataStructure&& rhs_) noexcept = default;
 
 		void operator()(std::array<int, 4>& nums_) const;
 
