@@ -44,7 +44,8 @@ void test_parser(std::string& logFileName, std::string parserArg, const std::arr
 	std::unique_ptr<LogParser> logParserPtr;
 	std::vector<std::string> args;
 
-	args = { "LogParser", "--file", logFileName, "--parser", parserArg, "--silent" };
+	args = { "LogParser", "--file", logFileName, "--parser", parserArg, 
+		     "--threads", numThreads, "--silent" };
 
 	LogParserCreaterConc logParserCreater(args);
 	logParserPtr = std::move(logParserCreater());
@@ -104,7 +105,8 @@ void test_parser(std::vector<std::unique_ptr<fileInfo>>& fileInfoVec_,
                    std::vector<double>& timings_, const int& numThreads_)
 {
 	timings_.resize(fileInfoVec_.size()); // The test_parser doesnot push_back so I need to initialize it with zeros
-	for (int i = 0; i < fileInfoVec_.size(); i++) {
+	int nData = static_cast<int>(fileInfoVec_.size());
+	for (int i = 0; i < nData; i++) {
 		test_parser<tMode>(fileInfoVec_[i],parserArg,timings_[i],numThreads_);
 	}
 }

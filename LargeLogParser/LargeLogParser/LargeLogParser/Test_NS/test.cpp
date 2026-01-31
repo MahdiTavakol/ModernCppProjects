@@ -272,7 +272,8 @@ TEST_CASE("Printing timing info different methods with different threads")
 
 	std::cout << std::string(78,'-') << std::endl;
 
-	for (int i = 0; i < numThreadsVec.size(); i++)
+	int nThreads = static_cast<int>(numThreadsVec.size());
+	for (int i = 0; i < nThreads; i++)
 		std::cout << std::left
 		<< std::setw(18) << numThreadsVec[i]
 		<< std::setw(20) << timingDifferentThreads[0][i]

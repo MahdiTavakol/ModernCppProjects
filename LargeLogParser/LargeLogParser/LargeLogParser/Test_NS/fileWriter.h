@@ -36,12 +36,10 @@ namespace Test_NS {
 			const double& errorPercent_,
 			const int& lineLength_ = 256) :
 			fileName{ fileName_ },
-			numLines{ numLines_ }, infoPercent{ infoPercent_ },
-			warnPercent{ warnPercent_ }, errorPercent{ errorPercent_ },
-			lineLength{ lineLength_ }
-		{
-		}
-
+			numLines{ numLines_ },  lineLength{ lineLength_ },
+			infoPercent{ infoPercent_ }, warnPercent{ warnPercent_ }, errorPercent{ errorPercent_ }
+		{}
+		virtual ~fileInfo() = default;
 		fileInfo(const fileInfo& rhs_) = default;
 
 		std::string returnFileName() const { return fileName; }
