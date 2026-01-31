@@ -16,6 +16,7 @@ enum class TestingMode
 
 using namespace Test_NS;
 using Parser_NS::LogParser;
+using Parser_NS::LogParserCreaterConc;
 
 template<TestingMode tMode>
 double run_parser(std::unique_ptr<LogParser>& logParserPtr)
@@ -45,12 +46,12 @@ void test_parser(std::string& logFileName, std::string parserArg, const std::arr
 
 	args = { "LogParser", "--file", logFileName, "--parser", parserArg, "--silent" };
 
-	LogParserCreaterConc logParserCreater{ args };
+	LogParserCreaterConc logParserCreater(args);
 	logParserPtr = std::move(logParserCreater());
 
-	DataStructure outputData;
+	Data_NS::DataStructure outputData;
 	timingInfo = run_parser<tMode>(logParserPtr);
-	logParserPtr->returnLogs<ReturnMode::MOVE>(outputData);
+	logParserPtr->returnLogs<Parser_NS::ReturnMode::MOVE>(outputData);
 	outputData(outputValues);
 
 	std::string failText = std::string("Failed for ") + logFileName;

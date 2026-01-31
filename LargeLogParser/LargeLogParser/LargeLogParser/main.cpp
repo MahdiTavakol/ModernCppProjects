@@ -5,18 +5,29 @@
 #include <iostream>
 #include <memory>
 
-void main(int narg, char** argv)
+int main(int argc, char** argv)
 {
 	using Parser_NS::LogParser;
 	using Parser_NS::LogParserCreaterConc;
 
 	std::vector<std::string> args;
-	for (int i = 1; i < narg; i++)
-		args.emplace_back(argv[i]);
+
+	if (argc == 1) {
+		std::cout << "Usage: LogParser [options]\n"
+			<< "Options:\n"
+			<< "  --file, -f <file_path>       Specify the log file path (default: LogFile.log)\n"
+			<< "  --threads, -t <num_threads>  Specify the number of threads (default: 1)\n"
+			<< "  --parser, -p <type>          Specify the parser type (SERIAL, THREADS, FUTURE) (default: SERIAL)\n"
+			<< "  --help, -h                   Show this help message\n";
+		std::cout << "Using default parameters." << std::endl;
+	} else {
+		for (int i = 1; i < argc; i++)
+			args.emplace_back(argv[i]);
+	}
 
 
 	std::unique_ptr<LogParser> logParserPtr;
-	LogParserCreaterConc parserCreater{ args };
+ 	LogParserCreaterConc parserCreater{ args };
 
 	logParserPtr = std::move(parserCreater());
 
@@ -32,4 +43,5 @@ void main(int narg, char** argv)
 
 	logParserPtr->writeData();
 
+	return 0;
 }

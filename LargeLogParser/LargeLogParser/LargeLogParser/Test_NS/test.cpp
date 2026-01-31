@@ -1,5 +1,4 @@
-
-
+#define CATCH_CONFIG_MAIN
 #include "catch_amalgamated.hpp"
 #include "test.hpp"
 
@@ -9,6 +8,7 @@
 #include <iostream>
 #include <iomanip>
 #include <random>
+#include <filesystem>
 
 // default parameters
 constexpr int line_length = 128;
@@ -285,9 +285,11 @@ TEST_CASE("Printing timing info different methods with different threads")
 
 TEST_CASE("Cleaning up the temp directory") {
 	std::cout << std::endl << std::endl;
-	std::cout << "Timing for different thread numbers" << std::endl;
+	std::cout << "Cleaning up the temp directory" << std::endl;
 
-
-	SUCCE
+	if (std::filesystem::exists("../temp")) {
+		std::filesystem::remove_all("../temp");
+		SUCCEED("Temp directory removed");
+	}
 
 }

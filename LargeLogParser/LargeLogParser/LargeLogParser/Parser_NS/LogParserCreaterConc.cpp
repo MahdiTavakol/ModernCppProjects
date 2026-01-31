@@ -2,7 +2,8 @@
 
 using namespace Parser_NS;
 
-LogParserCreaterConc::LogParserCreaterConc(const std::vector<std::string>& args_)
+LogParserCreaterConc::LogParserCreaterConc(const std::vector<std::string>& args_):
+	LogParserCreater()
 {
 	std::string filePath = "LogFile.log";
 	int numThreads = 1;
@@ -48,6 +49,7 @@ LogParserCreaterConc::LogParserCreaterConc(const std::vector<std::string>& args_
 		}
 	}
 
+
 	if (parserType == "SERIAL") {
 		logParserPtr = std::make_unique<LogParser>(filePath,silentMode);
 	}
@@ -57,4 +59,5 @@ LogParserCreaterConc::LogParserCreaterConc(const std::vector<std::string>& args_
 	else if (parserType == "FUTURE") {
 		logParserPtr = std::make_unique<LogParserFuture>(filePath, numThreads, silentMode);
 	}
+ 
 }
