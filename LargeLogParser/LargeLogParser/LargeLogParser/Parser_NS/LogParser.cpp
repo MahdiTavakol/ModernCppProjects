@@ -85,7 +85,8 @@ void LogParser::readFile()
 
 void LogParser::printProgress(const double& progress)
 {
-	std::cout << std::format("Progress {:.2f}%", progress) << std::endl;
+	std::cout << std::fixed << std::setprecision(2) << "Progress :" << progress << "%" << std::endl;
+	//std::cout << std::format("Progress {:.2f}%", progress) << std::endl;
 }
 
 void LogParser::writeData()
