@@ -45,7 +45,7 @@ void test_parser(std::string& logFileName, std::string parserArg, const std::arr
 	std::vector<std::string> args;
 
 	args = { "LogParser", "--file", logFileName, "--parser", parserArg, 
-		     "--threads", numThreads, "--silent" };
+		     "--threads", std::to_string(numThreads), "--silent" };
 
 	LogParserCreaterConc logParserCreater(args);
 	logParserPtr = std::move(logParserCreater());
