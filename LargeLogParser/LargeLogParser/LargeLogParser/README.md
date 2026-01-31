@@ -78,10 +78,6 @@ build\Release\unit_tests.exe
 
 ---
 
-
-
----
-
 ## Tests
 
 Tests and benchmarks are implemented with **Catch2** using the **amalgamated** distribution:
