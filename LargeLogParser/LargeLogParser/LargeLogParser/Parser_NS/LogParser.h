@@ -77,7 +77,7 @@ namespace Parser_NS {
 		int beg, end;
 
 		// log parsing keys
-		const std::string error_key, warn_key, info_key;
+		std::string error_key, warn_key, info_key;
 
 
 		// data structure
