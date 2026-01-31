@@ -11,12 +11,10 @@
 #include <filesystem>
 
 // default parameters
-constexpr int line_length = 128;
 constexpr int num_test_sizes = 10;
 constexpr int num_errwarninfo_combinations = 10;
 constexpr int size_step = 1000;
 constexpr int num_threads = 4;
-constexpr double file_size_0 = 600.0;
 constexpr int num_lines_0 = 1000;
 constexpr double info_0 = 20.9;
 constexpr double warn_0 = 10.7;
