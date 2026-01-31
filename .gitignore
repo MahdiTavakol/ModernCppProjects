@@ -373,3 +373,7 @@ FodyWeavers.xsd
 
 # Mandlebrot temp files
 /MandleBrot/MandelBrot/MandelBrot/temp
+
+
+# LargeLogParser temp files
+/LargeLogParser/LargeLogParser/LargeLogParser/temp

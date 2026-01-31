@@ -25,7 +25,7 @@ constexpr double error_0 = 35.5;
 // default fileInfos
 std::unique_ptr<fileInfo> fileInfoPtr =
     std::make_unique<fileInfo>(
-		             /* filename */    "testFile.dat",
+		             /* filename */    "../temp/testFile.dat",
                      /* numLines*/     num_lines_0, 
 					 /* info */		   info_0,
 					 /* warns */	   warn_0,
@@ -33,7 +33,7 @@ std::unique_ptr<fileInfo> fileInfoPtr =
 
 std::unique_ptr<fileInfo> fileInfoPtrZero = 
 	std::make_unique<fileInfo>(
-		             /* filename */    "emptyTestFile.dat",
+		             /* filename */    "../temp/emptyTestFile.dat",
                      /* numLines*/     0, 
 					 /* info */		   0.0,
 					 /* warns */	   0.0,
@@ -128,7 +128,7 @@ TEST_CASE("Filling the fileInfoVec with multiple combinations")
 
 		std::unique_ptr<fileInfo> fileInfoPtrI = 
 		    std::make_unique<fileInfo>(
-		             /* filename */    "testFile-" + std::to_string(i) + ".dat",
+		             /* filename */    "../temp/testFile-" + std::to_string(i) + ".dat",
                      /* numLines*/     num_lines_0, 
 					 /* info */		   infoPercent,
 					 /* warns */	   warnPercent,
@@ -194,7 +194,7 @@ TEST_CASE("Filling the fileInfoVec with multiple file sizes")
 
 		std::unique_ptr<fileInfo> fileInfoPtrI = 
 		    std::make_unique<fileInfo>(
-		             /* filename */   "testFile-" + std::to_string(i) + ".dat",
+		             /* filename */   "../temp/testFile-" + std::to_string(i) + ".dat",
                      /* numLines*/    num_lines, 
 					 /* info */	      info_0,
 					 /* warns */	  warn_0,
@@ -281,4 +281,13 @@ TEST_CASE("Printing timing info different methods with different threads")
 
 	std::cout << std::endl << std::endl;
 	SUCCEED("Timing results printed to console.");
+}
+
+TEST_CASE("Cleaning up the temp directory") {
+	std::cout << std::endl << std::endl;
+	std::cout << "Timing for different thread numbers" << std::endl;
+
+
+	SUCCE
+
 }
