@@ -5,6 +5,7 @@
 #include "LogParser.h"
 
 #include <string>
+#include <thread>
 #include <vector>
 
 
