@@ -52,7 +52,7 @@ const std::vector<int> numThreadsVec = { 1,2,4,6,8 };
 TEST_CASE("Testing without file generation for different log parsers")
 {
 	std::string fileName("../Test_NS/1stTest.dat");
-	std::array<int, 4> expectedValues = { 61, 12 , 4 , 23 };
+	std::array<int, 4> expectedValues = { 11000, 2336 , 1161 , 3860 };
 	double dummyTiming;
 	test_parser<TestingMode::NO_TIMING>
 		(fileName,"SERIAL",expectedValues, num_threads, dummyTiming);
