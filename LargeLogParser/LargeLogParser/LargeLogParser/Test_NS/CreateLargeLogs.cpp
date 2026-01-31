@@ -1,6 +1,8 @@
 #include "CreateLargeLogs.h"
 #include <random>
 
+using namespace Test_NS;
+
 CreateLargeLogs::CreateLargeLogs(const std::string& logFileName_, const int& num_lines_, const int& line_length_,
 		const double& info_percent_, const double& warns_percent_, const double& errors_percent_,
 		const bool& keep_temp_):

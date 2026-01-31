@@ -1,7 +1,7 @@
 #include "LogParserFuture.h"
-#include "DataStructure.h"
-#include <filesystem>
+#include "../Data_NS/DataStructure.h"
 
+using namespace Parser_NS;
 
 void LogParserFuture::readFile()
 {
@@ -10,7 +10,12 @@ void LogParserFuture::readFile()
 
 	for (int i = 0; i < num_threads; i++)
 	{
-		ftrs.push_back(std::async(std::launch::async, & LogParserFuture::readChunk, this, i, num_threads));
+		if (i == 0)
+			ftrs.push_back(std::async(std::launch::async, & LogParserFuture::readChunk,
+				this, i, num_threads, silentMode));
+		else
+			ftrs.push_back(std::async(std::launch::async, &LogParserFuture::readChunk,
+				this, i, num_threads, true));
 	}
 
 	for (auto& ftr : ftrs)
@@ -20,7 +25,7 @@ void LogParserFuture::readFile()
 	}
 }
 
-DataStructure LogParserFuture::readChunk(const int& me_, const int& num_)
+DataStructure LogParserFuture::readChunk(const int& me_, const int& num_, bool silentMode_)
 {
 	DataStructure output_data;
 
@@ -30,7 +35,7 @@ DataStructure LogParserFuture::readChunk(const int& me_, const int& num_)
 	if (myend > fileLength) myend = fileLength;
 
 	std::unique_ptr<LogParser> logParser =
-		std::make_unique<LogParser>(this->filePath, this->fileLength, mybeg, myend);
+		std::make_unique<LogParser>(this->filePath, this->fileLength, mybeg, myend, silentMode_);
 
 	logParser->readFile();
 	logParser->returnLogs<ReturnMode::MOVE>(output_data);

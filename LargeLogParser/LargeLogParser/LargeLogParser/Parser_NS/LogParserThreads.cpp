@@ -1,9 +1,10 @@
 #include "LogParserThreads.h"
 
-#include <filesystem>
 
-LogParserThreads::LogParserThreads(std::string filePath_, const int& numThreads_) :
-	LogParser{ filePath_ }, numThreads{ numThreads_ }
+using namespace Parser_NS;
+
+LogParserThreads::LogParserThreads(std::string filePath_, const int& numThreads_, bool silentMode_) :
+	LogParser{ filePath_, silentMode_}, numThreads{ numThreads_ }
 {
 	logParsers.reserve(numThreads);
 	threads.reserve(numThreads);
@@ -21,8 +22,8 @@ LogParserThreads::LogParserThreads(std::string filePath_, const int& numThreads_
 }
 
 LogParserThreads::LogParserThreads(std::string filePath_, const int& numThreads_,
-	const int& beg_, const int& end_) :
-	LogParser{ filePath_ }, numThreads{ numThreads_ }
+	const int& beg_, const int& end_, bool silentMode_) :
+	LogParser{ filePath_, silentMode_ }, numThreads{ numThreads_ }
 {
 	logParsers.reserve(numThreads);
 	threads.reserve(numThreads);
@@ -37,7 +38,10 @@ LogParserThreads::LogParserThreads(std::string filePath_, const int& numThreads_
 		int beg = beg_ + i * lengthPerThread;
 		int end = beg + lengthPerThread;
 		end = end >= end_ ? fileLength : end_;
-		logParsers.emplace_back(filePath, fileLength, beg, end);
+		if (i == 0)
+			logParsers.emplace_back(filePath, fileLength, beg, end, silentMode);
+		else
+			logParsers.emplace_back(filePath, fileLength, beg, end, false);
 	}
 }
 

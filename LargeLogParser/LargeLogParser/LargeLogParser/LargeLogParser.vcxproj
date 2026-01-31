@@ -128,23 +128,29 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="catch_amalgamated.hpp" />
-    <ClInclude Include="CreateLargeLogs.h" />
-    <ClInclude Include="fileWriter.h" />
-    <ClInclude Include="LogParser.h" />
-    <ClInclude Include="LogParserFuture.h" />
-    <ClInclude Include="LogParserThreads.h" />
-    <ClInclude Include="DataStructure.h" />
-    <ClInclude Include="test.hpp" />
+    <ClInclude Include="Data_NS\DataStructure.h" />
+    <ClInclude Include="Parser_NS\LogParser.h" />
+    <ClInclude Include="Parser_NS\LogParserCreater.h" />
+    <ClInclude Include="Parser_NS\LogParserCreaterConc.h" />
+    <ClInclude Include="Parser_NS\LogParserCreaterLazy.h" />
+    <ClInclude Include="Parser_NS\LogParserFuture.h" />
+    <ClInclude Include="Parser_NS\LogParserThreads.h" />
+    <ClInclude Include="Test_NS\catch_amalgamated.hpp" />
+    <ClInclude Include="Test_NS\CreateLargeLogs.h" />
+    <ClInclude Include="Test_NS\fileWriter.h" />
+    <ClInclude Include="Test_NS\test.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="catch_amalgamated.cpp" />
-    <ClCompile Include="CreateLargeLogs.cpp" />
-    <ClCompile Include="DataStructure.cpp" />
-    <ClCompile Include="LogParser.cpp" />
-    <ClCompile Include="LogParserFuture.cpp" />
-    <ClCompile Include="LogParserThreads.cpp" />
-    <ClCompile Include="test.cpp" />
+    <ClCompile Include="Data_NS\DataStructure.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Parser_NS\LogParser.cpp" />
+    <ClCompile Include="Parser_NS\LogParserCreaterConc.cpp" />
+    <ClCompile Include="Parser_NS\LogParserCreaterLazy.cpp" />
+    <ClCompile Include="Parser_NS\LogParserFuture.cpp" />
+    <ClCompile Include="Parser_NS\LogParserThreads.cpp" />
+    <ClCompile Include="Test_NS\catch_amalgamated.cpp" />
+    <ClCompile Include="Test_NS\CreateLargeLogs.cpp" />
+    <ClCompile Include="Test_NS\test.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

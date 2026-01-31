@@ -1,9 +1,12 @@
 #include "LogParser.h"
 #include <filesystem>
+#include <string>
 
+using namespace Parser_NS;
 
-LogParser::LogParser(std::string filePath_, std::array<std::string, 3> keys) :
-	filePath{ filePath_ }, beg{ 0 }, end{ 0 },
+LogParser::LogParser(std::string filePath_, bool silentMode_, std::array<std::string, 3> keys) :
+	filePath{ filePath_ }, silentMode{silentMode_},
+	beg{ 0 }, end{ 0 },
 	error_key{ keys[0] }, warn_key{ keys[1] }, info_key{ keys[2] }
 {
 	file.open(filePath);
@@ -13,8 +16,9 @@ LogParser::LogParser(std::string filePath_, std::array<std::string, 3> keys) :
 	end = fileLength;
 }
 
-LogParser::LogParser(std::string filePath_, const int& file_length_, int beg_, int end_) :
-	LogParser{ filePath_ }
+LogParser::LogParser(std::string filePath_, const int& file_length_, 
+	int beg_, int end_, bool silentMode_) :
+	LogParser{ filePath_ , silentMode_}
 {
 	fileLength = file_length_;
 	beg = beg_;
@@ -74,15 +78,42 @@ void LogParser::readFile()
 
 		double progress = 100 * (pos - beg) / (end - beg);
 
-		printProgress(progress);
+		if (!silentMode)
+			printProgress(progress);
 	}
 }
 
 void LogParser::printProgress(const double& progress)
 {
-	//std::cout << std::format("Progress {:.2f}%", progress) << std::endl;
+	std::cout << std::format("Progress {:.2f}%", progress) << std::endl;
 }
 
+void LogParser::writeData()
+{
+	std::string fileNameOnly;
+	std::stringstream iss(filePath);
+	std::getline(iss, fileNameOnly, ','); // to get the file name only without the extension
+
+	auto writeStream = [](const std::string& fileName_, 
+		                  const std::vector<std::string>& data_) {
+		std::ofstream stream(fileName_);
+		for (const auto& line : data_)
+			stream << line << std::endl;
+		stream.close();
+		};
+	
+	struct {
+		std::string fileName_;
+		std::vector<std::string> data_;
+	} output[3] = {
+		{ fileNameOnly + "-infos.log", data_struct.returnData()[0] },
+		{ fileNameOnly + "-warns.log", data_struct.returnData()[1] },
+		{ fileNameOnly + "-errors.log", data_struct.returnData()[2] }
+	};
+
+	for (const auto& out : output)
+		writeStream(out.fileName_, out.data_);
+}
 
 int LogParser::inquireFileLength(std::string filePath_)
 {

@@ -1,7 +1,4 @@
-#include "CreateLargeLogs.h"
-#include "LogParser.h"
-#include "LogParserFuture.h"
-#include "LogParserThreads.h"
+
 
 #include "catch_amalgamated.hpp"
 #include "test.hpp"
@@ -59,33 +56,33 @@ TEST_CASE("Testing without file generation for different log parsers")
 	std::string fileName("1stTest.dat");
 	std::array<int, 4> expectedValues = { 61, 12 , 4 , 23 };
 	double dummyTiming;
-	test_parser<ParserType::SERIAL, TestingMode::NO_TIMING>
-		(fileName,expectedValues , num_threads, dummyTiming);
-	test_parser<ParserType::THREADS, TestingMode::NO_TIMING>
-		(fileName, expectedValues, num_threads, dummyTiming);
-	test_parser<ParserType::FUTURE, TestingMode::NO_TIMING>
-		(fileName, expectedValues, num_threads, dummyTiming);
+	test_parser<TestingMode::NO_TIMING>
+		(fileName,"SERIAL",expectedValues, num_threads, dummyTiming);
+	test_parser<TestingMode::NO_TIMING>
+		(fileName, "THREADS", expectedValues, num_threads, dummyTiming);
+	test_parser<TestingMode::NO_TIMING>
+		(fileName, "FUTURE", expectedValues, num_threads, dummyTiming);
 }
 
 TEST_CASE("Testing empty files with different log parsers")
 {
 	double dummyTiming;
- 	test_parser<ParserType::SERIAL,TestingMode::NO_TIMING>
-	     (fileInfoPtrZero,dummyTiming, num_threads);
-    test_parser<ParserType::THREADS,TestingMode::NO_TIMING>
-	     (fileInfoPtrZero,dummyTiming, num_threads);
-    test_parser<ParserType::FUTURE,TestingMode::NO_TIMING>
-	     (fileInfoPtrZero,dummyTiming, num_threads);
+ 	test_parser<TestingMode::NO_TIMING>
+	     (fileInfoPtrZero,"SERIAL",dummyTiming, num_threads);
+    test_parser<TestingMode::NO_TIMING>
+	     (fileInfoPtrZero,"THREADS",dummyTiming, num_threads);
+    test_parser<TestingMode::NO_TIMING>
+	     (fileInfoPtrZero,"FUTURE",dummyTiming, num_threads);
 }
 
 TEST_CASE("Testing files with different log parsers")
 {
-	test_parser<ParserType::SERIAL,TestingMode::TIMING>
-	     (fileInfoPtr,timingDifferentParsers[0], num_threads);
-    test_parser<ParserType::THREADS,TestingMode::TIMING>
-	     (fileInfoPtr,timingDifferentParsers[1], num_threads);
-    test_parser<ParserType::FUTURE,TestingMode::TIMING>
-	     (fileInfoPtr,timingDifferentParsers[2], num_threads);
+	test_parser<TestingMode::TIMING>
+	     (fileInfoPtr,"SERIAL",timingDifferentParsers[0], num_threads);
+    test_parser<TestingMode::TIMING>
+	     (fileInfoPtr,"THREADS",timingDifferentParsers[1], num_threads);
+    test_parser<TestingMode::TIMING>
+	     (fileInfoPtr,"FUTURE",timingDifferentParsers[2], num_threads);
 }
 
 TEST_CASE("Printing timing info different parsers")
@@ -144,20 +141,20 @@ TEST_CASE("Filling the fileInfoVec with multiple combinations")
 
 TEST_CASE("Testing the serial log parser with multiple file combinations")
 {
-	test_parser<ParserType::SERIAL, TestingMode::TIMING>
-	   (fileInfoVec, timingDifferentCombinations[0], num_threads);
+	test_parser<TestingMode::TIMING>
+	   (fileInfoVec, "SERIAL", timingDifferentCombinations[0], num_threads);
 }
 
 TEST_CASE("Testing the thread log parser with multiple file combinations")
 {
-	test_parser<ParserType::THREADS, TestingMode::TIMING>
-	   (fileInfoVec, timingDifferentCombinations[1], num_threads);
+	test_parser<TestingMode::TIMING>
+	   (fileInfoVec, "THREADS",timingDifferentCombinations[1], num_threads);
 }
 
 TEST_CASE("Testing the future log parser with multiple file combinations")
 {
-	test_parser<ParserType::FUTURE, TestingMode::TIMING>
-	   (fileInfoVec, timingDifferentCombinations[2], num_threads);
+	test_parser<TestingMode::TIMING>
+	   (fileInfoVec, "FUTURE", timingDifferentCombinations[2], num_threads);
 }
 
 TEST_CASE("Printing timing info different file combinations with 4 threads")
@@ -210,20 +207,20 @@ TEST_CASE("Filling the fileInfoVec with multiple file sizes")
 
 TEST_CASE("Testing the serial log parser with multiple file sizes")
 {
-	test_parser<ParserType::SERIAL, TestingMode::TIMING>
-	   (fileInfoVec, timingDifferentSizes[0], num_threads);
+	test_parser<TestingMode::TIMING>
+	   (fileInfoVec,"SERIAL", timingDifferentSizes[0], num_threads);
 }
 
 TEST_CASE("Testing the threads log parser with multiple file sizes")
 {
-	test_parser<ParserType::THREADS, TestingMode::TIMING>
-	   (fileInfoVec, timingDifferentSizes[1], num_threads);
+	test_parser<TestingMode::TIMING>
+	   (fileInfoVec, "THREADS", timingDifferentSizes[1], num_threads);
 }
 
 TEST_CASE("Testing the future log parser with multiple file sizes")
 {
-	test_parser<ParserType::FUTURE, TestingMode::TIMING>
-	   (fileInfoVec, timingDifferentSizes[2], num_threads);
+	test_parser<TestingMode::TIMING>
+	   (fileInfoVec, "FUTURE", timingDifferentSizes[2], num_threads);
 }
 
 TEST_CASE("Printing timing info different methods with 4 threads")
@@ -252,15 +249,15 @@ TEST_CASE("Printing timing info different methods with 4 threads")
 TEST_CASE("Testing the threads log parser with multiple thread numbers")
 {
 	for (const auto& numThreads : numThreadsVec) 
-		test_parser<ParserType::THREADS,TestingMode::TIMING>
-			(fileInfoVec,timingDifferentThreads[0],numThreads);
+		test_parser<TestingMode::TIMING>
+			(fileInfoVec,"THREADS", timingDifferentThreads[0], numThreads);
 }
 
 TEST_CASE("Testing the parallel future log parser with multiple thread numbers")
 {
 	for (const auto& numThreads : numThreadsVec) 
-		test_parser<ParserType::FUTURE,TestingMode::TIMING>
-			(fileInfoVec,timingDifferentThreads[1],numThreads);
+		test_parser<TestingMode::TIMING>
+			(fileInfoVec,"FUTURE",timingDifferentThreads[1], numThreads);
 }
 
 TEST_CASE("Printing timing info different methods with different threads")

@@ -1,6 +1,8 @@
 #include "DataStructure.h"
 #include <stdexcept>
 
+using namespace Data_NS;
+
 void DataStructure::operator()(std::array<int,4>& nums_) const
 {
 	nums_[0] = numLines;
