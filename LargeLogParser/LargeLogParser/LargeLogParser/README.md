@@ -78,57 +78,7 @@ build\Release\unit_tests.exe
 
 ---
 
-## Linux (Intel oneAPI `icpx`)
 
-### Important note about `<format>`
-
-On Ubuntu 22.04 the default GCC is often **11.x**, and **libstdc++ 11 does not provide `<format>`**.
-If your sources include `<format>`, you must use a newer toolchain (recommended):
-
-- **Option A (recommended): install GCC 13** and point `icpx` at it
-- **Option B: use libc++** (requires libc++ packages and flags)
-
-#### Option A — GCC 13 + `icpx`
-
-```bash
-# one-time: install newer GCC toolchain
-sudo apt update
-sudo apt install software-properties-common
-sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-sudo apt update
-sudo apt install gcc-13 g++-13
-```
-
-Configure/build with `icpx` using GCC 13’s libstdc++:
-
-```bash
-source /opt/intel/oneapi/setvars.sh
-
-rm -rf build
-cmake -S . -B build   -DCMAKE_CXX_COMPILER=icpx   -DCMAKE_C_COMPILER=icx   -DCMAKE_CXX_FLAGS="--gcc-install-dir=/usr/lib/gcc/x86_64-linux-gnu/13"   -DCMAKE_BUILD_TYPE=Release
-
-cmake --build build -j
-ctest --test-dir build
-```
-
-#### Option B — libc++ (if you prefer)
-
-```bash
-sudo apt update
-sudo apt install libc++-dev libc++abi-dev
-```
-
-Then configure with flags:
-
-```bash
-source /opt/intel/oneapi/setvars.sh
-
-rm -rf build
-cmake -S . -B build   -DCMAKE_CXX_COMPILER=icpx   -DCMAKE_C_COMPILER=icx   -DCMAKE_CXX_FLAGS="-stdlib=libc++ -isystem /usr/include/c++/v1"   -DCMAKE_EXE_LINKER_FLAGS="-stdlib=libc++"   -DCMAKE_BUILD_TYPE=Release
-
-cmake --build build -j
-ctest --test-dir build
-```
 
 ---
 
