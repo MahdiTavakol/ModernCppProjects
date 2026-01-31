@@ -12,7 +12,7 @@ namespace Data_NS {
 			nums[0] = nums[1] = nums[2] = 0;
 		}
 		DataStructure(const DataStructure& rhs_) = default;
-		DataStructure(const DataStructure&& rhs_) noexcept = default;
+		DataStructure(DataStructure&& rhs_) noexcept = default;
 		DataStructure& operator=(const DataStructure& rhs_) = default;
 		DataStructure& operator=(DataStructure&& rhs_) noexcept = default;
 
