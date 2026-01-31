@@ -68,7 +68,7 @@ namespace Test_NS {
 		   emphasize
 		*/
 
-		~fileWriter() {
+		virtual ~fileWriter() {
 			file.close();
 		}
 
@@ -108,6 +108,8 @@ namespace Test_NS {
 		fileWriterSimple(const std::unique_ptr<fileInfo>& info_) :
 			fileWriter{ info_ } {
 		}
+
+		~fileWriterSimple() override = default;
 
 		fileWriterSimple(const fileWriterSimple& rhs_) = delete;
 
