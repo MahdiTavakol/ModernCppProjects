@@ -377,3 +377,5 @@ FodyWeavers.xsd
 
 # LargeLogParser temp files
 /LargeLogParser/LargeLogParser/LargeLogParser/temp
+/LargeLogParser/LargeLogParser/LargeLogParser/build
+
