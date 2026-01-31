@@ -24,6 +24,10 @@ namespace Parser_NS {
 		LogParser(std::string filePath_, 
 			bool silentMode = false, std::array<std::string, 3> keys = { "[ERROR]", "[WARN]", "[INFO]" });
 		LogParser(std::string filePath_, const int& file_length_, int beg_, int end_, bool silentMode = true);
+		~LogParser() {
+			if (file.is_open())
+				file.close();
+		}
 		virtual void readFile();
 		/*void readFile(int& beg_, int& end_) {
 			this->beg = beg_; this->end = end_;

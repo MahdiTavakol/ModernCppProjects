@@ -15,6 +15,7 @@ namespace Parser_NS {
 		{
 			num_threads = num_threads_;
 		}
+		~LogParserFuture() = default;
 
 		virtual void readFile() override;
 
