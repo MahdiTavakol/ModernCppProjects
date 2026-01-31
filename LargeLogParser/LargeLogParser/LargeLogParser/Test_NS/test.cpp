@@ -288,7 +288,7 @@ TEST_CASE("Cleaning up the temp directory") {
 	std::cout << "Cleaning up the temp directory" << std::endl;
 
 	if (std::filesystem::exists("../temp")) {
-		//std::filesystem::remove_all("../temp");
+		std::filesystem::remove_all("../temp");
 		SUCCEED("Temp directory removed");
 	}
 
