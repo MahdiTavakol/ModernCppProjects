@@ -10,6 +10,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <array>
+#include <string>
 #include "run_mandelbrot.h"
 
 
@@ -20,6 +21,15 @@ namespace Runner_NS {
 	{
 	public:
 		run_mandelbrot_animation(const Animate_type& ani_type_, bool shouldIRender = false, const double& gamma_=1.0);
+
+		run_mandelbrot_animation(const std::string info_,const complex<double>& center_,
+			                     const bounds& bnds_, const std::array<int,2>& resolution_,
+			                     const bool& shouldIRender_, const double& gamma_,
+			                     const thread_config& thread_cfg,
+		                         const std::string& mesh_type_string, 
+		                         const std::string& alloc_mode_string,
+			                     const std::string& alloc_major_string);
+
 
 		~run_mandelbrot_animation() = default;
 

@@ -17,6 +17,10 @@ void run_mandelbrot_timing::run()
 	return;
 }
 
+// it seems that run_timing function deals
+// with different allocation modes and mesh types
+// while the generate_timing_info function works on different thread configurations
+// names should be modified accordingly.
 void run_mandelbrot_timing::run_timing()
 {
 	std::cout << "Allocating the " << info << " mandelbrot pointer" << std::endl;

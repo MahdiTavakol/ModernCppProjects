@@ -2,32 +2,51 @@
 
 using namespace Runner_NS;
 
+
+
 run_mandelbrot_factory::run_mandelbrot_factory(std::vector<std::string> args_)
 {
 	int argc = static_cast<int>(args_.size());
 	int iarg = 1;
 
-	int type;
-	bounds bnds;
-	std::array<int, 2> resolution;
-	bool shouldIrender;
-	double gamma;
-
-	thread_config thread_cfg;
-	std::string mesh_type_string, alloc_mode_string, alloc_major_string;
 
 	auto invalid_arg_check = [](const int& iarg, const int& expectarg, const int& argc) {
 		if (iarg + expectarg >= argc)
 			throw std::invalid_argument("Invalid input arguments");
 		};
 
+	/* list of supported arguments
+	 * information string --info info_string
+	 * run types:
+	 *	timing --timing
+	 *  animation --animation 
+	 * type --> which animation type to run (based on the center)
+	 * bounds --> mandelbrot bounds --bounds x_min x_max y_min y_max
+	 * resolution --> mandelbrot resolution --resolution x_res y_res
+	 * thread_config --> thread configuration --threads threads_x threads_y
+	 * mesh_type --> mesh type --mesh_type mesh_type_string
+	 * aloc_mode --> allocation mode --alloc_mod alloc_mode_string
+	 * aloc_major --> allocation major --alloc_major alloc_major_string
+	 */
+
 	while (iarg < argc) {
-		if (args_[iarg] == "--timing") {
+		if (args_[iarg] == "--info") {
+			invalid_arg_check(iarg, 1, argc);
+			info = args_[iarg + 1];
+			iarg += 2;
+		}
+		else if (args_[iarg] == "--timing") {
 			iarg++;
+			if (run_type != Run_type::NONE)
+				throw std::invalid_argument("Cannot specify multiple run types");
+			run_type = Run_type::TIMING;
 			continue;
 		}
 		else if (args_[iarg] == "--animation") {
 			invalid_arg_check(iarg, 2, argc);
+			if (run_type != Run_type::NONE)
+				throw std::invalid_argument("Cannot specify multiple run types");
+			run_type = Run_type::ANIMATION;
 			if (args_[iarg + 1] == "true")
 				shouldIrender = true;
 			else
@@ -37,7 +56,7 @@ run_mandelbrot_factory::run_mandelbrot_factory(std::vector<std::string> args_)
 		}
 		else if (args_[iarg] == "--type") {
 			invalid_arg_check(iarg, 1, argc);
-			type = std::stoi(args_[iarg + 1]);
+			center_type_id = std::stoi(args_[iarg + 1]);
 			iarg += 2;
 		}
 		else if (args_[iarg] == "--bounds") {
@@ -76,4 +95,76 @@ run_mandelbrot_factory::run_mandelbrot_factory(std::vector<std::string> args_)
 			iarg += 2;
 		}
 	}
+
+	// Setting the center based on the center type
+	switch (center_type_id)
+	{
+	case 1:
+		center = complex(-0.743643887037151, 0.131825904205330);
+		break;
+
+	case 2:
+		center = complex(-0.1015, 0.633);
+		break;
+
+	case 3:
+		center = complex(-0.1015, 0.633);
+		break;
+
+	case 4:
+		center = complex(-1.4011551890, 0.0);
+		break;
+	case 5:
+		center = complex(-0.39054, 0.58679);
+		break;
+	case6:
+		center = complex(-0.761574, -0.0847596);
+		break;
+	case 7:
+		center = complex(-0.7435669, 0.1314023);
+		break;
+	case 8:
+		center = complex(-0.39054, -0.58679);
+		break;
+	case 9:
+		center = complex(-1.401155, 0.0);
+		break;
+
+	// burning ship cases
+	case 10:
+		center = complex(-1.516, -0.03);
+		decay_rate = 0.95;
+		scale0 = 10.0;
+		break;
+
+	case 11:
+		center = complex(-1.75, -0.03);
+		break;
+
+	default:
+		throw std::invalid_argument("Wrong anitype");
+	}
+
+	// Create the appropriate runner
+	switch (run_type) {
+		case Run_type::TIMING:
+		{
+			runner_ptr = std::make_unique<run_mandelbrot_timing>
+				(info, center, bnds, resolution, shouldIrender,
+				gamma, thread_cfg, mesh_type_string,
+				alloc_mode_string,
+				alloc_major_string);
+			break;
+		}
+		case Run_type::ANIMATION:
+		{
+			runner_ptr = std::make_unique<run_mandelbrot_animation>
+				(info, center, bnds, resolution, shouldIrender,
+				 gamma, thread_cfg, mesh_type_string,
+				 alloc_mode_string,
+				 alloc_major_string);
+			break;
+		}
+	}
+
 }
