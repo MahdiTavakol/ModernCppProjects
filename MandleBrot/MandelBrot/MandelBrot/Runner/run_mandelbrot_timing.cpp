@@ -75,6 +75,11 @@ void run_mandelbrot_timing::run_timing()
 	areas[info + " - " + title] = area;
 }
 
+// May be instead of so many different functions 
+// I can use strategy ... one strategy inheritance for
+// the allocation mode 
+// another for the allocation major and 
+// finally one for the mesh type
 void run_mandelbrot_timing::generate_timing_info()
 {
 	bounds bnds;
@@ -93,6 +98,7 @@ void run_mandelbrot_timing::generate_timing_info()
 	trd_cnfg_y_meshes.threads_y = num_threads;
 
 
+	//Should be a separate function 
 	auto run_diff_thread_configs = [&]()
 		{
 			mesh_type = Mesh_type::SERIAL;
