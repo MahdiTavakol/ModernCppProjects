@@ -160,6 +160,7 @@
     <ClCompile Include="Algorithm\mandelbrot_ymesh_outerloop.cpp" />
     <ClCompile Include="Array\array.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Runner\run_mandelbrot.cpp" />
     <ClCompile Include="Runner\run_mandelbrot_animation.cpp" />
     <ClCompile Include="Runner\run_mandelbrot_factory.cpp" />
     <ClCompile Include="Runner\run_mandelbrot_timing.cpp" />

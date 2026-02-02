@@ -14,21 +14,12 @@
 #include "run_mandelbrot.h"
 
 
-enum class Animate_type { ANIMATE_1, ANIMATE_2, ANIMATE_3, ANIMATE_4, ANIMATE_5, ANIMATE_6, ANIMATE_7, ANIMATE_8, ANIMATE_9,BURNING_1, BURNING_2 };
 
 namespace Runner_NS {
 	class run_mandelbrot_animation : public run_mandelbrot
 	{
 	public:
-		run_mandelbrot_animation(const Animate_type& ani_type_, bool shouldIRender = false, const double& gamma_=1.0);
-
-		run_mandelbrot_animation(const std::string info_,const complex<double>& center_,
-			                     const bounds& bnds_, const std::array<int,2>& resolution_,
-			                     const bool& shouldIRender_, const double& gamma_,
-			                     const thread_config& thread_cfg,
-		                         const std::string& mesh_type_string, 
-		                         const std::string& alloc_mode_string,
-			                     const std::string& alloc_major_string);
+		run_mandelbrot_animation(const std::vector<std::string>& args_);
 
 
 		~run_mandelbrot_animation() = default;
@@ -36,9 +27,10 @@ namespace Runner_NS {
 		void run() override;
 	
 	private:
-		Animate_type ani_type;
-		bool shouldIRender;
-		double gamma;
+		double decay_rate;
+		double scale0;
+
+
 		void generate_animation(const complex<double>& _center, int frame_init = 0, 
 			int num_frames = 10000, double decay_rate = 1.05, double scale0=1.0);
 		void animate(std::string _file_name, const complex<double>& _center, const double& _scale);

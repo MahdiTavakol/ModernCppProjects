@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iostream>
 #include <cstdlib>
+#include <array>
 
 
 #include "../Array/array.h"
@@ -31,6 +32,7 @@ namespace Runner_NS {
 	class run_mandelbrot
 	{
 	public:
+		run_mandelbrot(const std::vector<std::string>& args_);
 		run_mandelbrot(const bounds& bnds_,
 			int x_size_, int y_size_) :
 			bnds{ bnds_ }, x_size{ x_size_ }, y_size{ y_size_ } {}
@@ -57,15 +59,33 @@ namespace Runner_NS {
 		virtual void run() = 0;
 
 	protected:
+		// info string
 		std::string info;
+		// center point
+		int center_type_id;
+		complex<double> center;
+		// bounds
+		bounds bnds;
+		// allocation mode
+		std::string alloc_mode_string, alloc_major_string;
 		allocation_mode alloc_mode;
 		allocation_major alloc_major;
+		// mesh type
+		std::string mesh_type_string;
 		Mesh_type mesh_type;
-		bounds bnds;
+		// resolution
+		std::array<int, 2> resolution;
+		// should I render (just for animation)
+		bool shouldIRender= true;
+		// gamma
+		double gamma;
+		// thread configuration
+		thread_config thread_cfg;
 		int x_size;
 		int y_size;
-		thread_config thread_cfg;
 		double area;
+
+		// the mandelbrot pointer
 		std::unique_ptr<mandelbrot> mandelbrot_ptr;
 	};
 }

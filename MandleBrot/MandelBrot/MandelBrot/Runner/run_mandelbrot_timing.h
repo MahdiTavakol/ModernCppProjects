@@ -21,14 +21,7 @@ namespace Runner_NS {
 	class run_mandelbrot_timing : public run_mandelbrot
 	{
 	public:
-		run_mandelbrot_timing(const bounds& bnds_, int x_size_, int y_size_);
-		run_mandelbrot_timing(const std::string info_, const complex<double>& center_,
-			                  const bounds& bnds_, const std::array<int, 2>& resolution_,
-			                  const bool& shouldIRender_, const double& gamma_,
-	                          const thread_config& thread_cfg,
-			                  const std::string& mesh_type_string,
-			                  const std::string& alloc_mode_string,
-			                  const std::string& alloc_major_string);
+		run_mandelbrot_timing(const std::vector<std::string>& args_);
 		~run_mandelbrot_timing() = default;
 
 		void run() override;

@@ -9,67 +9,18 @@ using namespace Runner_NS;
 constexpr int renderingNEvery = 50;
 constexpr int maxThreads = 8;
 
-run_mandelbrot_animation::run_mandelbrot_animation(const Animate_type& ani_type_,
-	bool shouldIRender_, const double& gamma_ ):
-	        run_mandelbrot(),
-	        ani_type{ ani_type_ },
-			shouldIRender{shouldIRender_},
-			gamma{gamma_}
-            {}
+run_mandelbrot_animation::run_mandelbrot_animation(const std::vector<std::string>& args_) :
+	run_mandelbrot{ args_ }, decay_rate{ 1.05 }, scale0{ 1.0 }
+{
+	if (center_type_id == 10) {
+		decay_rate = 0.95;
+		scale0 = 10.0;
+	}
+}
+
 
 void run_mandelbrot_animation::run()
 {
-	complex center(-0.743643887037151, 0.131825904205330);
-	double decay_rate = 1.05;
-	double scale0 = 1.0;
-
-	switch (ani_type)
-	{
-	case Animate_type::ANIMATE_1:
-		center = complex(-0.743643887037151, 0.131825904205330);
-		break;
-
-	case Animate_type::ANIMATE_2:
-		center = complex(-0.1015, 0.633);
-		break;
-
-	case Animate_type::ANIMATE_3:
-		center = complex(-0.1015, 0.633);
-		break;
-
-	case Animate_type::ANIMATE_4:
-		center = complex(-1.4011551890, 0.0);
-		break;
-	case Animate_type::ANIMATE_5:
-		center = complex(-0.39054, 0.58679);
-		break;
-	case Animate_type::ANIMATE_6:
-		center = complex(-0.761574, - 0.0847596);
-		break;
-	case Animate_type::ANIMATE_7:
-		center = complex(-0.7435669, 0.1314023);
-		break;
-	case Animate_type::ANIMATE_8:
-		center = complex(-0.39054, - 0.58679);
-		break;
-	case Animate_type::ANIMATE_9:
-		center = complex(-1.401155,0.0);
-		break;
-
-
-	case Animate_type::BURNING_1:
-		center = complex(-1.516, -0.03);
-		decay_rate = 0.95;
-		scale0 = 10.0;
-		break;
-
-	case Animate_type::BURNING_2:
-		center = complex(-1.75, -0.03);
-		break;
-
-	default:
-		throw std::invalid_argument("Wrong anitype");
-	}
 	generate_animation(center,0,1000,decay_rate,scale0);
 }
 
@@ -167,11 +118,11 @@ void run_mandelbrot_animation::animate(std::string _file_name, const complex<dou
 			std::unique_ptr<mandelbrot> mandelbrot_ptr;
 			int num_iterations = 10000;
 			double gamma = 1.2;
-			if (ani_type != Animate_type::BURNING_1 && ani_type != Animate_type::BURNING_2)
+			if (center_type_id != 10 && center_type_id != 11)
 				mandelbrot_ptr = std::make_unique<mandelbrot_xmesh_outerloop>
 				(alloc_mode, alloc_major, bnds, x_size, y_size, trd_cnfg_y_meshes, _file_name,
 					num_iterations,gamma);
-			else if (ani_type == Animate_type::BURNING_1 || ani_type == Animate_type::BURNING_2)
+			else if (center_type_id == 10 || center_type_id == 11)
 				mandelbrot_ptr = std::make_unique<burningship_xmesh_outerloop>
 				(alloc_mode, alloc_major, bnds, x_size, y_size, trd_cnfg_y_meshes, _file_name,
 					num_iterations,gamma);

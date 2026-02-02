@@ -2,12 +2,13 @@
 
 using namespace Runner_NS;
 
-run_mandelbrot_timing::run_mandelbrot_timing(const bounds& bnds_, int x_size_, int y_size_) :
-	run_mandelbrot{bnds_,x_size_,y_size_} {
+run_mandelbrot_timing::run_mandelbrot_timing(const std::vector<std::string>& args_) :
+	run_mandelbrot{ args_ }
+{
 #pragma omp parallel
-		{
-			num_threads = omp_get_num_threads();
-		}
+	{
+		num_threads = omp_get_num_threads();
+	}
 }
 
 void run_mandelbrot_timing::run()
