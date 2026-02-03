@@ -1,4 +1,5 @@
 #include "run_mandelbrot_timing.h"
+#include "run_mandelbrot_single.h"
 
 using namespace Runner_NS;
 
@@ -9,156 +10,87 @@ run_mandelbrot_timing::run_mandelbrot_timing(const std::vector<std::string>& arg
 	{
 		num_threads = omp_get_num_threads();
 	}
+
+	// filling the allocation_mode vector
+	alloc_mode_vec.push_back(allocation_mode::C);
+	alloc_mode_vec.push_back(allocation_mode::CPP);
+	alloc_mode_vec.push_back(allocation_mode::MODERN);
+#if USE_MDSPAN
+	alloc_mode_vec.push_back(allocation_mode::MDSPAN);
+#endif
+
+
+	// filling the alloc_major vector
+	alloc_major_vec.push_back(allocation_major::X_MAJOR);
+	alloc_major_vec.push_back(allocation_major::Y_MAJOR);
+
+	
+	// filling the thread config vector
+	thread_config thread_cfg;
+	thread_cfg.threads_x = num_threads;
+	thread_cfg.threads_y = 1;
+	threads_vec.push_back(thread_cfg);
+	thread_cfg.threads_x = 1;
+	thread_cfg.threads_y = num_threads;
+	threads_vec.push_back(thread_cfg);
+
+	// filling the mesh vector
+	mesh_vec.push_back(Mesh_type::SERIAL);
+	mesh_vec.push_back(Mesh_type::XMESH_INNER_LOOP);
+	mesh_vec.push_back(Mesh_type::XMESH_OUTER_LOOP);
+	mesh_vec.push_back(Mesh_type::YMESH_INNER_LOOP);
+	mesh_vec.push_back(Mesh_type::YMESH_OUTER_LOOP);
+
 }
 
-void run_mandelbrot_timing::run()
-{
-	complex center(-0.743643887037151, 0.131825904205330);
-	generate_timing_info();
-	return;
-}
-
-// it seems that run_timing function deals
-// with different allocation modes and mesh types
-// while the generate_timing_info function works on different thread configurations
-// names should be modified accordingly.
-void run_mandelbrot_timing::run_timing()
-{
-	std::cout << "Allocating the " << info << " mandelbrot pointer" << std::endl;
-	std::string file_name("temp/Mandelbrot_" + info + ".dat");
-	std::string title;
-
-	switch (mesh_type)
-	{
-	case Mesh_type::XMESH_INNER_LOOP:
-		mandelbrot_ptr = std::make_unique<mandelbrot_xmesh_innerloop>(alloc_mode, alloc_major, bnds, x_size, y_size, thread_cfg, file_name);
-		title = "X-Mesh Inner Loop";
-		break;
-	case Mesh_type::XMESH_OUTER_LOOP:
-		title = "X-Mesh Outer Loop";
-		mandelbrot_ptr = std::make_unique<mandelbrot_xmesh_outerloop>(alloc_mode, alloc_major, bnds, x_size, y_size, thread_cfg, file_name);
-		break;
-	case Mesh_type::YMESH_INNER_LOOP:
-		mandelbrot_ptr = std::make_unique<mandelbrot_ymesh_innerloop>(alloc_mode, alloc_major, bnds, x_size, y_size, thread_cfg, file_name);
-		title = "Y-Mesh Inner Loop";
-		break;
-	case Mesh_type::YMESH_OUTER_LOOP:
-		mandelbrot_ptr = std::make_unique<mandelbrot_ymesh_outerloop>(alloc_mode, alloc_major, bnds, x_size, y_size, thread_cfg, file_name);
-		title = "Y-Mesh Outer Loop";
-		break;
-	case Mesh_type::SERIAL:
-		mandelbrot_ptr = std::make_unique<mandelbrot>(alloc_mode, alloc_major, bnds, x_size, y_size, file_name);
-		title = "Serial";
-		break;
-	default:
-		std::cerr << "Unknown mesh type!" << std::endl;
-		exit(EXIT_FAILURE);
-	}
-
-
-	std::cout << "Starting the " << info << " code" << std::endl;
-	std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
-	mandelbrot_ptr->calculate();
-	auto end = std::chrono::high_resolution_clock::now();
-	std::chrono::duration<double, std::milli> timeRequired = (end - start);
-	//Let's get milliseconds out of that, and report
-	std::cout << "The " << info << " code took " << timeRequired.count() << " milliseconds." << std::endl;
-	std::cout << "Finished the " << info << " code" << std::endl;
-	area = mandelbrot_ptr->return_area();
-	std::cout << "The area of the set is " << area << std::endl;
-
-	std::cout << "Writting the output " << std::endl;
-	mandelbrot_ptr->output();
-	std::cout << "Finished writing the output" << std::endl;
-
-	timings[info + " - " + title] = timeRequired.count();
-	areas[info + " - " + title] = area;
-}
 
 // May be instead of so many different functions 
 // I can use strategy ... one strategy inheritance for
 // the allocation mode 
 // another for the allocation major and 
 // finally one for the mesh type
-void run_mandelbrot_timing::generate_timing_info()
+void run_mandelbrot_timing::run()
 {
-	bounds bnds;
-	bnds.x_min = -3.56;
-	bnds.x_max = 1.77;
-	bnds.y_min = -1.5;
-	bnds.y_max = 1.5;
+	complex center(-0.743643887037151, 0.131825904205330);
+
+	int number = 0;
+	for (const auto& alloc_mode : alloc_mode_vec)
+		for (const auto& alloc_major: alloc_major_vec)
+			for (const auto& thread_cfg : threads_vec)
+				for (const auto& mesh_type: mesh_vec)
+				{
+					number++;
+					std::cout << "Allocating the #" << number << " mandelbrot pointer" << std::endl;
+					std::string file_name("temp/Mandelbrot_" + std::to_string(number) + ".dat");
+					std::string title;
+					mandelbrot_runner_ptr = std::make_unique<run_mandelbrot_single>
+						(alloc_mode, alloc_major, bnds, thread_cfg, file_name, mesh_type);
 
 
+					std::cout << "Starting the #" << number << " code" << std::endl;
+					std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
+					mandelbrot_runner_ptr->run();
 
-	thread_config trd_cnfg_serial, trd_cnfg_x_meshes, trd_cnfg_y_meshes;
+					auto end = std::chrono::high_resolution_clock::now();
+					std::chrono::duration<double, std::milli> timeRequired = (end - start);
+					//Let's get milliseconds out of that, and report
+					std::cout << "The #" << number << " code took " << timeRequired.count() << " milliseconds." << std::endl;
+					std::cout << "Finished the " << info << " code" << std::endl;
+					area = mandelbrot_runner_ptr->return_area();
+					std::cout << "The area of the set is " << area << std::endl;
 
-	trd_cnfg_x_meshes.threads_x = num_threads;
-	trd_cnfg_x_meshes.threads_y = 1;
-	trd_cnfg_y_meshes.threads_x = 1;
-	trd_cnfg_y_meshes.threads_y = num_threads;
+					std::cout << "Writting the output " << std::endl;
+					mandelbrot_runner_ptr->output();
+					std::cout << "Finished writing the output" << std::endl;
 
+					timings[info + " - " + title] = timeRequired.count();
+					areas[info + " - " + title] = area;
+					
+			    }
 
-	//Should be a separate function 
-	auto run_diff_thread_configs = [&]()
-		{
-			mesh_type = Mesh_type::SERIAL;
-			run_timing();
-
-			thread_cfg = trd_cnfg_x_meshes;
-			mesh_type = Mesh_type::XMESH_OUTER_LOOP;
-			run_timing();
-
-			mesh_type = Mesh_type::XMESH_INNER_LOOP;
-			run_timing();
-
-			thread_cfg = trd_cnfg_y_meshes;
-			mesh_type = Mesh_type::YMESH_OUTER_LOOP;
-			run_timing();
-
-			mesh_type = Mesh_type::YMESH_INNER_LOOP;
-			run_timing();
-		};
 
 	std::string timing_area_info_file("timing-area.csv");
 
-
-	// C
-	alloc_mode = allocation_mode::C;
-	alloc_major = allocation_major::X_MAJOR;
-	info = std::string("C_X_MAJOR");
-	run_diff_thread_configs();
-	alloc_major = allocation_major::Y_MAJOR;
-	info = std::string("C_Y_MAJOR");
-	run_diff_thread_configs();
-
-	// CPP
-	alloc_mode = allocation_mode::CPP;
-	alloc_major = allocation_major::X_MAJOR;
-	info = std::string("CPP_X_MAJOR");
-	run_diff_thread_configs();
-	alloc_major = allocation_major::Y_MAJOR;
-	info = std::string("CPP_Y_MAJOR");
-	run_diff_thread_configs();
-
-	// modern
-	alloc_mode = allocation_mode::MODERN;
-	alloc_major = allocation_major::X_MAJOR;
-	info = std::string("MODERN_X_MAJOR");
-	run_diff_thread_configs();
-	alloc_major = allocation_major::Y_MAJOR;
-	info = std::string("MODERN_Y_MAJOR");
-	run_diff_thread_configs();
-
-#if USE_MDSPAN
-	// mdspan
-	alloc_mode = allocation_mode::MDSPAN;
-	alloc_major = allocation_major::X_MAJOR;
-	info = std::string("MDSPAN_X_MAJOR");
-	run_diff_thread_configs();
-	alloc_major = allocation_major::Y_MAJOR;
-	info = std::string("MDSPAN_Y_MAJOR");
-	run_diff_thread_configs();
-#endif
 
 	writeMaps(timing_area_info_file, timings, areas);
 

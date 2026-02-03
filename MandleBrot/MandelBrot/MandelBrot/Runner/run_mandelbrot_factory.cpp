@@ -1,5 +1,9 @@
 #include "run_mandelbrot_factory.h"
 
+#include "run_mandelbrot_animation.h"
+#include "run_mandelbrot_timing.h"
+#include "run_mandelbrot_single.h"
+
 using namespace Runner_NS;
 
 
@@ -14,7 +18,10 @@ run_mandelbrot_factory::run_mandelbrot_factory(const std::vector<std::string>& a
 
 	run_type = args_[1];
 
-	if (run_type == "timing") {
+	if (run_type == "single") {
+		runner_ptr = std::make_unique<run_mandelbrot_single>(args_);
+	}
+	else if (run_type == "timing") {
 		runner_ptr = std::make_unique<run_mandelbrot_timing>(args_);
 	}
 	else if (run_type == "animation") {

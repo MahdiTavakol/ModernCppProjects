@@ -90,6 +90,9 @@
     <ClInclude Include="Runner\run_mandelbrot_factory.h">
       <Filter>Source Files\Runner</Filter>
     </ClInclude>
+    <ClInclude Include="Runner\run_mandelbrot_single.h">
+      <Filter>Source Files\Runner</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -132,6 +135,9 @@
       <Filter>Source Files\Runner</Filter>
     </ClCompile>
     <ClCompile Include="Runner\run_mandelbrot.cpp">
+      <Filter>Source Files\Runner</Filter>
+    </ClCompile>
+    <ClCompile Include="Runner\run_mandelbrot_single.cpp">
       <Filter>Source Files\Runner</Filter>
     </ClCompile>
   </ItemGroup>

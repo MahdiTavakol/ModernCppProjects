@@ -28,14 +28,16 @@ using namespace Mandelbrot_NS;
 
 namespace Runner_NS {
 	enum class Mesh_type { SERIAL, XMESH_INNER_LOOP, XMESH_OUTER_LOOP, YMESH_INNER_LOOP, YMESH_OUTER_LOOP };
+	using Array_NS::allocation_mode;
+	using Array_NS::allocation_major;
 
 	class run_mandelbrot
 	{
 	public:
 		run_mandelbrot(const std::vector<std::string>& args_);
-		run_mandelbrot(const bounds& bnds_,
-			int x_size_, int y_size_) :
-			bnds{ bnds_ }, x_size{ x_size_ }, y_size{ y_size_ } {}
+		run_mandelbrot(const allocation_mode& alloc_mode_, const allocation_major& alloc_major_,
+			const bounds& bnds, const thread_config& thread_cfg, const std::string& info, const Mesh_type& mesh_type_);
+
 
 		run_mandelbrot() {};
 
@@ -57,6 +59,13 @@ namespace Runner_NS {
 		virtual ~run_mandelbrot() = default;
 
 		virtual void run() = 0;
+
+		double& return_area() {
+			mandelbrot_ptr->return_area();
+		}
+		void output() {
+			mandelbrot_ptr->output();
+		}
 
 	protected:
 		// info string

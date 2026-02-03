@@ -1,8 +1,6 @@
 #pragma once
 
 #include "run_mandelbrot.h"
-#include "run_mandelbrot_animation.h"
-#include "run_mandelbrot_timing.h"
 
 namespace Runner_NS {
 

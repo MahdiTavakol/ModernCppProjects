@@ -147,6 +147,7 @@
     <ClInclude Include="Runner\run_mandelbrot.h" />
     <ClInclude Include="Runner\run_mandelbrot_animation.h" />
     <ClInclude Include="Runner\run_mandelbrot_factory.h" />
+    <ClInclude Include="Runner\run_mandelbrot_single.h" />
     <ClInclude Include="Runner\run_mandelbrot_timing.h" />
   </ItemGroup>
   <ItemGroup>
@@ -163,6 +164,7 @@
     <ClCompile Include="Runner\run_mandelbrot.cpp" />
     <ClCompile Include="Runner\run_mandelbrot_animation.cpp" />
     <ClCompile Include="Runner\run_mandelbrot_factory.cpp" />
+    <ClCompile Include="Runner\run_mandelbrot_single.cpp" />
     <ClCompile Include="Runner\run_mandelbrot_timing.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

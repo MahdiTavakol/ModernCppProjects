@@ -1,5 +1,7 @@
 #include "run_mandelbrot.h"
 
+#include <algorithm>
+
 using namespace Runner_NS;
 
 run_mandelbrot::run_mandelbrot(const std::vector<std::string>& args_)
@@ -62,6 +64,7 @@ run_mandelbrot::run_mandelbrot(const std::vector<std::string>& args_)
 		else if (args_[iarg] == "--mesh_type") {
 			invalid_arg_check(iarg, 1, argc);
 			mesh_type_string = args_[iarg + 1];
+			std::transform(mesh_type_string.begin(), mesh_type_string.end(), mesh_type_string.begin(), ::toupper);
 			iarg += 2;
 		}
 		else if (args_[iarg] == "--alloc_mod") {
@@ -127,6 +130,29 @@ run_mandelbrot::run_mandelbrot(const std::vector<std::string>& args_)
 		throw std::invalid_argument("Wrong anitype");
 	}
 
-
+	if (mesh_type_string == "XMESH_INNER_LOOP") {
+		mesh_type = Mesh_type::XMESH_INNER_LOOP;
+	}
+	else if (mesh_type_string == "XMESH_OUTER_LOOP")
+	{
+		mesh_type = Mesh_type::XMESH_OUTER_LOOP;
+	}
+	else if (mesh_type_string == "YMESH_INNER_LOOP:") {
+		mesh_type = Mesh_type::YMESH_INNER_LOOP;
+	}
+	else if (mesh_type_string == "YMESH_OUTER_LOOP") {
+		mesh_type = Mesh_type::YMESH_OUTER_LOOP;
+	}
+	else if (mesh_type_string == "SERIAL") {
+		mesh_type = Mesh_type::SERIAL;
+	}
 
 }
+
+run_mandelbrot::run_mandelbrot(const allocation_mode& alloc_mode_, const allocation_major& alloc_major_,
+	const bounds& bnds_, const thread_config& thread_cfg_, const std::string& info_, const Mesh_type& mesh_type_):
+	info{info_}, center{complex(-0.743643887037151, 0.131825904205330)}, bnds{ bnds_ },
+	alloc_mode{alloc_mode_}, alloc_major{alloc_major_}, mesh_type{mesh_type_},
+	resolution{1920,1080},
+	thread_cfg{thread_cfg_}
+{}

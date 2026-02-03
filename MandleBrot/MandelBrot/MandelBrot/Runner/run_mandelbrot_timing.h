@@ -32,12 +32,20 @@ namespace Runner_NS {
 		std::map<std::string, double> areas;
 
 
-		void run_timing();
-		void generate_timing_info();
-
 		static void writeMaps(std::string _info_file_name,
 			                  std::map<std::string, double>& _timings,
 			                  std::map<std::string, double>& _areas);
+
+
+		/// <summary>
+		///  May be I need to replaced these with maps from allocation_mode to string to have the name of each one too. 
+		/// </summary>
+		std::vector<allocation_mode> alloc_mode_vec;
+		std::vector<allocation_major> alloc_major_vec;
+		std::vector<thread_config> threads_vec;
+		std::vector<Mesh_type> mesh_vec;
+
+		std::unique_ptr<run_mandelbrot> mandelbrot_runner_ptr;
 	};
 }
 
