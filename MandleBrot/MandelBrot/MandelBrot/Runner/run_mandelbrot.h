@@ -27,7 +27,7 @@ using Numerical_NS::complex;
 using namespace Mandelbrot_NS;
 
 namespace Runner_NS {
-	enum class Mesh_type { SERIAL, XMESH_INNER_LOOP, XMESH_OUTER_LOOP, YMESH_INNER_LOOP, YMESH_OUTER_LOOP };
+	
 	using Array_NS::allocation_mode;
 	using Array_NS::allocation_major;
 

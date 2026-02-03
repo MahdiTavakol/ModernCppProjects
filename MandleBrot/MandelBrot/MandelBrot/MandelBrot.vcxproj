@@ -130,6 +130,7 @@
   <ItemGroup>
     <ClInclude Include="Algorithm\burningship_xmesh_outerloop.h" />
     <ClInclude Include="Algorithm\mandelbrot.h" />
+    <ClInclude Include="Algorithm\mandelbrot_omp.h" />
     <ClInclude Include="Algorithm\mandelbrot_xmesh.h" />
     <ClInclude Include="Algorithm\mandelbrot_xmesh_innerloop.h" />
     <ClInclude Include="Algorithm\mandelbrot_xmesh_outerloop.h" />
@@ -153,6 +154,7 @@
   <ItemGroup>
     <ClCompile Include="Algorithm\burningship_xmesh_outerloop.cpp" />
     <ClCompile Include="Algorithm\mandelbrot.cpp" />
+    <ClCompile Include="Algorithm\mandelbrot_omp.cpp" />
     <ClCompile Include="Algorithm\mandelbrot_xmesh.cpp" />
     <ClCompile Include="Algorithm\mandelbrot_xmesh_innerloop.cpp" />
     <ClCompile Include="Algorithm\mandelbrot_xmesh_outerloop.cpp" />

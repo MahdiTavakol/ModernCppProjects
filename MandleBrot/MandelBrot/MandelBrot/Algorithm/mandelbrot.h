@@ -55,6 +55,8 @@ namespace Mandelbrot_NS {
 		std::unique_ptr<array_allocator> array_alloc_ptr;
 		std::string file_name;
 		std::unique_ptr<std::ofstream> file;
+
+		std::unique_ptr<std::array<int, 2>[]> x_ranges, y_ranges;
 	};
 }
 
