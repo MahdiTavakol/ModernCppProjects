@@ -8,6 +8,7 @@
 #include "../Numerical/complex.h"
 #include "../Array/array_allocator.h"
 #include "../definitions.h"
+#include "formula.h"
 
 using Array_NS::allocation_mode;
 using Array_NS::array_allocator;
@@ -44,7 +45,15 @@ namespace Mandelbrot_NS {
 		void output();
 		double& return_area();
 
+
+
+		friend class omp_strategy;
+		friend class omp_strategy_i;
+		friend class omp_strategy_j;
+
 	protected:
+		std::unique_ptr<formula<double>> frmla;
+
 		allocation_mode alloc_mode;
 		allocation_major alloc_major;
 		double gamma;
@@ -56,6 +65,13 @@ namespace Mandelbrot_NS {
 		std::string file_name;
 		std::unique_ptr<std::ofstream> file;
 
+
+		// These are for the omp variant
+		// In order to avoid circular dependency 
+		// in the strategies I had to put 
+		// these here.
+		thread_config thread_cfg;
+		int omp_num_threads, thread_id, size_per_thread;
 		std::unique_ptr<std::array<int, 2>[]> x_ranges, y_ranges;
 	};
 }

@@ -129,6 +129,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Algorithm\burningship_xmesh_outerloop.h" />
+    <ClInclude Include="Algorithm\formula.h" />
+    <ClInclude Include="Algorithm\strategies.h" />
     <ClInclude Include="Algorithm\mandelbrot.h" />
     <ClInclude Include="Algorithm\mandelbrot_omp.h" />
     <ClInclude Include="Algorithm\mandelbrot_xmesh.h" />
@@ -161,6 +163,7 @@
     <ClCompile Include="Algorithm\mandelbrot_ymesh.cpp" />
     <ClCompile Include="Algorithm\mandelbrot_ymesh_innerloop.cpp" />
     <ClCompile Include="Algorithm\mandelbrot_ymesh_outerloop.cpp" />
+    <ClCompile Include="Algorithm\strategies.cpp" />
     <ClCompile Include="Array\array.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Runner\run_mandelbrot.cpp" />

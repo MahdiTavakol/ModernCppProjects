@@ -96,6 +96,12 @@
     <ClInclude Include="Algorithm\mandelbrot_omp.h">
       <Filter>Source Files\Algorithm</Filter>
     </ClInclude>
+    <ClInclude Include="Algorithm\strategies.h">
+      <Filter>Source Files\Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\formula.h">
+      <Filter>Source Files\Algorithm</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -144,6 +150,9 @@
       <Filter>Source Files\Runner</Filter>
     </ClCompile>
     <ClCompile Include="Algorithm\mandelbrot_omp.cpp">
+      <Filter>Source Files\Algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\strategies.cpp">
       <Filter>Source Files\Algorithm</Filter>
     </ClCompile>
   </ItemGroup>
