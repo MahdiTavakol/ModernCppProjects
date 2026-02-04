@@ -16,6 +16,7 @@
 #include "../Array/array_allocator.h"
 #include "../Numerical/complex.h"
 #include "../Algorithm/mandelbrot.h"
+#include "../Algorithm/mandelbrot_omp.h"
 #include "../Algorithm/mandelbrot_xmesh_innerloop.h"
 #include "../Algorithm/mandelbrot_xmesh_outerloop.h"
 #include "../Algorithm/mandelbrot_ymesh_innerloop.h"
@@ -84,6 +85,8 @@ namespace Runner_NS {
 		Mesh_type mesh_type;
 		// resolution
 		std::array<int, 2> resolution;
+		// is it burning
+		bool burning = false;
 		// should I render (just for animation)
 		bool shouldIRender= true;
 		// gamma

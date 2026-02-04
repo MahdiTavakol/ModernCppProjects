@@ -20,7 +20,7 @@ namespace Mandelbrot_NS {
 		int num_iterations;
 
 		thread_config thread_cfg;
-		std::unique_ptr<formula<double>> frmla;
+		formula<double>* frmlaRaw;
 
 		std::reference_wrapper<mandelbrot> mndlbrt_ref;
 	};

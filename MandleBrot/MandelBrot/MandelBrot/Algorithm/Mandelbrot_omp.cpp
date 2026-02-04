@@ -7,9 +7,11 @@ mandelbrot_omp::mandelbrot_omp(
 	/* allocation config */ const allocation_mode& _alloc_mode, const allocation_major& _alloc_major,
 	/* space config */ const bounds& _bnds, const int& _n_xs, const int& _n_ys,
 	/* thread configuration*/ const thread_config& thread_cfg,
+	/* mesh type */ const Mesh_type& mesh_type_,
 	/* file name */ const std::string& _file_name,
 	/* number of iterations*/ const int& num_iterations_,
-	/* gamma */ const double& gamma) :
+	/* gamma */ const double& gamma,
+	/* is it burning ship*/ const bool& burning_) :
 	mandelbrot{ _alloc_mode, _alloc_major, _bnds, _n_xs, _n_ys, _file_name, num_iterations_, gamma }
 {
 	int threads_x = thread_cfg.threads_x;
@@ -17,6 +19,8 @@ mandelbrot_omp::mandelbrot_omp(
 
 	x_ranges = std::make_unique<std::array<int, 2>[]>(threads_x);
 	y_ranges = std::make_unique<std::array<int, 2>[]>(threads_y);
+
+	array_alloc_ptr = std::make_unique<array_allocator>(alloc_mode, alloc_major, threads_x * n_xs, threads_y * n_ys, _file_name);
 
 
 #pragma omp parallel 
@@ -49,6 +53,23 @@ mandelbrot_omp::mandelbrot_omp(
 	}
 
 
+	switch (mesh_type_) {
+	case Mesh_type::OUTER_LOOP:
+		run_strategy = std::make_unique<omp_strategy_i>();
+		break;
+	case Mesh_type::INNER_LOOP:
+		run_strategy = std::make_unique<omp_strategy_i>();
 
+	}
 
+	if (!burning_)
+		frmla = std::make_unique<formula_1<double>>();
+	else
+		frmla = std::make_unique<formula_2<double>>();
+
+}
+
+void mandelbrot_omp::calculate(const double& scale_)
+{
+	run_strategy->calculate(scale_);
 }

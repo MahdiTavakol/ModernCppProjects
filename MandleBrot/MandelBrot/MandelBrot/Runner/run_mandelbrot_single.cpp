@@ -17,32 +17,19 @@ run_mandelbrot_single::run_mandelbrot_single(const allocation_mode& alloc_mode_,
 
 void run_mandelbrot_single::build_mandelbrot_ptr()
 {
-	switch (mesh_type)
-	{
-	case Mesh_type::XMESH_INNER_LOOP:
-		mandelbrot_ptr = std::make_unique<mandelbrot_xmesh_innerloop>(alloc_mode, alloc_major, bnds, x_size, y_size, thread_cfg, info);
-		info += "X-Mesh Inner Loop";
-		break;
-	case Mesh_type::XMESH_OUTER_LOOP:
-		mandelbrot_ptr = std::make_unique<mandelbrot_xmesh_outerloop>(alloc_mode, alloc_major, bnds, x_size, y_size, thread_cfg, info);
-		info += "X-Mesh Outer Loop";
-		break;
-	case Mesh_type::YMESH_INNER_LOOP:
-		mandelbrot_ptr = std::make_unique<mandelbrot_ymesh_innerloop>(alloc_mode, alloc_major, bnds, x_size, y_size, thread_cfg, info);
-		info += "Y-Mesh Inner Loop";
-		break;
-	case Mesh_type::YMESH_OUTER_LOOP:
-		mandelbrot_ptr = std::make_unique<mandelbrot_ymesh_outerloop>(alloc_mode, alloc_major, bnds, x_size, y_size, thread_cfg, info);
-		info += "Y-Mesh Outer Loop";
-		break;
-	case Mesh_type::SERIAL:
-		mandelbrot_ptr = std::make_unique<mandelbrot>(alloc_mode, alloc_major, bnds, x_size, y_size, info);
-		info += "Serial";
-		break;
-	default:
-		std::cerr << "Unknown mesh type!" << std::endl;
-		exit(EXIT_FAILURE);
-	}
+	if (mesh_type != Mesh_type::SERIAL)
+		mandelbrot_ptr = std::make_unique<mandelbrot_omp>(
+			alloc_mode, alloc_major,
+			bnds, x_size, y_size, thread_cfg, info,
+			mesh_type,
+			10000, 1.0, burning);
+	else
+		mandelbrot_ptr = std::make_unique<mandelbrot>(
+			alloc_mode, alloc_major,
+			bnds, x_size, y_size, thread_cfg, info,
+			mesh_type,
+			10000, 1.0, burning);
+
 }
 
 void run_mandelbrot_single::run()

@@ -20,7 +20,7 @@ void omp_strategy::calculate(const double& _scale)
 
 	thread_cfg = mndlbrt_ref.get().thread_cfg;
 
-	frmla = mndlbrt_ref.get().frmla;
+	frmlaRaw = mndlbrt_ref.get().frmla.get();
 
 }
 
@@ -53,7 +53,7 @@ void omp_strategy_i::calculate(const double& _scale)
 
 		for (int i = first_x; i < last_x; i++)
 		{
-			for (int j = first_y; i < last_y; j++)
+			for (int j = first_y; j < last_y; j++)
 			{
 				complex<double> min(static_cast<double>(x_min), static_cast<double>(y_min));
 				double _i = static_cast<double>(i % n_xs);
@@ -69,7 +69,7 @@ void omp_strategy_i::calculate(const double& _scale)
 				int k = 0;
 				for (k = 0; k < num_iterations; k++)
 				{
-					z = (*frmla)(z, c);
+					z = (*frmlaRaw)(z, c);
 					if (z.abs_complex() > escape) break;
 				}
 				if (k == num_iterations)
@@ -88,7 +88,7 @@ void omp_strategy_i::calculate(const double& _scale)
 					(*(array_alloc_ptr))(i - k * n_xs, j - l * n_ys) = (*(array_alloc_ptr))(i, j);
 }
 
-void omp_strategy_j::calculate(const double& scale_)
+void omp_strategy_j::calculate(const double& _scale)
 {
 	omp_strategy::calculate(_scale);
 
@@ -114,13 +114,13 @@ void omp_strategy_j::calculate(const double& scale_)
 		const int& last_y = y_ranges[thread_id][1];
 
 
-		for (int i = first_x; i < last_x; i++)
+		for (int j = first_y; j < last_y; j++)
 		{
-			for (int j = first_y; i < last_y; j++)
+			for (int i = first_x; i < last_x; i++)
 			{
 				complex min(static_cast<double>(x_min), static_cast<double>(y_min));
 				double _i = static_cast<double>(i % n_xs);
-				double _j = static_cast<double>(j);
+				double _j = static_cast<double>(j % n_ys);
 				_i = static_cast<double>((_i + n_xs / _scale) / _scale);
 				_j = static_cast<double>((_j + n_ys / _scale) / _scale);
 
@@ -132,7 +132,7 @@ void omp_strategy_j::calculate(const double& scale_)
 				int k = 0;
 				for (k = 0; k < num_iterations; k++)
 				{
-					z = z * z + c;
+					z = (*frmlaRaw)(z, c);
 					if (z.abs_complex() > escape) break;
 				}
 				if (k == num_iterations)

@@ -9,6 +9,7 @@
 #include "../Array/array_allocator.h"
 #include "../definitions.h"
 #include "formula.h"
+#include "strategies.h"
 
 using Array_NS::allocation_mode;
 using Array_NS::array_allocator;
@@ -34,6 +35,12 @@ namespace Mandelbrot_NS {
 			       /* file name */ const std::string& _file_name = "Mandelbrot.dat",
 			       /* number of iterations*/ const int& num_iterations_=10000,
 		           /* gamma */ const double& gamma = 1.0);
+		mandelbrot(/* allocation config */ const allocation_mode& _alloc_mode, const allocation_major& _alloc_major,
+			       /* space config */ const bounds& _bnds, const int& _n_xs, const int& _n_ys,
+			       /* mesh type */ const Mesh_type& mesh_type_,
+			       /* file name */ const std::string& _file_name = "Mandelbrot.dat",
+			       /* number of iterations*/ const int& num_iterations_=10000,
+		           /* gamma */ const double& gamma = 1.0);
 		mandelbrot(const mandelbrot&) = delete;
 		mandelbrot& operator=(const mandelbrot&) = delete;
 		mandelbrot(mandelbrot&&) = default;
@@ -52,8 +59,6 @@ namespace Mandelbrot_NS {
 		friend class omp_strategy_j;
 
 	protected:
-		std::unique_ptr<formula<double>> frmla;
-
 		allocation_mode alloc_mode;
 		allocation_major alloc_major;
 		double gamma;
@@ -64,6 +69,10 @@ namespace Mandelbrot_NS {
 		std::unique_ptr<array_allocator> array_alloc_ptr;
 		std::string file_name;
 		std::unique_ptr<std::ofstream> file;
+
+		// Objects of strategy classes
+		std::unique_ptr<formula<double>> frmla;
+		
 
 
 		// These are for the omp variant

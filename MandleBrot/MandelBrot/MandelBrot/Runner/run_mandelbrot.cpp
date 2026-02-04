@@ -120,28 +120,24 @@ run_mandelbrot::run_mandelbrot(const std::vector<std::string>& args_)
 		// burning ship cases
 	case 10:
 		center = complex(-1.516, -0.03);
+		burning = true;
 		break;
 
 	case 11:
 		center = complex(-1.75, -0.03);
+		burning = true;
 		break;
 
 	default:
 		throw std::invalid_argument("Wrong anitype");
 	}
 
-	if (mesh_type_string == "XMESH_INNER_LOOP") {
-		mesh_type = Mesh_type::XMESH_INNER_LOOP;
+	if (mesh_type_string == "INNER_LOOP") {
+		mesh_type = Mesh_type::INNER_LOOP;
 	}
-	else if (mesh_type_string == "XMESH_OUTER_LOOP")
+	else if (mesh_type_string == "OUTER_LOOP")
 	{
-		mesh_type = Mesh_type::XMESH_OUTER_LOOP;
-	}
-	else if (mesh_type_string == "YMESH_INNER_LOOP:") {
-		mesh_type = Mesh_type::YMESH_INNER_LOOP;
-	}
-	else if (mesh_type_string == "YMESH_OUTER_LOOP") {
-		mesh_type = Mesh_type::YMESH_OUTER_LOOP;
+		mesh_type = Mesh_type::OUTER_LOOP;
 	}
 	else if (mesh_type_string == "SERIAL") {
 		mesh_type = Mesh_type::SERIAL;
