@@ -1,27 +1,14 @@
 #pragma once
-#include <map>
 #include <chrono>
-#include <optional>
 #include <string>
 #include <memory>
-#include <stdexcept>
 #include <utility>
-#include <fstream>
-#include <iostream>
-#include <cstdlib>
 #include <array>
 
 
 #include "../Array/array.h"
-#include "../Array/array_allocator.h"
 #include "../Numerical/complex.h"
 #include "../Algorithm/mandelbrot.h"
-#include "../Algorithm/mandelbrot_omp.h"
-#include "../Algorithm/mandelbrot_xmesh_innerloop.h"
-#include "../Algorithm/mandelbrot_xmesh_outerloop.h"
-#include "../Algorithm/mandelbrot_ymesh_innerloop.h"
-#include "../Algorithm/mandelbrot_ymesh_outerloop.h"
-#include "../Algorithm/burningship_xmesh_outerloop.h"
 #include "../definitions.h"
 
 using Numerical_NS::complex;

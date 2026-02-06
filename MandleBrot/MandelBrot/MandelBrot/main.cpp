@@ -1,39 +1,35 @@
 #include <cmath>
 #include <iostream>
-#include <fstream>
 #include <sstream>
 #include <chrono>
-#include <map>
+#include <memory>
 
-#include <omp.h>
-
-#include "definitions.h"
-#include "Array/array.h"
-#include "Numerical/complex.h"
-#include "memory.h"
-#include "Algorithm/mandelbrot.h"
-#include "Algorithm/mandelbrot_xmesh.h"
-#include "Algorithm/mandelbrot_ymesh.h"
-#include "Algorithm/mandelbrot_xmesh_innerloop.h"
-#include "Algorithm/mandelbrot_ymesh_innerloop.h"
 #include "Runner/run_mandelbrot.h"
-#include "Runner/run_mandelbrot_timing.h"
-#include "Runner/run_mandelbrot_animation.h"
+#include "Runner/run_mandelbrot_factory.h"
+#include "help.h"
 
-using Mandelbrot_NS::bounds;
+using Runner_NS::run_mandelbrot_factory;
 using Runner_NS::run_mandelbrot;
-using Runner_NS::run_mandelbrot_timing;
-using Runner_NS::run_mandelbrot_animation;
-
-void timing(std::unique_ptr<run_mandelbrot>&);
-void animation(std::unique_ptr<run_mandelbrot>&);
 
 
-int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
+int main(int argc, char** argv)
 {
 	try {
+		std::vector<std::string> args;
+		if (argc == 1) {
+			std::cout << "Using the default parameters!" << std::endl;
+			default_args(argv[0], args);
+		}
+		else if (argc == 2 && argv[1] == "--h") {
+			print_help(argv[0]);
+		}
+		else {
+			for (int i = 0; i < argc; i++)
+				args.push_back(argv[i]);
+		}
+		auto factory = std::make_unique<run_mandelbrot_factory>(args);
 		std::unique_ptr<run_mandelbrot> run_mandelbrot_ptr;
-		animation(run_mandelbrot_ptr);
+		factory->return_runner(std::move(run_mandelbrot_ptr));
 		run_mandelbrot_ptr->run();
 	}
 	catch (std::bad_alloc &ae) {
@@ -48,23 +44,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 	return EXIT_SUCCESS;
 }
 
-void timing(std::unique_ptr<run_mandelbrot>& run_mandelbrot_ptr)
-{
-	bounds bnds;
-	bnds.x_min = -3.56;
-	bnds.x_max = 1.77;
-	bnds.y_min = -1.5;
-	bnds.y_max = 1.5;
-	int x_size = 1920;
-	int y_size = 1080;
-	run_mandelbrot_ptr = std::make_unique<run_mandelbrot_timing>(bnds, x_size, y_size);
-	run_mandelbrot_ptr->run();
-}
 
-void animation(std::unique_ptr<run_mandelbrot>& run_madelbrot_ptr)
-{
-	run_madelbrot_ptr = std::make_unique<run_mandelbrot_animation>(Animate_type::ANIMATE_6,true);
-}
+
 
 
 

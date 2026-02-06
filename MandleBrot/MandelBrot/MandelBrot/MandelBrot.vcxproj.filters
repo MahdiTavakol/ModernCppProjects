@@ -39,24 +39,6 @@
     <ClInclude Include="Algorithm\mandelbrot.h">
       <Filter>Source Files\Algorithm</Filter>
     </ClInclude>
-    <ClInclude Include="Algorithm\mandelbrot_xmesh.h">
-      <Filter>Source Files\Algorithm</Filter>
-    </ClInclude>
-    <ClInclude Include="Algorithm\mandelbrot_xmesh_innerloop.h">
-      <Filter>Source Files\Algorithm</Filter>
-    </ClInclude>
-    <ClInclude Include="Algorithm\mandelbrot_xmesh_outerloop.h">
-      <Filter>Source Files\Algorithm</Filter>
-    </ClInclude>
-    <ClInclude Include="Algorithm\mandelbrot_ymesh.h">
-      <Filter>Source Files\Algorithm</Filter>
-    </ClInclude>
-    <ClInclude Include="Algorithm\mandelbrot_ymesh_innerloop.h">
-      <Filter>Source Files\Algorithm</Filter>
-    </ClInclude>
-    <ClInclude Include="Algorithm\mandelbrot_ymesh_outerloop.h">
-      <Filter>Source Files\Algorithm</Filter>
-    </ClInclude>
     <ClInclude Include="Array\array.h">
       <Filter>Source Files\Array</Filter>
     </ClInclude>
@@ -84,9 +66,6 @@
     <ClInclude Include="Runner\run_mandelbrot_timing.h">
       <Filter>Source Files\Runner</Filter>
     </ClInclude>
-    <ClInclude Include="Algorithm\burningship_xmesh_outerloop.h">
-      <Filter>Source Files\Algorithm</Filter>
-    </ClInclude>
     <ClInclude Include="Runner\run_mandelbrot_factory.h">
       <Filter>Source Files\Runner</Filter>
     </ClInclude>
@@ -102,30 +81,15 @@
     <ClInclude Include="Algorithm\formula.h">
       <Filter>Source Files\Algorithm</Filter>
     </ClInclude>
+    <ClInclude Include="help.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Algorithm\mandelbrot.cpp">
-      <Filter>Source Files\Algorithm</Filter>
-    </ClCompile>
-    <ClCompile Include="Algorithm\mandelbrot_xmesh.cpp">
-      <Filter>Source Files\Algorithm</Filter>
-    </ClCompile>
-    <ClCompile Include="Algorithm\mandelbrot_xmesh_innerloop.cpp">
-      <Filter>Source Files\Algorithm</Filter>
-    </ClCompile>
-    <ClCompile Include="Algorithm\mandelbrot_xmesh_outerloop.cpp">
-      <Filter>Source Files\Algorithm</Filter>
-    </ClCompile>
-    <ClCompile Include="Algorithm\mandelbrot_ymesh.cpp">
-      <Filter>Source Files\Algorithm</Filter>
-    </ClCompile>
-    <ClCompile Include="Algorithm\mandelbrot_ymesh_innerloop.cpp">
-      <Filter>Source Files\Algorithm</Filter>
-    </ClCompile>
-    <ClCompile Include="Algorithm\mandelbrot_ymesh_outerloop.cpp">
       <Filter>Source Files\Algorithm</Filter>
     </ClCompile>
     <ClCompile Include="Array\array.cpp">
@@ -136,9 +100,6 @@
     </ClCompile>
     <ClCompile Include="Runner\run_mandelbrot_timing.cpp">
       <Filter>Source Files\Runner</Filter>
-    </ClCompile>
-    <ClCompile Include="Algorithm\burningship_xmesh_outerloop.cpp">
-      <Filter>Source Files\Algorithm</Filter>
     </ClCompile>
     <ClCompile Include="Runner\run_mandelbrot_factory.cpp">
       <Filter>Source Files\Runner</Filter>

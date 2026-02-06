@@ -1,6 +1,7 @@
 #include "run_mandelbrot_timing.h"
 #include "run_mandelbrot_single.h"
 
+
 using namespace Runner_NS;
 
 run_mandelbrot_timing::run_mandelbrot_timing(const std::vector<std::string>& args_) :
@@ -36,10 +37,8 @@ run_mandelbrot_timing::run_mandelbrot_timing(const std::vector<std::string>& arg
 
 	// filling the mesh vector
 	mesh_vec.push_back(Mesh_type::SERIAL);
-	mesh_vec.push_back(Mesh_type::XMESH_INNER_LOOP);
-	mesh_vec.push_back(Mesh_type::XMESH_OUTER_LOOP);
-	mesh_vec.push_back(Mesh_type::YMESH_INNER_LOOP);
-	mesh_vec.push_back(Mesh_type::YMESH_OUTER_LOOP);
+	mesh_vec.push_back(Mesh_type::INNER_LOOP);
+	mesh_vec.push_back(Mesh_type::OUTER_LOOP);
 
 }
 

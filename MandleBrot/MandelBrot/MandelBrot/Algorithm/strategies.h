@@ -44,4 +44,14 @@ namespace Mandelbrot_NS {
 		void dummy() override {}
 		void calculate(const double& scale_) override;
 	};
+
+	class omp_strategy_serial : public omp_strategy {
+		public:
+		omp_strategy_serial(mandelbrot& mndlbrt_ref_) :
+			omp_strategy{ mndlbrt_ref_ }
+		{}
+		~omp_strategy_serial() = default;
+		void dummy() override {}
+		void calculate(const double& scale_) override;
+	};
 }

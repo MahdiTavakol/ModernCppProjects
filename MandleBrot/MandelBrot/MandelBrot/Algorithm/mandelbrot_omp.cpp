@@ -16,6 +16,16 @@ mandelbrot_omp::mandelbrot_omp(
 {
 	int threads_x = thread_cfg.threads_x;
 	int threads_y = thread_cfg.threads_y;
+	// The threads_x and threads_y are ignored in the case of SERIAL mesh type
+	if (mesh_type_ == Mesh_type::SERIAL) {
+		if (threads_x != 1 || threads_y != 1) {
+			std::cout <<
+				"Warning: ignoring the threads_x and threads_y parameters for the SERIAL mesh type!" <<
+				std::endl;
+			threads_x = threads_y = 1;
+		}
+	}
+
 
 	x_ranges = std::make_unique<std::array<int, 2>[]>(threads_x);
 	y_ranges = std::make_unique<std::array<int, 2>[]>(threads_y);
@@ -58,7 +68,11 @@ mandelbrot_omp::mandelbrot_omp(
 		run_strategy = std::make_unique<omp_strategy_i>();
 		break;
 	case Mesh_type::INNER_LOOP:
-		run_strategy = std::make_unique<omp_strategy_i>();
+		run_strategy = std::make_unique<omp_strategy_j>();
+		break;
+	case Mesh_type::SERIAL:
+		run_strategy = std::make_unique<omp_strategy_serial>();
+		break;
 
 	}
 

@@ -1,14 +1,6 @@
 #pragma once
-#include <map>
 #include <chrono>
-#include <optional>
 #include <string>
-#include <memory>
-#include <stdexcept>
-#include <utility>
-#include <fstream>
-#include <iostream>
-#include <cstdlib>
 #include <array>
 #include <string>
 #include "run_mandelbrot.h"

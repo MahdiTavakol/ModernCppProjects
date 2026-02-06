@@ -1,7 +1,9 @@
 #include "run_mandelbrot_animation.h"
+#include "../Algorithm/mandelbrot_omp.h"
 #include <cstdio>
 #include <thread>
 #include <vector>
+#include <omp.h>
 
 
 using namespace Runner_NS;
@@ -111,22 +113,17 @@ void run_mandelbrot_animation::animate(std::string _file_name, const complex<dou
 				num_threads = omp_get_num_threads();
 			}
 
-			thread_config  trd_cnfg_y_meshes;
-			trd_cnfg_y_meshes.threads_x = num_threads;
-			trd_cnfg_y_meshes.threads_y = 1;
 
 			std::unique_ptr<mandelbrot> mandelbrot_ptr;
 			int num_iterations = 10000;
 			double gamma = 1.2;
-			if (center_type_id != 10 && center_type_id != 11)
-				mandelbrot_ptr = std::make_unique<mandelbrot_xmesh_outerloop>
-				(alloc_mode, alloc_major, bnds, x_size, y_size, trd_cnfg_y_meshes, _file_name,
-					num_iterations,gamma);
-			else if (center_type_id == 10 || center_type_id == 11)
-				mandelbrot_ptr = std::make_unique<burningship_xmesh_outerloop>
-				(alloc_mode, alloc_major, bnds, x_size, y_size, trd_cnfg_y_meshes, _file_name,
-					num_iterations,gamma);
 
+			mandelbrot_ptr = std::make_unique<mandelbrot_omp>(
+				alloc_mode, alloc_major,
+				bnds, x_size, y_size, thread_cfg, info,
+				mesh_type,
+				10000, 1.0, burning);
+			
 
 			std::cout << "Running mandelbrot file " << _file_name << std::endl;
 			mandelbrot_ptr->calculate();

@@ -57,6 +57,7 @@ namespace Mandelbrot_NS {
 		friend class omp_strategy;
 		friend class omp_strategy_i;
 		friend class omp_strategy_j;
+		friend class omp_strategy_serial;
 
 	protected:
 		allocation_mode alloc_mode;

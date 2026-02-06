@@ -128,17 +128,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Algorithm\burningship_xmesh_outerloop.h" />
     <ClInclude Include="Algorithm\formula.h" />
     <ClInclude Include="Algorithm\strategies.h" />
     <ClInclude Include="Algorithm\mandelbrot.h" />
     <ClInclude Include="Algorithm\mandelbrot_omp.h" />
-    <ClInclude Include="Algorithm\mandelbrot_xmesh.h" />
-    <ClInclude Include="Algorithm\mandelbrot_xmesh_innerloop.h" />
-    <ClInclude Include="Algorithm\mandelbrot_xmesh_outerloop.h" />
-    <ClInclude Include="Algorithm\mandelbrot_ymesh.h" />
-    <ClInclude Include="Algorithm\mandelbrot_ymesh_innerloop.h" />
-    <ClInclude Include="Algorithm\mandelbrot_ymesh_outerloop.h" />
     <ClInclude Include="Array\array.h" />
     <ClInclude Include="Array\array_allocator.h" />
     <ClInclude Include="Array\array_c.h" />
@@ -146,6 +139,7 @@
     <ClInclude Include="Array\array_mdspan.h" />
     <ClInclude Include="Array\array_modern.h" />
     <ClInclude Include="definitions.h" />
+    <ClInclude Include="help.h" />
     <ClInclude Include="Numerical\complex.h" />
     <ClInclude Include="Runner\run_mandelbrot.h" />
     <ClInclude Include="Runner\run_mandelbrot_animation.h" />
@@ -154,15 +148,8 @@
     <ClInclude Include="Runner\run_mandelbrot_timing.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Algorithm\burningship_xmesh_outerloop.cpp" />
     <ClCompile Include="Algorithm\mandelbrot.cpp" />
     <ClCompile Include="Algorithm\mandelbrot_omp.cpp" />
-    <ClCompile Include="Algorithm\mandelbrot_xmesh.cpp" />
-    <ClCompile Include="Algorithm\mandelbrot_xmesh_innerloop.cpp" />
-    <ClCompile Include="Algorithm\mandelbrot_xmesh_outerloop.cpp" />
-    <ClCompile Include="Algorithm\mandelbrot_ymesh.cpp" />
-    <ClCompile Include="Algorithm\mandelbrot_ymesh_innerloop.cpp" />
-    <ClCompile Include="Algorithm\mandelbrot_ymesh_outerloop.cpp" />
     <ClCompile Include="Algorithm\strategies.cpp" />
     <ClCompile Include="Array\array.cpp" />
     <ClCompile Include="main.cpp" />

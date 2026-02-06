@@ -1,4 +1,5 @@
 #include "run_mandelbrot_single.h"
+#include "../Algorithm/mandelbrot_omp.h"
 
 using namespace Runner_NS;
 
@@ -17,19 +18,11 @@ run_mandelbrot_single::run_mandelbrot_single(const allocation_mode& alloc_mode_,
 
 void run_mandelbrot_single::build_mandelbrot_ptr()
 {
-	if (mesh_type != Mesh_type::SERIAL)
-		mandelbrot_ptr = std::make_unique<mandelbrot_omp>(
-			alloc_mode, alloc_major,
-			bnds, x_size, y_size, thread_cfg, info,
-			mesh_type,
-			10000, 1.0, burning);
-	else
-		mandelbrot_ptr = std::make_unique<mandelbrot>(
-			alloc_mode, alloc_major,
-			bnds, x_size, y_size, thread_cfg, info,
-			mesh_type,
-			10000, 1.0, burning);
-
+	mandelbrot_ptr = std::make_unique<mandelbrot_omp>(
+		alloc_mode, alloc_major,
+		bnds, x_size, y_size, thread_cfg, info,
+		mesh_type,
+		10000, 1.0, burning);
 }
 
 void run_mandelbrot_single::run()
