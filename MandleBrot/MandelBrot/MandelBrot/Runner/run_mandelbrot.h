@@ -57,15 +57,17 @@ namespace Runner_NS {
 		std::array<int, 2> resolution{ 1920,1080 };
 		// is it burning
 		bool burning =  false;
+		// number of iterations
+		int num_iterations = 10000;
 		// should I render (just for animation)
 		bool shouldIRender{ true };
 		// gamma
-		double gamma{ 0 };
+		double gamma{1.0};
 		// thread configuration
 		thread_config thread_cfg{};
 		int x_size{ 0 };
 		int y_size{ 0 };
-		double area{ 0 };
+		double area{ 0.0 };
 
 		// the mandelbrot pointer
 		std::unique_ptr<mandelbrot> mandelbrot_ptr;

@@ -58,6 +58,11 @@ run_mandelbrot::run_mandelbrot(const std::vector<std::string>& args_)
 			thread_cfg.threads_y = std::stoi(args_[iarg + 2]);
 			iarg += 3;
 		}
+		else if (args_[iarg] == "--num_iterations") {
+			invalid_arg_check(iarg, 1, argc);
+			num_iterations = std::stoi(args_[iarg + 1]);
+			iarg += 2;
+		}
 		else if (args_[iarg] == "--mesh_type") {
 			invalid_arg_check(iarg, 1, argc);
 			std::string mesh_type_string = args_[iarg + 1];
@@ -77,6 +82,11 @@ run_mandelbrot::run_mandelbrot(const std::vector<std::string>& args_)
 			std::string alloc_major_string = args_[iarg + 1];
 			std::transform(alloc_major_string.begin(), alloc_major_string.end(), alloc_major_string.begin(), ::toupper);
 			parse_allocation_major(alloc_major_string, alloc_major);
+			iarg += 2;
+		}
+		else if (args_[iarg] == "--gamma") {
+			invalid_arg_check(iarg, 1, argc);
+			gamma = std::stoi(args_[iarg + 1]);
 			iarg += 2;
 		}
 		else if (args_[iarg] == "--no_rendering") {

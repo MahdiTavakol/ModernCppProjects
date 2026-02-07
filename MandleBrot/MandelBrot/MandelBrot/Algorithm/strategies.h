@@ -16,7 +16,7 @@ namespace Mandelbrot_NS {
 			{};
 			virtual ~omp_strategy() = default;
 			virtual void dummy() = 0;
-			virtual void calculate(const double& scale_);
+			virtual void calculate([[maybe_unused]] const double& scale_);
 
 	protected:
 		int n_xs = 0, n_ys = 0;

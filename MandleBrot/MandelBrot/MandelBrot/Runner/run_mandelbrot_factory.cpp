@@ -11,7 +11,6 @@ using namespace Runner_NS;
 run_mandelbrot_factory::run_mandelbrot_factory(const std::vector<std::string>& args_)
 {
 	int argc = static_cast<int>(args_.size());
-	int iarg = 1;
 
 	if (argc < 2)
 		throw std::invalid_argument("Invalid input arguments");

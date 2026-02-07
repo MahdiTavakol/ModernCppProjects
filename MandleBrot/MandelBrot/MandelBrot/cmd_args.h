@@ -83,6 +83,9 @@ static void default_args(const std::string& progName, std::vector<std::string>& 
     args_.push_back(std::to_string(1920));
     args_.push_back(std::to_string(1080));
 
+    args_.push_back("--gamma");
+    args_.push_back(std::to_string(1.2));
+
     args_.push_back("--threads");
     args_.push_back(std::to_string(8));
     args_.push_back(std::to_string(1));

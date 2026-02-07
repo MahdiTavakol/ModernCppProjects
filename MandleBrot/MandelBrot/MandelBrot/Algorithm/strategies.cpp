@@ -7,7 +7,7 @@
 
 using namespace Mandelbrot_NS;
 
-void omp_strategy::calculate(const double& _scale)
+void omp_strategy::calculate([[maybe_unused]] const double& _scale)
 {
 	n_xs = mndlbrt_ref.get().n_xs;
 	n_ys = mndlbrt_ref.get().n_ys;
@@ -197,4 +197,5 @@ void omp_strategy_serial::calculate(const double& _scale)
 			(*(array_alloc_ptr))(i, j) = static_cast<double>(k) / static_cast<double>(num_iterations);
 		}
 	}
+	area = ara;
 }

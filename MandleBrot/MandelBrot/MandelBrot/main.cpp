@@ -16,7 +16,7 @@ int main(int argc, char** argv)
 			std::cout << "Using the default parameters!" << std::endl;
 			default_args(argv[0], args);
 		}
-		else if (argc == 2 && argv[1] == "--help") {
+		else if (argc == 2 && std::string(argv[1]) == "--help") {
 			print_help(argv[0]);
 		}
 		else {

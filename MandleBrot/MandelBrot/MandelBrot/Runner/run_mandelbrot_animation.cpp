@@ -114,22 +114,14 @@ void run_mandelbrot_animation::animate(std::string _file_name, const complex<dou
 			int y_size = size[1];
 
 
-			int num_threads;
-#pragma omp parallel
-			{
-				num_threads = omp_get_num_threads();
-			}
-
 
 			std::unique_ptr<mandelbrot> mandelbrot_ptr;
-			int num_iterations = 10000;
-			double gamma = 1.2;
 
 			mandelbrot_ptr = std::make_unique<mandelbrot_omp>(
 				alloc_mode, alloc_major,
 				bnds, x_size, y_size, thread_cfg, mesh_type, 
 				_file_name,
-				10000, 1.0, burning);
+				num_iterations, gamma, burning);
 			
 
 			std::cout << "Running mandelbrot file " << _file_name << std::endl;
