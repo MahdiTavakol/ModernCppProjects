@@ -48,7 +48,7 @@ namespace Mandelbrot_NS {
 			array_alloc_ptr->reset(file_name_);
 		}
 		void output();
-		double& return_area();
+		int& return_area();
 
 
 
@@ -63,7 +63,7 @@ namespace Mandelbrot_NS {
 		double gamma;
 		int n_xs, n_ys;
 		double x_min, x_max, y_min, y_max;
-		double area;
+		int area;
 		int num_iterations;
 		std::unique_ptr<array_allocator> array_alloc_ptr;
 		std::string file_name;

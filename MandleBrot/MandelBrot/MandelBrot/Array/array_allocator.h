@@ -69,8 +69,13 @@ namespace Array_NS {
 			else
 				throw std::runtime_error("Invalid allocation major");
 			// Allocating arrays
-			if (array_ptr)
-				array_ptr->initiate();
+			if (array_ptr) {
+				// there is an issue with using malloc with zero size
+				if (n_xs * n_ys > 0)
+					array_ptr->initiate();
+				else
+					std::cout << "Warning: the array size is zero!" << std::endl;
+			}
 			else
 				throw std::runtime_error("The array_ptr has not been allocated!\nYou should never have reached here!");
 		}

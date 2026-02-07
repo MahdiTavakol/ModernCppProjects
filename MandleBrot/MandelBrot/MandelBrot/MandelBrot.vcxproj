@@ -146,6 +146,7 @@
     <ClInclude Include="Runner\run_mandelbrot_single.h" />
     <ClInclude Include="Runner\run_mandelbrot_timing.h" />
     <ClInclude Include="Test\catch_amalgamated.hpp" />
+    <ClInclude Include="Test\test.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Algorithm\mandelbrot.cpp" />

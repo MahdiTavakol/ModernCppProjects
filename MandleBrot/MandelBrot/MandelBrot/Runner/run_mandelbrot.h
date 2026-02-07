@@ -32,7 +32,7 @@ namespace Runner_NS {
 			mandelbrot_ptr->reset(bnds_, file_name_);
 		}
 
-		double& return_area() {
+		int& return_area() {
 			return mandelbrot_ptr->return_area();
 		}
 		void output() {
@@ -63,9 +63,9 @@ namespace Runner_NS {
 		double gamma{1.0};
 		// thread configuration
 		thread_config thread_cfg{};
-		int x_size{ 0 };
-		int y_size{ 0 };
-		double area{ 0.0 };
+		int x_size{1920};
+		int y_size{1080};
+		int area{ 0 };
 
 		// the mandelbrot pointer
 		std::unique_ptr<mandelbrot> mandelbrot_ptr;

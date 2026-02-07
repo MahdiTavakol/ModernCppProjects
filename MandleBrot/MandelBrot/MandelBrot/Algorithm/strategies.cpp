@@ -35,7 +35,7 @@ void omp_strategy_i::calculate(const double& _scale)
 	auto& x_ranges = mndlbrt_ref.get().x_ranges;
 	auto& y_ranges = mndlbrt_ref.get().y_ranges;
 
-	double ara = 0.0;
+	int ara = 0;
 #pragma omp parallel reduction(+:ara) // default(none) shared(n_xs,x_min,x_max,y_min,y_max,y_size,num_iterations,X,first_range,last_range,size_per_thread)
 	{
 		int thread_id = omp_get_thread_num();
@@ -100,7 +100,7 @@ void omp_strategy_j::calculate(const double& _scale)
 	auto& x_ranges = mndlbrt_ref.get().x_ranges;
 	auto& y_ranges = mndlbrt_ref.get().y_ranges;
 
-	double ara = 0.0;
+	int ara = 0;
 #pragma omp parallel reduction(+:ara) // default(none) shared(n_xs,x_min,x_max,y_min,y_max,y_size,num_iterations,X,first_range,last_range,size_per_thread)
 	{
 		int thread_id = omp_get_thread_num();
@@ -170,7 +170,7 @@ void omp_strategy_serial::calculate(const double& _scale)
 	const int& first_y = y_ranges[0][0];
 	const int& last_y = y_ranges[0][1];
 
-	double ara = 0.0;
+	int ara = 0;
 	for (int i = first_x; i < last_x; i++)
 	{
 		for (int j = first_y; j < last_y; j++)

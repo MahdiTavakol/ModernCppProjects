@@ -19,7 +19,7 @@ mandelbrot::mandelbrot(const allocation_mode& _alloc_mode, const allocation_majo
 	file_name{ _file_name }
 {
 	array_alloc_ptr = std::make_unique<array_allocator>(alloc_mode, alloc_major, n_xs, n_ys, file_name,gamma_);
-	this->area = 0.0;
+	this->area = 0;
 }
 
 
@@ -56,7 +56,8 @@ void mandelbrot::output()
 {
 	array_alloc_ptr->write_data(n_xs,n_ys);
 }
-double& mandelbrot::return_area()
+
+int& mandelbrot::return_area()
 {
 	return this->area;
 }

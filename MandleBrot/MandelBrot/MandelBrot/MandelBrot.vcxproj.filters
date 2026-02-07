@@ -87,6 +87,9 @@
     <ClInclude Include="Test\catch_amalgamated.hpp">
       <Filter>Source Files\Test</Filter>
     </ClInclude>
+    <ClInclude Include="Test\test.h">
+      <Filter>Source Files\Test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
