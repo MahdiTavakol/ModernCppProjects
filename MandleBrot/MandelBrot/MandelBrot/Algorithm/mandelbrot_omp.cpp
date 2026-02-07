@@ -39,7 +39,9 @@ mandelbrot_omp::mandelbrot_omp(
 		int num_threads = omp_get_num_threads();
 		if (num_threads != threads_x * threads_y)
 		{
-			std::cout << "Warning: resettting the number of threads" << std::endl;
+			int thread_id = omp_get_thread_num();
+			if (thread_id == 0)
+				std::cout << "Warning: resettting the number of threads" << std::endl;
 		}
 
 	}
