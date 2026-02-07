@@ -17,18 +17,26 @@ namespace Runner_NS {
 	public:
 		run_mandelbrot_timing(const std::vector<std::string>& args_);
 		~run_mandelbrot_timing() = default;
+		void reset_setting_map(
+			const std::vector<allocation_mode>& alloc_mode_vec_,
+			const std::vector<allocation_major>& alloc_major_vec_,
+			const std::vector<thread_config>& threads_vec_,
+			const std::vector<Mesh_type>& mesh_vec_
+		);
+		std::vector<int> return_area_vec();
 
 		void run() override;
 
 	private:
 		int num_threads;
 		std::map<std::string, double> timings;
-		std::map<std::string, double> areas;
+		std::map<std::string, int> areas;
+		bool writeFile = true;
 
 
 		static void writeMaps(std::string _info_file_name,
 			                  std::map<std::string, double>& _timings,
-			                  std::map<std::string, double>& _areas);
+			                  std::map<std::string, int>& _areas);
 
 
 		/// <summary>

@@ -13,6 +13,11 @@ run_mandelbrot_timing::run_mandelbrot_timing(const std::vector<std::string>& arg
 		num_threads = omp_get_num_threads();
 	}
 
+	for (auto& arg : args_) {
+		if (arg == "--noWrite")
+			writeFile = false;
+	}
+
 	// filling the allocation_mode vector
 	alloc_mode_vec.push_back(allocation_mode::C);
 	alloc_mode_vec.push_back(allocation_mode::CPP);
@@ -89,20 +94,40 @@ void run_mandelbrot_timing::run()
 			    }
 
 
-	std::string timing_area_info_file("timing-area.csv");
-
-
-	writeMaps(timing_area_info_file, timings, areas);
+	if (writeFile) {
+		std::string timing_area_info_file("timing-area.csv");
+		writeMaps(timing_area_info_file, timings, areas);
+	}
 
 	std::cout << "All done!" << std::endl;
 
 	return;
 }
 
+void run_mandelbrot_timing::reset_setting_map(
+	const std::vector<allocation_mode>& alloc_mode_vec_,
+	const std::vector<allocation_major>& alloc_major_vec_,
+	const std::vector<thread_config>& threads_vec_,
+	const std::vector<Mesh_type>& mesh_vec_) {
+	alloc_mode_vec = alloc_mode_vec_;
+	alloc_major_vec = alloc_major_vec_;
+	threads_vec = threads_vec_;
+	mesh_vec = mesh_vec_;
+}
+
+std::vector<int> run_mandelbrot_timing::return_area_vec()
+{
+	std::vector<int> out;
+	for (auto it = areas.begin(); it != areas.end(); it++) {
+		out.push_back(it->second);
+	}
+	return out;
+}
+
 
 void run_mandelbrot_timing::writeMaps(std::string _info_file_name,
 	                                  std::map<std::string, double>& _timings,
-	                                  std::map<std::string, double>& _areas)
+	                                  std::map<std::string, int>& _areas)
 {
 	std::cout << "Writing the timing info file " << std::endl;
 	std::ofstream info_file(_info_file_name);

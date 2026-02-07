@@ -1,6 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include "catch_amalgamated.hpp"
 #include "../definitions.h"
+#include "../Runner/run_mandelbrot_timing.h"
 
 #include "test.h"
 
@@ -21,7 +22,11 @@ vector<thread_config> thread_cfg_vec = {
     thread_config{1,8}, thread_config{2,4}, thread_config{4,2}, thread_config{8,1}
 };
 
-TEST_CASE("Testing serial running") {
+std::vector<allocation_mode>& alloc_mode_vec = { allocation_mode::C, allocation_mode::CPP, allocation_mode::MODERN};
+std::vector<allocation_major>& alloc_major_vec = { allocation_major::X_MAJOR, allocation_major::Y_MAJOR };
+std::vector<Mesh_type> mesh_vec = { Mesh_type::SERIAL, Mesh_type::INNER_LOOP, Mesh_type::OUTER_LOOP };
+
+TEST_CASE("Testing serial running (the single mode)") {
     int expected = 0;
 
     vector<string> args;
@@ -42,7 +47,7 @@ TEST_CASE("Testing serial running") {
     REQUIRE(area == expected);
 }
 
-TEST_CASE("Testing various thread numbers") {
+TEST_CASE("Testing various thread numbers (The single mode)") {
 
     int expected = 0;
 
@@ -66,26 +71,28 @@ TEST_CASE("Testing various thread numbers") {
     }
 }
 
-TEST_CASE("Testing various thread configurations") {
+TEST_CASE("Testing various thread configurations (The timing mode)") {
     int expected = 0;
 
-    for (const auto& thread_cfg : thread_cfg_vec) {
-        vector<string> args;
-        int area;
-        string dummy = "test";
-        args.push_back(dummy);
-        args.push_back("single");
-        args.push_back("--info");
-        args.push_back("test");
-        args.push_back("--resolution");
-        args.push_back(std::to_string(1920));
-        args.push_back(std::to_string(1080));
-        args.push_back("--threads");
-        args.push_back(std::to_string(thread_cfg.threads_x));
-        args.push_back(std::to_string(thread_cfg.threads_y));
-        area = run_wrapper(args);
 
-        REQUIRE(area == expected);
-    }
+    vector<string> args;
+    string dummy = "test";
+    args.push_back(dummy);
+    args.push_back("timing");
+    args.push_back("--info");
+    args.push_back("test");
+    args.push_back("--resolution");
+    args.push_back(std::to_string(1920));
+    args.push_back(std::to_string(1080));
+    args.push_back("--noWrite");
+
+    std::unique_ptr<Runner_NS::run_mandelbrot_timing> runner =
+        std::make_unique<Runner_NS::run_mandelbrot_timing>(args);
+    runner->reset_setting_map(alloc_mode_vec, alloc_major_vec, thread_cfg_vec, mesh_vec);
+    runner->run();
+    std::vector<int> outs = runner->return_area_vec();
+
+    for (const auto& out : outs)
+        REQUIRE(out == expected);
 }
 
