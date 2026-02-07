@@ -74,7 +74,7 @@ static void default_args(const std::string& progName, std::vector<std::string>& 
     args_.push_back("animation");
 
     args_.push_back("--info");
-    args_.push_back("ani");
+    args_.push_back("frame");
 
     args_.push_back("--type");
     args_.push_back(std::to_string(6));
@@ -85,10 +85,6 @@ static void default_args(const std::string& progName, std::vector<std::string>& 
 
     args_.push_back("--gamma");
     args_.push_back(std::to_string(1.2));
-
-    args_.push_back("--threads");
-    args_.push_back(std::to_string(8));
-    args_.push_back(std::to_string(1));
 
 }
 
