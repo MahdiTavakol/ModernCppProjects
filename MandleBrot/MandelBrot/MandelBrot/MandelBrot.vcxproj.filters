@@ -28,6 +28,9 @@
     <Filter Include="Source Files\Array">
       <UniqueIdentifier>{64c05de7-5186-4f21-a00f-e136bd285f46}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Test">
+      <UniqueIdentifier>{63fe076d-d62e-49e2-b006-e7aeba50f2d0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="definitions.h">
@@ -81,6 +84,9 @@
     <ClInclude Include="Algorithm\formula.h">
       <Filter>Source Files\Algorithm</Filter>
     </ClInclude>
+    <ClInclude Include="Test\catch_amalgamated.hpp">
+      <Filter>Source Files\Test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -115,6 +121,12 @@
     </ClCompile>
     <ClCompile Include="cmd_args.h">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Test\test.cpp">
+      <Filter>Source Files\Test</Filter>
+    </ClCompile>
+    <ClCompile Include="Test\catch_amalgamated.cpp">
+      <Filter>Source Files\Test</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

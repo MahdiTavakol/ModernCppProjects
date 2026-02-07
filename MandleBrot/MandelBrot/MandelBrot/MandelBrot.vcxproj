@@ -145,6 +145,7 @@
     <ClInclude Include="Runner\run_mandelbrot_factory.h" />
     <ClInclude Include="Runner\run_mandelbrot_single.h" />
     <ClInclude Include="Runner\run_mandelbrot_timing.h" />
+    <ClInclude Include="Test\catch_amalgamated.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Algorithm\mandelbrot.cpp" />
@@ -158,6 +159,8 @@
     <ClCompile Include="Runner\run_mandelbrot_factory.cpp" />
     <ClCompile Include="Runner\run_mandelbrot_single.cpp" />
     <ClCompile Include="Runner\run_mandelbrot_timing.cpp" />
+    <ClCompile Include="Test\catch_amalgamated.cpp" />
+    <ClCompile Include="Test\test.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

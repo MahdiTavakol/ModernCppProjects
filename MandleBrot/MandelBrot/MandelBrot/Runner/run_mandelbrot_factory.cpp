@@ -26,6 +26,8 @@ run_mandelbrot_factory::run_mandelbrot_factory(const std::vector<std::string>& a
 	else if (run_type == "animation") {
 		runner_ptr = std::make_unique<run_mandelbrot_animation>(args_);
 	}
+	else
+		throw std::runtime_error("Wrong simulation type!");
 
 }
 
