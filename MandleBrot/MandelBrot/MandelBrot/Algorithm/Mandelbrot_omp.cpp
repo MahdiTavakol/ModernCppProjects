@@ -63,6 +63,11 @@ mandelbrot_omp::mandelbrot_omp(
 		y_ranges[i] = std::array<int, 2>{ y_first,y_last };
 	}
 
+	// The compiler complains about x_per_thread and y_per_thread
+	// variables not used while they have been used.
+	// To stop this complain we added this part
+	x_per_thread = y_per_thread = 0;
+
 
 	switch (mesh_type_) {
 	case Mesh_type::OUTER_LOOP:
