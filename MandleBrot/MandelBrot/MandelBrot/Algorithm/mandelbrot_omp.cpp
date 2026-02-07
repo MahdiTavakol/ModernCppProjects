@@ -1,4 +1,5 @@
 #include "mandelbrot_omp.h"
+#include <array>
 #include <omp.h>
 
 using namespace Mandelbrot_NS;
@@ -65,13 +66,13 @@ mandelbrot_omp::mandelbrot_omp(
 
 	switch (mesh_type_) {
 	case Mesh_type::OUTER_LOOP:
-		run_strategy = std::make_unique<omp_strategy_i>();
+		run_strategy = std::make_unique<omp_strategy_i>(*this);
 		break;
 	case Mesh_type::INNER_LOOP:
-		run_strategy = std::make_unique<omp_strategy_j>();
+		run_strategy = std::make_unique<omp_strategy_j>(*this);
 		break;
 	case Mesh_type::SERIAL:
-		run_strategy = std::make_unique<omp_strategy_serial>();
+		run_strategy = std::make_unique<omp_strategy_serial>(*this);
 		break;
 
 	}

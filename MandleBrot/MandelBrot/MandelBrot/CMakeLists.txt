@@ -89,13 +89,8 @@ endif()
 # -----------------------------
 set(ALGO_SOURCES
   Algorithm/mandelbrot.cpp
-  Algorithm/mandelbrot_xmesh.cpp
-  Algorithm/mandelbrot_xmesh_innerloop.cpp
-  Algorithm/mandelbrot_xmesh_outerloop.cpp
-  Algorithm/mandelbrot_ymesh.cpp
-  Algorithm/mandelbrot_ymesh_innerloop.cpp
-  Algorithm/mandelbrot_ymesh_outerloop.cpp
-  Algorithm/burningship_xmesh_outerloop.cpp
+  Algorithm/mandelbrot_omp.cpp
+  Algorithm/strategies.cpp
 )
 
 set(ARRAY_SOURCES
@@ -103,6 +98,9 @@ set(ARRAY_SOURCES
 )
 
 set(RUNNER_SOURCES
+  Runner/run_mandelbrot.cpp
+  Runner/run_mandelbrot_factory.cpp
+  Runner/run_mandelbrot_single.cpp
   Runner/run_mandelbrot_animation.cpp
   Runner/run_mandelbrot_timing.cpp
 )
