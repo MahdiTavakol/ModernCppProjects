@@ -41,6 +41,12 @@ namespace Mandelbrot_NS {
 
 		void calculate() { calculate(2.0); }
 		virtual void calculate(const double& _scale);
+		void reset(const bounds& bnds_, const std::string& file_name_)
+		{
+			x_min = bnds_.x_min; x_max = bnds_.x_max;
+			y_min = bnds_.y_min; y_max = bnds_.y_max;
+			array_alloc_ptr->reset(file_name_);
+		}
 		void output();
 		double& return_area();
 

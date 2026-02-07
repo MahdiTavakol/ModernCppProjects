@@ -85,6 +85,12 @@ namespace Array_NS {
 			return (*array_ptr)(x, y);
 		}
 
+		void reset(const std::string& file_name) {
+			if (array_ptr == nullptr)
+				throw std::runtime_error("The array_ptr has not been allocated yet!");
+			array_ptr->reset(file_name);
+		}
+
 		void write_data(const int& xhi, const int& yhi)
 		{
 			array_ptr->write_data(xhi, yhi,gamma);

@@ -18,6 +18,12 @@ run_mandelbrot_animation::run_mandelbrot_animation(const std::vector<std::string
 		decay_rate = 0.95;
 		scale0 = 10.0;
 	}
+
+	mandelbrot_ptr = std::make_unique<mandelbrot_omp>(
+		alloc_mode, alloc_major,
+		bnds, x_size, y_size, thread_cfg, mesh_type,
+		info,
+		num_iterations, gamma, burning);
 }
 
 
@@ -102,32 +108,32 @@ void run_mandelbrot_animation::generate_animation(const complex<double>& _center
 
 void run_mandelbrot_animation::animate(std::string _file_name, const complex<double>& _center, const double& _scale)
 {
-	        using namespace Mandelbrot_NS;
-			bounds bnds;
-			bnds.x_min = _center.real - (2.665 / _scale);
-			bnds.x_max = _center.real + (2.665 / _scale);
-			bnds.y_min = _center.imag - (1.5 / _scale);
-			bnds.y_max = _center.imag + (1.5 / _scale);
+	using namespace Mandelbrot_NS;
+	bounds bnds;
+	bnds.x_min = _center.real - (2.665 / _scale);
+	bnds.x_max = _center.real + (2.665 / _scale);
+	bnds.y_min = _center.imag - (1.5 / _scale);
+	bnds.y_max = _center.imag + (1.5 / _scale);
 
 
-			int x_size = size[0];
-			int y_size = size[1];
+	int x_size = size[0];
+	int y_size = size[1];
 
 
 
-			std::unique_ptr<mandelbrot> mandelbrot_ptr;
+	std::unique_ptr<mandelbrot> mandelbrot_ptr;
 
-			mandelbrot_ptr = std::make_unique<mandelbrot_omp>(
-				alloc_mode, alloc_major,
-				bnds, x_size, y_size, thread_cfg, mesh_type, 
-				_file_name,
-				num_iterations, gamma, burning);
+	mandelbrot_ptr = std::make_unique<mandelbrot_omp>(
+			alloc_mode, alloc_major,
+			bnds, x_size, y_size, thread_cfg, mesh_type, 
+			_file_name,
+			num_iterations, gamma, burning);
 			
 
-			std::cout << "Running mandelbrot file " << _file_name << std::endl;
-			mandelbrot_ptr->calculate();
-			std::cout << "Finished running mandelbrot file " << _file_name << std::endl;
-			mandelbrot_ptr->output();
+	std::cout << "Running mandelbrot file " << _file_name << std::endl;
+	mandelbrot_ptr->calculate();
+	std::cout << "Finished running mandelbrot file " << _file_name << std::endl;
+	mandelbrot_ptr->output();
 }
 
 void run_mandelbrot_animation::svgrender(const int first_frame_, const int stride_, const int last_frame_,

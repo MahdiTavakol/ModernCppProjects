@@ -12,8 +12,6 @@ namespace Runner_NS {
 	{
 	public:
 		run_mandelbrot_animation(const std::vector<std::string>& args_);
-
-
 		~run_mandelbrot_animation() = default;
 
 		void run() override;

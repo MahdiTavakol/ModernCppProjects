@@ -35,6 +35,9 @@ namespace Array_NS {
 		void write_data(const double& gamma_ = 1.0);
 		virtual double& operator()(int x, int y) = 0;
 		//double operator()(int& x, int& y) const;
+		void reset(const std::string& file_name) {
+			output = std::make_unique<std::ofstream>(file_name);
+		}
 
 
 	protected:

@@ -7,7 +7,7 @@ using namespace Mandelbrot_NS;
 mandelbrot_omp::mandelbrot_omp(
 	/* allocation config */ const allocation_mode& _alloc_mode, const allocation_major& _alloc_major,
 	/* space config */ const bounds& _bnds, const int& _n_xs, const int& _n_ys,
-	/* thread configuration*/ const thread_config& thread_cfg,
+	/* thread configuration*/ const thread_config& thread_cfg_,
 	/* mesh type */ const Mesh_type& mesh_type_,
 	/* file name */ const std::string& _file_name,
 	/* number of iterations*/ const int& num_iterations_,
@@ -15,6 +15,7 @@ mandelbrot_omp::mandelbrot_omp(
 	/* is it burning ship*/ const bool& burning_) :
 	mandelbrot{ _alloc_mode, _alloc_major, _bnds, _n_xs, _n_ys, _file_name, num_iterations_, gamma }
 {
+	thread_cfg = thread_cfg_;
 	int threads_x = thread_cfg.threads_x;
 	int threads_y = thread_cfg.threads_y;
 	// The threads_x and threads_y are ignored in the case of SERIAL mesh type
@@ -41,7 +42,7 @@ mandelbrot_omp::mandelbrot_omp(
 		{
 			int thread_id = omp_get_thread_num();
 			if (thread_id == 0)
-				std::cout << "Warning: resettting the number of threads" << std::endl;
+				std::cout << "Warning: resetting the number of threads" << std::endl;
 		}
 
 	}
