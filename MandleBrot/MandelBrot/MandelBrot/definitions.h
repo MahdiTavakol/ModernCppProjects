@@ -13,7 +13,7 @@ public:
 	int threads_x; 
 	int threads_y;
 	
-	thread_config(int _x = 1, int _y = 1) : threads_x(_x), threads_y(_y) {}
+	thread_config(int _x = 1, int _y = 1) : threads_x{ _x }, threads_y{ _y } {}
 	};
 
 enum class Mesh_type { SERIAL, INNER_LOOP, OUTER_LOOP };

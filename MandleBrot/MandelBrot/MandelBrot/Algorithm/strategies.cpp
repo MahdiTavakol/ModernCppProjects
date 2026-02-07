@@ -45,7 +45,8 @@ void omp_strategy_i::calculate(const double& _scale)
 		int thread_id_y = thread_id / (thread_cfg.threads_x);
 
 
-
+		if (thread_id_x >= thread_cfg.threads_x || thread_id_y >= thread_cfg.threads_y)
+			std::cout << "Error: out of range thread!" << std::endl;
 		const int& first_x = x_ranges[thread_id_x][0];
 		const int& last_x = x_ranges[thread_id_x][1];
 		const int& first_y = y_ranges[thread_id_y][0];
@@ -109,7 +110,8 @@ void omp_strategy_j::calculate(const double& _scale)
 		int thread_id_y = thread_id / (thread_cfg.threads_x);
 
 
-
+		if (thread_id_x >= thread_cfg.threads_x || thread_id_y >= thread_cfg.threads_y)
+			std::cout << "Error: out of range thread!" << std::endl;
 		const int& first_x = x_ranges[thread_id_x][0];
 		const int& last_x = x_ranges[thread_id_x][1];
 		const int& first_y = y_ranges[thread_id_y][0];
