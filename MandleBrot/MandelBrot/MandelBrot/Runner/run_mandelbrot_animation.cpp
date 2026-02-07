@@ -128,7 +128,7 @@ void run_mandelbrot_animation::animate(std::string _file_name, const complex<dou
 			mandelbrot_ptr = std::make_unique<mandelbrot_omp>(
 				alloc_mode, alloc_major,
 				bnds, x_size, y_size, thread_cfg, mesh_type, 
-				info,
+				_file_name,
 				10000, 1.0, burning);
 			
 
