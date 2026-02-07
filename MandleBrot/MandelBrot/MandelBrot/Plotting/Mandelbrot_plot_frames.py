@@ -8,7 +8,7 @@ import sys
 ###########################################################################
 def apply_colormap(c_array,cmap):
 
-	cmap = plt.get_cmap('inferno')
+	cmap = plt.get_cmap('rainbow')
 
 	rgba = cmap(c_array)
 	
