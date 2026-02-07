@@ -96,6 +96,10 @@ run_mandelbrot::run_mandelbrot(const std::vector<std::string>& args_)
 			shouldIRender = false;
 			iarg++;
 		}
+		else if (args_[iarg] == "--num_frames") {
+			invalid_arg_check(iarg, 1, argc);
+			iarg += 2;
+		}
 	}
 
 	if (!threadsSet) {

@@ -53,7 +53,8 @@ void run_mandelbrot_animation::generate_animation(const complex<double>& _center
 				last_rendering_frame = first_rendering_frame + renderingNEvery - 1;
 				last_rendering_frame = last_rendering_frame < num_frames-1 ? last_rendering_frame : num_frames-1;
 				thrds.push_back(std::thread(svgrender,
-					first_rendering_frame, 1, last_rendering_frame, size, tmpl));
+					first_rendering_frame, 1, last_rendering_frame,
+					std::array<int,2>{x_size,y_size}, tmpl));
 				first_rendering_frame = last_rendering_frame + 1;
 			}
 			else {
@@ -115,10 +116,6 @@ void run_mandelbrot_animation::animate(std::string _file_name, const complex<dou
 	bnds.y_max = _center.imag + (1.5 / _scale);
 
 
-	int x_size = size[0];
-	int y_size = size[1];
-
-
 
 	std::unique_ptr<mandelbrot> mandelbrot_ptr;
 
@@ -133,6 +130,8 @@ void run_mandelbrot_animation::animate(std::string _file_name, const complex<dou
 	mandelbrot_ptr->calculate();
 	std::cout << "Finished running mandelbrot file " << _file_name << std::endl;
 	mandelbrot_ptr->output();
+	// putting the areas
+	areas[_file_name] = mandelbrot_ptr->return_area();
 }
 
 void run_mandelbrot_animation::svgrender(const int first_frame_, const int stride_, const int last_frame_,
@@ -157,4 +156,13 @@ void run_mandelbrot_animation::svgrender(const int first_frame_, const int strid
 	while (fgets(buf, sizeof(buf), pipe.get())) {
 		/*discard everything*/
 	}
+}
+
+std::vector<int> run_mandelbrot_animation::return_area_vec()
+{
+	std::vector<int> out;
+	for (auto it = areas.begin(); it != areas.end(); it++) {
+		out.push_back(it->second);
+	}
+	return out;
 }

@@ -22,9 +22,9 @@ vector<thread_config> thread_cfg_vec = {
     thread_config{1,8}, thread_config{2,4}, thread_config{4,2}, thread_config{8,1}
 };
 
-std::vector<allocation_mode>& alloc_mode_vec = { allocation_mode::C, allocation_mode::CPP, allocation_mode::MODERN};
-std::vector<allocation_major>& alloc_major_vec = { allocation_major::X_MAJOR, allocation_major::Y_MAJOR };
-std::vector<Mesh_type> mesh_vec = { Mesh_type::SERIAL, Mesh_type::INNER_LOOP, Mesh_type::OUTER_LOOP };
+std::vector<allocation_mode>& alloc_mode_vec{ allocation_mode::C, allocation_mode::CPP, allocation_mode::MODERN};
+std::vector<allocation_major>& alloc_major_vec{ allocation_major::X_MAJOR, allocation_major::Y_MAJOR };
+std::vector<Mesh_type> mesh_vec{ Mesh_type::SERIAL, Mesh_type::INNER_LOOP, Mesh_type::OUTER_LOOP };
 
 TEST_CASE("Testing serial running (the single mode)") {
     int expected = 0;
@@ -45,6 +45,30 @@ TEST_CASE("Testing serial running (the single mode)") {
     area = run_wrapper(args);
 
     REQUIRE(area == expected);
+}
+
+TEST_CASE("Testing various thread numbers (The animation mode mode)") {
+
+    int expected = 0;
+
+    for (const auto& thread : threads) {
+        vector<string> args;
+        int area;
+        string dummy = "test";
+        args.push_back(dummy);
+        args.push_back("single");
+        args.push_back("--info");
+        args.push_back("test");
+        args.push_back("--resolution");
+        args.push_back(std::to_string(1920));
+        args.push_back(std::to_string(1080));
+        args.push_back("--threads");
+        args.push_back(std::to_string(thread));
+        args.push_back(std::to_string(1));
+        area = run_wrapper(args);
+
+        REQUIRE(area == expected);
+    }
 }
 
 TEST_CASE("Testing various thread numbers (The single mode)") {
