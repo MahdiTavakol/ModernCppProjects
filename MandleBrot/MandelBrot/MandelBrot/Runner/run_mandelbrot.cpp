@@ -1,6 +1,7 @@
 #include "run_mandelbrot.h"
 
 #include <algorithm>
+#include <omp.h>
 
 using namespace Runner_NS;
 
@@ -8,6 +9,7 @@ run_mandelbrot::run_mandelbrot(const std::vector<std::string>& args_)
 {
 	int iarg = 2;
 	int argc = static_cast<int>(args_.size());
+	bool threadsSet = false;
 
 
 	/* list of supported arguments
@@ -56,6 +58,7 @@ run_mandelbrot::run_mandelbrot(const std::vector<std::string>& args_)
 			invalid_arg_check(iarg, 2, argc);
 			thread_cfg.threads_x = std::stoi(args_[iarg + 1]);
 			thread_cfg.threads_y = std::stoi(args_[iarg + 2]);
+			threadsSet = true;
 			iarg += 3;
 		}
 		else if (args_[iarg] == "--num_iterations") {
@@ -92,6 +95,15 @@ run_mandelbrot::run_mandelbrot(const std::vector<std::string>& args_)
 		else if (args_[iarg] == "--no_rendering") {
 			shouldIRender = false;
 			iarg++;
+		}
+	}
+
+	if (!threadsSet) {
+#pragma omp parallel
+		{
+			int num_threads = omp_get_num_threads();
+			thread_cfg.threads_x = num_threads;
+			thread_cfg.threads_y = 1;
 		}
 	}
 
