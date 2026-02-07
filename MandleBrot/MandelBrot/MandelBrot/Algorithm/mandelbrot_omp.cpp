@@ -48,8 +48,8 @@ mandelbrot_omp::mandelbrot_omp(
 
 	int x_per_thread = (this->n_xs + threads_x - 1) / threads_x;
 	for (int i = 0; i < threads_x; i++) {
-		int x_first = i * this->n_xs + i * size_per_thread;
-		int x_last = x_first + size_per_thread;
+		int x_first = i * this->n_xs + i * x_per_thread;
+		int x_last = x_first + x_per_thread;
 		if (x_last > this->n_xs * threads_x) x_last = this->n_xs * threads_x;
 		x_ranges[i] = std::array<int, 2>{ x_first,x_last };
 	}
@@ -57,11 +57,16 @@ mandelbrot_omp::mandelbrot_omp(
 
 	int y_per_thread = (this->n_ys + threads_y - 1) / threads_y;
 	for (int i = 0; i < threads_y; i++) {
-		int y_first = i * this->n_ys + i * size_per_thread;
-		int y_last = y_first + size_per_thread;
+		int y_first = i * this->n_ys + i * y_per_thread;
+		int y_last = y_first + y_per_thread;
 		if (y_last > this->n_ys * threads_y) y_last = this->n_ys * threads_y;
 		y_ranges[i] = std::array<int, 2>{ y_first,y_last };
 	}
+
+	// The compiler complains about x_per_thread and y_per_thread
+	// variables not used while they have been used.
+	// To stop this complain we added this part
+	x_per_thread = y_per_thread = 0;
 
 
 	switch (mesh_type_) {
