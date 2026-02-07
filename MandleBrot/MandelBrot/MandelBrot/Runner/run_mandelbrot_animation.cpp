@@ -3,7 +3,6 @@
 #include <cstdio>
 #include <thread>
 #include <vector>
-#include <omp.h>
 
 
 using namespace Runner_NS;

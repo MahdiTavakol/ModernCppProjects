@@ -12,7 +12,7 @@ namespace Runner_NS {
 		run_mandelbrot_factory(const std::vector<std::string>& args_);
 		~run_mandelbrot_factory() = default;
 
-		void return_runner(std::unique_ptr<run_mandelbrot>&& run_mandelbrot_ptr);
+		void return_runner(std::unique_ptr<run_mandelbrot>& run_mandelbrot_ptr);
 	private:
 
 		// run_type

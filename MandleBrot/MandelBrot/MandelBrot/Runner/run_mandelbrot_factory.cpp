@@ -29,7 +29,7 @@ run_mandelbrot_factory::run_mandelbrot_factory(const std::vector<std::string>& a
 
 }
 
-void run_mandelbrot_factory::return_runner(std::unique_ptr<run_mandelbrot>&& run_mandelbrot_ptr) {
+void run_mandelbrot_factory::return_runner(std::unique_ptr<run_mandelbrot>& run_mandelbrot_ptr) {
 	// Sanity check
 	if (runner_ptr == nullptr)
 		throw std::runtime_error("The runner_ptr has not been initialized yet!");

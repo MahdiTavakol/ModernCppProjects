@@ -24,7 +24,7 @@ int main(int argc, char** argv)
 		}
 		auto factory = std::make_unique<run_mandelbrot_factory>(args);
 		std::unique_ptr<run_mandelbrot> run_mandelbrot_ptr;
-		factory->return_runner(std::move(run_mandelbrot_ptr));
+		factory->return_runner(run_mandelbrot_ptr);
 		run_mandelbrot_ptr->run();
 	}
 	catch (std::bad_alloc &ae) {
