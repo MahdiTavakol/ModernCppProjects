@@ -38,7 +38,7 @@ void run_mandelbrot_animation::generate_animation(const complex<double>& _center
 	thrds.reserve(nRenderingThreads);
 	int first_rendering_frame = 0;
 	int last_rendering_frame;
-	std::array<std::string, 2> tmpl = { "frame",".dat" };
+	std::array<std::string, 2> tmpl = { info,".dat" };
 
 	auto async_render = [&]()
 		{
@@ -76,7 +76,7 @@ void run_mandelbrot_animation::generate_animation(const complex<double>& _center
 		S *= decay_rate;
 		if (i < frame_init) continue;
 		double zoom = S;
-		std::string file_name("temp/frame-" + std::to_string(i) + ".dat");
+		std::string file_name("temp/" + tmpl[0] + "-" + std::to_string(i) + ".dat");
 
 		// Calculation
 		animate(file_name, _center, zoom);
