@@ -1,13 +1,9 @@
-#include <cmath>
 #include <iostream>
-#include <sstream>
-#include <chrono>
 #include <memory>
 
 #include "Runner/run_mandelbrot.h"
 #include "Runner/run_mandelbrot_factory.h"
-#include "help.h"
-
+#include "cmd_args.h"
 using Runner_NS::run_mandelbrot_factory;
 using Runner_NS::run_mandelbrot;
 
@@ -20,12 +16,11 @@ int main(int argc, char** argv)
 			std::cout << "Using the default parameters!" << std::endl;
 			default_args(argv[0], args);
 		}
-		else if (argc == 2 && argv[1] == "--h") {
+		else if (argc == 2 && argv[1] == "--help") {
 			print_help(argv[0]);
 		}
 		else {
-			for (int i = 0; i < argc; i++)
-				args.push_back(argv[i]);
+			args = args_vec(argc, argv);
 		}
 		auto factory = std::make_unique<run_mandelbrot_factory>(args);
 		std::unique_ptr<run_mandelbrot> run_mandelbrot_ptr;
@@ -40,7 +35,6 @@ int main(int argc, char** argv)
 		std::cerr << "Exception: " << ae.what() << std::endl;
 		return EXIT_FAILURE;
 	}
-
 	return EXIT_SUCCESS;
 }
 

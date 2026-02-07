@@ -11,7 +11,7 @@ void LogParserFuture::readFile()
 	for (int i = 0; i < num_threads; i++)
 	{
 		if (i == 0)
-			ftrs.push_back(std::async(std::launch::async, & LogParserFuture::readChunk,
+			ftrs.push_back(std::async(std::launch::async, &LogParserFuture::readChunk,
 				this, i, num_threads, silentMode));
 		else
 			ftrs.push_back(std::async(std::launch::async, &LogParserFuture::readChunk,

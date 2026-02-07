@@ -9,12 +9,12 @@
 using namespace Runner_NS;
 
 constexpr int renderingNEvery = 50;
-constexpr int maxThreads = 8;
+constexpr int maxRenderingThreads = 8;
 
 run_mandelbrot_animation::run_mandelbrot_animation(const std::vector<std::string>& args_) :
 	run_mandelbrot{ args_ }, decay_rate{ 1.05 }, scale0{ 1.0 }
 {
-	if (center_type_id == 10) {
+	if (burning == true && std::abs(center.real +1.516) < 1e-6) {
 		decay_rate = 0.95;
 		scale0 = 10.0;
 	}
@@ -32,23 +32,24 @@ void run_mandelbrot_animation::generate_animation(const complex<double>& _center
 	double S0 = scale0;
 	double S = S0;
 
-	int nThreads = std::min((num_frames + renderingNEvery - 1) / renderingNEvery,maxThreads);
+	// Rendering settings  --->>>
+	int nRenderingThreads = std::min((num_frames + renderingNEvery - 1) / renderingNEvery,maxRenderingThreads);
 	std::vector<std::thread> thrds;
-	thrds.reserve(nThreads);
-	int first_frame = 0;
-	int last_frame;
+	thrds.reserve(nRenderingThreads);
+	int first_rendering_frame = 0;
+	int last_rendering_frame;
 	std::array<std::string, 2> tmpl = { "frame",".dat" };
 
 	auto async_render = [&]()
 		{
-			int availThreads = nThreads - thrds.size();
+			int availThreads = nRenderingThreads - static_cast<int>(thrds.size());
 			if (availThreads > 0) {
-				if (first_frame >= num_frames) return;
-				last_frame = first_frame + renderingNEvery - 1;
-				last_frame = last_frame < num_frames-1 ? last_frame : num_frames-1;
+				if (first_rendering_frame >= num_frames) return;
+				last_rendering_frame = first_rendering_frame + renderingNEvery - 1;
+				last_rendering_frame = last_rendering_frame < num_frames-1 ? last_rendering_frame : num_frames-1;
 				thrds.push_back(std::thread(svgrender,
-					first_frame, 1, last_frame, size, tmpl));
-				first_frame = last_frame + 1;
+					first_rendering_frame, 1, last_rendering_frame, size, tmpl));
+				first_rendering_frame = last_rendering_frame + 1;
 			}
 			else {
 				for (auto& thrd : thrds)
@@ -58,21 +59,29 @@ void run_mandelbrot_animation::generate_animation(const complex<double>& _center
 		};
 		
 	std::string command("mkdir temp");
-#ifdef WIN_32
-	std::unique_ptr<FILE,decltype(&_pclose)> pipe(popen(command.c_str(),"r"),_pclose);
+
+#ifdef _WIN32
+	std::unique_ptr<FILE,decltype(&_pclose)> pipe(_popen(command.c_str(),"r"),_pclose);
 #else
 	std::unique_ptr<FILE,decltype(&pclose)> pipe(popen(command.c_str(),"r"),pclose);
 #endif
+
 	char buf[256];
 	while(fgets(buf,sizeof(buf),pipe.get())) {}
 
+	// <<<--- rendering settings 
+
+	// Going through the frames
 	for (int i = 0; i < num_frames; i++) {
 		S *= decay_rate;
 		if (i < frame_init) continue;
 		double zoom = S;
 		std::string file_name("temp/frame-" + std::to_string(i) + ".dat");
+
+		// Calculation
 		animate(file_name, _center, zoom);
 
+		// Rendering 
 		if (shouldIRender && renderingNEvery) {
 			if (i && i % renderingNEvery == 0) {
 				async_render();
@@ -82,7 +91,7 @@ void run_mandelbrot_animation::generate_animation(const complex<double>& _center
 
 	if (shouldIRender && renderingNEvery) {
 		// it is possible that not all the frames have been rendered by now
-		while (first_frame < num_frames) {
+		while (first_rendering_frame < num_frames) {
 			async_render();
 		}
 	}
@@ -104,8 +113,6 @@ void run_mandelbrot_animation::animate(std::string _file_name, const complex<dou
 			int x_size = size[0];
 			int y_size = size[1];
 
-			allocation_mode alloc_mode = allocation_mode::MODERN;
-			allocation_major alloc_major = allocation_major::X_MAJOR;
 
 			int num_threads;
 #pragma omp parallel
@@ -120,8 +127,8 @@ void run_mandelbrot_animation::animate(std::string _file_name, const complex<dou
 
 			mandelbrot_ptr = std::make_unique<mandelbrot_omp>(
 				alloc_mode, alloc_major,
-				bnds, x_size, y_size, thread_cfg, info,
-				mesh_type,
+				bnds, x_size, y_size, thread_cfg, mesh_type, 
+				info,
 				10000, 1.0, burning);
 			
 

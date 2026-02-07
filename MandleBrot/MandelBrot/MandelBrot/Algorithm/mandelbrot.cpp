@@ -1,6 +1,7 @@
 #include "mandelbrot.h"
 #include "../Numerical/complex.h"
 #include "../Array/array.h"
+#include <array>
 
 using namespace Mandelbrot_NS;
 using Numerical_NS::complex;

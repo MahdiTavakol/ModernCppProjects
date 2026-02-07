@@ -27,29 +27,15 @@ namespace Runner_NS {
 			const bounds& bnds, const thread_config& thread_cfg, const std::string& info, const Mesh_type& mesh_type_);
 
 
-		run_mandelbrot() {};
+		//run_mandelbrot() {};
 
-		run_mandelbrot(std::string info_,
-			const bounds& bnds_,
-			int x_size_, int y_size_,
-			const thread_config& thread_cfg_,
-			Mesh_type mesh_type_,
-			allocation_mode alloc_mode_,
-			allocation_major alloc_major_) :
-				info{ std::move(info_) },
-			    alloc_mode{ alloc_mode_ },
-			    alloc_major{ alloc_major_ },
-				mesh_type{ mesh_type_ },
-				bnds{ bnds_ },
-				x_size{ x_size_ }, y_size{ y_size_ },
-				thread_cfg{ thread_cfg_ } {}
 
 		virtual ~run_mandelbrot() = default;
 
 		virtual void run() = 0;
 
 		double& return_area() {
-			mandelbrot_ptr->return_area();
+			return mandelbrot_ptr->return_area();
 		}
 		void output() {
 			mandelbrot_ptr->output();
@@ -57,35 +43,40 @@ namespace Runner_NS {
 
 	protected:
 		// info string
-		std::string info;
+		std::string info{ "test" };
 		// center point
-		int center_type_id;
-		complex<double> center;
+		complex<double> center{ -0.743643887037151, 0.131825904205330 };
 		// bounds
-		bounds bnds;
+		bounds bnds{ -3.56, 1.77, -1.50, 1.50 };
 		// allocation mode
-		std::string alloc_mode_string, alloc_major_string;
-		allocation_mode alloc_mode;
-		allocation_major alloc_major;
+		allocation_mode alloc_mode{ allocation_mode::MODERN };
+		allocation_major alloc_major{ allocation_major::X_MAJOR };
 		// mesh type
-		std::string mesh_type_string;
-		Mesh_type mesh_type;
+		Mesh_type mesh_type{ Mesh_type::INNER_LOOP };
 		// resolution
-		std::array<int, 2> resolution;
+		std::array<int, 2> resolution{ 1920,1080 };
 		// is it burning
-		bool burning = false;
+		bool burning =  false;
 		// should I render (just for animation)
-		bool shouldIRender= true;
+		bool shouldIRender{ true };
 		// gamma
-		double gamma;
+		double gamma{ 0 };
 		// thread configuration
-		thread_config thread_cfg;
-		int x_size;
-		int y_size;
-		double area;
+		thread_config thread_cfg{};
+		int x_size{ 0 };
+		int y_size{ 0 };
+		double area{ 0 };
 
 		// the mandelbrot pointer
 		std::unique_ptr<mandelbrot> mandelbrot_ptr;
+
+	private:
+		static void invalid_arg_check(const int& iarg, const int& expectarg, const int& argc);
+		static void parse_center(const int& center_type_id, complex<double>& center, bool& burning);
+		static void parse_allocation_mode(const std::string& alloc_mode_string, allocation_mode& alloc_mode);
+		static void parse_allocation_major(const std::string& alloc_major_string, allocation_major& alloc_major);
+		static void parse_mesh_type(const std::string& mesh_type_string, Mesh_type& mesh_type);
+
 	};
 }
 

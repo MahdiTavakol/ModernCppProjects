@@ -139,7 +139,6 @@
     <ClInclude Include="Array\array_mdspan.h" />
     <ClInclude Include="Array\array_modern.h" />
     <ClInclude Include="definitions.h" />
-    <ClInclude Include="help.h" />
     <ClInclude Include="Numerical\complex.h" />
     <ClInclude Include="Runner\run_mandelbrot.h" />
     <ClInclude Include="Runner\run_mandelbrot_animation.h" />
@@ -152,6 +151,7 @@
     <ClCompile Include="Algorithm\mandelbrot_omp.cpp" />
     <ClCompile Include="Algorithm\strategies.cpp" />
     <ClCompile Include="Array\array.cpp" />
+    <ClCompile Include="cmd_args.h" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Runner\run_mandelbrot.cpp" />
     <ClCompile Include="Runner\run_mandelbrot_animation.cpp" />

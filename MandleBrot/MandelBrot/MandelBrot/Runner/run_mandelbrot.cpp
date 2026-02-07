@@ -7,12 +7,8 @@ using namespace Runner_NS;
 run_mandelbrot::run_mandelbrot(const std::vector<std::string>& args_)
 {
 	int iarg = 2;
-	int argc = args_.size();
+	int argc = static_cast<int>(args_.size());
 
-	auto invalid_arg_check = [](const int& iarg, const int& expectarg, const int& argc) {
-		if (iarg + expectarg >= argc)
-			throw std::invalid_argument("Invalid input arguments");
-		};
 
 	/* list of supported arguments
 	 * information string --info info_string
@@ -24,8 +20,8 @@ run_mandelbrot::run_mandelbrot(const std::vector<std::string>& args_)
 	 * resolution --> mandelbrot resolution --resolution x_res y_res
 	 * thread_config --> thread configuration --threads threads_x threads_y
 	 * mesh_type --> mesh type --mesh_type mesh_type_string
-	 * aloc_mode --> allocation mode --alloc_mod alloc_mode_string
-	 * aloc_major --> allocation major --alloc_major alloc_major_string
+	 * alloc_mode --> allocation mode --alloc_mod alloc_mode_string
+	 * alloc_major --> allocation major --alloc_major alloc_major_string
 	 */
 
 
@@ -38,7 +34,8 @@ run_mandelbrot::run_mandelbrot(const std::vector<std::string>& args_)
 		}
 		else if (args_[iarg] == "--type") {
 			invalid_arg_check(iarg, 1, argc);
-			center_type_id = std::stoi(args_[iarg + 1]);
+			int center_type_id = std::stoi(args_[iarg + 1]);
+			parse_center(center_type_id, center, burning);
 			iarg += 2;
 		}
 		else if (args_[iarg] == "--bounds") {
@@ -51,8 +48,8 @@ run_mandelbrot::run_mandelbrot(const std::vector<std::string>& args_)
 		}
 		else if (args_[iarg] == "--resolution") {
 			invalid_arg_check(iarg, 2, argc);
-			resolution[0] = std::stod(args_[iarg + 1]);
-			resolution[1] = std::stod(args_[iarg + 2]);
+			resolution[0] = std::stoi(args_[iarg + 1]);
+			resolution[1] = std::stoi(args_[iarg + 2]);
 			iarg += 3;
 		}
 		else if (args_[iarg] == "--threads") {
@@ -63,18 +60,23 @@ run_mandelbrot::run_mandelbrot(const std::vector<std::string>& args_)
 		}
 		else if (args_[iarg] == "--mesh_type") {
 			invalid_arg_check(iarg, 1, argc);
-			mesh_type_string = args_[iarg + 1];
+			std::string mesh_type_string = args_[iarg + 1];
 			std::transform(mesh_type_string.begin(), mesh_type_string.end(), mesh_type_string.begin(), ::toupper);
+			parse_mesh_type(mesh_type_string, mesh_type);
 			iarg += 2;
 		}
 		else if (args_[iarg] == "--alloc_mod") {
 			invalid_arg_check(iarg, 1, argc);
-			alloc_mode_string = args_[iarg + 1];
+			std::string alloc_mode_string = args_[iarg + 1];
+			std::transform(alloc_mode_string.begin(), alloc_mode_string.end(), alloc_mode_string.begin(), ::toupper);
+			parse_allocation_mode(alloc_mode_string, alloc_mode);
 			iarg += 2;
 		}
 		else if (args_[iarg] == "--alloc_major") {
 			invalid_arg_check(iarg, 1, argc);
-			alloc_major_string = args_[iarg + 1];
+			std::string alloc_major_string = args_[iarg + 1];
+			std::transform(alloc_major_string.begin(), alloc_major_string.end(), alloc_major_string.begin(), ::toupper);
+			parse_allocation_major(alloc_major_string, alloc_major);
 			iarg += 2;
 		}
 		else if (args_[iarg] == "--no_rendering") {
@@ -83,6 +85,22 @@ run_mandelbrot::run_mandelbrot(const std::vector<std::string>& args_)
 		}
 	}
 
+}
+
+run_mandelbrot::run_mandelbrot(const allocation_mode& alloc_mode_, const allocation_major& alloc_major_,
+	const bounds& bnds_, const thread_config& thread_cfg_, const std::string& info_, const Mesh_type& mesh_type_):
+	info{info_}, center{complex(-0.743643887037151, 0.131825904205330)}, bnds{ bnds_ },
+	alloc_mode{alloc_mode_}, alloc_major{alloc_major_}, mesh_type{mesh_type_},
+	resolution{1920,1080},
+	thread_cfg{thread_cfg_}
+{}
+
+void run_mandelbrot::invalid_arg_check(const int& iarg, const int& expectarg, const int& argc) {
+	if (iarg + expectarg >= argc)
+		throw std::invalid_argument("Invalid input arguments");
+}
+
+void run_mandelbrot::parse_center(const int& center_type_id, complex<double>& center, bool& burning) {
 	// Setting the center based on the center type
 	switch (center_type_id)
 	{
@@ -104,7 +122,7 @@ run_mandelbrot::run_mandelbrot(const std::vector<std::string>& args_)
 	case 5:
 		center = complex(-0.39054, 0.58679);
 		break;
-	case6:
+	case 6:
 		center = complex(-0.761574, -0.0847596);
 		break;
 	case 7:
@@ -129,9 +147,47 @@ run_mandelbrot::run_mandelbrot(const std::vector<std::string>& args_)
 		break;
 
 	default:
-		throw std::invalid_argument("Wrong anitype");
+		throw std::invalid_argument("Wrong center_type_id");
 	}
 
+}
+
+void run_mandelbrot::parse_allocation_mode(const std::string& alloc_mode_string, allocation_mode& alloc_mode) {
+	// Setting the alloc_mode_ based on the alloc_mode_string
+	if (alloc_mode_string == "C")
+	{
+		alloc_mode = allocation_mode::C;
+	}
+	else if (alloc_mode_string == "CPP")
+	{
+		alloc_mode = allocation_mode::CPP;
+	}
+	else if (alloc_mode_string == "MODERN")
+	{
+		alloc_mode = allocation_mode::MODERN;
+	}
+	else if (alloc_mode_string == "MDSPAN")
+	{
+		alloc_mode = allocation_mode::MDSPAN;
+	}
+	else
+		throw std::invalid_argument("Wrong allocation mode string");
+}
+
+void run_mandelbrot::parse_allocation_major(const std::string& alloc_major_string, allocation_major& alloc_major) {
+	// Setting the alloc_major based on the alloc_major_string
+	if (alloc_major_string == "X_MAJOR") {
+		alloc_major = allocation_major::X_MAJOR;
+	}
+	else if (alloc_major_string == "Y_MAJOR") {
+		alloc_major = allocation_major::Y_MAJOR;
+	}
+	else
+		throw std::invalid_argument("Wrong allocation major string");
+}
+
+void run_mandelbrot::parse_mesh_type(const std::string& mesh_type_string, Mesh_type& mesh_type) {
+	// Setting the mesh_type based on the mesh_type_string
 	if (mesh_type_string == "INNER_LOOP") {
 		mesh_type = Mesh_type::INNER_LOOP;
 	}
@@ -142,13 +198,6 @@ run_mandelbrot::run_mandelbrot(const std::vector<std::string>& args_)
 	else if (mesh_type_string == "SERIAL") {
 		mesh_type = Mesh_type::SERIAL;
 	}
-
+	else
+		throw std::invalid_argument("Wrong mesh_type_string");
 }
-
-run_mandelbrot::run_mandelbrot(const allocation_mode& alloc_mode_, const allocation_major& alloc_major_,
-	const bounds& bnds_, const thread_config& thread_cfg_, const std::string& info_, const Mesh_type& mesh_type_):
-	info{info_}, center{complex(-0.743643887037151, 0.131825904205330)}, bnds{ bnds_ },
-	alloc_mode{alloc_mode_}, alloc_major{alloc_major_}, mesh_type{mesh_type_},
-	resolution{1920,1080},
-	thread_cfg{thread_cfg_}
-{}

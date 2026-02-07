@@ -1,5 +1,6 @@
 #include "run_mandelbrot_timing.h"
 #include "run_mandelbrot_single.h"
+#include <omp.h>
 
 
 using namespace Runner_NS;

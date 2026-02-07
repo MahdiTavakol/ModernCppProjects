@@ -198,5 +198,3 @@ void omp_strategy_serial::calculate(const double& _scale)
 		}
 	}
 }
-
-}

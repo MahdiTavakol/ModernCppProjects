@@ -34,12 +34,12 @@ namespace Array_NS {
 			if (alloc_major == allocation_major::X_MAJOR) {
 				data = (double**)malloc(n_xs * sizeof(double*));
 				for (int i = 0; i < n_xs; i++)
-					data[i] = &temp[i * n_ys];
+					data[i] = (double *)( &temp[i * n_ys]);
 			}
 			else if (alloc_major == allocation_major::Y_MAJOR) {
 				data = (double**)malloc(n_ys * sizeof(double*));
 				for (int i = 0; i < n_ys; i++)
-					data[i] = &temp[i * n_xs];
+					data[i] = (double *)( &temp[i * n_xs]);
 			}
 		}
 		void deallocate() override {

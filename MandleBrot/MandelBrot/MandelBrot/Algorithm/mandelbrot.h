@@ -5,11 +5,9 @@
 #include <fstream>
 #include <memory>
 
-#include "../Numerical/complex.h"
 #include "../Array/array_allocator.h"
 #include "../definitions.h"
 #include "formula.h"
-#include "strategies.h"
 
 using Array_NS::allocation_mode;
 using Array_NS::array_allocator;
@@ -20,10 +18,10 @@ constexpr double escape = 2.0;
 namespace Mandelbrot_NS {
 
 	struct bounds {
-		double x_min;
-		double x_max;
-		double y_min;
-		double y_max;
+		double x_min = -3.56;
+		double x_max =  1.77;
+		double y_min = -1.50;
+		double y_max =  1.50;
 	};
 
 
@@ -32,12 +30,6 @@ namespace Mandelbrot_NS {
 	public:
 		mandelbrot(/* allocation config */ const allocation_mode& _alloc_mode, const allocation_major& _alloc_major,
 			       /* space config */ const bounds& _bnds, const int& _n_xs, const int& _n_ys,
-			       /* file name */ const std::string& _file_name = "Mandelbrot.dat",
-			       /* number of iterations*/ const int& num_iterations_=10000,
-		           /* gamma */ const double& gamma = 1.0);
-		mandelbrot(/* allocation config */ const allocation_mode& _alloc_mode, const allocation_major& _alloc_major,
-			       /* space config */ const bounds& _bnds, const int& _n_xs, const int& _n_ys,
-			       /* mesh type */ const Mesh_type& mesh_type_,
 			       /* file name */ const std::string& _file_name = "Mandelbrot.dat",
 			       /* number of iterations*/ const int& num_iterations_=10000,
 		           /* gamma */ const double& gamma = 1.0);
@@ -81,7 +73,7 @@ namespace Mandelbrot_NS {
 		// in the strategies I had to put 
 		// these here.
 		thread_config thread_cfg;
-		int omp_num_threads, thread_id, size_per_thread;
+		int omp_num_threads = 0, size_per_thread = 0;
 		std::unique_ptr<std::array<int, 2>[]> x_ranges, y_ranges;
 	};
 }

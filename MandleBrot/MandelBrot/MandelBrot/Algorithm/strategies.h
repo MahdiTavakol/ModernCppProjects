@@ -1,10 +1,13 @@
 #pragma once
 #include "mandelbrot.h"
+#include "../definitions.h"
+#include "formula.h"
 #include <functional>
 
 using namespace Numerical_NS;
 
 namespace Mandelbrot_NS {
+	class mandelbrot;
 
 	class omp_strategy {
 	public:
@@ -16,11 +19,12 @@ namespace Mandelbrot_NS {
 			virtual void calculate(const double& scale_);
 
 	protected:
-		int n_xs, n_ys,  x_min, x_max, y_min, y_max;
-		int num_iterations;
+		int n_xs = 0, n_ys = 0;
+		double x_min = 0.0, x_max = 0.0, y_min = 0.0, y_max = 0.0;
+		int num_iterations = 10000;
 
 		thread_config thread_cfg;
-		formula<double>* frmlaRaw;
+		formula<double>* frmlaRaw =  nullptr;
 
 		std::reference_wrapper<mandelbrot> mndlbrt_ref;
 	};

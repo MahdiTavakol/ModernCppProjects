@@ -81,9 +81,6 @@
     <ClInclude Include="Algorithm\formula.h">
       <Filter>Source Files\Algorithm</Filter>
     </ClInclude>
-    <ClInclude Include="help.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -115,6 +112,9 @@
     </ClCompile>
     <ClCompile Include="Algorithm\strategies.cpp">
       <Filter>Source Files\Algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="cmd_args.h">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

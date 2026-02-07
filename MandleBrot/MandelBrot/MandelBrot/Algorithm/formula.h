@@ -24,7 +24,7 @@ namespace Mandelbrot_NS {
 	class formula_1 : public formula<T> {
 	public:
 		formula_1() = default;
-		complex<T> operator()(complex<T>& z, const complex<T>& c) override
+		complex<T> operator()(const complex<T>& z, const complex<T>& c) override
 		{
 			return z * z + c;
 		}
