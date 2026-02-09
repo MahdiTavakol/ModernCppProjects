@@ -11,6 +11,7 @@ project(Mandelbrot LANGUAGES CXX VERSION 0.1.0)
 option(USE_MDSPAN   "Enable std::mdspan-based arrays (needs C++23-ready library)" ON)
 option(USE_FAST_MATH "Enable fast-math optimizations" OFF)
 option(BUILD_DEBUG   "Build with debug symbols and lower optimization" OFF)
+option(BUILD_TESTS   "Build unit tests" OFF)
 
 # -----------------------------
 # Global C++ standard (stay on 20 so CMake 3.22 + FindOpenMP works)
@@ -106,18 +107,34 @@ set(RUNNER_SOURCES
 )
 
 set(MAIN_SRC main.cpp)
+set(TEST_SOURCES
+  Test/test.cpp
+  Test/catch_amalgamated.cpp
+)
 
-add_executable(mandelbrot
-  ${MAIN_SRC}
+add_library(mandelbrot_core
   ${ALGO_SOURCES}
   ${ARRAY_SOURCES}
   ${RUNNER_SOURCES}
 )
 
+add_executable(mandelbrot_app
+  ${MAIN_SRC}
+)
+
+target_link_libraries(mandelbrot_app PRIVATE mandelbrot_core)
+
+if (BUILD_TESTS)
+  add_executable(mandelbrot_test
+    ${TEST_SOURCES}
+  )
+  target_link_libraries(mandelbrot_test PRIVATE mandelbrot_core)
+endif()
+
 # -----------------------------
 # Includes
 # -----------------------------
-target_include_directories(mandelbrot PUBLIC
+set(COMMON_INCLUDE_DIRS
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/Algorithm
   ${CMAKE_CURRENT_SOURCE_DIR}/Array
@@ -125,10 +142,12 @@ target_include_directories(mandelbrot PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/Numerical
 )
 
+target_include_directories(mandelbrot_core PUBLIC ${COMMON_INCLUDE_DIRS})
+
 # -----------------------------
 # Compile-time definitions
 # -----------------------------
-target_compile_definitions(mandelbrot PUBLIC
+target_compile_definitions(mandelbrot_core PUBLIC
   $<$<BOOL:${USE_MDSPAN}>:USE_MDSPAN=1>
   $<$<NOT:$<BOOL:${USE_MDSPAN}>>:USE_MDSPAN=0>
 )
@@ -136,11 +155,11 @@ target_compile_definitions(mandelbrot PUBLIC
 # -----------------------------
 # Link
 # -----------------------------
-target_link_libraries(mandelbrot PRIVATE OpenMP::OpenMP_CXX)
+target_link_libraries(mandelbrot_core PRIVATE OpenMP::OpenMP_CXX)
 
 # Intel oneAPI on Windows (MSVC mode) sometimes needs this:
 if (MSVC AND (CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM"))
-  target_compile_options(mandelbrot PRIVATE /Qopenmp)
+  target_compile_options(mandelbrot_core PRIVATE /Qopenmp)
 endif()
 
 # -----------------------------
@@ -149,9 +168,9 @@ endif()
 # -----------------------------
 if (USE_MDSPAN)
   if (MSVC)
-    target_compile_options(mandelbrot PRIVATE /std:c++latest)
+    target_compile_options(mandelbrot_core PUBLIC /std:c++latest)
   else()
-    target_compile_options(mandelbrot PRIVATE -std=c++23)
+    target_compile_options(mandelbrot_core PUBLIC -std=c++23)
   endif()
 endif()
 
@@ -162,3 +181,4 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Algorithm PREFIX "Algorithm" FILES
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Array     PREFIX "Array"     FILES ${ARRAY_SOURCES})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Runner    PREFIX "Runner"    FILES ${RUNNER_SOURCES})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}           PREFIX "Root"      FILES ${MAIN_SRC})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/Test      PREFIX "Test"      FILES ${TEST_SOURCES})

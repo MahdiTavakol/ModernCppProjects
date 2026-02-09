@@ -22,9 +22,9 @@ vector<thread_config> thread_cfg_vec = {
     thread_config{1,8}, thread_config{2,4}, thread_config{4,2}, thread_config{8,1}
 };
 
-std::vector<allocation_mode>& alloc_mode_vec{ allocation_mode::C, allocation_mode::CPP, allocation_mode::MODERN};
-std::vector<allocation_major>& alloc_major_vec{ allocation_major::X_MAJOR, allocation_major::Y_MAJOR };
-std::vector<Mesh_type> mesh_vec{ Mesh_type::SERIAL, Mesh_type::INNER_LOOP, Mesh_type::OUTER_LOOP };
+std::vector<allocation_mode> alloc_mode_vec = { allocation_mode::C, allocation_mode::CPP, allocation_mode::MODERN};
+std::vector<allocation_major> alloc_major_vec = { allocation_major::X_MAJOR, allocation_major::Y_MAJOR };
+std::vector<Mesh_type> mesh_vec = { Mesh_type::SERIAL, Mesh_type::INNER_LOOP, Mesh_type::OUTER_LOOP };
 
 TEST_CASE("Testing serial running (the single mode)") {
     int expected = 0;
