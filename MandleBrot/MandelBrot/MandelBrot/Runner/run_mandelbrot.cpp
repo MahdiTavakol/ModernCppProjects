@@ -146,7 +146,7 @@ void run_mandelbrot::parse_center(const int& center_type_id, complex<double>& ce
 		break;
 
 	case 3:
-		center = complex(-0.1015, 0.633);
+		center = complex(-0.1015, -0.633);
 		break;
 
 	case 4:

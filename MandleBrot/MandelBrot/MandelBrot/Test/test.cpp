@@ -10,9 +10,11 @@
 
 using std::vector, std::string;
 
-vector<int> threads = { 1,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40 };
+static vector<int> center_ids = { 1,2,3,4,5,6,7,8,9,10,11,12 };
+static vector<int> expected_center_ids = {};
+static vector<int> threads = { 1,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40 };
 
-vector<thread_config> thread_cfg_vec = {
+static vector<thread_config> thread_cfg_vec = {
     thread_config{1,40},thread_config{2,20},thread_config{4,10},thread_config{5,8}, thread_config{8,5}, thread_config{10,4},
     thread_config{20,2}, thread_config{40,1},
     thread_config{1,36}, thread_config{2,18}, thread_config{4,9}, thread_config{9,4}, thread_config{18,2},thread_config{36,1},
@@ -22,9 +24,9 @@ vector<thread_config> thread_cfg_vec = {
     thread_config{1,8}, thread_config{2,4}, thread_config{4,2}, thread_config{8,1}
 };
 
-std::vector<allocation_mode> alloc_mode_vec = { allocation_mode::C, allocation_mode::CPP, allocation_mode::MODERN};
-std::vector<allocation_major> alloc_major_vec = { allocation_major::X_MAJOR, allocation_major::Y_MAJOR };
-std::vector<Mesh_type> mesh_vec = { Mesh_type::SERIAL, Mesh_type::INNER_LOOP, Mesh_type::OUTER_LOOP };
+static std::vector<allocation_mode> alloc_mode_vec = { allocation_mode::C, allocation_mode::CPP, allocation_mode::MODERN};
+static std::vector<allocation_major> alloc_major_vec = { allocation_major::X_MAJOR, allocation_major::Y_MAJOR };
+static std::vector<Mesh_type> mesh_vec = { Mesh_type::SERIAL, Mesh_type::INNER_LOOP, Mesh_type::OUTER_LOOP };
 
 TEST_CASE("Testing serial running (the single mode)") {
     int expected = 0;
