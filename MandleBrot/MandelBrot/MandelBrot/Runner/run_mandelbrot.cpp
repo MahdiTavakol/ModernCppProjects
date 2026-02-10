@@ -37,8 +37,11 @@ run_mandelbrot::run_mandelbrot(const std::vector<std::string>& args_)
 		else if (args_[iarg] == "--type") {
 			invalid_arg_check(iarg, 1, argc);
 			int center_type_id = std::stoi(args_[iarg + 1]);
+			std::cout << "Here " << std::endl;
 			parse_center(center_type_id, center, burning);
+			std::cout << "There" << std::endl;
 			bnds = center_scale_2_bounds(center);
+			std::cout << "Then" << std::endl;
 			iarg += 2;
 		}
 		else if (args_[iarg] == "--bounds") {
