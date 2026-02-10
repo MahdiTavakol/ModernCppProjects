@@ -6,14 +6,15 @@ using namespace Mandelbrot_NS;
 
 mandelbrot_omp::mandelbrot_omp(
 	/* allocation config */ const allocation_mode& _alloc_mode, const allocation_major& _alloc_major,
-	/* space config */ const bounds& _bnds, const int& _n_xs, const int& _n_ys,
+	/* space config */ const bounds& _bnds,
+	/* resolution */ std::array<int, 2> _res,
 	/* thread configuration*/ const thread_config& thread_cfg_,
 	/* mesh type */ const Mesh_type& mesh_type_,
 	/* file name */ const std::string& _file_name,
 	/* number of iterations*/ const int& num_iterations_,
 	/* gamma */ const double& gamma,
 	/* is it burning ship*/ const bool& burning_) :
-	mandelbrot{ _alloc_mode, _alloc_major, _bnds, _n_xs, _n_ys, _file_name, num_iterations_, gamma }
+	mandelbrot{ _alloc_mode, _alloc_major, _bnds, _res, _file_name, num_iterations_, gamma }
 {
 	thread_cfg = thread_cfg_;
 	int threads_x = thread_cfg.threads_x;
@@ -32,7 +33,7 @@ mandelbrot_omp::mandelbrot_omp(
 	x_ranges = std::make_unique<std::array<int, 2>[]>(threads_x);
 	y_ranges = std::make_unique<std::array<int, 2>[]>(threads_y);
 
-	array_alloc_ptr = std::make_unique<array_allocator>(alloc_mode, alloc_major, threads_x * n_xs, threads_y * n_ys, _file_name);
+	array_alloc_ptr = std::make_unique<array_allocator>(alloc_mode, alloc_major, threads_x * resolution[0], threads_y * resolution[1], _file_name);
 
 
 #pragma omp parallel 
@@ -49,20 +50,20 @@ mandelbrot_omp::mandelbrot_omp(
 
 	omp_set_num_threads(threads_x * threads_y);
 
-	int x_per_thread = (this->n_xs + threads_x - 1) / threads_x;
+	int x_per_thread = (resolution[0] + threads_x - 1) / threads_x;
 	for (int i = 0; i < threads_x; i++) {
-		int x_first = i * this->n_xs + i * x_per_thread;
+		int x_first = i * this->resolution[0] + i * x_per_thread;
 		int x_last = x_first + x_per_thread;
-		if (x_last > this->n_xs * threads_x) x_last = this->n_xs * threads_x;
+		if (x_last > this->resolution[0] * threads_x) x_last = this->resolution[0] * threads_x;
 		x_ranges[i] = std::array<int, 2>{ x_first,x_last };
 	}
 
 
-	int y_per_thread = (this->n_ys + threads_y - 1) / threads_y;
+	int y_per_thread = (this->resolution[1] + threads_y - 1) / threads_y;
 	for (int i = 0; i < threads_y; i++) {
-		int y_first = i * this->n_ys + i * y_per_thread;
+		int y_first = i * this->resolution[1] + i * y_per_thread;
 		int y_last = y_first + y_per_thread;
-		if (y_last > this->n_ys * threads_y) y_last = this->n_ys * threads_y;
+		if (y_last > this->resolution[1] * threads_y) y_last = resolution[1] * threads_y;
 		y_ranges[i] = std::array<int, 2>{ y_first,y_last };
 	}
 

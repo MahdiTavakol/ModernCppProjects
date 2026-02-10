@@ -20,7 +20,7 @@ void run_mandelbrot_single::build_mandelbrot_ptr()
 {
 	mandelbrot_ptr = std::make_unique<mandelbrot_omp>(
 		alloc_mode, alloc_major,
-		bnds, x_size, y_size, thread_cfg, mesh_type,
+		bnds, resolution, thread_cfg, mesh_type,
 		info,
 		10000, 1.0, burning);
 }
