@@ -10,7 +10,8 @@ namespace Mandelbrot_NS {
 	class mandelbrot_omp : public mandelbrot {
 	public:
 		mandelbrot_omp(/* allocation config */ const allocation_mode& _alloc_mode, const allocation_major& _alloc_major,
-			           /* space config */ const bounds& _bnds, const int& _n_xs, const int& _n_ys,
+			           /* space config */ const bounds& _bnds,
+			           /* resolution */ std::array<int, 2> _res,
 			           /* thread configuration*/ const thread_config& thread_cfg,
 			           /* mesh type */ const Mesh_type& mesh_type_,
 			           /* file name */ const std::string& _file_name = "Mandelbrot.dat",

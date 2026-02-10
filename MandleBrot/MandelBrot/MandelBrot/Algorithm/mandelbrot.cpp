@@ -7,24 +7,27 @@ using namespace Mandelbrot_NS;
 using Numerical_NS::complex;
 
 mandelbrot::mandelbrot(const allocation_mode& _alloc_mode, const allocation_major& _alloc_major,
-	                   const bounds& _bnds, const int& _n_xs, const int& _n_ys,
+	                   const bounds& _bnds, 
+	                   std::array<int,2> _res,
 	                   const std::string& _file_name,
 	                   const int& num_iterations_,
 					   const double& gamma_):
 	alloc_mode{ _alloc_mode }, alloc_major{_alloc_major},
 	gamma{gamma_},
-	n_xs{ _n_xs }, n_ys{ _n_ys },
+	resolution{_res},
 	x_min {_bnds.x_min}, x_max{ _bnds.x_max }, y_min{ _bnds.y_min }, y_max{ _bnds.y_max },
 	num_iterations{num_iterations_},
 	file_name{ _file_name }
 {
-	array_alloc_ptr = std::make_unique<array_allocator>(alloc_mode, alloc_major, n_xs, n_ys, file_name,gamma_);
+	array_alloc_ptr = std::make_unique<array_allocator>(alloc_mode, alloc_major, resolution[0], resolution[1], file_name, gamma_);
 	this->area = 0;
 }
 
 
 void mandelbrot::calculate(const double& _scale)
 {
+	int n_xs = resolution[0];
+	int n_ys = resolution[1];
 	// Row bases similar to our allocation
 	for (int j = 0; j < n_ys; j++)
 		for (int i = 0; i < n_xs; i++)
@@ -54,7 +57,7 @@ void mandelbrot::calculate(const double& _scale)
 
 void mandelbrot::output()
 {
-	array_alloc_ptr->write_data(n_xs,n_ys);
+	array_alloc_ptr->write_data(resolution[0],resolution[1]);
 }
 
 int& mandelbrot::return_area()

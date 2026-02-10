@@ -9,8 +9,8 @@ using namespace Mandelbrot_NS;
 
 void omp_strategy::calculate([[maybe_unused]] const double& _scale)
 {
-	n_xs = mndlbrt_ref.get().n_xs;
-	n_ys = mndlbrt_ref.get().n_ys;
+	n_xs = mndlbrt_ref.get().resolution[0];
+	n_ys = mndlbrt_ref.get().resolution[1];
 	x_min = mndlbrt_ref.get().x_min;
 	x_max = mndlbrt_ref.get().x_max;
 	y_min = mndlbrt_ref.get().y_min;

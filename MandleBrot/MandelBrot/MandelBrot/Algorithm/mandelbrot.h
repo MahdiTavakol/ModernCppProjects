@@ -8,6 +8,7 @@
 #include "../Array/array_allocator.h"
 #include "../definitions.h"
 #include "formula.h"
+#include <array>
 
 using Array_NS::allocation_mode;
 using Array_NS::array_allocator;
@@ -29,7 +30,8 @@ namespace Mandelbrot_NS {
 	{
 	public:
 		mandelbrot(/* allocation config */ const allocation_mode& _alloc_mode, const allocation_major& _alloc_major,
-			       /* space config */ const bounds& _bnds, const int& _n_xs, const int& _n_ys,
+			       /* space config */ const bounds& _bnds,
+			       /* resolution */ std::array<int,2> _res,
 			       /* file name */ const std::string& _file_name = "Mandelbrot.dat",
 			       /* number of iterations*/ const int& num_iterations_=10000,
 		           /* gamma */ const double& gamma = 1.0);
@@ -61,7 +63,7 @@ namespace Mandelbrot_NS {
 		allocation_mode alloc_mode;
 		allocation_major alloc_major;
 		double gamma;
-		int n_xs, n_ys;
+		std::array<int, 2> resolution;
 		double x_min, x_max, y_min, y_max;
 		int area;
 		int num_iterations;

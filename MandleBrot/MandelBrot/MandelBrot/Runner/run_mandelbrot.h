@@ -66,8 +66,7 @@ namespace Runner_NS {
 		double gamma{1.0};
 		// thread configuration
 		thread_config thread_cfg{};
-		int x_size{1920};
-		int y_size{1080};
+		// the calculated area
 		int area{ 0 };
 
 		// the mandelbrot pointer
