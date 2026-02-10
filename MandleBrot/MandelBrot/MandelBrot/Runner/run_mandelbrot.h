@@ -38,6 +38,9 @@ namespace Runner_NS {
 		void output() {
 			mandelbrot_ptr->output();
 		}
+		virtual void print_output() {
+			std::cout << "Finished running!" << std::endl;
+		}
 
 	protected:
 		// info string

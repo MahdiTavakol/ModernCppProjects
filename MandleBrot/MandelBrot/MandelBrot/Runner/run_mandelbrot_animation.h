@@ -17,6 +17,7 @@ namespace Runner_NS {
 		std::vector<int> return_area_vec();
 
 		void run() override;
+
 	
 	private:
 		int num_frames{ 100 };

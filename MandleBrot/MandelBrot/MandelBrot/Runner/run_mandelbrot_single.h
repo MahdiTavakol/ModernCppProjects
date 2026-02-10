@@ -29,6 +29,10 @@ namespace Runner_NS {
 		void build_mandelbrot_ptr();
 
 		void run() override;
+		void print_output() override {
+			std::cout << "The area is: " << area << std::endl;
+			run_mandelbrot::print_output();
+		}
 
 	private:
 	};

@@ -26,6 +26,7 @@ int main(int argc, char** argv)
 		std::unique_ptr<run_mandelbrot> run_mandelbrot_ptr;
 		factory->return_runner(run_mandelbrot_ptr);
 		run_mandelbrot_ptr->run();
+		run_mandelbrot_ptr->print_output();
 	}
 	catch (std::bad_alloc &ae) {
 		std::cerr << "C++ allocation failed:" << ae.what() << std::endl;
