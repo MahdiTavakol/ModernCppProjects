@@ -104,6 +104,12 @@ run_mandelbrot::run_mandelbrot(const std::vector<std::string>& args_)
 			invalid_arg_check(iarg, 1, argc);
 			iarg += 2;
 		}
+		else if (args_[iarg] == "--noWrite") {
+			// this is parsed again by the run_mandelbrot_timing 
+			iarg++;
+		}
+		else
+			throw std::invalid_argument("Unknown argument!");
 	}
 
 	if (!threadsSet) {
