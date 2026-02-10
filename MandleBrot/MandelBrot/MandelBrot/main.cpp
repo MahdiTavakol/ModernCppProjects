@@ -25,8 +25,10 @@ int main(int argc, char** argv)
 		auto factory = std::make_unique<run_mandelbrot_factory>(args);
 		std::unique_ptr<run_mandelbrot> run_mandelbrot_ptr;
 		factory->return_runner(run_mandelbrot_ptr);
+		std::cout << "HERE" << std::endl;
 		run_mandelbrot_ptr->run();
 		run_mandelbrot_ptr->print_output();
+		std::cout << "THERE" << std::endl;
 	}
 	catch (std::bad_alloc &ae) {
 		std::cerr << "C++ allocation failed:" << ae.what() << std::endl;
@@ -36,6 +38,7 @@ int main(int argc, char** argv)
 		std::cerr << "Exception: " << ae.what() << std::endl;
 		return EXIT_FAILURE;
 	}
+	std::cout << "THUS" << std::endl;
 	return EXIT_SUCCESS;
 }
 

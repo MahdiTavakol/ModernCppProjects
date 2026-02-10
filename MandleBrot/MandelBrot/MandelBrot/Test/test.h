@@ -12,7 +12,7 @@ using Runner_NS::run_mandelbrot;
 
 using std::vector, std::string;
 
-double run_wrapper(const vector<string>& args)
+int run_wrapper(const vector<string>& args)
 {
 	auto factory = std::make_unique<run_mandelbrot_factory>(args);
 	std::unique_ptr<run_mandelbrot> run_mandelbrot_ptr;
