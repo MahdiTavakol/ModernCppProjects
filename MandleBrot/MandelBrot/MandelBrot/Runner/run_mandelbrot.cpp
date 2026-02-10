@@ -38,6 +38,7 @@ run_mandelbrot::run_mandelbrot(const std::vector<std::string>& args_)
 			invalid_arg_check(iarg, 1, argc);
 			int center_type_id = std::stoi(args_[iarg + 1]);
 			parse_center(center_type_id, center, burning);
+			bnds = center_scale_2_bounds(center);
 			iarg += 2;
 		}
 		else if (args_[iarg] == "--bounds") {
@@ -226,4 +227,13 @@ void run_mandelbrot::parse_mesh_type(const std::string& mesh_type_string, Mesh_t
 	}
 	else
 		throw std::invalid_argument("Wrong mesh_type_string");
+}
+
+bounds run_mandelbrot::center_scale_2_bounds(const complex<double>& _center, const double& _scale) {
+	bounds bnds;
+	bnds.x_min = _center.real - (2.665 / _scale);
+	bnds.x_max = _center.real + (2.665 / _scale);
+	bnds.y_min = _center.imag - (1.5 / _scale);
+	bnds.y_max = _center.imag + (1.5 / _scale);
+	return bnds;
 }

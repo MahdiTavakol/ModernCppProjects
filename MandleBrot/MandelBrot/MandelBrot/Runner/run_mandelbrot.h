@@ -73,6 +73,9 @@ namespace Runner_NS {
 		// the mandelbrot pointer
 		std::unique_ptr<mandelbrot> mandelbrot_ptr;
 
+		// converting the center and scale to bounds 
+		static bounds center_scale_2_bounds(const complex<double>& _center, const double& scale_ = 1.0);
+
 	private:
 		static void invalid_arg_check(const int& iarg, const int& expectarg, const int& argc);
 		static void parse_center(const int& center_type_id, complex<double>& center, bool& burning);
