@@ -28,4 +28,5 @@ void run_mandelbrot_single::build_mandelbrot_ptr()
 void run_mandelbrot_single::run()
 {
 	mandelbrot_ptr->calculate();
+	area = mandelbrot_ptr->return_area();
 }
