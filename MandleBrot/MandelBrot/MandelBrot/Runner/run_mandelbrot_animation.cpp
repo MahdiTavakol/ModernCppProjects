@@ -18,11 +18,11 @@ run_mandelbrot_animation::run_mandelbrot_animation(const std::vector<std::string
 		scale0 = 10.0;
 	}
 
-	mandelbrot_ptr = std::make_unique<mandelbrot_omp>(
-		alloc_mode, alloc_major,
-		bnds, x_size, y_size, thread_cfg, mesh_type,
-		info,
-		num_iterations, gamma, burning);
+	//mandelbrot_ptr = std::make_unique<mandelbrot_omp>(
+	//	alloc_mode, alloc_major,
+	//	bnds, resolution, thread_cfg, mesh_type,
+	//	info,
+	//	num_iterations, gamma, burning);
 }
 
 
@@ -54,7 +54,7 @@ void run_mandelbrot_animation::generate_animation(const complex<double>& _center
 				last_rendering_frame = last_rendering_frame < num_frames-1 ? last_rendering_frame : num_frames-1;
 				thrds.push_back(std::thread(svgrender,
 					first_rendering_frame, 1, last_rendering_frame,
-					std::array<int,2>{x_size,y_size}, tmpl));
+					resolution, tmpl));
 				first_rendering_frame = last_rendering_frame + 1;
 			}
 			else {
@@ -117,7 +117,7 @@ void run_mandelbrot_animation::animate(std::string _file_name, const complex<dou
 
 	mandelbrot_ptr = std::make_unique<mandelbrot_omp>(
 			alloc_mode, alloc_major,
-			bnds, x_size, y_size, thread_cfg, mesh_type, 
+			bnds, resolution, thread_cfg, mesh_type, 
 			_file_name,
 			num_iterations, gamma, burning);
 			
