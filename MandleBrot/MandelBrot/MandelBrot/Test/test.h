@@ -6,7 +6,6 @@
 
 #include "../Runner/run_mandelbrot.h"
 #include "../Runner/run_mandelbrot_factory.h"
-#include "../cmd_args.h"
 using Runner_NS::run_mandelbrot_factory;
 using Runner_NS::run_mandelbrot;
 
