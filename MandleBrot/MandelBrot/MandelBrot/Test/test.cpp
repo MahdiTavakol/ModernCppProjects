@@ -144,10 +144,6 @@ TEST_CASE("Testing various thread configurations (The single mode)") {
         REQUIRE(area == expected);
 
     }
-
-    for (const auto& thread : threads) {
-
-    }
 }
 
 TEST_CASE("Testing various thread numbers (The timing mode)") {
