@@ -46,6 +46,7 @@ static std::vector<Mesh_type> mesh_vec = { Mesh_type::SERIAL, Mesh_type::INNER_L
 
 
 TEST_CASE("Testing serial running with various centers (the single mode)") {
+    std::cout << "Testing serial running with various centers (the single mode)" << std::endl;
 
     for (const auto& [type, expected] : center_id_results) {
         vector<string> args;
@@ -71,6 +72,7 @@ TEST_CASE("Testing serial running with various centers (the single mode)") {
 }
 
 TEST_CASE("Testing serial running (the single mode)") {
+    std::cout << "Testing serial running (the single mode)" << std::endl;
     int expected = center_id_results[1];
 
     vector<string> args;
@@ -94,7 +96,7 @@ TEST_CASE("Testing serial running (the single mode)") {
 }
 
 TEST_CASE("Testing various thread numbers (The single mode)") {
-
+    std::cout << "Testing various thread numbers (The single mode)" << std::endl;
     int expected = center_id_results[1];
 
     for (const auto& thread : threads) {
@@ -120,7 +122,7 @@ TEST_CASE("Testing various thread numbers (The single mode)") {
 }
 
 TEST_CASE("Testing various thread configurations (The single mode)") {
-
+    std::cout << "Testing various thread configurations (The single mode)" << std::endl;
     int expected = center_id_results[1];
 
     for (const auto& thread_cfg : thread_cfg_vec) {
@@ -147,6 +149,7 @@ TEST_CASE("Testing various thread configurations (The single mode)") {
 }
 
 TEST_CASE("Testing various thread numbers (The timing mode)") {
+    std::cout << "Testing various thread numbers (The timing mode)" << std::endl;
     int expected = center_id_results[1];
 
     vector<allocation_mode> alloc_mode_vec_i;
@@ -186,6 +189,7 @@ TEST_CASE("Testing various thread numbers (The timing mode)") {
 
 
 TEST_CASE("Testing various thread configurations (The timing mode)") {
+    std::cout << "Testing various thread configurations (The timing mode)" << std::endl;
     int expected = center_id_results[1];
 
     vector<string> args;
