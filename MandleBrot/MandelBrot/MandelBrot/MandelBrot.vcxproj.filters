@@ -90,6 +90,9 @@
     <ClInclude Include="Test\test.h">
       <Filter>Source Files\Test</Filter>
     </ClInclude>
+    <ClInclude Include="Test\unittest_algorithm.h">
+      <Filter>Source Files\Test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -129,6 +132,9 @@
       <Filter>Source Files\Test</Filter>
     </ClCompile>
     <ClCompile Include="Test\catch_amalgamated.cpp">
+      <Filter>Source Files\Test</Filter>
+    </ClCompile>
+    <ClCompile Include="Test\unittest_algorithm.cpp">
       <Filter>Source Files\Test</Filter>
     </ClCompile>
   </ItemGroup>

@@ -147,6 +147,7 @@
     <ClInclude Include="Runner\run_mandelbrot_timing.h" />
     <ClInclude Include="Test\catch_amalgamated.hpp" />
     <ClInclude Include="Test\test.h" />
+    <ClInclude Include="Test\unittest_algorithm.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Algorithm\mandelbrot.cpp" />
@@ -162,6 +163,7 @@
     <ClCompile Include="Runner\run_mandelbrot_timing.cpp" />
     <ClCompile Include="Test\catch_amalgamated.cpp" />
     <ClCompile Include="Test\test.cpp" />
+    <ClCompile Include="Test\unittest_algorithm.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
