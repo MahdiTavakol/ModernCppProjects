@@ -55,21 +55,21 @@ mandelbrot_omp::mandelbrot_omp(
 
 	omp_set_num_threads(threads_x * threads_y);
 
-	int x_per_thread = (resolution[0] + threads_x - 1) / threads_x;
+	int x_per_thread = (this->resolution[0] + threads_x - 1) / threads_x;
 	for (int i = 0; i < threads_x; i++) {
 		int x_first = i * this->resolution[0] + i * x_per_thread;
-		int x_last = x_first + x_per_thread;
+		int x_last = x_first + x_per_thread;\
 		if (x_last > this->resolution[0] * threads_x) x_last = this->resolution[0] * threads_x;
 		x_ranges[i] = std::array<int, 2>{ x_first,x_last };
 	}
 
 
 	int y_per_thread = (this->resolution[1] + threads_y - 1) / threads_y;
-	for (int i = 0; i < threads_y; i++) {
-		int y_first = i * this->resolution[1] + i * y_per_thread;
+	for (int j = 0; j < threads_y; j++) {
+		int y_first = j * this->resolution[1] + j * y_per_thread;
 		int y_last = y_first + y_per_thread;
-		if (y_last > this->resolution[1] * threads_y) y_last = resolution[1] * threads_y;
-		y_ranges[i] = std::array<int, 2>{ y_first,y_last };
+		if (y_last > this->resolution[1] * threads_y) y_last = this->resolution[1] * threads_y;
+		y_ranges[j] = std::array<int, 2>{ y_first,y_last };
 	}
 
 	// The compiler complains about x_per_thread and y_per_thread

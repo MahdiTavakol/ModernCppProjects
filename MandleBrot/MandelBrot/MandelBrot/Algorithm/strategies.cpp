@@ -131,6 +131,8 @@ void omp_strategy_j::calculate(const double& _scale)
 				complex min(static_cast<double>(x_min), static_cast<double>(y_min));
 				double _i = static_cast<double>(i % n_xs);
 				double _j = static_cast<double>(j % n_ys);
+				if (_i >= n_xs || _j >= n_ys)
+					continue;
 				_i = static_cast<double>((_i + n_xs / _scale) / _scale);
 				_j = static_cast<double>((_j + n_ys / _scale) / _scale);
 
