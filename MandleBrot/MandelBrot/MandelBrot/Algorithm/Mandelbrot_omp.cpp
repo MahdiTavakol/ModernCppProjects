@@ -65,6 +65,8 @@ mandelbrot_omp::mandelbrot_omp(
 		/**/
 		/**/
 		/**/
+		/**/
+		/**/
 	}
 
 
