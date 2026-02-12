@@ -79,6 +79,16 @@ mandelbrot_omp::mandelbrot_omp(
 		y_ranges[j] = std::array<int, 2>{ y_first,y_last };
 	}
 
+	for (int i = 0; i < threads_x; i++) {
+		std::cout << x_ranges[i][0]<< "," << x_ranges[i][1] << std::endl;
+	}
+
+	std::cout << std::endl;
+	for (int i = 0; i < threads_y; i++) {
+		std::cout << y_ranges[i][0] << "," << y_ranges[i][1] << std::endl;
+	}
+
+
 	// The compiler complains about x_per_thread and y_per_thread
 	// variables not used while they have been used.
 	// To stop this complain we added this part
