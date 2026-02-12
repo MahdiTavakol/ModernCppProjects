@@ -124,9 +124,9 @@ void omp_strategy_j::calculate(const double& _scale)
 		const int& last_y = y_ranges[thread_id_y][1];
 
 
-		for (int j = first_y; j <= last_y; j++)
+		for (int j = first_y; j < last_y; j++)
 		{
-			for (int i = first_x; i <= last_x; i++)
+			for (int i = first_x; i < last_x; i++)
 			{
 				complex min(static_cast<double>(x_min), static_cast<double>(y_min));
 				double _i = static_cast<double>(i % n_xs);
