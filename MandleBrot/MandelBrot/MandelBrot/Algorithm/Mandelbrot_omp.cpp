@@ -26,6 +26,7 @@ mandelbrot_omp::mandelbrot_omp(
 				"Warning: ignoring the threads_x and threads_y parameters for the SERIAL mesh type!" <<
 				std::endl;
 				*/
+			/* */
 			threads_x = threads_y = 1;
 		}
 	}
@@ -43,8 +44,9 @@ mandelbrot_omp::mandelbrot_omp(
 		if (num_threads != threads_x * threads_y)
 		{
 			int thread_id = omp_get_thread_num();
-			if (thread_id == 0)
+			/*if (thread_id == 0)
 				std::cout << "Warning: resetting the number of threads" << std::endl;
+				*/
 		}
 
 	}
