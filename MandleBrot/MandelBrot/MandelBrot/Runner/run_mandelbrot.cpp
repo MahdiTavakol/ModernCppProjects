@@ -106,7 +106,12 @@ run_mandelbrot::run_mandelbrot(const std::vector<std::string>& args_)
 			iarg++;
 		}
 		else
-			throw std::invalid_argument("Unknown argument!");
+		{
+			std::string argument = std::string(args_[iarg]);
+			std::string message = std::string("Unknown argument ") + argument + std::string("!");
+			throw std::invalid_argument(message.c_str());
+		}
+			
 	}
 
 	if (!threadsSet) {
