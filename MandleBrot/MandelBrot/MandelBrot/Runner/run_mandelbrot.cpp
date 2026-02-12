@@ -125,11 +125,15 @@ run_mandelbrot::run_mandelbrot(const std::vector<std::string>& args_)
 
 }
 
-run_mandelbrot::run_mandelbrot(const allocation_mode& alloc_mode_, const allocation_major& alloc_major_,
-	const bounds& bnds_, const thread_config& thread_cfg_, const std::string& info_, const Mesh_type& mesh_type_):
-	info{info_}, center{complex(-0.743643887037151, 0.131825904205330)}, bnds{ bnds_ },
+run_mandelbrot::run_mandelbrot(const allocation_mode& alloc_mode_,
+	const allocation_major& alloc_major_,
+	const bounds& bnds_, const thread_config& thread_cfg_,
+	const std::string& info_, const Mesh_type& mesh_type_,
+	const std::array<int,2>& resolution_,
+	const complex<double>& center_):
+	info{info_}, center{center_}, bnds{ bnds_ },
 	alloc_mode{alloc_mode_}, alloc_major{alloc_major_}, mesh_type{mesh_type_},
-	resolution{1920,1080},
+	resolution{resolution_},
 	thread_cfg{thread_cfg_}
 {}
 

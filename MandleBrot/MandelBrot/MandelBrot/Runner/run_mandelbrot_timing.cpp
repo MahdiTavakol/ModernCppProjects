@@ -56,7 +56,6 @@ run_mandelbrot_timing::run_mandelbrot_timing(const std::vector<std::string>& arg
 // finally one for the mesh type
 void run_mandelbrot_timing::run()
 {
-	complex center(-0.743643887037151, 0.131825904205330);
 
 	int number = 0;
 	for (const auto& alloc_mode : alloc_mode_vec)
@@ -69,7 +68,9 @@ void run_mandelbrot_timing::run()
 					std::string file_name("temp/Mandelbrot_" + std::to_string(number) + ".dat");
 					std::string title;
 					mandelbrot_runner_ptr = std::make_unique<run_mandelbrot_single>
-						(alloc_mode, alloc_major, bnds, thread_cfg, file_name, mesh_type);
+						(alloc_mode, alloc_major,
+						 bnds, thread_cfg, file_name, mesh_type,
+						 resolution, center);
 
 
 					std::cout << "Starting the #" << number << " code" << std::endl;

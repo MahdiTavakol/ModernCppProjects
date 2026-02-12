@@ -34,6 +34,7 @@ public:
 		threads_y{threads_y_},
 		others{others_} 
 	{}
+
 	vector<string> operator()() const {
 		vector<string> args;
 		args.push_back(dummy);

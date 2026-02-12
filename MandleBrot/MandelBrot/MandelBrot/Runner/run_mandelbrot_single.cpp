@@ -9,9 +9,17 @@ run_mandelbrot_single::run_mandelbrot_single(const std::vector<std::string>& arg
 	build_mandelbrot_ptr();
 }
 
-run_mandelbrot_single::run_mandelbrot_single(const allocation_mode& alloc_mode_, const allocation_major& alloc_major_,
-	const bounds& bnds_, const thread_config& thread_cfg_, const std::string& info_, const Mesh_type& mesh_type_):
-	     run_mandelbrot{alloc_mode_,alloc_major_,bnds_,thread_cfg_, info_, mesh_type_} 
+run_mandelbrot_single::run_mandelbrot_single(
+	const allocation_mode& alloc_mode_, 
+	const allocation_major& alloc_major_,
+	const bounds& bnds_, const thread_config& thread_cfg_,
+	const std::string& info_, 
+	const Mesh_type& mesh_type_,
+	const std::array<int,2>& resolution_,
+	const complex<double>& center_):
+	     run_mandelbrot{alloc_mode_,alloc_major_,bnds_,
+	                    thread_cfg_, info_, mesh_type_,
+	                    resolution_, center_} 
 {
 	build_mandelbrot_ptr();
 }

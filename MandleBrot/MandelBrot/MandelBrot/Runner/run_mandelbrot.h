@@ -23,8 +23,12 @@ namespace Runner_NS {
 	{
 	public:
 		run_mandelbrot(const std::vector<std::string>& args_);
-		run_mandelbrot(const allocation_mode& alloc_mode_, const allocation_major& alloc_major_,
-			const bounds& bnds, const thread_config& thread_cfg, const std::string& info, const Mesh_type& mesh_type_);
+		run_mandelbrot(const allocation_mode& alloc_mode_, 
+			const allocation_major& alloc_major_,
+			const bounds& bnds, const thread_config& thread_cfg, 
+			const std::string& info, const Mesh_type& mesh_type_,
+			const std::array<int,2>& resolution_,
+			const complex<double>& center_);
 		virtual ~run_mandelbrot() = default;
 
 		virtual void run() = 0;

@@ -147,7 +147,7 @@ TEST_CASE("Testing various thread numbers (The timing mode)") {
                                    std::to_string(1),
                                    std::string("--noWrite")};
 
-    auto args = arg_builder();
+    vector<string> args = arg_builder();
 
 
     std::unique_ptr<Runner_NS::run_mandelbrot_timing> runner =
