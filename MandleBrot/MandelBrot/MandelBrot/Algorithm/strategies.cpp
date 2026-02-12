@@ -42,6 +42,7 @@ void omp_strategy_i::calculate(const double& _scale)
 		/*if (thread_id == 0)
 			std::cout << "Using " << omp_get_num_threads() << " omp threads" << std::endl;
 			*/
+		/**/
 		int thread_id_x = thread_id % (thread_cfg.threads_x);
 		int thread_id_y = thread_id / (thread_cfg.threads_x);
 
