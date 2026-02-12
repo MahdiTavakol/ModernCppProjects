@@ -62,6 +62,7 @@ mandelbrot_omp::mandelbrot_omp(
 		if (x_last >= this->resolution[0] * threads_x) x_last = this->resolution[0] * threads_x - 1;
 		x_ranges[i] = std::array<int, 2>{ x_first,x_last };
 		/**/
+		/**/
 	}
 
 
