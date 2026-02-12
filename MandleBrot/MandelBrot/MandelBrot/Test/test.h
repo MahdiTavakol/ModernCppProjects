@@ -27,6 +27,7 @@ public:
 		dummy{dummy_},
 		mode{mode_},
 		type{type_},
+		info{info_},
 		res_x{res_x_},
 		res_y{res_y_},
 		threads_x{threads_x_},
