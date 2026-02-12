@@ -72,6 +72,10 @@ TEST_CASE("Testing serial running with various centers (the single mode)") {
                                        std::to_string(1)};
 
         auto args = arg_builder();
+        std::cout << "testing!" << std::endl;
+        for (auto& arg : args)
+            std::cout << arg;
+        std::cout << std::endl;
         int area = run_wrapper(args);
 
         std::cout << "Testing the center #" << type << std::endl;
