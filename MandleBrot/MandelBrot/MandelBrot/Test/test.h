@@ -66,6 +66,6 @@ int run_wrapper(const vector<string>& args)
 	std::unique_ptr<run_mandelbrot> run_mandelbrot_ptr;
 	factory->return_runner(run_mandelbrot_ptr);
 	run_mandelbrot_ptr->run();
-	double output = run_mandelbrot_ptr->return_area();
-	return output;
+	int area = run_mandelbrot_ptr->return_area();
+	return area;
 }
