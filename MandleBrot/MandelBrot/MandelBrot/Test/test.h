@@ -48,7 +48,8 @@ public:
 		args.push_back("--threads");
 		args.push_back(threads_x);
 		args.push_back(threads_y);
-		args.push_back(others);
+		if (!others.empty())
+			args.push_back(others);
 		return args;
 	}
 
