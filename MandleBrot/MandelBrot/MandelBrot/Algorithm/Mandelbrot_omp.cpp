@@ -80,7 +80,7 @@ mandelbrot_omp::mandelbrot_omp(
 	}
 
 	for (int i = 0; i < threads_x; i++) {
-		std::cout << x_ranges[i][0] - this->resolution[0]*i << "," << x_ranges[i][1] - i*this->resolution[0]  << std::endl;
+		std::cout << (x_ranges[i])[0] - this->resolution[0]*i << "," << x_ranges[i][1] - i*this->resolution[0]  << std::endl;
 	}
 
 	std::cout << std::endl;
