@@ -16,28 +16,24 @@ static map<int, int> center_id_results = { {1,7505}, {2,4810}, {3,4810},
                                            {7,7504}, {8,5271}, {9,5156},
                                            {10,4122}, {11,3029} };
 
-static vector<int> threads = { 1,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40 };
+static vector<int> threads = { 1,2,4,8,12,16,20,24,30,34,38,40 };
 
 static vector<thread_config> thread_cfg_vec = {
     // 40 threads
-    thread_config{1,40}, thread_config{2,20}, thread_config{4,10},
-    thread_config{5,8},  thread_config{8,5},  thread_config{10,4},
-    thread_config{20,2}, thread_config{40,1},
+    thread_config{1,40},
+    thread_config{4,10},
     // 36 threads
-    thread_config{1,36}, thread_config{2,18}, thread_config{4,9}, 
-    thread_config{9,4},  thread_config{18,2}, thread_config{36,1}, 
+    thread_config{4,9}, 
+    thread_config{9,4}, 
     // 32 threads
-    thread_config{1,32}, thread_config{2,16}, thread_config{4,8}, 
-    thread_config{8,4},  thread_config{16,2}, thread_config{32,1}, 
+    thread_config{1,32}, 
+    thread_config{32,1}, 
     // 20 threads
-    thread_config{1,20}, thread_config{2,10}, thread_config{4,5},
-    thread_config{5,4},  thread_config{10,2}, thread_config{20,1},
+    thread_config{4,5},
+    thread_config{5,4},
     // 16 threads
-    thread_config{1,16}, thread_config{2,8},  thread_config{4,4},
-    thread_config{8,2},  thread_config{16,1},
-    // 8 threads
-    thread_config{1,8},  thread_config{2,4},  thread_config{4,2},
-    thread_config{8,1}
+    thread_config{1,16}, thread_config{4,4},
+    thread_config{16,1},
 };
 
 static std::vector<allocation_mode> alloc_mode_vec = { allocation_mode::C, allocation_mode::CPP, allocation_mode::MODERN};

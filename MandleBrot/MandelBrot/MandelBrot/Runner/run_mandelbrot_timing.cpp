@@ -61,16 +61,20 @@ void run_mandelbrot_timing::run()
 	for (const auto& alloc_mode : alloc_mode_vec)
 		for (const auto& alloc_major: alloc_major_vec)
 			for (const auto& thread_cfg : threads_vec)
-				for (const auto& mesh_type: mesh_vec)
+				for (const auto& mesh_type : mesh_vec)
 				{
 					number++;
-					std::cout << "Allocating the #" << number << " mandelbrot pointer" << std::endl;
+					if (writeFile) {
+						std::cout << "Allocating the #" << 
+							number << " mandelbrot pointer" <<
+							std::endl;
+					}
 					std::string file_name("temp/Mandelbrot_" + std::to_string(number) + ".dat");
 					std::string title;
 					mandelbrot_runner_ptr = std::make_unique<run_mandelbrot_single>
 						(alloc_mode, alloc_major,
-						 bnds, thread_cfg, file_name, mesh_type,
-						 resolution, center);
+							bnds, thread_cfg, file_name, mesh_type,
+							resolution, center);
 
 
 					std::cout << "Starting the #" << number << " code" << std::endl;
@@ -80,14 +84,19 @@ void run_mandelbrot_timing::run()
 					auto end = std::chrono::high_resolution_clock::now();
 					std::chrono::duration<double, std::milli> timeRequired = (end - start);
 					//Let's get milliseconds out of that, and report
-					std::cout << "The #" << number << " code took " << timeRequired.count() << " milliseconds." << std::endl;
-					std::cout << "Finished the " << info << " code" << std::endl;
+					if (writeFile) {
+						std::cout << "The #" << number << " code took " <<
+							timeRequired.count() << " milliseconds." << std::endl;
+						std::cout << "Finished the " << info << " code" << std::endl;
+					}
 					area = mandelbrot_runner_ptr->return_area();
-					std::cout << "The area of the set is " << area << std::endl;
 
-					std::cout << "Writting the output " << std::endl;
-					mandelbrot_runner_ptr->output();
-					std::cout << "Finished writing the output" << std::endl;
+					if (writeFile) {
+						std::cout << "The area of the set is " << area << std::endl;
+						std::cout << "Writting the output " << std::endl;
+						mandelbrot_runner_ptr->output();
+						std::cout << "Finished writing the output" << std::endl;
+					}
 
 					timings[info + " - " + title] = timeRequired.count();
 					areas[info + " - " + title] = area;
