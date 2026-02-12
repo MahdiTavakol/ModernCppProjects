@@ -108,8 +108,10 @@ void omp_strategy_j::calculate(const double& _scale)
 #pragma omp parallel reduction(+:ara) // default(none) shared(n_xs,x_min,x_max,y_min,y_max,y_size,num_iterations,X,first_range,last_range,size_per_thread)
 	{
 		int thread_id = omp_get_thread_num();
+		/*
 		if (thread_id == 0)
 			std::cout << "Using " << omp_get_num_threads() << " omp threads" << std::endl;
+			*/
 		int thread_id_x = thread_id % (thread_cfg.threads_x);
 		int thread_id_y = thread_id / (thread_cfg.threads_x);
 

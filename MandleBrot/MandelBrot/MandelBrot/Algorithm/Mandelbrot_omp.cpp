@@ -47,6 +47,8 @@ mandelbrot_omp::mandelbrot_omp(
 			/*if (thread_id == 0)
 				std::cout << "Warning: resetting the number of threads" << std::endl;
 				*/
+			/**/
+			/**/
 		}
 
 	}
