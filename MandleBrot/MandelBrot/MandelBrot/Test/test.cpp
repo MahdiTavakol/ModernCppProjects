@@ -11,10 +11,10 @@
 
 using std::vector, std::string, std::map;
 
-static map<int, int> center_id_results = { {1,759168}, {2,487535}, {3,488644},
-                                           {4,507003}, {5,524282}, {6,763938},
-                                           {7,759132}, {8,525352}, {9,507009},
-                                           {10,411034}, {11,300908} };
+static map<int, int> center_id_results = { {1,7505}, {2,4810}, {3,4810},
+                                           {4,5156}, {5,5165}, {6,7558},
+                                           {7,7504}, {8,5271}, {9,5156},
+                                           {10,4122}, {11,3029} };
 
 static vector<int> threads = { 1,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40 };
 
@@ -44,55 +44,42 @@ static std::vector<allocation_mode> alloc_mode_vec = { allocation_mode::C, alloc
 static std::vector<allocation_major> alloc_major_vec = { allocation_major::X_MAJOR, allocation_major::Y_MAJOR };
 static std::vector<Mesh_type> mesh_vec = { Mesh_type::SERIAL, Mesh_type::INNER_LOOP, Mesh_type::OUTER_LOOP };
 
+TEST_CASE("Testing serial running (the single mode)") {
+    std::cout << "Testing serial running (the single mode)" << std::endl;
+    int expected = center_id_results[1];
+
+    string dummy = "test";
+    test_args_builder arg_builder{ dummy,string("single"),
+                                   std::to_string(1),
+                                   string("test"),
+                                   std::to_string(192), std::to_string(108),
+                                   std::to_string(1),
+                                   std::to_string(1),
+                                   std::string("--noWrite") };
+
+    auto args = arg_builder();
+    int area = run_wrapper(args);
+
+    REQUIRE(area == expected);
+}
 
 TEST_CASE("Testing serial running with various centers (the single mode)") {
     std::cout << "Testing serial running with various centers (the single mode)" << std::endl;
 
     for (const auto& [type, expected] : center_id_results) {
-        vector<string> args;
-        int area;
         string dummy = "test";
-        args.push_back(dummy);
-        args.push_back("single");
-        args.push_back("--type");
-        args.push_back(std::to_string(type));
-        args.push_back("--info");
-        args.push_back("test");
-        args.push_back("--resolution");
-        args.push_back(std::to_string(1920));
-        args.push_back(std::to_string(1080));
-        args.push_back("--threads");
-        args.push_back(std::to_string(1));
-        args.push_back(std::to_string(1));
-        area = run_wrapper(args);
+        test_args_builder arg_builder{ dummy,string("single"),
+                                       std::to_string(type),
+                                       string("test"),
+                                       std::to_string(192), std::to_string(108),
+                                       std::to_string(1),
+                                       std::to_string(1)};
 
+        auto args = arg_builder();
+        int area = run_wrapper(args);
 
         REQUIRE(area == expected);
     }
-}
-
-TEST_CASE("Testing serial running (the single mode)") {
-    std::cout << "Testing serial running (the single mode)" << std::endl;
-    int expected = center_id_results[1];
-
-    vector<string> args;
-    int area;
-    string dummy = "test";
-    args.push_back(dummy);
-    args.push_back("single");
-    args.push_back("--type");
-    args.push_back(std::to_string(1));
-    args.push_back("--info");
-    args.push_back("test");
-    args.push_back("--resolution");
-    args.push_back(std::to_string(1920));
-    args.push_back(std::to_string(1080));
-    args.push_back("--threads");
-    args.push_back(std::to_string(1));
-    args.push_back(std::to_string(1));
-    area = run_wrapper(args);
-
-    REQUIRE(area == expected);
 }
 
 TEST_CASE("Testing various thread numbers (The single mode)") {
@@ -100,21 +87,15 @@ TEST_CASE("Testing various thread numbers (The single mode)") {
     int expected = center_id_results[1];
 
     for (const auto& thread : threads) {
-        vector<string> args;
         int area;
         string dummy = "test";
-        args.push_back(dummy);
-        args.push_back("single");
-        args.push_back("--type");
-        args.push_back(std::to_string(1));
-        args.push_back("--info");
-        args.push_back("test");
-        args.push_back("--resolution");
-        args.push_back(std::to_string(1920));
-        args.push_back(std::to_string(1080));
-        args.push_back("--threads");
-        args.push_back(std::to_string(thread));
-        args.push_back(std::to_string(1));
+        test_args_builder arg_builder{ dummy,string("single"),
+                                       std::to_string(1),
+                                       string("test"),
+                                       std::to_string(192), std::to_string(108),
+                                       std::to_string(thread), std::to_string(1) };
+
+        auto args = arg_builder();
         area = run_wrapper(args);
 
         REQUIRE(area == expected);
@@ -126,22 +107,16 @@ TEST_CASE("Testing various thread configurations (The single mode)") {
     int expected = center_id_results[1];
 
     for (const auto& thread_cfg : thread_cfg_vec) {
-        vector<string> args;
-        int area;
         string dummy = "test";
-        args.push_back(dummy);
-        args.push_back("single");
-        args.push_back("--type");
-        args.push_back(std::to_string(1));
-        args.push_back("--info");
-        args.push_back("test");
-        args.push_back("--resolution");
-        args.push_back(std::to_string(1920));
-        args.push_back(std::to_string(1080));
-        args.push_back("--threads");
-        args.push_back(std::to_string(thread_cfg.threads_x));
-        args.push_back(std::to_string(thread_cfg.threads_y));
-        area = run_wrapper(args);
+        test_args_builder arg_builder{ dummy,string("single"),
+                                       std::to_string(1),
+                                       string("test"),
+                                       std::to_string(192), std::to_string(108),
+                                       std::to_string(thread_cfg.threads_x), 
+                                       std::to_string(thread_cfg.threads_y) };
+
+        auto args = arg_builder();
+        int area = run_wrapper(args);
 
         REQUIRE(area == expected);
 
@@ -163,19 +138,17 @@ TEST_CASE("Testing various thread numbers (The timing mode)") {
     for (auto& thread : threads)
         thread_cfg_vec_i.push_back(thread_config(thread, 1));
 
-
-    vector<string> args;
     string dummy = "test";
-    args.push_back(dummy);
-    args.push_back("timing");
-    args.push_back("--type");
-    args.push_back(std::to_string(1));
-    args.push_back("--info");
-    args.push_back("test");
-    args.push_back("--resolution");
-    args.push_back(std::to_string(1920));
-    args.push_back(std::to_string(1080));
-    args.push_back("--noWrite");
+    test_args_builder arg_builder{ dummy,string("timing"),
+                                   std::to_string(1),
+                                   string("test"),
+                                   std::to_string(192), std::to_string(108),
+                                   std::to_string(1),
+                                   std::to_string(1),
+                                   std::string("--noWrite")};
+
+    auto args = arg_builder();
+
 
     std::unique_ptr<Runner_NS::run_mandelbrot_timing> runner =
         std::make_unique<Runner_NS::run_mandelbrot_timing>(args);
@@ -192,18 +165,17 @@ TEST_CASE("Testing various thread configurations (The timing mode)") {
     std::cout << "Testing various thread configurations (The timing mode)" << std::endl;
     int expected = center_id_results[1];
 
-    vector<string> args;
     string dummy = "test";
-    args.push_back(dummy);
-    args.push_back("timing");
-    args.push_back("--type");
-    args.push_back(std::to_string(1));
-    args.push_back("--info");
-    args.push_back("test");
-    args.push_back("--resolution");
-    args.push_back(std::to_string(1920));
-    args.push_back(std::to_string(1080));
-    args.push_back("--noWrite");
+    test_args_builder arg_builder{ dummy,string("timing"),
+                                   std::to_string(1),
+                                   string("test"),
+                                   std::to_string(192), std::to_string(108),
+                                   std::to_string(1),
+                                   std::to_string(1),
+                                   std::string("--noWrite") };
+
+    auto args = arg_builder();
+
 
     std::unique_ptr<Runner_NS::run_mandelbrot_timing> runner =
         std::make_unique<Runner_NS::run_mandelbrot_timing>(args);
