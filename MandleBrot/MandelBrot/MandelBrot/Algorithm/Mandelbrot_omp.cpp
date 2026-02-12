@@ -58,6 +58,7 @@ mandelbrot_omp::mandelbrot_omp(
 	int x_per_thread = (this->resolution[0] + threads_x - 1) / threads_x;
 	for (int i = 0; i < threads_x; i++) {
 		int x_first = i * this->resolution[0] + i * x_per_thread;
+		x_first =  i * x_per_thread;
 		int x_last = x_first + x_per_thread ;
 		if (x_first >= this->resolution[0] * threads_x)
 			x_first = this->resolution[0] * threads_x;
@@ -71,6 +72,7 @@ mandelbrot_omp::mandelbrot_omp(
 	int y_per_thread = (this->resolution[1] + threads_y - 1) / threads_y;
 	for (int j = 0; j < threads_y; j++) {
 		int y_first = j * this->resolution[1] + j * y_per_thread;
+		y_first = j * y_per_thread;
 		int y_last = y_first + y_per_thread;
 		if (y_first >= this->resolution[1] * threads_y)
 			y_first = this->resolution[1] * threads_y;
@@ -80,12 +82,12 @@ mandelbrot_omp::mandelbrot_omp(
 	}
 
 	for (int i = 0; i < threads_x; i++) {
-		std::cout << (x_ranges[i])[0] - this->resolution[0]*i << "," << x_ranges[i][1] - i*this->resolution[0]  << std::endl;
+		std::cout << x_ranges[i][0] << "," << x_ranges[i][1] << std::endl;
 	}
 
 	std::cout << std::endl;
 	for (int i = 0; i < threads_y; i++) {
-		std::cout << y_ranges[i][0] - i*this->resolution[1] << "," << y_ranges[i][1] - i*this->resolution[1] << std::endl;
+		std::cout << y_ranges[i][0] << "," << y_ranges[i][1] << std::endl;
 	}
 
 
