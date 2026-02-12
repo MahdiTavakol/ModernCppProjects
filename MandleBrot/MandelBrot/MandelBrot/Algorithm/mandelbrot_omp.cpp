@@ -22,9 +22,11 @@ mandelbrot_omp::mandelbrot_omp(
 	// The threads_x and threads_y are ignored in the case of SERIAL mesh type
 	if (mesh_type_ == Mesh_type::SERIAL) {
 		if (threads_x != 1 || threads_y != 1) {
-			std::cout <<
+			/*std::cout <<
 				"Warning: ignoring the threads_x and threads_y parameters for the SERIAL mesh type!" <<
 				std::endl;
+				*/
+			/* */
 			threads_x = threads_y = 1;
 		}
 	}
