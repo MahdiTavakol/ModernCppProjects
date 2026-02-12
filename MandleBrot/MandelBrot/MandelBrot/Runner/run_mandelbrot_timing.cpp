@@ -76,9 +76,10 @@ void run_mandelbrot_timing::run()
 							bnds, thread_cfg, file_name, mesh_type,
 							resolution, center);
 
-
-					std::cout << "Starting the #" << number << " code" << std::endl;
-					std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
+					if (writeFile)
+						std::cout << "Starting the #" << number << " code" << std::endl;
+					std::chrono::high_resolution_clock::time_point start =
+						std::chrono::high_resolution_clock::now();
 					mandelbrot_runner_ptr->run();
 
 					auto end = std::chrono::high_resolution_clock::now();
