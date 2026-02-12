@@ -76,6 +76,7 @@ mandelbrot_omp::mandelbrot_omp(
 			y_first = this->resolution[1] * threads_y;
 		if (y_last >= this->resolution[1] * threads_y)
 			y_last = this->resolution[1] * threads_y;
+
 		y_ranges[j] = std::array<int, 2>{ y_first,y_last };
 	}
 
