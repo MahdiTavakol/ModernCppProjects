@@ -59,11 +59,12 @@ mandelbrot_omp::mandelbrot_omp(
 	for (int i = 0; i < threads_x; i++) {
 		int x_first = i * this->resolution[0] + i * x_per_thread;
 		int x_last = x_first + x_per_thread ;
+		if (x_first >= this->resolution[0] * threads_x)
+			x_first = this->resolution[0] * threads_x;
 		if (x_last >= this->resolution[0] * threads_x)
-			x_last = this->resolution[0] * threads_x - 1;
+			x_last = this->resolution[0] * threads_x ;
 		x_ranges[i] = std::array<int, 2>{ x_first,x_last };
-		/**/
-		/**/
+		/*/*/
 	}
 
 
@@ -71,10 +72,22 @@ mandelbrot_omp::mandelbrot_omp(
 	for (int j = 0; j < threads_y; j++) {
 		int y_first = j * this->resolution[1] + j * y_per_thread;
 		int y_last = y_first + y_per_thread;
+		if (y_first >= this->resolution[1] * threads_y)
+			y_first = this->resolution[1] * threads_y;
 		if (y_last >= this->resolution[1] * threads_y)
-			y_last = this->resolution[1] * threads_y - 1;
+			y_last = this->resolution[1] * threads_y ;
 		y_ranges[j] = std::array<int, 2>{ y_first,y_last };
 	}
+
+	for (int i = 0; i < threads_x; i++) {
+		std::cout << x_ranges[i][0]<< "," << x_ranges[i][1] << std::endl;
+	}
+
+	std::cout << std::endl;
+	for (int i = 0; i < threads_y; i++) {
+		std::cout << y_ranges[i][0] << "," << y_ranges[i][1] << std::endl;
+	}
+
 
 	// The compiler complains about x_per_thread and y_per_thread
 	// variables not used while they have been used.
