@@ -40,7 +40,10 @@ static std::vector<allocation_mode> alloc_mode_vec = { allocation_mode::C, alloc
 static std::vector<allocation_major> alloc_major_vec = { allocation_major::X_MAJOR, allocation_major::Y_MAJOR };
 static std::vector<Mesh_type> mesh_vec = { Mesh_type::SERIAL, Mesh_type::INNER_LOOP, Mesh_type::OUTER_LOOP };
 
+static int test_number = 0;
+
 TEST_CASE("Testing serial running (the single mode)") {
+    test_number++;
     //std::cout << "Testing serial running (the single mode)" << std::endl;
     int expected = center_id_results[1];
 
@@ -116,6 +119,8 @@ TEST_CASE("Testing various thread configurations (The single mode)") {
         auto args = arg_builder();
         int area = run_wrapper(args);
 
+
+        std::cout << "Testing the thread configuration :(" << thread_cfg.threads_x << "," << thread_cfg.threads_y << ")" << std::endl;
         REQUIRE(area == expected);
 
     }
