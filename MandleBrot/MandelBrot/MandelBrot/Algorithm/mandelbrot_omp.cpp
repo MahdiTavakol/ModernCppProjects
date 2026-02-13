@@ -83,12 +83,12 @@ mandelbrot_omp::mandelbrot_omp(
 	std::cout << "n_threads is " << threads_x << "," << threads_y << std::endl;
 	std::cout << "resolution is " << resolution[0] << "," << resolution[1] << std::endl << std::endl;
 	for (int i = 0; i < threads_x; i++) {
-		std::cout << x_ranges[i][0] << "," << x_ranges[i][1] << std::endl;
+		std::cout << x_ranges[i][0] << "," << x_ranges[i][1] << "," << x_ranges[i][0] % resolution[0] << ","  << x_ranges[i][1] % resolution[0] << std::endl;
 	}
 
 	std::cout << std::endl;
 	for (int i = 0; i < threads_y; i++) {
-		std::cout << y_ranges[i][0] << "," << y_ranges[i][1] << std::endl;
+		std::cout << y_ranges[i][0] << "," << y_ranges[i][1] << "," << y_ranges[i][0] % resolution[1] << "," << y_ranges[i][1] % resolution[1] << std::endl;
 	}
 
 
