@@ -53,7 +53,6 @@ mandelbrot_omp::mandelbrot_omp(
 
 	}
 
-	omp_set_num_threads(threads_x * threads_y);
 
 	// calculating the number of deactivated threads
 	int x_per_thread = (this->resolution[0] + threads_x - 1) / threads_x;
@@ -68,6 +67,8 @@ mandelbrot_omp::mandelbrot_omp(
 	threads_y -= deactivate_threads_y;
 	thread_cfg.threads_x = threads_x;
 	thread_cfg.threads_y = threads_y;
+
+	omp_set_num_threads(threads_x * threads_y);
 
 
 	std::fill_n(x_ranges.get(), threads_x, std::array<int, 2>{0, 0});
