@@ -85,7 +85,7 @@ mandelbrot_omp::mandelbrot_omp(
 	}
 
 	// Setting the data range for each thread in y dimension
-	int y_per_thread = (resolution[0] + threads_y - 1) / threads_y;
+	int y_per_thread = (resolution[1] + threads_y - 1) / threads_y;
 	for (int j = 0; j < threads_y; j++) {
 		int y_first = j * this->resolution[1] + j * y_per_thread;
 		int y_last = y_first + y_per_thread;
