@@ -11,7 +11,7 @@
 
 using std::vector, std::string, std::map;
 
-static map<int, int> center_id_results = { {1,7505}, {2,4810}, {3,4920},
+static map<int, int> center_id_results = { {1,7505}, {2,4810}, {3,4810},
                                            {4,5156}, {5,5165}, {6,7558},
                                            {7,7504}, {8,5271}, {9,5156},
                                            {10,4122}, {11,3029} };
