@@ -80,6 +80,8 @@ mandelbrot_omp::mandelbrot_omp(
 		y_ranges[j] = std::array<int, 2>{ y_first,y_last };
 	}
 
+	std::cout << "n_threads is " << threads_x << "," << threads_y << std::endl;
+	std::cout << "resolution is " << resolution[0] << "," << resolution[1] << std::endl << std::endl;
 	for (int i = 0; i < threads_x; i++) {
 		std::cout << x_ranges[i][0] << "," << x_ranges[i][1] << std::endl;
 	}
