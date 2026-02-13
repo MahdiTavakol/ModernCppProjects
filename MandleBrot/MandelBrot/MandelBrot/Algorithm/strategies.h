@@ -24,15 +24,15 @@ namespace Mandelbrot_NS {
 		double x_min = 0.0, x_max = 0.0, y_min = 0.0, y_max = 0.0;
 		int num_iterations = 10000;
 
+		formula<double>* frmlaRaw =  nullptr;
+
+		std::reference_wrapper<mandelbrot> mndlbrt_ref;
+
 		// thread_cfg might be changed later
 		// on the constructor of the mandelbrot_omp
 		// to avoid out of range access
 		// So we need a reference_wrapper
 		std::reference_wrapper<thread_config> thread_cfg;
-
-		formula<double>* frmlaRaw =  nullptr;
-
-		std::reference_wrapper<mandelbrot> mndlbrt_ref;
 	};
 
 	class omp_strategy_i : public omp_strategy {
