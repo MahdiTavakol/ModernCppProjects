@@ -18,7 +18,7 @@ void omp_strategy::calculate([[maybe_unused]] const double& _scale)
 
 	num_iterations = mndlbrt_ref.get().num_iterations;
 
-	thread_cfg = mndlbrt_ref.get().thread_cfg;
+	thread_cfg = &(mndlbrt_ref.get().thread_cfg);
 
 	frmlaRaw = mndlbrt_ref.get().frmla.get();
 

@@ -10,8 +10,8 @@
 
 class thread_config {
 public:
-	int threads_x; 
-	int threads_y;
+	int threads_x = 1; 
+	int threads_y = 1;
 	
 	thread_config(int _x = 1, int _y = 1) : threads_x{ _x }, threads_y{ _y } {}
 	};

@@ -12,8 +12,9 @@ namespace Mandelbrot_NS {
 	class omp_strategy {
 	public:
 			omp_strategy(mandelbrot& mndlbrt_ref_):
-				mndlbrt_ref{ mndlbrt_ref_ }
-			{};
+				mndlbrt_ref{ mndlbrt_ref_ },
+				thread_cfg{mndlbrt_ref_.thread_cfg}
+			{}
 			virtual ~omp_strategy() = default;
 			virtual void dummy() = 0;
 			virtual void calculate([[maybe_unused]] const double& scale_);
@@ -23,7 +24,12 @@ namespace Mandelbrot_NS {
 		double x_min = 0.0, x_max = 0.0, y_min = 0.0, y_max = 0.0;
 		int num_iterations = 10000;
 
-		thread_config thread_cfg;
+		// thread_cfg might be changed later
+		// on the constructor of the mandelbrot_omp
+		// to avoid out of range access
+		// So we need a reference_wrapper
+		std::reference_wrapper<thread_config> thread_cfg;
+
 		formula<double>* frmlaRaw =  nullptr;
 
 		std::reference_wrapper<mandelbrot> mndlbrt_ref;
