@@ -55,24 +55,26 @@ mandelbrot_omp::mandelbrot_omp(
 
 
 	// calculating the number of deactivated threads
-	int x_per_thread = (this->resolution[0] + threads_x - 1) / threads_x;
-	int y_per_thread = (this->resolution[1] + threads_y - 1) / threads_y;
-	int total_data_expected_x = x_per_thread * threads_x;
-	int total_data_expected_y = y_per_thread * threads_y;
-	int extra_data_x = total_data_expected_x - resolution[0];
-	int extra_data_y = total_data_expected_y - resolution[1];
-	int deactivate_threads_x = extra_data_x / x_per_thread;
-	int deactivate_threads_y = extra_data_y / y_per_thread;
+	auto deactive_threads = [&](int threads, int res) {
+		int per_thread = (res + threads - 1) / threads;
+		int total_data_expected = per_thread * threads;
+		int extra_data = total_data_expected - res;
+		int deactivated_threads = extra_data / per_thread;
+		return deactivated_threads;
+		};
+	int deactivate_threads_x = deactive_threads(threads_x, this->resolution[0]);
+	int deactivate_threads_y = deactive_threads(threads_y, this->resolution[1]);
 	threads_x -= deactivate_threads_x;
 	threads_y -= deactivate_threads_y;
 	thread_cfg.threads_x = threads_x;
 	thread_cfg.threads_y = threads_y;
 
+
+	// Resetting the number of omp threads
 	omp_set_num_threads(threads_x * threads_y);
 
-
-	std::fill_n(x_ranges.get(), threads_x, std::array<int, 2>{0, 0});
-	
+	// Setting the data range for each thread in x dimension
+	int x_per_thread = (resolution[0] + threads_x - 1) / threads_x;
 	for (int i = 0; i < threads_x; i++) {
 		int x_first = i * this->resolution[0] + i * x_per_thread;
 		int x_last = x_first + x_per_thread ;
@@ -82,9 +84,8 @@ mandelbrot_omp::mandelbrot_omp(
 		/*/*/
 	}
 
-
-	std::fill_n(y_ranges.get(), threads_y, std::array<int, 2>{0, 0});
-	
+	// Setting the data range for each thread in y dimension
+	int y_per_thread = (resolution[0] + threads_y - 1) / threads_y;
 	for (int j = 0; j < threads_y; j++) {
 		int y_first = j * this->resolution[1] + j * y_per_thread;
 		int y_last = y_first + y_per_thread;
@@ -93,16 +94,6 @@ mandelbrot_omp::mandelbrot_omp(
 		y_ranges[j] = std::array<int, 2>{ y_first,y_last };
 	}
 
-	std::cout << "n_threads is " << threads_x << "," << threads_y << std::endl;
-	std::cout << "resolution is " << resolution[0] << "," << resolution[1] << std::endl << std::endl;
-	for (int i = 0; i < threads_x; i++) {
-		std::cout << x_ranges[i][0] << "," << x_ranges[i][1] << "," << x_ranges[i][0] % resolution[0] << ","  << x_ranges[i][1] % resolution[0] << std::endl;
-	}
-
-	std::cout << std::endl;
-	for (int i = 0; i < threads_y; i++) {
-		std::cout << y_ranges[i][0] << "," << y_ranges[i][1] << "," << y_ranges[i][0] % resolution[1] << "," << y_ranges[i][1] % resolution[1] << std::endl;
-	}
 
 
 	// The compiler complains about x_per_thread and y_per_thread
