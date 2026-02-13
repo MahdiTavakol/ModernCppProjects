@@ -45,11 +45,11 @@ void omp_strategy_i::calculate(const double& _scale)
 		/**/
 		/**/
 		/**/
-		int thread_id_x = thread_id % (thread_cfg.threads_x);
-		int thread_id_y = thread_id / (thread_cfg.threads_x);
+		int thread_id_x = thread_id % (thread_cfg.get().threads_x);
+		int thread_id_y = thread_id / (thread_cfg.get().threads_x);
 
 
-		if (thread_id_x >= thread_cfg.threads_x || thread_id_y >= thread_cfg.threads_y)
+		if (thread_id_x >= thread_cfg.get().threads_x || thread_id_y >= thread_cfg.get().threads_y)
 			std::cout << "Error: out of range thread!" << std::endl;
 		const int& first_x = x_ranges[thread_id_x][0];
 		const int& last_x = x_ranges[thread_id_x][1];
@@ -87,8 +87,8 @@ void omp_strategy_i::calculate(const double& _scale)
 		}
 	}
 	area = ara;
-	for (int k = 0; k < thread_cfg.threads_x; k++)
-		for (int l = 0; l < thread_cfg.threads_y; l++)
+	for (int k = 0; k < thread_cfg.get().threads_x; k++)
+		for (int l = 0; l < thread_cfg.get().threads_y; l++)
 			for (int i = x_ranges[k][0]; i < x_ranges[k][1]; i++)
 				for (int j = y_ranges[l][0]; j < y_ranges[l][1]; j++)
 					(*(array_alloc_ptr))(i - k * n_xs, j - l * n_ys) = (*(array_alloc_ptr))(i, j);
@@ -112,11 +112,11 @@ void omp_strategy_j::calculate(const double& _scale)
 		if (thread_id == 0)
 			std::cout << "Using " << omp_get_num_threads() << " omp threads" << std::endl;
 			*/
-		int thread_id_x = thread_id % (thread_cfg.threads_x);
-		int thread_id_y = thread_id / (thread_cfg.threads_x);
+		int thread_id_x = thread_id % (thread_cfg.get().threads_x);
+		int thread_id_y = thread_id / (thread_cfg.get().threads_x);
 
 
-		if (thread_id_x >= thread_cfg.threads_x || thread_id_y >= thread_cfg.threads_y)
+		if (thread_id_x >= thread_cfg.get().threads_x || thread_id_y >= thread_cfg.get().threads_y)
 			std::cout << "Error: out of range thread!" << std::endl;
 		const int& first_x = x_ranges[thread_id_x][0];
 		const int& last_x = x_ranges[thread_id_x][1];
@@ -154,8 +154,8 @@ void omp_strategy_j::calculate(const double& _scale)
 		}
 	}
 	area = ara;
-	for (int k = 0; k < thread_cfg.threads_x; k++)
-		for (int l = 0; l < thread_cfg.threads_y; l++)
+	for (int k = 0; k < thread_cfg.get().threads_x; k++)
+		for (int l = 0; l < thread_cfg.get().threads_y; l++)
 			for (int i = x_ranges[k][0]; i < x_ranges[k][1]; i++)
 				for (int j = y_ranges[l][0]; j < y_ranges[l][1]; j++)
 					(*(array_alloc_ptr))(i - k * n_xs, j - l * n_ys) = (*(array_alloc_ptr))(i, j);
