@@ -4,86 +4,474 @@
 #include <vector>
 #include <array>
 #include <memory>
+#include <iostream>
+
+
+#include "Particles.h"
+#include "Engine.h"
+#include "Integrator.h"
+#include "EulerIntegrator.h"
+#include "SemiIntegrator.h"
+#include "FixPrint.h"
+#include "Box.h"
+#include "Run.h"
 
 using std::vector, std::array;
 using std::make_unique, std::unique_ptr;
-using std::reference_wrapper;
 
-class Engine;
 
-class Box {
-public:
-	Box(Engine& engine_,
-		const array<int, 3>& min_,
-		const array<int, 3>& max_) :
-		engineRef{ engine_},
-		min{min_}, max{max_}
-	{}
-private:
-	reference_wrapper<Engine> engineRef;
-	array<int, 3> min, max;
-};
-
-class Particles {
-public:
-	Particles(Engine& engine_, const int& nmax_) :
-		engineRef{engine_}, 
-		nmax{ nmax_ }
-	{
-		positions.reserve(nmax);
-	}
-	void addParticle(array<int, 3> newPosition_)
-	{
-		//check the boundary conditions
-		positions.push_back(newPosition_);
-	}
-
-private:
-	reference_wrapper<Engine> engineRef;
-	int nmax;
-	vector<array<int, 3>> positions;
-};
-
-class Engine {
-public:
-	Engine(const int& nmax, array<int, 3> min, array<int, 3> max):
-		box{make_unique<Box>(*this,min,max)},
-		particles{make_unique<Particles>(*this,nmax)}
-	{}
-	void resetBox(unique_ptr<Box>& box_) {
-		box = std::move(box_);
-	}
-	void resetParticles(unique_ptr<Particles> particles_) {
-		particles = std::move(particles_);
-	}
-
-private:
-	unique_ptr<Box> box;
-	unique_ptr<Particles> particles;
-	int nmax;
-};
-
-TEST_CASE("Starting each class with minimal input args!") {
+TEST_CASE("Starting and registering each class of the Engine class with minimal input args")
+{
 	// constant variables
 	int nmax = 10;
-	array<int, 3> min = { 0,0,0 };
-	array<int, 3> max = { 10,10,10 };
-
-	// class engine
-	Engine engine(nmax,min,max);
-
-	// class box
-	Box box(engine, min, max);
-
+	array<double, 3> min = { 0.0,0.0,0.0 };
+	array<double, 3> max = { 10.0,10.0,10.0 };
+	// the mocked Engine object
+	Engine mockedEngine;
+	// box 
+	auto box = make_unique<Box>(mockedEngine, min, max );
 	// particles
-	Particles particles(engine, nmax);
+	auto particles = make_unique<Particles>( mockedEngine,nmax );
+	// parameters before registering into the engine
+	array<double, 3> rMin1, rMax1, rMin2, rMax2;
+	int rNmax1, rNlocal1, rNmax2, rNlocal2;
+	box->getDimensions(rMin1, rMax1);
+	particles->getNmaxNlocal(rNmax1, rNlocal1);
+	// adding these to the engine
+	mockedEngine.registerBox(box);
+	mockedEngine.registerParticles(particles);
+	// parameters afer registering into the engine
+	const unique_ptr<Box>& boxE = mockedEngine.getBox();
+	const unique_ptr<Particles>& particlesE = mockedEngine.getParticles();
+	boxE->getDimensions(rMin2, rMax2);
+	particlesE->getNmaxNlocal(rNmax2, rNlocal2);
+	// checking if they are equal
+	REQUIRE(rMin1 == rMin2);
+	REQUIRE(rMax1 == rMax2);
+	REQUIRE(rNmax1 == rNmax2);
+	REQUIRE(rNlocal1 == rNlocal2);
+
+}
+
+TEST_CASE("Testing the Euler integration in 100 steps for 3 particles under constant velocity condition")
+{
+	constexpr int nSteps = 100;
+	// constant variables
+	int nmax = 10;
+	array<double, 3> min = { 0.0,0.0,0.0 };
+	array<double, 3> max = { 1000.0,1000.0,1000.0 };
+	// the mocked Engine object
+	Engine mockedEngine;
+	// box 
+	auto box = make_unique<Box>(mockedEngine, min, max);
+	// particles
+	auto particles = make_unique<Particles>(mockedEngine, nmax);
+	// Integrator
+	unique_ptr<Integrator> integrator = make_unique<EulerIntegrator>(mockedEngine);
+	// adding these to the engine
+	mockedEngine.registerBox(box);
+	mockedEngine.registerParticles(particles);
+	mockedEngine.registerIntegrator(integrator);
+	// getting a reference to particles
+	auto& engineParticles = mockedEngine.getParticlesForUpdate();
+	// new particles
+	vector<array<double, 3>> newXs, newVs, newFs;
+	vector<double> newMs;
+	// particle #1
+	newXs.push_back({ 0.0,0.0,0.0 });
+	newVs.push_back({ 2.0,1.0,5.0 });
+	newFs.push_back({ 0.0,0.0,0.0 });
+	newMs.push_back(5.0);
+	// particle #2
+	newXs.push_back({ 3.0,100.0,1000.0 });
+	newVs.push_back({ 8.0,-0.1,-10.0 });
+	newFs.push_back({ 0.0,0.0,0.0 });
+	newMs.push_back(5.0);
+	// particle #3
+	newXs.push_back({ 700.0,20.0,50.0 });
+	newVs.push_back({ -5.0,0.1,7.0 });
+	newFs.push_back({ 0.0,0.0,0.0 });
+	newMs.push_back(5.0);
+	// expected values
+	vector<array<double, 3>> finalXs, finalVs, finalFs;
+	vector<double> finalMs;
+	// particle #1
+	finalXs.push_back({ 200.0,100.0,500.0 });
+	finalVs.push_back({ 2.0,1.0,5.0 });
+	finalFs.push_back({ 0.0,0.0,0.0 });
+	finalMs.push_back(5.0);
+	// particle #2
+	finalXs.push_back({ 803.0,90.0,0.0 });
+	finalVs.push_back({ 8.0,-0.1,-10.0 });
+	finalFs.push_back({ 0.0,0.0,0.0 });
+	finalMs.push_back(5.0);
+	// particle #3
+	finalXs.push_back({ 200.0,30.0,750.0 });
+	finalVs.push_back({ -5.0,0.1,7.0 });
+	finalFs.push_back({ 0.0,0.0,0.0 });
+	finalMs.push_back(5.0);
+
+	// adding it 
+	for (int i = 0; i < 3; i++) {
+		engineParticles->addParticle(newXs[i], newVs[i], newFs[i], newMs[i]);
+	}
+	// creating the run object
+	auto run = make_unique<Run>(mockedEngine);
+	// setting it up
+	run->setup();
+	// running it for 100 steps
+	run->start(nSteps);
+	// comparing the results
+	for (int i = 0; i < 3; i++) {
+		array<double, 3> xi, vi, fi;
+		double mi;
+		engineParticles->getAtomVec(i, xi, vi, fi, mi);
+		for (int j = 0; j < 3; j++) {
+			REQUIRE_THAT(xi[j], Catch::Matchers::WithinAbs(finalXs[i][j], 1e-6));
+			REQUIRE_THAT(vi[j], Catch::Matchers::WithinAbs(finalVs[i][j], 1e-6));
+			REQUIRE_THAT(fi[j], Catch::Matchers::WithinAbs(finalFs[i][j], 1e-6));
+		}
+		REQUIRE_THAT(mi, Catch::Matchers::WithinAbs(finalMs[i], 1e-6));
+	}
+}
+
+TEST_CASE("Testing the Euler integration in 100 steps for 3 particles under constant acceleration condition")
+{
+	constexpr int nSteps = 100;
+	// constant variables
+	int nmax = 10;
+	array<double, 3> min = { -100000.0,-100000.0,-100000.0 };
+	array<double, 3> max = { 100000.0,100000.0,100000.0 };
+	// the mocked Engine object
+	Engine mockedEngine;
+	// box 
+	auto box = make_unique<Box>(mockedEngine, min, max);
+	// particles
+	auto particles = make_unique<Particles>(mockedEngine, nmax);
+	// Integrator
+	unique_ptr<Integrator> integrator = make_unique<EulerIntegrator>(mockedEngine);
+	// adding these to the engine
+	mockedEngine.registerBox(box);
+	mockedEngine.registerParticles(particles);
+	mockedEngine.registerIntegrator(integrator);
+	// getting a reference to particles
+	auto& engineParticles = mockedEngine.getParticlesForUpdate();
+	// new particles
+	vector<array<double, 3>> newXs, newVs, newFs;
+	vector<double> newMs;
+	// particle #1
+	newXs.push_back({ 0.0,0.0,0.0 });
+	newVs.push_back({ 2.0,1.0,5.0 });
+	newFs.push_back({ 5.0,8.0,-10.0 });
+	newMs.push_back(5.0);
+	// particle #2
+	newXs.push_back({ 3.0,100.0,1000.0 });
+	newVs.push_back({ 8.0,-0.1,-10.0 });
+	newFs.push_back({ 0.1,2.0,-10.0 });
+	newMs.push_back(5.0);
+	// particle #3
+	newXs.push_back({ 700.0,20.0,50.0 });
+	newVs.push_back({ -5.0,0.1,7.0 });
+	newFs.push_back({ 0.1,3.0,0.2 });
+	newMs.push_back(5.0);
+	// expected values
+	vector<array<double, 3>> finalXs, finalVs, finalFs;
+	vector<double> finalMs;
+	// particle #1
+	finalXs.push_back({ 5150.0,8020.0,-9400.0 });
+	finalVs.push_back({ 102.0,161.0,-195.0 });
+	finalFs.push_back({ 5.0,8.0,-10.0 });
+	finalMs.push_back(5.0);
+	// particle #2
+	finalXs.push_back({ 902.0,2070.0,-9900.0 });
+	finalVs.push_back({10.0,39.9,-210.0 });
+	finalFs.push_back({ 0.1,2.0,-10.0 });
+	finalMs.push_back(5.0);
+	// particle #3
+	finalXs.push_back({ 299.0,3000.0,948.0 });
+	finalVs.push_back({ -3.0,60.1,11.0 });
+	finalFs.push_back({ 0.1,3.0,0.2 });
+	finalMs.push_back(5.0);
+
+	// adding it 
+	for (int i = 0; i < 3; i++) {
+		engineParticles->addParticle(newXs[i], newVs[i], newFs[i], newMs[i]);
+	}
+	// creating the run object
+	auto run = make_unique<Run>(mockedEngine);
+	// setting it up
+	run->setup();
+	// running it for 100 steps
+	run->start(nSteps);
+	// comparing the results
+	for (int i = 0; i < 3; i++) {
+		array<double, 3> xi, vi, fi;
+		double mi;
+		engineParticles->getAtomVec(i, xi, vi, fi, mi);
+		for (int j = 0; j < 3; j++) {
+			REQUIRE_THAT(xi[j], Catch::Matchers::WithinAbs(finalXs[i][j], 1e-6));
+			REQUIRE_THAT(vi[j], Catch::Matchers::WithinAbs(finalVs[i][j], 1e-6));
+			REQUIRE_THAT(fi[j], Catch::Matchers::WithinAbs(finalFs[i][j], 1e-6));
+		}
+		REQUIRE_THAT(mi, Catch::Matchers::WithinAbs(finalMs[i], 1e-6));
+	}
+}
 
 
-	// adding new particles
-	vector<array<int, 3>> positions;
-	positions.push_back({ 1,1,1 });
-	positions.push_back({ 2,3,5 });
-	positions.push_back({ 5,8,2 });
-	for (const auto& position : positions)
-		particles.addParticle(position);
+TEST_CASE("Testing the Semi-Euler integration in 100 steps for 3 particles under constant velocity condition")
+{
+	constexpr int nSteps = 100;
+	// constant variables
+	int nmax = 10;
+	array<double, 3> min = { 0.0,0.0,0.0 };
+	array<double, 3> max = { 1000.0,1000.0,1000.0 };
+	// the mocked Engine object
+	Engine mockedEngine;
+	// box 
+	auto box = make_unique<Box>(mockedEngine, min, max);
+	// particles
+	auto particles = make_unique<Particles>(mockedEngine, nmax);
+	// Integrator
+	unique_ptr<Integrator> integrator = make_unique<SemiIntegrator>(mockedEngine);
+	// adding these to the engine
+	mockedEngine.registerBox(box);
+	mockedEngine.registerParticles(particles);
+	mockedEngine.registerIntegrator(integrator);
+	// getting a reference to particles
+	auto& engineParticles = mockedEngine.getParticlesForUpdate();
+	// new particles
+	vector<array<double, 3>> newXs, newVs, newFs;
+	vector<double> newMs;
+	// particle #1
+	newXs.push_back({ 0.0,0.0,0.0 });
+	newVs.push_back({ 2.0,1.0,5.0 });
+	newFs.push_back({ 0.0,0.0,0.0 });
+	newMs.push_back(5.0);
+	// particle #2
+	newXs.push_back({ 3.0,100.0,1000.0 });
+	newVs.push_back({ 8.0,-0.1,-10.0 });
+	newFs.push_back({ 0.0,0.0,0.0 });
+	newMs.push_back(5.0);
+	// particle #3
+	newXs.push_back({ 700.0,20.0,50.0 });
+	newVs.push_back({ -5.0,0.1,7.0 });
+	newFs.push_back({ 0.0,0.0,0.0 });
+	newMs.push_back(5.0);
+	// expected values
+	vector<array<double, 3>> finalXs, finalVs, finalFs;
+	vector<double> finalMs;
+	// particle #1
+	finalXs.push_back({ 200.0,100.0,500.0 });
+	finalVs.push_back({ 2.0,1.0,5.0 });
+	finalFs.push_back({ 0.0,0.0,0.0 });
+	finalMs.push_back(5.0);
+	// particle #2
+	finalXs.push_back({ 803.0,90.0,0.0 });
+	finalVs.push_back({ 8.0,-0.1,-10.0 });
+	finalFs.push_back({ 0.0,0.0,0.0 });
+	finalMs.push_back(5.0);
+	// particle #3
+	finalXs.push_back({ 200.0,30.0,750.0 });
+	finalVs.push_back({ -5.0,0.1,7.0 });
+	finalFs.push_back({ 0.0,0.0,0.0 });
+	finalMs.push_back(5.0);
+
+	// adding it 
+	for (int i = 0; i < 3; i++) {
+		engineParticles->addParticle(newXs[i], newVs[i], newFs[i], newMs[i]);
+	}
+	// creating the run object
+	auto run = make_unique<Run>(mockedEngine);
+	// setting it up
+	run->setup();
+	// running it for 100 steps
+	run->start(nSteps);
+	// comparing the results
+	for (int i = 0; i < 3; i++) {
+		array<double, 3> xi, vi, fi;
+		double mi;
+		engineParticles->getAtomVec(i, xi, vi, fi, mi);
+		for (int j = 0; j < 3; j++) {
+			REQUIRE_THAT(xi[j], Catch::Matchers::WithinAbs(finalXs[i][j], 1e-6));
+			REQUIRE_THAT(vi[j], Catch::Matchers::WithinAbs(finalVs[i][j], 1e-6));
+			REQUIRE_THAT(fi[j], Catch::Matchers::WithinAbs(finalFs[i][j], 1e-6));
+		}
+		REQUIRE_THAT(mi, Catch::Matchers::WithinAbs(finalMs[i], 1e-6));
+	}
+}
+
+TEST_CASE("Testing the Semi-Euler integration in 100 steps for 3 particles under constant acceleration condition")
+{
+	constexpr int nSteps = 100;
+	// constant variables
+	int nmax = 10;
+	array<double, 3> min = { -100000.0,-100000.0,-100000.0 };
+	array<double, 3> max = { 100000.0,100000.0,100000.0 };
+	// the mocked Engine object
+	Engine mockedEngine;
+	// box 
+	auto box = make_unique<Box>(mockedEngine, min, max);
+	// particles
+	auto particles = make_unique<Particles>(mockedEngine, nmax);
+	// Integrator
+	unique_ptr<Integrator> integrator = make_unique<SemiIntegrator>(mockedEngine);
+	// adding these to the engine
+	mockedEngine.registerBox(box);
+	mockedEngine.registerParticles(particles);
+	mockedEngine.registerIntegrator(integrator);
+	// getting a reference to particles
+	auto& engineParticles = mockedEngine.getParticlesForUpdate();
+	// new particles
+	vector<array<double, 3>> newXs, newVs, newFs;
+	vector<double> newMs;
+	// particle #1
+	newXs.push_back({ 0.0,0.0,0.0 });
+	newVs.push_back({ 2.0,1.0,5.0 });
+	newFs.push_back({ 5.0,8.0,-10.0 });
+	newMs.push_back(5.0);
+	// particle #2
+	newXs.push_back({ 3.0,100.0,1000.0 });
+	newVs.push_back({ 8.0,-0.1,-10.0 });
+	newFs.push_back({ 0.1,2.0,-10.0 });
+	newMs.push_back(5.0);
+	// particle #3
+	newXs.push_back({ 700.0,20.0,50.0 });
+	newVs.push_back({ -5.0,0.1,7.0 });
+	newFs.push_back({ 0.1,3.0,0.2 });
+	newMs.push_back(5.0);
+	// expected values
+	vector<array<double, 3>> finalXs, finalVs, finalFs;
+	vector<double> finalMs;
+	// particle #1
+	finalXs.push_back({ 5250.0,8180.0,-9600.0 });
+	finalVs.push_back({ 102.0,161.0,-195.0 });
+	finalFs.push_back({ 5.0,8.0,-10.0 });
+	finalMs.push_back(5.0);
+	// particle #2
+	finalXs.push_back({ 904.0,2110.0,-10100.0 });
+	finalVs.push_back({ 10.0,39.9,-210.0 });
+	finalFs.push_back({ 0.1,2.0,-10.0 });
+	finalMs.push_back(5.0);
+	// particle #3
+	finalXs.push_back({ 301.0,3060.0,952.0 });
+	finalVs.push_back({ -3.0,60.1,11.0 });
+	finalFs.push_back({ 0.1,3.0,0.2 });
+	finalMs.push_back(5.0);
+
+	// adding it 
+	for (int i = 0; i < 3; i++) {
+		engineParticles->addParticle(newXs[i], newVs[i], newFs[i], newMs[i]);
+	}
+	// creating the run object
+	auto run = make_unique<Run>(mockedEngine);
+	// setting it up
+	run->setup();
+	// running it for 100 steps
+	run->start(nSteps);
+	// comparing the results
+	for (int i = 0; i < 3; i++) {
+		array<double, 3> xi, vi, fi;
+		double mi;
+		engineParticles->getAtomVec(i, xi, vi, fi, mi);
+		for (int j = 0; j < 3; j++) {
+			REQUIRE_THAT(xi[j], Catch::Matchers::WithinAbs(finalXs[i][j], 1e-6));
+			REQUIRE_THAT(vi[j], Catch::Matchers::WithinAbs(finalVs[i][j], 1e-6));
+			REQUIRE_THAT(fi[j], Catch::Matchers::WithinAbs(finalFs[i][j], 1e-6));
+		}
+		REQUIRE_THAT(mi, Catch::Matchers::WithinAbs(finalMs[i], 1e-6));
+	}
+}
+
+TEST_CASE("Testing fixes invoked at initial_integrate and final_integrate steps") {
+	constexpr int nSteps = 5;
+	// constant variables
+	int nmax = 10;
+	array<double, 3> min = { -100000.0,-100000.0,-100000.0 };
+	array<double, 3> max = { 100000.0,100000.0,100000.0 };
+	// the mocked Engine object
+	Engine mockedEngine;
+	// box 
+	auto box = make_unique<Box>(mockedEngine, min, max);
+	// particles
+	auto particles = make_unique<Particles>(mockedEngine, nmax);
+	// Integrator
+	unique_ptr<Integrator> integrator = make_unique<SemiIntegrator>(mockedEngine);
+	// The fix command
+	auto fixPrint1 = make_unique<FixPrint>(mockedEngine, "1",1, POST_FORCE, "x",0);
+	auto fixPrint2 = make_unique<FixPrint>(mockedEngine, "2",1, POST_FORCE, "v",0);
+	auto fixPrint3 = make_unique<FixPrint>(mockedEngine, "3",1, POST_FORCE, "f",0);
+	// adding these to the engine
+	mockedEngine.registerBox(box);
+	mockedEngine.registerParticles(particles);
+	mockedEngine.registerIntegrator(integrator);
+	mockedEngine.registerFix(std::move(fixPrint1));
+	mockedEngine.registerFix(std::move(fixPrint2));
+	mockedEngine.registerFix(std::move(fixPrint3));
+	// getting a reference to particles
+	auto& engineParticles = mockedEngine.getParticlesForUpdate();
+	// new particles
+	vector<array<double, 3>> newXs, newVs, newFs;
+	vector<double> newMs;
+	// particle #1
+	newXs.push_back({ 0.0,0.0,0.0 });
+	newVs.push_back({ 2.0,1.0,5.0 });
+	newFs.push_back({ 5.0,8.0,-10.0 });
+	newMs.push_back(5.0);
+
+	// adding it 
+	for (int i = 0; i < 1; i++) {
+		engineParticles->addParticle(newXs[i], newVs[i], newFs[i], newMs[i]);
+	}
+
+	// expected values
+	vector<array<double, 3>> expectedXs, expectedVs, expectedFs;
+
+	// xs
+	expectedXs.push_back({ 3.0,2.6,3.0 });
+	expectedXs.push_back({ 7.0,6.8,4.0 });
+	expectedXs.push_back({ 12.0,12.6,3.0 });
+	expectedXs.push_back({ 18.0,20.0,0.0 });
+	expectedXs.push_back({ 25.0,29.0,-5.0 });
+	// vs
+	expectedVs.push_back({ 3.0,2.6,3.0 });
+	expectedVs.push_back({ 4.0,4.2,1.0 });
+	expectedVs.push_back({ 5.0,5.8,-1.0 });
+	expectedVs.push_back({ 6.0,7.4,-3.0 });
+	expectedVs.push_back({ 7.0,9.0,-5.0 });
+	// fs
+	expectedVs.push_back({ 5.0,8.0,-10.0 });
+	expectedVs.push_back({ 5.0,8.0,-10.0 });
+	expectedVs.push_back({ 5.0,8.0,-10.0 });
+	expectedVs.push_back({ 5.0,8.0,-10.0 });
+	expectedVs.push_back({ 5.0,8.0,-10.0 });
+
+
+	// creating the run object
+	auto run = make_unique<Run>(mockedEngine);
+	// setting it up
+	run->setup();
+	// running it for 100 steps
+	run->start(nSteps);
+	// getting the fixprints
+	auto& fix1ref = mockedEngine.returnFixById("1");
+	auto& fix2ref = mockedEngine.returnFixById("2");
+	auto& fix3ref = mockedEngine.returnFixById("3");
+	// casting the fixPrint
+	FixPrint* const fixPrint1 = dynamic_cast<FixPrint*>(fix1ref.get());
+	FixPrint* const fixPrint2 = dynamic_cast<FixPrint*>(fix2ref.get());
+	FixPrint* const fixPrint3 = dynamic_cast<FixPrint*>(fix3ref.get());
+
+	// getting fixprint outputs;
+	auto finalXs = fixPrint1->getOutputVector();
+	auto finalVs = fixPrint2->getOutputVector();
+	auto finalFs = fixPrint3->getOutputVector();
+
+	// comparing the results
+	for (int i = 0; i < nSteps; i++) {
+		for (int j = 0; j < 3; j++) {
+			REQUIRE_THAT(expectedXs[i][j], Catch::Matchers::WithinAbs(finalXs[i][j], 1e-6));
+			REQUIRE_THAT(expectedXs[i][j], Catch::Matchers::WithinAbs(finalVs[i][j], 1e-6));
+			REQUIRE_THAT(expectedXs[i][j], Catch::Matchers::WithinAbs(finalFs[i][j], 1e-6));
+		}
+	}
 }
