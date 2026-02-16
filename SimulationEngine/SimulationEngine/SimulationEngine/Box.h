@@ -14,7 +14,7 @@ public:
 	{
 	}
 	void getDimensions(std::array<double, 3>& min_,
-		array<double, 3>& max_) const {
+		std::array<double, 3>& max_) const {
 		min_ = min;
 		max_ = max;
 	}

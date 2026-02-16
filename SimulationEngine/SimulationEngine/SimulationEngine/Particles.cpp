@@ -9,9 +9,9 @@ Particles::Particles(Engine& engine_, int nmax_) :
 	f.reserve(3 * nmax);
 	m.reserve(nmax);
 }
-void Particles::addParticle(array<double, 3> newX_,
-	array<double, 3> newV_ ,
-	array<double, 3> newF_ ,
+void Particles::addParticle(std::array<double, 3> newX_,
+	std::array<double, 3> newV_ ,
+	std::array<double, 3> newF_ ,
 	double newM_ )
 {
 	//check the boundary conditions
@@ -35,16 +35,16 @@ void Particles::getNmaxNlocal(int& nmax_, int& nlocal_) const {
 }
 // get atom i position
 void Particles::getAtomVec(const int& i,
-	array<double, 3>& xi,
-	array<double, 3>& vi,
-	array<double, 3>& fi,
+	std::array<double, 3>& xi,
+	std::array<double, 3>& vi,
+	std::array<double, 3>& fi,
 	double& mi)
 {
-	xi = array<double, 3>
+	xi = std::array<double, 3>
 	{ x[3 * i], x[3 * i + 1], x[3 * i + 2] };
-	vi = array<double, 3>
+	vi = std::array<double, 3>
 	{ v[3 * i], v[3 * i + 1], v[3 * i + 2] };
-	fi = array<double, 3>
+	fi = std::array<double, 3>
 	{ f[3 * i], f[3 * i + 1], f[3 * i + 2] };
 	mi = m[i];
 }

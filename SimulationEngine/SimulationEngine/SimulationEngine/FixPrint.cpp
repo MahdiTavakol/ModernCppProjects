@@ -5,7 +5,7 @@ FixPrint::FixPrint(Engine& engine_,
 	std::string id_,
 	int nevery_ ,
 	int mask_,
-	string variable_,
+	std::string variable_,
 	int particleId_) :
 	Fix{ engine_,id_,nevery_ },
 	variable{ variable_ },
@@ -51,12 +51,12 @@ void FixPrint::final_integrate() {
 
 void FixPrint::fillData()
 {
-	array<double, 3> out =
+	std::array<double, 3> out =
 	{ inData[3 * particleId], inData[3 * particleId + 1] , inData[3 * particleId + 2] };
 
 	data.push_back(out);
 }
 
-const vector<array<double, 3>>& FixPrint::getOutputVector() const {
+const std::vector<std::array<double, 3>>& FixPrint::getOutputVector() const {
 	return data;
 }

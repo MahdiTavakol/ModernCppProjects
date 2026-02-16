@@ -10,7 +10,7 @@
 class Particles : public Type {
 public:
 	Particles(Engine& engine_, int nmax_);
-	void addParticle(array<double, 3> newX_,
+	void addParticle(std::array<double, 3> newX_,
 		std::array<double, 3> newV_ = { 0.0,0.0,0.0 },
 		std::array<double, 3> newF_ = { 0.0,0.0,0.0 },
 		double newM_ = 10.0);

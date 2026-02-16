@@ -3,7 +3,10 @@
 #include "Particles.h"
 #include "Box.h"
 #include "Fix.h"
+
+
 #include <utility>
+#include <stdexcept>
 
 using std::make_unique;
 using std::unique_ptr;
@@ -58,15 +61,16 @@ vector<unique_ptr<Fix>>& Engine::getFixList() {
 	return fixList;
 }
 unique_ptr<Fix>& Engine::returnFixById(string id_) {
-	for (int i = 0; i < fixList.size(); i++)
+	/*for (int i = 0; i < fixList.size(); i++)
 	{
 		if (fixList[i]->getId() == id_) {
 			return fixList[i];
 		}
-	}
-	/*for (auto& fix : fixList) {
+	}*/
+	for (auto& fix : fixList) {
 		if (fix->getId() == id_) {
 			return fix;
 		}
-	}*/
+	}
+	throw std::invalid_argument("The fix was not find!");
 }

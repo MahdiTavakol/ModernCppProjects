@@ -457,21 +457,22 @@ TEST_CASE("Testing fixes invoked at initial_integrate and final_integrate steps"
 	auto& fix2ref = mockedEngine.returnFixById("2");
 	auto& fix3ref = mockedEngine.returnFixById("3");
 	// casting the fixPrint
-	FixPrint* const fixPrint1 = dynamic_cast<FixPrint*>(fix1ref.get());
-	FixPrint* const fixPrint2 = dynamic_cast<FixPrint*>(fix2ref.get());
-	FixPrint* const fixPrint3 = dynamic_cast<FixPrint*>(fix3ref.get());
-
+	FixPrint* const fixPrintPtr1 = dynamic_cast<FixPrint*>(fix1ref.get());
+	FixPrint* const fixPrintPtr2 = dynamic_cast<FixPrint*>(fix2ref.get());
+	FixPrint* const fixPrintPtr3 = dynamic_cast<FixPrint*>(fix3ref.get());
 	// getting fixprint outputs;
-	auto finalXs = fixPrint1->getOutputVector();
-	auto finalVs = fixPrint2->getOutputVector();
-	auto finalFs = fixPrint3->getOutputVector();
+	auto finalXs = fixPrintPtr1->getOutputVector();
+	auto finalVs = fixPrintPtr2->getOutputVector();
+	auto finalFs = fixPrintPtr3->getOutputVector();
 
 	// comparing the results
 	for (int i = 0; i < nSteps; i++) {
 		for (int j = 0; j < 3; j++) {
+			std::cout << "i and j are " << i << "," << j << std::endl;
 			REQUIRE_THAT(expectedXs[i][j], Catch::Matchers::WithinAbs(finalXs[i][j], 1e-6));
 			REQUIRE_THAT(expectedXs[i][j], Catch::Matchers::WithinAbs(finalVs[i][j], 1e-6));
 			REQUIRE_THAT(expectedXs[i][j], Catch::Matchers::WithinAbs(finalFs[i][j], 1e-6));
 		}
 	}
 }
+

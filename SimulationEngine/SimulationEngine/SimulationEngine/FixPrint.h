@@ -11,7 +11,7 @@ public:
 		std::string id_,
 		int nevery_ = 1,
 		int mask_ = POST_FORCE,
-		string variable_ = "x",
+		std::string variable_ = "x",
 		int particleId_ = 0);
 
 	void init() override;
@@ -19,11 +19,11 @@ public:
 	void pre_force() override;
 	void post_force() override;
 	void final_integrate() override;
-	const vector<std::array<double,3>>& getOutputVector() const;
+	const std::vector<std::array<double,3>>& getOutputVector() const;
 
 private:
 	double* inData = nullptr;
-	string variable;
+	std::string variable;
 	int particleId;
 
 	void fillData();
