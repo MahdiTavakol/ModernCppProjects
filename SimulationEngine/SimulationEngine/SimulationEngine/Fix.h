@@ -3,7 +3,7 @@
 #include "Type.h"
 #include "Engine.h"
 
-static enum FixMask {
+enum FixMask {
 	INIT_INTEGRATE = 1 << 1,
 	PRE_FORCE = 1 << 2,
 	POST_FORCE = 1 << 3,
@@ -12,7 +12,6 @@ static enum FixMask {
 
 class Fix : public Type
 {
-
 public:
 	Fix(Engine& engine_,
 		std::string id_,
@@ -20,6 +19,7 @@ public:
 		Type{ engine_, id_},
 		nevery{nevery_}
 	{}
+	virtual ~Fix() {}
 	
 	virtual void init() {};
 	virtual void setup() {};

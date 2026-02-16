@@ -4,7 +4,6 @@
 #include <array>
 #include <vector>
 
-using std::array, std::vector;
 
 class FixPrint : public Fix {
 public:
@@ -20,7 +19,7 @@ public:
 	void pre_force() override;
 	void post_force() override;
 	void final_integrate() override;
-	const vector<array<double,3>>& getOutputVector() const;
+	const vector<std::array<double,3>>& getOutputVector() const;
 
 private:
 	double* inData = nullptr;
@@ -28,5 +27,5 @@ private:
 	int particleId;
 
 	void fillData();
-	vector<array<double,3>> data;
+	std::vector<std::array<double,3>> data;
 };

@@ -3,6 +3,12 @@
 #include "Particles.h"
 #include "Box.h"
 #include "Fix.h"
+#include <utility>
+
+using std::make_unique;
+using std::unique_ptr;
+using std::vector;
+using std::string;
 
 Engine::Engine(unique_ptr<Box>& box_,
 	unique_ptr<Particles>& particles_) :
@@ -51,11 +57,16 @@ unique_ptr<Integrator>& Engine::getIntegrator() {
 vector<unique_ptr<Fix>>& Engine::getFixList() {
 	return fixList;
 }
-const unique_ptr<Fix>& Engine::returnFixById(string  id_) const {
-	for (auto& fix : fixList) {
+unique_ptr<Fix>& Engine::returnFixById(string id_) {
+	for (int i = 0; i < fixList.size(); i++)
+	{
+		if (fixList[i]->getId() == id_) {
+			return fixList[i];
+		}
+	}
+	/*for (auto& fix : fixList) {
 		if (fix->getId() == id_) {
 			return fix;
 		}
-	}
-	return nullptr;
+	}*/
 }
