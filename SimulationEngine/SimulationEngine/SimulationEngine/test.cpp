@@ -397,9 +397,12 @@ TEST_CASE("Testing fixes invoked at initial_integrate and final_integrate steps"
 	// Integrator
 	unique_ptr<Integrator> integrator = make_unique<SemiIntegrator>(mockedEngine);
 	// The fix command
-	auto fixPrint1 = make_unique<FixPrint>(mockedEngine, "1",1, POST_FORCE, "x",0);
-	auto fixPrint2 = make_unique<FixPrint>(mockedEngine, "2",1, POST_FORCE, "v",0);
-	auto fixPrint3 = make_unique<FixPrint>(mockedEngine, "3",1, POST_FORCE, "f",0);
+	auto fixPrint1 = make_unique<FixPrint>(mockedEngine, "1", 1, INIT_INTEGRATE,  "x", 0);
+	auto fixPrint2 = make_unique<FixPrint>(mockedEngine, "2", 1, INIT_INTEGRATE,  "v", 0);
+	auto fixPrint3 = make_unique<FixPrint>(mockedEngine, "3", 1, INIT_INTEGRATE,  "f", 0);
+	auto fixPrint4 = make_unique<FixPrint>(mockedEngine, "4", 1, FINAL_INTEGRATE, "x", 0);
+	auto fixPrint5 = make_unique<FixPrint>(mockedEngine, "5", 1, FINAL_INTEGRATE, "v", 0);
+	auto fixPrint6 = make_unique<FixPrint>(mockedEngine, "6", 1, FINAL_INTEGRATE, "f", 0);
 	// adding these to the engine
 	mockedEngine.registerBox(box);
 	mockedEngine.registerParticles(particles);
@@ -407,6 +410,9 @@ TEST_CASE("Testing fixes invoked at initial_integrate and final_integrate steps"
 	mockedEngine.registerFix(std::move(fixPrint1));
 	mockedEngine.registerFix(std::move(fixPrint2));
 	mockedEngine.registerFix(std::move(fixPrint3));
+	mockedEngine.registerFix(std::move(fixPrint4));
+	mockedEngine.registerFix(std::move(fixPrint5));
+	mockedEngine.registerFix(std::move(fixPrint6));
 	// getting a reference to particles
 	auto& engineParticles = mockedEngine.getParticlesForUpdate();
 	// new particles
@@ -427,23 +433,26 @@ TEST_CASE("Testing fixes invoked at initial_integrate and final_integrate steps"
 	vector<array<double, 3>> expectedXs, expectedVs, expectedFs;
 
 	// xs
+	expectedXs.push_back({ 0.0,0.0,0.0 });
 	expectedXs.push_back({ 3.0,2.6,3.0 });
 	expectedXs.push_back({ 7.0,6.8,4.0 });
 	expectedXs.push_back({ 12.0,12.6,3.0 });
 	expectedXs.push_back({ 18.0,20.0,0.0 });
 	expectedXs.push_back({ 25.0,29.0,-5.0 });
 	// vs
+	expectedVs.push_back({ 2.0,1.0,5.0 });
 	expectedVs.push_back({ 3.0,2.6,3.0 });
 	expectedVs.push_back({ 4.0,4.2,1.0 });
 	expectedVs.push_back({ 5.0,5.8,-1.0 });
 	expectedVs.push_back({ 6.0,7.4,-3.0 });
 	expectedVs.push_back({ 7.0,9.0,-5.0 });
 	// fs
-	expectedVs.push_back({ 5.0,8.0,-10.0 });
-	expectedVs.push_back({ 5.0,8.0,-10.0 });
-	expectedVs.push_back({ 5.0,8.0,-10.0 });
-	expectedVs.push_back({ 5.0,8.0,-10.0 });
-	expectedVs.push_back({ 5.0,8.0,-10.0 });
+	expectedFs.push_back({ 5.0,8.0,-10.0 });
+	expectedFs.push_back({ 5.0,8.0,-10.0 });
+	expectedFs.push_back({ 5.0,8.0,-10.0 });
+	expectedFs.push_back({ 5.0,8.0,-10.0 });
+	expectedFs.push_back({ 5.0,8.0,-10.0 });
+	expectedFs.push_back({ 5.0,8.0,-10.0 });
 
 
 	// creating the run object
@@ -456,22 +465,41 @@ TEST_CASE("Testing fixes invoked at initial_integrate and final_integrate steps"
 	auto& fix1ref = mockedEngine.returnFixById("1");
 	auto& fix2ref = mockedEngine.returnFixById("2");
 	auto& fix3ref = mockedEngine.returnFixById("3");
+	auto& fix4ref = mockedEngine.returnFixById("4");
+	auto& fix5ref = mockedEngine.returnFixById("5");
+	auto& fix6ref = mockedEngine.returnFixById("6");
 	// casting the fixPrint
 	FixPrint* const fixPrintPtr1 = dynamic_cast<FixPrint*>(fix1ref.get());
 	FixPrint* const fixPrintPtr2 = dynamic_cast<FixPrint*>(fix2ref.get());
 	FixPrint* const fixPrintPtr3 = dynamic_cast<FixPrint*>(fix3ref.get());
+	FixPrint* const fixPrintPtr4 = dynamic_cast<FixPrint*>(fix4ref.get());
+	FixPrint* const fixPrintPtr5 = dynamic_cast<FixPrint*>(fix5ref.get());
+	FixPrint* const fixPrintPtr6 = dynamic_cast<FixPrint*>(fix6ref.get());
+	// checking the type of the Fix
+	if (fixPrintPtr1 == nullptr ||
+		fixPrintPtr2 == nullptr ||
+		fixPrintPtr3 == nullptr ||
+		fixPrintPtr4 == nullptr ||
+		fixPrintPtr5 == nullptr ||
+		fixPrintPtr6 == nullptr )
+		std::cout << "Error " << std::endl;
 	// getting fixprint outputs;
-	auto finalXs = fixPrintPtr1->getOutputVector();
-	auto finalVs = fixPrintPtr2->getOutputVector();
-	auto finalFs = fixPrintPtr3->getOutputVector();
+	auto initXs = fixPrintPtr1->getOutputVector();
+	auto initVs = fixPrintPtr2->getOutputVector();
+	auto initFs = fixPrintPtr3->getOutputVector();
+	auto finalXs = fixPrintPtr4->getOutputVector();
+	auto finalVs = fixPrintPtr5->getOutputVector();
+	auto finalFs = fixPrintPtr6->getOutputVector();
 
 	// comparing the results
 	for (int i = 0; i < nSteps; i++) {
 		for (int j = 0; j < 3; j++) {
-			std::cout << "i and j are " << i << "," << j << std::endl;
-			REQUIRE_THAT(expectedXs[i][j], Catch::Matchers::WithinAbs(finalXs[i][j], 1e-6));
-			REQUIRE_THAT(expectedXs[i][j], Catch::Matchers::WithinAbs(finalVs[i][j], 1e-6));
-			REQUIRE_THAT(expectedXs[i][j], Catch::Matchers::WithinAbs(finalFs[i][j], 1e-6));
+			REQUIRE_THAT(expectedXs[i][j],   Catch::Matchers::WithinAbs(initXs[i][j],  1e-6));
+			REQUIRE_THAT(expectedVs[i][j],   Catch::Matchers::WithinAbs(initVs[i][j],  1e-6));
+			REQUIRE_THAT(expectedFs[i][j],   Catch::Matchers::WithinAbs(initFs[i][j],  1e-6));
+			REQUIRE_THAT(expectedXs[i+1][j], Catch::Matchers::WithinAbs(finalXs[i][j], 1e-6));
+			REQUIRE_THAT(expectedVs[i+1][j], Catch::Matchers::WithinAbs(finalVs[i][j], 1e-6));
+			REQUIRE_THAT(expectedFs[i+1][j], Catch::Matchers::WithinAbs(finalFs[i][j], 1e-6));
 		}
 	}
 }

@@ -1,6 +1,8 @@
 #include "FixPrint.h"
 #include "Particles.h"
 
+#include <iostream>
+
 FixPrint::FixPrint(Engine& engine_,
 	std::string id_,
 	int nevery_ ,

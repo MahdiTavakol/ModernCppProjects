@@ -61,12 +61,6 @@ vector<unique_ptr<Fix>>& Engine::getFixList() {
 	return fixList;
 }
 unique_ptr<Fix>& Engine::returnFixById(string id_) {
-	/*for (int i = 0; i < fixList.size(); i++)
-	{
-		if (fixList[i]->getId() == id_) {
-			return fixList[i];
-		}
-	}*/
 	for (auto& fix : fixList) {
 		if (fix->getId() == id_) {
 			return fix;

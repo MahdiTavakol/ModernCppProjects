@@ -2,6 +2,8 @@
 #include "Particles.h"
 #include "Fix.h"
 
+#include <iostream>
+
 void Integrator::init() {
 	auto& fixList = engine().getFixList();
 	for (auto& fix : fixList) {
@@ -33,7 +35,7 @@ void Integrator::pre_force() {
 }
 
 void Integrator::post_force() {
-	auto& fixList = engine().getFixList();
+ 	auto& fixList = engine().getFixList();
 	for (auto& fix : fixList) {
 		if (fix->mask & POST_FORCE)
 			fix->post_force();
