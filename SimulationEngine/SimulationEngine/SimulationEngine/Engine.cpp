@@ -65,6 +65,9 @@ unique_ptr<Integrator>& Engine::getIntegrator() {
 vector<unique_ptr<Fix>>& Engine::getFixList() {
 	return fixList;
 }
+std::unique_ptr<ForceField>& Engine::getForceField() {
+	return forcefield;
+}
 unique_ptr<Fix>& Engine::returnFixById(string id_) {
 	for (auto& fix : fixList) {
 		if (fix->getId() == id_) {

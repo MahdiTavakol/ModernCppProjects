@@ -16,3 +16,4 @@ protected:
 		double* fforce_, double& energy_) = 0;
 
 };
+

@@ -13,6 +13,7 @@ void Run::start(int nSteps_, int timestep_ ) {
 	for (currentStep = timestep_; currentStep < nSteps; currentStep++) {
 		integrator->initial_integrate();
 		integrator->pre_force();
+		integrator->force();
 		integrator->post_force();
 		integrator->final_integrate();
 	}

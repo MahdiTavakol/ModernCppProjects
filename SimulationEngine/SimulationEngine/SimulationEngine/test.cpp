@@ -601,8 +601,8 @@ TEST_CASE("Calculating the force from the forcefield equation") {
 	// comparing the results
 	for (int i = 0; i < nSteps; i++) {
 		for (int j = 0; j < 3; j++) {
-			//REQUIRE_THAT(expectedF1s[i][j], Catch::Matchers::WithinAbs(F1s[i][j], 1e-6));
-			REQUIRE_THAT(expectedF2s[i][j], Catch::Matchers::WithinAbs(F2s[i][j], 1e-6));
+			REQUIRE_THAT(expectedF1s[i][j], Catch::Matchers::WithinAbs(F1s[i][j], 1e-6));
+			//REQUIRE_THAT(expectedF2s[i][j], Catch::Matchers::WithinAbs(F2s[i][j], 1e-6));
 		}
 	}
 

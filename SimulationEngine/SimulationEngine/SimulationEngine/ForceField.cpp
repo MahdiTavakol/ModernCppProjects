@@ -1,11 +1,15 @@
 #include "ForceField.h"
 #include "Particles.h"
+#include <iostream>
 
 void ForceField::update() {
 	int nlocal, nmax;
+	std::cout << "1" << std::endl;
 	auto& particles = engine().getParticlesForUpdate();
+	std::cout << "2" << std::endl;
 	auto x = particles->getXData();
 	auto f = particles->getFData();
+	std::cout << "3" << std::endl;
 	particles->getNmaxNlocal(nmax, nlocal);
 
 	double energy;

@@ -1,6 +1,7 @@
 #include "Integrator.h"
 #include "Particles.h"
 #include "Fix.h"
+#include "ForceField.h"
 
 #include <iostream>
 
@@ -32,6 +33,13 @@ void Integrator::pre_force() {
 		if (fix->mask & PRE_FORCE)
 			fix->pre_force();
 	}
+}
+
+void Integrator::force() {
+	int nmax, nlocal;
+ 	auto& forcefield = engine().getForceField();
+	if (forcefield != nullptr)
+		forcefield->update();
 }
 
 void Integrator::post_force() {

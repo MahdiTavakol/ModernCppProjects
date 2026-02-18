@@ -34,6 +34,7 @@ public:
 	const std::unique_ptr<Particles>& getParticles() const;
 	std::unique_ptr<Particles>& getParticlesForUpdate();
 	std::unique_ptr<Integrator>& getIntegrator();
+	std::unique_ptr<ForceField>& getForceField();
 	std::vector<std::unique_ptr<Fix>>& getFixList();
 	std::unique_ptr<Fix>& returnFixById(std::string id_);
 
