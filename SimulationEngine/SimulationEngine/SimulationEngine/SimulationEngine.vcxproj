@@ -133,10 +133,12 @@
     <ClCompile Include="EulerIntegrator.cpp" />
     <ClCompile Include="Fix.cpp" />
     <ClCompile Include="FixPrint.cpp" />
+    <ClCompile Include="ForceField.cpp" />
     <ClCompile Include="Integrator.cpp" />
     <ClCompile Include="Particles.cpp" />
     <ClCompile Include="Run.cpp" />
     <ClCompile Include="SemiIntegrator.cpp" />
+    <ClCompile Include="SpringField.cpp" />
     <ClCompile Include="test.cpp" />
     <ClCompile Include="Type.cpp" />
   </ItemGroup>
@@ -147,10 +149,12 @@
     <ClInclude Include="EulerIntegrator.h" />
     <ClInclude Include="Fix.h" />
     <ClInclude Include="FixPrint.h" />
+    <ClInclude Include="ForceField.h" />
     <ClInclude Include="Integrator.h" />
     <ClInclude Include="Particles.h" />
     <ClInclude Include="Run.h" />
     <ClInclude Include="SemiIntegrator.h" />
+    <ClInclude Include="SpringField.h" />
     <ClInclude Include="Type.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

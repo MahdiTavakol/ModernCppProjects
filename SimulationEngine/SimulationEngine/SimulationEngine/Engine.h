@@ -7,6 +7,7 @@
 class Box;
 class Particles;
 class Integrator;
+class ForceField;
 class Fix;
 
 
@@ -27,6 +28,7 @@ public:
 	void registerBox(std::unique_ptr<Box>& box_);
 	void registerParticles(std::unique_ptr<Particles>& particles_);
 	void registerIntegrator(std::unique_ptr<Integrator>& integrator_);
+	void registerForceField(std::unique_ptr<ForceField>& forcefield_);
 	void registerFix(std::unique_ptr<Fix> fix_);
 	const std::unique_ptr<Box>& getBox() const;
 	const std::unique_ptr<Particles>& getParticles() const;
@@ -39,6 +41,7 @@ private:
 	std::unique_ptr<Box> box = nullptr;
 	std::unique_ptr<Particles> particles = nullptr;
 	std::unique_ptr<Integrator> integrator = nullptr;
+	std::unique_ptr<ForceField> forcefield = nullptr;
 	std::vector<std::unique_ptr<Fix>> fixList;
 	int nmax;
 };

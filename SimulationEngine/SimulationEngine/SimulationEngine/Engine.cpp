@@ -1,6 +1,7 @@
 #include "Engine.h"
 #include "Integrator.h"
 #include "Particles.h"
+#include "ForceField.h"
 #include "Box.h"
 #include "Fix.h"
 
@@ -40,6 +41,10 @@ void Engine::registerParticles(unique_ptr<Particles>& particles_)
 void Engine::registerIntegrator(unique_ptr<Integrator>& integrator_)
 {
 	integrator = std::move(integrator_);
+}
+void Engine::registerForceField(std::unique_ptr<ForceField>& forcefield_)
+{
+	forcefield = std::move(forcefield_);
 }
 void Engine::registerFix(unique_ptr<Fix> fix_)
 {

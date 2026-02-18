@@ -11,7 +11,9 @@
 #include "Engine.h"
 #include "Integrator.h"
 #include "EulerIntegrator.h"
+#include "Forcefield.h"
 #include "SemiIntegrator.h"
+#include "SpringField.h"
 #include "FixPrint.h"
 #include "Box.h"
 #include "Run.h"
@@ -504,3 +506,104 @@ TEST_CASE("Testing fixes invoked at initial_integrate and final_integrate steps"
 	}
 }
 
+
+TEST_CASE("Calculating the force from the forcefield equation") {
+	// number of steps
+	constexpr int nSteps = 5;
+	// constant variables
+	int nmax = 10;
+	array<double, 3> min = { -100000.0,-100000.0,-100000.0 };
+	array<double, 3> max = { 100000.0,100000.0,100000.0 };
+	// the mocked Engine object
+	Engine mockedEngine;
+	// box 
+	auto box = make_unique<Box>(mockedEngine, min, max);
+	// particles
+	auto particles = make_unique<Particles>(mockedEngine, nmax);
+	// forceField
+	unique_ptr<ForceField> forcefield = make_unique<SpringField>(mockedEngine,10);
+	// Integrator
+	unique_ptr<Integrator> integrator = make_unique<SemiIntegrator>(mockedEngine);
+	// The fix command
+	auto fixPrint1 = make_unique<FixPrint>(mockedEngine, "1", 1, POST_FORCE, "f", 0);
+	auto fixPrint2 = make_unique<FixPrint>(mockedEngine, "2", 1, POST_FORCE, "f", 1);
+	// adding these to the engine
+	mockedEngine.registerBox(box);
+	mockedEngine.registerParticles(particles);
+	mockedEngine.registerForceField(forcefield);
+	mockedEngine.registerIntegrator(integrator);
+	mockedEngine.registerFix(std::move(fixPrint1));
+	mockedEngine.registerFix(std::move(fixPrint2));
+
+	// getting a reference to particles
+	auto& engineParticles = mockedEngine.getParticlesForUpdate();
+	// new particles
+	vector<array<double, 3>> newXs, newVs, newFs;
+	vector<double> newMs;
+	// particle #1
+	newXs.push_back({ 0.0,0.0,0.0 });
+	newVs.push_back({ 2.0,1.0,5.0 });
+	newFs.push_back({ 5.0,8.0,-10.0 });
+	newMs.push_back(5.0);
+	// particle #2
+	newXs.push_back({ 3.0,100.0,1000.0 });
+	newVs.push_back({ 8.0,-0.1,-10.0 });
+	newFs.push_back({ 0.1,2.0,-10.0 });
+	newMs.push_back(5.0);
+
+	// adding it 
+	for (int i = 0; i < 1; i++) {
+		engineParticles->addParticle(newXs[i], newVs[i], newFs[i], newMs[i]);
+	}
+
+	// creating the run object
+	auto run = make_unique<Run>(mockedEngine);
+	// setting it up
+	run->setup();
+	// running it for 100 steps
+	run->start(nSteps);
+	// getting the fixprints
+	auto& fix1ref = mockedEngine.returnFixById("1");
+	auto& fix2ref = mockedEngine.returnFixById("2");
+
+	// casting the fixPrint
+	FixPrint* const fixPrintPtr1 = dynamic_cast<FixPrint*>(fix1ref.get());
+	FixPrint* const fixPrintPtr2 = dynamic_cast<FixPrint*>(fix2ref.get());
+	// checking the type of the Fix
+	if (fixPrintPtr1 == nullptr ||
+		fixPrintPtr2 == nullptr)
+		std::cout << "Error " << std::endl;
+
+	// getting fixprint outputs;
+	auto F1s = fixPrintPtr1->getOutputVector();
+	auto F2s = fixPrintPtr2->getOutputVector();
+
+
+	// expected values
+	vector<array<double, 3>> expectedF1s, expectedF2s;
+
+	// Particle #1
+	expectedF1s.push_back({  30.0,1000.0,10000.0 });
+	expectedF1s.push_back({  90.0, 989.0,9850.0 });
+	expectedF1s.push_back({ -90.0,-3000.0,-30000.0 });
+	expectedF1s.push_back({-270.0,-6869.0,-69850.0 });
+	expectedF1s.push_back({-270.0,-4978.0,-49700.0 });
+	expectedF1s.push_back({ 270.0,11011.0,110150.0 });
+	// Particle #2
+	expectedF2s.push_back({ -30.0,-1000.0,-10000.0 });
+	expectedF2s.push_back({  -90.0, -989.0,-9850.0 });
+	expectedF2s.push_back({   90.0, 3000.0, 30000.0 });
+	expectedF2s.push_back({  270.0, 6869.0, 69850.0 });
+	expectedF2s.push_back({  270.0, 4978.0, 49700.0 });
+	expectedF2s.push_back({ -270.0,-11011.0,-110150.0 });
+
+
+	// comparing the results
+	for (int i = 0; i < nSteps; i++) {
+		for (int j = 0; j < 3; j++) {
+			//REQUIRE_THAT(expectedF1s[i][j], Catch::Matchers::WithinAbs(F1s[i][j], 1e-6));
+			REQUIRE_THAT(expectedF2s[i][j], Catch::Matchers::WithinAbs(F2s[i][j], 1e-6));
+		}
+	}
+
+}
