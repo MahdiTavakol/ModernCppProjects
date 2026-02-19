@@ -17,10 +17,19 @@ using std::string;
 Engine::Engine(unique_ptr<Box>& box_,
 	unique_ptr<Particles>& particles_) :
 	box{ std::move(box_) },
-	particles{ std::move(particles_) }
+	particles{ std::move(particles_) },
+	forcefield{ std::make_unique<ForceField>(*this)}
 {}
 
-Engine::Engine() = default;
+Engine::Engine() : 
+	forcefield{std::make_unique<ForceField>(*this)}
+{}
+
+Engine::Engine(Run_Status& run_status_) :
+	run_status{ run_status_ },
+	forcefield{std::make_unique<ForceField>(*this)}
+{}
+
 Engine::~Engine() = default;
 
 void Engine::resetBox(unique_ptr<Box>& box_) {
@@ -75,4 +84,8 @@ unique_ptr<Fix>& Engine::returnFixById(string id_) {
 		}
 	}
 	throw std::invalid_argument("The fix was not find!");
+}
+
+const Engine::Run_Status& Engine::getStatus() const {
+	return run_status;
 }

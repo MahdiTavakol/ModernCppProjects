@@ -543,16 +543,16 @@ TEST_CASE("Calculating the force from the forcefield equation") {
 	// particle #1
 	newXs.push_back({ 0.0,0.0,0.0 });
 	newVs.push_back({ 2.0,1.0,5.0 });
-	newFs.push_back({ 5.0,8.0,-10.0 });
+	newFs.push_back({ 0.0,0.0,0.0 });
 	newMs.push_back(5.0);
 	// particle #2
 	newXs.push_back({ 3.0,100.0,1000.0 });
 	newVs.push_back({ 8.0,-0.1,-10.0 });
-	newFs.push_back({ 0.1,2.0,-10.0 });
+	newFs.push_back({ 0.0,0.0,0.0 });
 	newMs.push_back(5.0);
 
 	// adding it 
-	for (int i = 0; i < 1; i++) {
+	for (int i = 0; i < 2; i++) {
 		engineParticles->addParticle(newXs[i], newVs[i], newFs[i], newMs[i]);
 	}
 
@@ -584,26 +584,83 @@ TEST_CASE("Calculating the force from the forcefield equation") {
 
 	// Particle #1
 	expectedF1s.push_back({  30.0,1000.0,10000.0 });
-	expectedF1s.push_back({  90.0, 989.0,9850.0 });
-	expectedF1s.push_back({ -90.0,-3000.0,-30000.0 });
-	expectedF1s.push_back({-270.0,-6869.0,-69850.0 });
-	expectedF1s.push_back({-270.0,-4978.0,-49700.0 });
-	expectedF1s.push_back({ 270.0,11011.0,110150.0 });
+	expectedF1s.push_back({ -30.0,-3011.0,-30150.0 });
+	expectedF1s.push_back({  30.0, 5022.0, 50300.0 });
+	expectedF1s.push_back({ -30.0,-7033.0,-70450.0 });
+	expectedF1s.push_back({  30.0, 9044.0, 90600.0 });
+	expectedF1s.push_back({ -30.0,-11055.0,-110750.0 });
 	// Particle #2
-	expectedF2s.push_back({ -30.0,-1000.0,-10000.0 });
-	expectedF2s.push_back({  -90.0, -989.0,-9850.0 });
-	expectedF2s.push_back({   90.0, 3000.0, 30000.0 });
-	expectedF2s.push_back({  270.0, 6869.0, 69850.0 });
-	expectedF2s.push_back({  270.0, 4978.0, 49700.0 });
-	expectedF2s.push_back({ -270.0,-11011.0,-110150.0 });
-
+	for (auto& f : expectedF1s)
+		expectedF2s.push_back({ -f[0],-f[1],-f[2] });
 
 	// comparing the results
 	for (int i = 0; i < nSteps; i++) {
 		for (int j = 0; j < 3; j++) {
 			REQUIRE_THAT(expectedF1s[i][j], Catch::Matchers::WithinAbs(F1s[i][j], 1e-6));
-			//REQUIRE_THAT(expectedF2s[i][j], Catch::Matchers::WithinAbs(F2s[i][j], 1e-6));
+			REQUIRE_THAT(expectedF2s[i][j], Catch::Matchers::WithinAbs(F2s[i][j], 1e-6));
 		}
 	}
+}
 
+TEST_CASE("Testing the silent and verbose version of the engine") {
+	// run_status
+	struct {
+		std::string messages;
+		Engine::Run_Status status;
+	} run_array[2] = {
+		{"Running the silent version of the engine",
+		 Engine::Run_Status::SILENT},
+		{"Running the verbose version of the engine",
+		 Engine::Run_Status::VERBOSE},
+	} ;
+
+
+	for (auto& run : run_array) {
+		std::cout << run.messages << std::endl;
+		constexpr int nSteps = 5;
+		// constant variables
+		int nmax = 10;
+		array<double, 3> min = { -100000.0,-100000.0,-100000.0 };
+		array<double, 3> max = { 100000.0,100000.0,100000.0 };
+		// the mocked Engine object
+		Engine mockedEngine(run.status);
+		// box 
+		auto box = make_unique<Box>(mockedEngine, min, max);
+		// particles
+		auto particles = make_unique<Particles>(mockedEngine, nmax);
+		// Integrator
+		unique_ptr<Integrator> integrator = make_unique<SemiIntegrator>(mockedEngine);;
+		// adding these to the engine
+		mockedEngine.registerBox(box);
+		mockedEngine.registerParticles(particles);
+		mockedEngine.registerIntegrator(integrator);
+
+		// getting a reference to particles
+		auto& engineParticles = mockedEngine.getParticlesForUpdate();
+		// new particles
+		vector<array<double, 3>> newXs, newVs, newFs;
+		vector<double> newMs;
+		// particle #1
+		newXs.push_back({ 0.0,0.0,0.0 });
+		newVs.push_back({ 2.0,1.0,5.0 });
+		newFs.push_back({ 0.0,0.0,0.0 });
+		newMs.push_back(5.0);
+		// particle #2
+		newXs.push_back({ 3.0,100.0,1000.0 });
+		newVs.push_back({ 8.0,-0.1,-10.0 });
+		newFs.push_back({ 0.0,0.0,0.0 });
+		newMs.push_back(5.0);
+
+		// adding it 
+		for (int i = 0; i < 2; i++) {
+			engineParticles->addParticle(newXs[i], newVs[i], newFs[i], newMs[i]);
+		}
+
+		// creating the run object
+		auto run = make_unique<Run>(mockedEngine);
+		// setting it up
+		run->setup();
+		// running it for 100 steps
+		run->start(nSteps);
+	}
 }

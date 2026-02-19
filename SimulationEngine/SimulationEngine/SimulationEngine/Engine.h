@@ -13,6 +13,7 @@ class Fix;
 
 class Engine {
 public:
+	enum class Run_Status {SILENT,VERBOSE};
 	enum class ItemType { BOX, PARTICLES };
 
 	// constructor with prebuilt types
@@ -20,6 +21,8 @@ public:
 		std::unique_ptr<Particles>& particles_);
 	// default constructor to be used in unittests
 	Engine();
+	// passing the run_status as an argument
+	Engine(Run_Status& run_status_);
 	// put the destructor in the cpp file since
 	// it needs the definition of the Box, Particles, Integrator, etc
 	~Engine();
@@ -37,12 +40,18 @@ public:
 	std::unique_ptr<ForceField>& getForceField();
 	std::vector<std::unique_ptr<Fix>>& getFixList();
 	std::unique_ptr<Fix>& returnFixById(std::string id_);
+	const Run_Status& getStatus() const;
 
 private:
+	Run_Status run_status = Run_Status::SILENT;
 	std::unique_ptr<Box> box = nullptr;
 	std::unique_ptr<Particles> particles = nullptr;
 	std::unique_ptr<Integrator> integrator = nullptr;
-	std::unique_ptr<ForceField> forcefield = nullptr;
+	/* 
+	 * The default value of the forcefield 
+	 * is provided in the constructor
+	 */
+	std::unique_ptr<ForceField> forcefield;
 	std::vector<std::unique_ptr<Fix>> fixList;
 	int nmax;
 };

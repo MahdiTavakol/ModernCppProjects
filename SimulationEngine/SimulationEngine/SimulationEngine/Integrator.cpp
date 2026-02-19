@@ -6,7 +6,9 @@
 #include <iostream>
 
 void Integrator::init() {
-	auto& fixList = engine().getFixList();
+	auto& forcefield = engine().getForceField();
+	forcefield->init();
+  	auto& fixList = engine().getFixList();
 	for (auto& fix : fixList) {
 		fix->init();
 	}
@@ -38,8 +40,7 @@ void Integrator::pre_force() {
 void Integrator::force() {
 	int nmax, nlocal;
  	auto& forcefield = engine().getForceField();
-	if (forcefield != nullptr)
-		forcefield->update();
+	forcefield->update();
 }
 
 void Integrator::post_force() {

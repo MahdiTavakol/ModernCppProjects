@@ -2,19 +2,31 @@
 #include "Particles.h"
 #include <iostream>
 
+void ForceField::init() {
+	int nlocal, nmax;
+	return;
+	auto& particles = engine().getParticlesForUpdate();
+	auto f = particles->getFData();
+	particles->getNmaxNlocal(nmax, nlocal);
+
+	for (int i = 0; i < nlocal; i++) {
+		f[3 * i] = 0.0;
+		f[3 * i + 1] = 0.0;
+		f[3 * i + 2] = 0.0;
+	}
+}
+
 void ForceField::update() {
 	int nlocal, nmax;
-	std::cout << "1" << std::endl;
+	auto& box = engine().getBox();
 	auto& particles = engine().getParticlesForUpdate();
-	std::cout << "2" << std::endl;
 	auto x = particles->getXData();
 	auto f = particles->getFData();
-	std::cout << "3" << std::endl;
 	particles->getNmaxNlocal(nmax, nlocal);
 
 	double energy;
-	for (int i = 0; i < nmax; i++)
-		for (int j = 0; j < nmax; j++) {
+	for (int i = 0; i < nlocal; i++)
+		for (int j = 0; j < nlocal; j++) {
 			if (j == i) continue;
 			std::array<double, 3> dist = {
 				x[3 * i] - x[3 * j],
