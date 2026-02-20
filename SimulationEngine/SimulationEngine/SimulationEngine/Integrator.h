@@ -17,6 +17,7 @@ public:
 
 	virtual void init();
 	virtual void setup();
+	virtual void neighbor_build();
 	virtual void initial_integrate();
 	virtual void pre_force();
 	virtual void force();

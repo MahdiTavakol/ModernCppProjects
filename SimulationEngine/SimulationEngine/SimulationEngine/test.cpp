@@ -12,6 +12,8 @@
 #include "Integrator.h"
 #include "EulerIntegrator.h"
 #include "Forcefield.h"
+#include "Neighbor.h"
+#include "SimpleNeighbor.h"
 #include "SemiIntegrator.h"
 #include "SpringField.h"
 #include "FixPrint.h"
@@ -662,5 +664,84 @@ TEST_CASE("Testing the silent and verbose version of the engine") {
 		run->setup();
 		// running it for 100 steps
 		run->start(nSteps);
+	}
+}
+
+TEST_CASE("Testing the neighbor list construction and updating") {
+	constexpr int nSteps = 5;
+	// constant variables
+	int nmax = 10;
+	// max and min
+	array<double, 3> min = { -100000.0,-100000.0,-100000.0 };
+	array<double, 3> max = { 100000.0,100000.0,100000.0 };
+	// neighbor cutoff
+	double neighbor_cutoff = 90.0;
+	// the mocked Engine object
+	Engine mockedEngine;
+	// box 
+	auto box = make_unique<Box>(mockedEngine, min, max);
+	// particles
+	auto particles = make_unique<Particles>(mockedEngine, nmax);
+	// neighbor list
+	unique_ptr<Neighbor> neighbor = make_unique<SimpleNeighbor>(mockedEngine, neighbor_cutoff);
+	// adding these to the engine
+	mockedEngine.registerBox(box);
+	mockedEngine.registerParticles(particles);
+	mockedEngine.registerNeighbor(neighbor);
+
+	// getting a reference to particles
+	auto& engineParticles = mockedEngine.getParticlesForUpdate();
+	// new particles
+	std::vector<std::array<double, 3>> newXs = {
+	{ -24.0, -94.0, -37.0 },
+	{ -27.0, -20.0, -25.0 },
+	{ -49.0,  98.0,  96.0 },
+	{  13.0,  -3.0,  23.0 },
+	{  22.0, -27.0,  89.0 },
+	{  97.0,  19.0,  80.0 },
+	{ -10.0,  14.0, -23.0 },
+	{ -79.0, -89.0, -71.0 },
+	{ 100.0, -58.0, -90.0 },
+	{ -86.0,  32.0,  85.0 }
+	};
+	vector<array<double, 3>> newVs, newFs;
+	vector<double> newMs;
+	for (int i = 0; i < 10; i++) {
+		newVs.push_back({ 0.0,0.0,0.0 });
+		newFs.push_back({ 0.0,0.0,0.0 });
+		newMs.push_back(5.0);
+	}
+	std::map<int, std::vector<int>> expectedNeighborList = {
+	{1, {2, 8}},
+	{2, {1, 4, 7}},
+	{3, {10}},
+	{4, {2, 5, 7}},
+	{5, {4, 6}},
+	{6, {5}},
+	{7, {2, 4}},
+	{8, {1}},
+	{10,{3}}
+	};
+	// adding it 
+	for (int i = 0; i < 10; i++) {
+		engineParticles->addParticle(newXs[i], newVs[i], newFs[i], newMs[i]);
+	}
+
+	// creating the run object
+	auto run = make_unique<Run>(mockedEngine);
+	// setting it up
+	run->setup();
+	// running it for 100 steps
+	run->start(nSteps);
+	// getting the neighbor list
+	auto& neighborPtr = mockedEngine.getNeighbor();
+	int nNeigh, * neighList, * firstNeigh, * numNeigh;
+	neighborPtr->getNeighborList(nNeigh, neighList,  firstNeigh, numNeigh);
+	// comparing the results
+	for (int i = 0;i < nNeigh; i++) {
+		int particleId = i + 1;
+		std::vector<int> expectedNeighbors = expectedNeighborList[particleId];
+		std::vector<int> actualNeighbors(neighList + firstNeigh[i], neighList + firstNeigh[i] + numNeigh[i]);
+		REQUIRE_THAT(actualNeighbors, Catch::Matchers::UnorderedEquals(expectedNeighbors));
 	}
 }

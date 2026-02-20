@@ -18,16 +18,19 @@ Engine::Engine(unique_ptr<Box>& box_,
 	unique_ptr<Particles>& particles_) :
 	box{ std::move(box_) },
 	particles{ std::move(particles_) },
-	forcefield{ std::make_unique<ForceField>(*this)}
+	forcefield{ std::make_unique<ForceField>(*this)},
+	neighbor{ std::make_unique<Neighbor>(*this,0.0)}
 {}
 
 Engine::Engine() : 
-	forcefield{std::make_unique<ForceField>(*this)}
+	forcefield{std::make_unique<ForceField>(*this)},
+	neighbor{ std::make_unique<Neighbor>(*this,0.0) }
 {}
 
 Engine::Engine(Run_Status& run_status_) :
 	run_status{ run_status_ },
-	forcefield{std::make_unique<ForceField>(*this)}
+	forcefield{std::make_unique<ForceField>(*this)},
+	neighbor{ std::make_unique<Neighbor>(*this,0.0) }
 {}
 
 Engine::~Engine() = default;
@@ -58,6 +61,10 @@ void Engine::registerForceField(std::unique_ptr<ForceField>& forcefield_)
 void Engine::registerFix(unique_ptr<Fix> fix_)
 {
 	fixList.push_back(std::move(fix_));
+}
+void Engine::registerNeighbor(unique_ptr<Neighbor>& neighbor_)
+{
+	neighbor = std::move(neighbor_);
 }
 const unique_ptr<Box>& Engine::getBox() const {
 	return box;

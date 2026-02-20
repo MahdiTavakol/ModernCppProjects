@@ -135,9 +135,11 @@
     <ClCompile Include="FixPrint.cpp" />
     <ClCompile Include="ForceField.cpp" />
     <ClCompile Include="Integrator.cpp" />
+    <ClCompile Include="Neighbor.cpp" />
     <ClCompile Include="Particles.cpp" />
     <ClCompile Include="Run.cpp" />
     <ClCompile Include="SemiIntegrator.cpp" />
+    <ClCompile Include="SimpleNeighbor.cpp" />
     <ClCompile Include="SpringField.cpp" />
     <ClCompile Include="test.cpp" />
     <ClCompile Include="Type.cpp" />
@@ -151,9 +153,11 @@
     <ClInclude Include="FixPrint.h" />
     <ClInclude Include="ForceField.h" />
     <ClInclude Include="Integrator.h" />
+    <ClInclude Include="Neighbor.h" />
     <ClInclude Include="Particles.h" />
     <ClInclude Include="Run.h" />
     <ClInclude Include="SemiIntegrator.h" />
+    <ClInclude Include="SimpleNeighbor.h" />
     <ClInclude Include="SpringField.h" />
     <ClInclude Include="Type.h" />
   </ItemGroup>

@@ -2,10 +2,13 @@
 #include "Particles.h"
 #include "Fix.h"
 #include "ForceField.h"
+#include "Neighbor.h"
 
 #include <iostream>
 
 void Integrator::init() {
+	auto& neighbor = engine().getNeighbor();
+	neighbor->init();
 	auto& forcefield = engine().getForceField();
 	forcefield->init();
   	auto& fixList = engine().getFixList();
@@ -19,6 +22,11 @@ void Integrator::setup() {
 	for (auto& fix : fixList) {
 		fix->setup();
 	}
+}
+
+void Integrator::neighbor_build() {
+	auto& neighbor = engine().getNeighbor();
+	neighbor->update();
 }
 
 void Integrator::initial_integrate() {

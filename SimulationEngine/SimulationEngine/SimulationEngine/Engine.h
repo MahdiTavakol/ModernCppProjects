@@ -9,6 +9,7 @@ class Particles;
 class Integrator;
 class ForceField;
 class Fix;
+class Neighbor;
 
 
 class Engine {
@@ -33,6 +34,7 @@ public:
 	void registerIntegrator(std::unique_ptr<Integrator>& integrator_);
 	void registerForceField(std::unique_ptr<ForceField>& forcefield_);
 	void registerFix(std::unique_ptr<Fix> fix_);
+	void registerNeighbor(std::unique_ptr<Neighbor>& neighbor_);
 	const std::unique_ptr<Box>& getBox() const;
 	const std::unique_ptr<Particles>& getParticles() const;
 	std::unique_ptr<Particles>& getParticlesForUpdate();
@@ -41,6 +43,7 @@ public:
 	std::vector<std::unique_ptr<Fix>>& getFixList();
 	std::unique_ptr<Fix>& returnFixById(std::string id_);
 	const Run_Status& getStatus() const;
+	std::unique_ptr<Neighbor>& getNeighbor();
 
 private:
 	Run_Status run_status = Run_Status::SILENT;
@@ -52,6 +55,7 @@ private:
 	 * is provided in the constructor
 	 */
 	std::unique_ptr<ForceField> forcefield;
+	std::unique_ptr<Neighbor> neighbor;
 	std::vector<std::unique_ptr<Fix>> fixList;
 	int nmax;
 };

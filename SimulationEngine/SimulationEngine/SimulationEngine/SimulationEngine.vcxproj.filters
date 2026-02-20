@@ -57,6 +57,12 @@
     <ClCompile Include="SpringField.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Neighbor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SimpleNeighbor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="catch_amalgamated.hpp">
@@ -96,6 +102,12 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="SpringField.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Neighbor.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleNeighbor.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
