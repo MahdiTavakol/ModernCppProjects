@@ -2,6 +2,7 @@
 #include "Integrator.h"
 #include "Particles.h"
 #include "ForceField.h"
+#include "Neighbor.h"
 #include "Box.h"
 #include "Fix.h"
 
@@ -40,6 +41,35 @@ void Engine::resetBox(unique_ptr<Box>& box_) {
 }
 void Engine::resetParticles(unique_ptr<Particles> particles_) {
 	particles = std::move(particles_);
+}
+void Engine::registerItem(std::unique_ptr<Type>&& type_) {
+
+	if (auto boxPtr = dynamic_cast<Box*>(type_.get())) {
+		box.reset(boxPtr);
+	}
+	else if (auto intPtr = dynamic_cast<Integrator*>(type_.get())) {
+		integrator.reset(intPtr);
+	} 
+	else if (auto frcPtr = dynamic_cast<ForceField*>(type_.get())) {
+		forcefield.reset(frcPtr);
+	}
+	else if (auto fixPtr = dynamic_cast<Fix*>(type_.get())) {
+		std::unique_ptr<Fix> fixUniquePtr;
+		fixUniquePtr.reset(fixPtr);
+		fixList.push_back(std::move(fixUniquePtr));
+	}
+	else if (auto prtPtr = dynamic_cast<Particles*>(type_.get())) {
+		particles.reset(prtPtr);
+	}
+	else if (auto nbrPtr = dynamic_cast<Neighbor*>(type_.get())) {
+		neighbor.reset(nbrPtr);
+	}
+	else 
+		throw std::invalid_argument("The type is not recognized!");
+
+	type_.release();
+
+	
 }
 
 void Engine::registerBox(unique_ptr<Box>& box_)
@@ -95,4 +125,8 @@ unique_ptr<Fix>& Engine::returnFixById(string id_) {
 
 const Engine::Run_Status& Engine::getStatus() const {
 	return run_status;
+}
+
+std::unique_ptr<Neighbor>& Engine::getNeighbor() {
+	return neighbor;
 }

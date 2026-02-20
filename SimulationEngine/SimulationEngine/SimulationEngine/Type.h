@@ -12,6 +12,7 @@ public:
 		id{ id_ },
 		engineRef{ engine_ }
 	{}
+	virtual ~Type() = default;
 	Engine& engine() {
 		return engineRef.get();
 	}

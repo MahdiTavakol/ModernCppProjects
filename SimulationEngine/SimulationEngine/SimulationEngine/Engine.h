@@ -10,12 +10,18 @@ class Integrator;
 class ForceField;
 class Fix;
 class Neighbor;
+class Type;
 
 
 class Engine {
 public:
 	enum class Run_Status {SILENT,VERBOSE};
-	enum class ItemType { BOX, PARTICLES };
+	enum class ItemType { BOX,
+		                  PARTICLES,
+	                      INTEGRATOR,
+	                      FORCEFIELD,
+	                      FIX,
+	                      NEIGHBOR};
 
 	// constructor with prebuilt types
 	Engine(std::unique_ptr<Box>& box_,
@@ -27,6 +33,7 @@ public:
 	// put the destructor in the cpp file since
 	// it needs the definition of the Box, Particles, Integrator, etc
 	~Engine();
+	void registerItem(std::unique_ptr<Type>&& type_);
 	void resetBox(std::unique_ptr<Box>& box_);
 	void resetParticles(std::unique_ptr<Particles> particles_);
 	void registerBox(std::unique_ptr<Box>& box_);

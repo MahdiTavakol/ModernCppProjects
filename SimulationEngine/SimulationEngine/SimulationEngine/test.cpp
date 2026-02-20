@@ -42,8 +42,8 @@ TEST_CASE("Starting and registering each class of the Engine class with minimal 
 	box->getDimensions(rMin1, rMax1);
 	particles->getNmaxNlocal(rNmax1, rNlocal1);
 	// adding these to the engine
-	mockedEngine.registerBox(box);
-	mockedEngine.registerParticles(particles);
+	mockedEngine.registerItem(std::move(box));
+	mockedEngine.registerItem(std::move(particles));
 	// parameters afer registering into the engine
 	const unique_ptr<Box>& boxE = mockedEngine.getBox();
 	const unique_ptr<Particles>& particlesE = mockedEngine.getParticles();
@@ -631,7 +631,7 @@ TEST_CASE("Testing the silent and verbose version of the engine") {
 		// particles
 		auto particles = make_unique<Particles>(mockedEngine, nmax);
 		// Integrator
-		unique_ptr<Integrator> integrator = make_unique<SemiIntegrator>(mockedEngine);;
+		unique_ptr<Integrator> integrator = make_unique<SemiIntegrator>(mockedEngine);
 		// adding these to the engine
 		mockedEngine.registerBox(box);
 		mockedEngine.registerParticles(particles);
@@ -676,17 +676,22 @@ TEST_CASE("Testing the neighbor list construction and updating") {
 	array<double, 3> max = { 100000.0,100000.0,100000.0 };
 	// neighbor cutoff
 	double neighbor_cutoff = 90.0;
+	//
+	Engine::Run_Status run_status = Engine::Run_Status::SILENT;
 	// the mocked Engine object
-	Engine mockedEngine;
+	Engine mockedEngine(run_status);
 	// box 
 	auto box = make_unique<Box>(mockedEngine, min, max);
 	// particles
 	auto particles = make_unique<Particles>(mockedEngine, nmax);
+	// Integrator
+	unique_ptr<Integrator> integrator = make_unique<SemiIntegrator>(mockedEngine);
 	// neighbor list
 	unique_ptr<Neighbor> neighbor = make_unique<SimpleNeighbor>(mockedEngine, neighbor_cutoff);
 	// adding these to the engine
 	mockedEngine.registerBox(box);
 	mockedEngine.registerParticles(particles);
+	mockedEngine.registerIntegrator(integrator);
 	mockedEngine.registerNeighbor(neighbor);
 
 	// getting a reference to particles
@@ -735,13 +740,18 @@ TEST_CASE("Testing the neighbor list construction and updating") {
 	run->start(nSteps);
 	// getting the neighbor list
 	auto& neighborPtr = mockedEngine.getNeighbor();
-	int nNeigh, * neighList, * firstNeigh, * numNeigh;
+	int nNeigh = 0;
+	int* neighList = nullptr, * firstNeigh = nullptr, * numNeigh = nullptr;
 	neighborPtr->getNeighborList(nNeigh, neighList,  firstNeigh, numNeigh);
 	// comparing the results
 	for (int i = 0;i < nNeigh; i++) {
+		 std::cout << std::endl;
 		int particleId = i + 1;
 		std::vector<int> expectedNeighbors = expectedNeighborList[particleId];
 		std::vector<int> actualNeighbors(neighList + firstNeigh[i], neighList + firstNeigh[i] + numNeigh[i]);
+		for (int& neighborId : actualNeighbors) {
+			neighborId += 1; // converting from 0-based to 1-based indexing
+		}
 		REQUIRE_THAT(actualNeighbors, Catch::Matchers::UnorderedEquals(expectedNeighbors));
 	}
 }
