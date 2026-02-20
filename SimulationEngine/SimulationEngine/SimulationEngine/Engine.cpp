@@ -44,6 +44,9 @@ void Engine::resetParticles(unique_ptr<Particles> particles_) {
 }
 void Engine::registerItem(std::unique_ptr<Type>&& type_) {
 
+	// A new get item type function should be added.
+	// Also  getter and setter functions should be made
+	// from the same template to avoid the code repetition.
 	if (auto boxPtr = dynamic_cast<Box*>(type_.get())) {
 		box.reset(boxPtr);
 	}

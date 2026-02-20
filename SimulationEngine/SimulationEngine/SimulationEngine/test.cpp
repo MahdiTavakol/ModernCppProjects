@@ -45,7 +45,8 @@ TEST_CASE("Starting and registering each class of the Engine class with minimal 
 	mockedEngine.registerItem(std::move(box));
 	mockedEngine.registerItem(std::move(particles));
 	// parameters afer registering into the engine
-	const unique_ptr<Box>& boxE = mockedEngine.getBox();
+	const unique_ptr<Box> boxE;
+	mockedEngine.getItem(boxE);
 	const unique_ptr<Particles>& particlesE = mockedEngine.getParticles();
 	boxE->getDimensions(rMin2, rMax2);
 	particlesE->getNmaxNlocal(rNmax2, rNlocal2);

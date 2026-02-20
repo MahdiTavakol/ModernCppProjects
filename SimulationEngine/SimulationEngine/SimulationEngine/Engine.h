@@ -51,6 +51,7 @@ public:
 	std::unique_ptr<Fix>& returnFixById(std::string id_);
 	const Run_Status& getStatus() const;
 	std::unique_ptr<Neighbor>& getNeighbor();
+	std::unique_ptr<Type>& getItem(ItemType type_);
 
 private:
 	Run_Status run_status = Run_Status::SILENT;
