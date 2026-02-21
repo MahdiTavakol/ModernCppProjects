@@ -58,7 +58,7 @@ EngineFactory::EngineFactory(std::vector<std::string> args) :
 	run = std::make_unique<Run>(*engine);
 }
 
-Engine&& EngineFactory::returnEngine() {
+std::unique_ptr<Engine> EngineFactory::returnEngine() {
 	for (const auto& command : args) {
 		this->parseCommand(command);
 	}
@@ -75,7 +75,7 @@ Engine&& EngineFactory::returnEngine() {
 	engine->setItem(std::move(run));
 	engine->getFixList() = std::move(fixList);
 
-	return std::move(*engine);
+	return std::move(engine);
 }
 
 void EngineFactory::parseCommand(const std::string& command) {

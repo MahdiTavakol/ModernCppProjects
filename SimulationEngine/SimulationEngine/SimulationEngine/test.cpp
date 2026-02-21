@@ -686,6 +686,7 @@ TEST_CASE("Testing the silent and verbose version of the engine") {
 	}
 }
 
+
 TEST_CASE("Testing the neighbor list construction and updating") {
 	std::cout << "Testing the neighbor list construction and updating" << std::endl;
 	std::cout << std::string(80, '=') << std::endl;
@@ -711,8 +712,6 @@ TEST_CASE("Testing the neighbor list construction and updating") {
 		"particle 10 -86.0 32.0 85.0 0.0 0.0 0.0 0.0 0.0 0.0 5.0",
 		"integrator semi 1",
 		"error screen",
-		"fix print 1 1 init_integrate x 0",
-		"fix print 2 1 init_integrate v 0",
 		neighbor_command,
 		"run_status silent",
 	 	run_command
@@ -721,14 +720,10 @@ TEST_CASE("Testing the neighbor list construction and updating") {
 	EngineFactory factory(commands);
 	// building the engine using the factory
 	auto engine = factory.returnEngine();
-	auto& integrator = engine.getIntegrator();
-	if (integrator == nullptr) {
-		std::cout << "Error: dfdsgsfg set up correctly" << std::endl;
-		return;
-	}
+	auto& run = engine->getRunCommand();
 	// running the engine
-	engine.setupSim();
-	engine.runSim();
+	engine->setupSim();
+	engine->runSim();
 	// expected neighbor list
 	std::map<int, std::vector<int>> expectedNeighborList = {
 	{ 1, { 2, 8 } },
@@ -741,11 +736,10 @@ TEST_CASE("Testing the neighbor list construction and updating") {
 	{ 8, {1} },
 	{ 10,{3} } };
 	// getting the neighbor list
-	auto& neighborPtr = engine.getNeighbor();
+	auto& neighborPtr = engine->getNeighbor();
 	int nNeigh = 0;
 	int* neighList = nullptr, * firstNeigh = nullptr, * numNeigh = nullptr;
 	neighborPtr->getNeighborList(nNeigh, neighList,  firstNeigh, numNeigh);
-	std::cout << "here" << std::endl;
  	// comparing the results
 	for (int i = 0;i < nNeigh; i++) {
 		 std::cout << std::endl;
@@ -841,7 +835,7 @@ TEST_CASE("Testing the engine factory class to build the engine from commands") 
 	// checking if the engine was built successfully
 	
 	// 1 - checking the box dimensions
-	auto& boxRef = engine.getBox();
+	auto& boxRef = engine->getBox();
 	REQUIRE(boxRef);
 	std::array<double, 3> expectedMin = { 0.0,0.0,0.0 };
 	std::array<double, 3> expectedMax = { 100000.0,100000.0,100000.0 };
@@ -852,14 +846,14 @@ TEST_CASE("Testing the engine factory class to build the engine from commands") 
 		REQUIRE_THAT(expectedMax[i], Catch::Matchers::WithinAbs(actualMax[i], 1e-6));
 	}
 	// 2 - checking the max particles
-	auto& particlesRef = engine.getParticles();
+	auto& particlesRef = engine->getParticles();
 	REQUIRE(particlesRef);
 	int nmax, nlocal;
 	particlesRef->getNmaxNlocal(nmax, nlocal);
 	REQUIRE(nmax == 10);
 
 	// 3 - checking the integrator type
-	Integrator* integratorRaw = engine.getIntegrator().get();
+	Integrator* integratorRaw = engine->getIntegrator().get();
 	REQUIRE(integratorRaw);
 	if (auto semiIntegratorPtr = dynamic_cast<SemiIntegrator*>(integratorRaw)) {
 		SUCCEED("The integrator is of type SemiIntegrator");
@@ -869,7 +863,7 @@ TEST_CASE("Testing the engine factory class to build the engine from commands") 
 	}
 
 	// 4 - checking the error streams
-	auto& errorRef = engine.getError();
+	auto& errorRef = engine->getError();
 	REQUIRE(errorRef);
 	auto& errorStreams = errorRef->getStreams();
 	REQUIRE(errorStreams.size() == 1);
@@ -881,8 +875,8 @@ TEST_CASE("Testing the engine factory class to build the engine from commands") 
 	}
 
 	// 5 - checking the fix prints
-	auto& fix1Ref = engine.returnFixById("1");
-	auto& fix2Ref = engine.returnFixById("2");
+	auto& fix1Ref = engine->returnFixById("1");
+	auto& fix2Ref = engine->returnFixById("2");
 	REQUIRE(fix1Ref);
 	REQUIRE(fix2Ref);
 	if (auto fixPtr = dynamic_cast<FixPrint*>(fix1Ref.get())
@@ -894,7 +888,7 @@ TEST_CASE("Testing the engine factory class to build the engine from commands") 
 	}
 
 	// 6 - checking the force field
-	auto& forcefield = engine.getForceField();
+	auto& forcefield = engine->getForceField();
 	REQUIRE(forcefield);
 	if (auto springFieldPtr = dynamic_cast<SpringField*>(forcefield.get())) {
 		SUCCEED("The force field is of type SpringField");
@@ -904,7 +898,7 @@ TEST_CASE("Testing the engine factory class to build the engine from commands") 
 	}
 
 	// 7 - checking the neighbor
-	auto& neighbor = engine.getNeighbor();
+	auto& neighbor = engine->getNeighbor();
 	REQUIRE(neighbor);
 	double expectedCutoff = 90.0;
 	double actualCutoff = neighbor->getCutoff();
@@ -917,11 +911,11 @@ TEST_CASE("Testing the engine factory class to build the engine from commands") 
 	}
 
 	// 8 - checking the run status
-	auto& runStatus = engine.getStatus();
+	auto& runStatus = engine->getStatus();
 	REQUIRE(runStatus == Engine::Run_Status::VERBOSE);
 
 	// 9 - checking the run command
-	auto& runCommand = engine.getRunCommand();
+	auto& runCommand = engine->getRunCommand();
 	REQUIRE(runCommand);
 	int expectedSteps = 100;
 	int actualSteps = runCommand->getSteps();
@@ -943,7 +937,7 @@ TEST_CASE("Testing the engine factory class to build the engine from commands") 
 	{ 0.0,0.0,0.0 },
 	{ 0.0,0.0,0.0 }
 	};
-	auto& particlesForUpdate = engine.getParticlesForUpdate();
+	auto& particlesForUpdate = engine->getParticlesForUpdate();
 	for (int i = 0; i < 3; i++) {
 		std::array<double, 3> actualX, actualV, actualF;
 		double actualM;

@@ -9,7 +9,7 @@ constexpr int maxCommandTypes = 20;
 class EngineFactory {
 public:
 	EngineFactory(std::vector<std::string> args);
-	Engine&& returnEngine();
+	std::unique_ptr<Engine> returnEngine();
 
 	// Classes with multiple inheritance levels
 	// they finally will have their own factory class
