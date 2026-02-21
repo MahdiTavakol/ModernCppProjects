@@ -5,6 +5,7 @@
 #include "Neighbor.h"
 #include "Box.h"
 #include "Fix.h"
+#include "Error.h"
 
 
 #include <utility>
@@ -20,7 +21,8 @@ Engine::Engine(unique_ptr<Box>& box_,
 	box{ std::move(box_) },
 	particles{ std::move(particles_) },
 	forcefield{ std::make_unique<ForceField>(*this)},
-	neighbor{ std::make_unique<Neighbor>(*this,0.0)}
+	neighbor{ std::make_unique<Neighbor>(*this,0.0)},
+	error{std::make_unique<Error>(*this)}
 {}
 
 Engine::Engine() : 
@@ -36,49 +38,54 @@ Engine::Engine(Run_Status& run_status_) :
 
 Engine::~Engine() = default;
 
-void Engine::setItem(std::unique_ptr<Type>&& type_) {
-	ItemType iType = detectType(type_);
+void Engine::setItem(std::unique_ptr<Ref>&& Ref_) {
+	ItemRef iRef = detectRef(Ref_);
 
-	switch (iType) {
-		case ItemType::BOX:
-			box.reset(dynamic_cast<Box*>(type_.release()));
+	switch (iRef) {
+		case ItemRef::BOX:
+			box.reset(dynamic_cast<Box*>(Ref_.release()));
 			break;
-		case ItemType::PARTICLES:
-			particles.reset(dynamic_cast<Particles*>(type_.release()));
+		case ItemRef::PARTICLES:
+			particles.reset(dynamic_cast<Particles*>(Ref_.release()));
 			break;
-		case ItemType::INTEGRATOR:
-			integrator.reset(dynamic_cast<Integrator*>(type_.release()));
+		case ItemRef::INTEGRATOR:
+			integrator.reset(dynamic_cast<Integrator*>(Ref_.release()));
 			break;
-		case ItemType::FORCEFIELD:
-			forcefield.reset(dynamic_cast<ForceField*>(type_.release()));
+		case ItemRef::FORCEFIELD:
+			forcefield.reset(dynamic_cast<ForceField*>(Ref_.release()));
 			break;
-		case ItemType::FIX:
-			fixList.push_back(std::unique_ptr<Fix>(dynamic_cast<Fix*>(type_.release())));
+		case ItemRef::FIX:
+			fixList.push_back(std::unique_ptr<Fix>(dynamic_cast<Fix*>(Ref_.release())));
 			break;
-		case ItemType::NEIGHBOR:
-			neighbor.reset(dynamic_cast<Neighbor*>(type_.release()));
+		case ItemRef::NEIGHBOR:
+			neighbor.reset(dynamic_cast<Neighbor*>(Ref_.release()));
+			break;
+		case ItemRef::ERROR:
+			error.reset(dynamic_cast<Error*>(Ref_.release()));
 			break;
 		default:
-			throw std::invalid_argument("The type is not recognized!");
+			throw std::invalid_argument("The Ref is not recognized!");
 	}	
 }
 
-Type* Engine::getItem(ItemType type_) {
-	switch (type_) {
-		case ItemType::BOX:
+Ref* Engine::getItem(ItemRef Ref_) {
+	switch (Ref_) {
+		case ItemRef::BOX:
 			return box.get();
-		case ItemType::PARTICLES:
+		case ItemRef::PARTICLES:
 			return particles.get();
-		case ItemType::INTEGRATOR:
+		case ItemRef::INTEGRATOR:
 			return integrator.get();
-		case ItemType::FORCEFIELD:
+		case ItemRef::FORCEFIELD:
 			return forcefield.get();
-		case ItemType::FIX:
+		case ItemRef::FIX:
 			throw std::invalid_argument("There can be multiple fixes, please use getFixList() to get the list of fixes!");
-		case ItemType::NEIGHBOR:
+		case ItemRef::NEIGHBOR:
 			return neighbor.get();
+		case ItemRef::ERROR:
+			return error.get();
 		default:
-			throw std::invalid_argument("The type is not recognized!");
+			throw std::invalid_argument("The Ref is not recognized!");
 	}
 }
 const unique_ptr<Box>& Engine::getBox() const {
@@ -116,26 +123,33 @@ std::unique_ptr<Neighbor>& Engine::getNeighbor() {
 	return neighbor;
 }
 
-Engine::ItemType Engine::detectType(const std::unique_ptr<Type>& type_)
+std::unique_ptr<Error>& Engine::getError() {
+	return error;
+}
+
+Engine::ItemRef Engine::detectRef(const std::unique_ptr<Ref>& Ref_)
 {
-	if (auto boxPtr = dynamic_cast<Box*>(type_.get())) {
-		return ItemType::BOX;
+	if (auto boxPtr = dynamic_cast<Box*>(Ref_.get())) {
+		return ItemRef::BOX;
 	}
-	else if (auto intPtr = dynamic_cast<Integrator*>(type_.get())) {
-		return ItemType::INTEGRATOR;
+	else if (auto intPtr = dynamic_cast<Integrator*>(Ref_.get())) {
+		return ItemRef::INTEGRATOR;
 	}
-	else if (auto frcPtr = dynamic_cast<ForceField*>(type_.get())) {
-		return ItemType::FORCEFIELD;
+	else if (auto frcPtr = dynamic_cast<ForceField*>(Ref_.get())) {
+		return ItemRef::FORCEFIELD;
 	}
-	else if (auto fixPtr = dynamic_cast<Fix*>(type_.get())) {
-		return ItemType::FIX;
+	else if (auto fixPtr = dynamic_cast<Fix*>(Ref_.get())) {
+		return ItemRef::FIX;
 	}
-	else if (auto prtPtr = dynamic_cast<Particles*>(type_.get())) {
-		return ItemType::PARTICLES;
+	else if (auto prtPtr = dynamic_cast<Particles*>(Ref_.get())) {
+		return ItemRef::PARTICLES;
 	}
-	else if (auto nbrPtr = dynamic_cast<Neighbor*>(type_.get())) {
-		return ItemType::NEIGHBOR;
+	else if (auto nbrPtr = dynamic_cast<Neighbor*>(Ref_.get())) {
+		return ItemRef::NEIGHBOR;
+	}
+	else if (auto errPtr = dynamic_cast<Error*>(Ref_.get())) {
+		return ItemRef::ERROR;
 	}
 	else
-		throw std::invalid_argument("The type is not recognized!");
+		throw std::invalid_argument("The Ref is not recognized!");
 }

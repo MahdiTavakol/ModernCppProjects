@@ -1,13 +1,13 @@
 #pragma once
 
-#include "Type.h"
+#include "Ref.h"
 #include "Engine.h"
 #include <array>
 
-class ForceField: public Type {
+class ForceField: public Ref {
 public:
 	ForceField(Engine& engine_) :
-		Type{ engine_,"1" }
+		Ref{ engine_,"1" }
 	{}
 	void init();
 	void update();

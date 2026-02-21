@@ -1,13 +1,13 @@
 #pragma once
 
 #include "Engine.h"
-#include "Type.h"
+#include "Ref.h"
 
 #include <vector>
 #include <array>
 
 
-class Particles : public Type {
+class Particles : public Ref {
 public:
 	Particles(Engine& engine_, int nmax_);
 	void addParticle(std::array<double, 3> newX_,

@@ -1,7 +1,7 @@
 #include "Particles.h"
 
 Particles::Particles(Engine& engine_, int nmax_) :
-	Type{ engine_,"Particles-1" },
+	Ref{ engine_,"Particles-1" },
 	nmax{ nmax_ }
 {
 	x.reserve(3 * nmax);

@@ -19,6 +19,7 @@
 #include "FixPrint.h"
 #include "Box.h"
 #include "Run.h"
+#include "Error.h"
 
 using std::vector, std::array;
 using std::make_unique, std::unique_ptr;
@@ -26,6 +27,8 @@ using std::make_unique, std::unique_ptr;
 
 TEST_CASE("Starting and registering each class of the Engine class with minimal input args")
 {
+	std::cout << "Testing the starting and registering of each class of the Engine class with minimal input args" << std::endl;
+	std::cout << std::string(80, '=') << std::endl;
 	// constant variables
 	int nmax = 10;
 	array<double, 3> min = { 0.0,0.0,0.0 };
@@ -45,7 +48,7 @@ TEST_CASE("Starting and registering each class of the Engine class with minimal 
 	mockedEngine.setItem(std::move(box));
 	mockedEngine.setItem(std::move(particles));
 	// parameters afer registering into the engine
-	Type* boxPtrBase = mockedEngine.getItem(Engine::ItemType::BOX);
+	Ref* boxPtrBase = mockedEngine.getItem(Engine::ItemRef::BOX);
 	auto boxPtr = dynamic_cast<Box*>(boxPtrBase);
 	const unique_ptr<Particles>& particlesE = mockedEngine.getParticles();
 	boxPtr->getDimensions(rMin2, rMax2);
@@ -60,6 +63,8 @@ TEST_CASE("Starting and registering each class of the Engine class with minimal 
 
 TEST_CASE("Testing the Euler integration in 100 steps for 3 particles under constant velocity condition")
 {
+	std::cout << "Testing the Euler integration in 100 steps for 3 particles under constant velocity condition" << std::endl;
+	std::cout << std::string(80, '=') << std::endl;
 	constexpr int nSteps = 100;
 	// constant variables
 	int nmax = 10;
@@ -142,6 +147,8 @@ TEST_CASE("Testing the Euler integration in 100 steps for 3 particles under cons
 
 TEST_CASE("Testing the Euler integration in 100 steps for 3 particles under constant acceleration condition")
 {
+	std::cout << "Testing the Euler integration in 100 steps for 3 particles under constant acceleration condition" << std::endl;
+	std::cout << std::string(80, '=') << std::endl;
 	constexpr int nSteps = 100;
 	// constant variables
 	int nmax = 10;
@@ -225,6 +232,8 @@ TEST_CASE("Testing the Euler integration in 100 steps for 3 particles under cons
 
 TEST_CASE("Testing the Semi-Euler integration in 100 steps for 3 particles under constant velocity condition")
 {
+	std::cout << "Testing the Semi-Euler integration in 100 steps for 3 particles under constant velocity condition" << std::endl;
+	std::cout << std::string(80, '=') << std::endl;
 	constexpr int nSteps = 100;
 	// constant variables
 	int nmax = 10;
@@ -307,6 +316,8 @@ TEST_CASE("Testing the Semi-Euler integration in 100 steps for 3 particles under
 
 TEST_CASE("Testing the Semi-Euler integration in 100 steps for 3 particles under constant acceleration condition")
 {
+	std::cout << "Testing the Semi-Euler integration in 100 steps for 3 particles under constant acceleration condition" << std::endl;
+	std::cout << std::string(80, '=') << std::endl;
 	constexpr int nSteps = 100;
 	// constant variables
 	int nmax = 10;
@@ -388,6 +399,8 @@ TEST_CASE("Testing the Semi-Euler integration in 100 steps for 3 particles under
 }
 
 TEST_CASE("Testing fixes invoked at initial_integrate and final_integrate steps") {
+	std::cout << "Testing fixes invoked at initial_integrate and final_integrate steps" << std::endl;
+	std::cout << std::string(80, '=') << std::endl;
 	constexpr int nSteps = 5;
 	// constant variables
 	int nmax = 10;
@@ -480,7 +493,7 @@ TEST_CASE("Testing fixes invoked at initial_integrate and final_integrate steps"
 	FixPrint* const fixPrintPtr4 = dynamic_cast<FixPrint*>(fix4ref.get());
 	FixPrint* const fixPrintPtr5 = dynamic_cast<FixPrint*>(fix5ref.get());
 	FixPrint* const fixPrintPtr6 = dynamic_cast<FixPrint*>(fix6ref.get());
-	// checking the type of the Fix
+	// checking the Ref of the Fix
 	if (fixPrintPtr1 == nullptr ||
 		fixPrintPtr2 == nullptr ||
 		fixPrintPtr3 == nullptr ||
@@ -511,6 +524,8 @@ TEST_CASE("Testing fixes invoked at initial_integrate and final_integrate steps"
 
 
 TEST_CASE("Calculating the force from the forcefield equation") {
+	std::cout << "Testing the calculation of the force from the forcefield equation" << std::endl;
+	std::cout << std::string(80, '=') << std::endl;
 	// number of steps
 	constexpr int nSteps = 5;
 	// constant variables
@@ -572,7 +587,7 @@ TEST_CASE("Calculating the force from the forcefield equation") {
 	// casting the fixPrint
 	FixPrint* const fixPrintPtr1 = dynamic_cast<FixPrint*>(fix1ref.get());
 	FixPrint* const fixPrintPtr2 = dynamic_cast<FixPrint*>(fix2ref.get());
-	// checking the type of the Fix
+	// checking the Ref of the Fix
 	if (fixPrintPtr1 == nullptr ||
 		fixPrintPtr2 == nullptr)
 		std::cout << "Error " << std::endl;
@@ -606,6 +621,8 @@ TEST_CASE("Calculating the force from the forcefield equation") {
 }
 
 TEST_CASE("Testing the silent and verbose version of the engine") {
+	std::cout << "Testing the silent and verbose version of the engine" << std::endl;
+	std::cout << std::string(80, '=') << std::endl;
 	// run_status
 	struct {
 		std::string messages;
@@ -669,6 +686,8 @@ TEST_CASE("Testing the silent and verbose version of the engine") {
 }
 
 TEST_CASE("Testing the neighbor list construction and updating") {
+	std::cout << "Testing the neighbor list construction and updating" << std::endl;
+	std::cout << std::string(80, '=') << std::endl;
 	constexpr int nSteps = 5;
 	// constant variables
 	int nmax = 10;
@@ -759,6 +778,8 @@ TEST_CASE("Testing the neighbor list construction and updating") {
 
 TEST_CASE("Testing various error and warning messages")
 {
+	std::cout << "Testing various error and warning messages" << std::endl;
+	std::cout << std::string(80, '=') << std::endl;
 	// constant variables
 	int nmax = 10;
 	array<double, 3> min = { 0.0,0.0,0.0 };
@@ -791,9 +812,13 @@ TEST_CASE("Testing various error and warning messages")
 	errorRef->warning("Warning message 3");
 	// checking the outputs
 	std::cout << "The ostringstreams contain:" << std::endl;
-	auto& errorStreams = errorRef->getErrorStreams();
-	for (auto& stream : errorStreams) {
-		std::cout << stream.str() << std::endl;
+	auto& errorStreamsRef = errorRef->getStreams();
+	for (auto& stream : errorStreamsRef) {
+		if (auto ostringstreamPtr = dynamic_cast<std::ostringstream*>(&(stream.get()))) {
+			std::cout << ostringstreamPtr->str() << std::endl;
+		}
+		else
+			std::cout << "Error: Stream is not an ostringstream" << std::endl;
 	}
 	
 	std::vector<std::reference_wrapper<std::ostream>> newErrorStreams = {

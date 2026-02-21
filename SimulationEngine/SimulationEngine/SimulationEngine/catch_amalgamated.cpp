@@ -6453,7 +6453,7 @@ namespace Catch {
 
 #include <ostream>
 #include <cstring>
-#include <cctype>
+#include <ccType>
 #include <vector>
 
 namespace Catch {

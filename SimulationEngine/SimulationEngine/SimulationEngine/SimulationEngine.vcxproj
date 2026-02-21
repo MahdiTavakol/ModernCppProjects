@@ -143,7 +143,7 @@
     <ClCompile Include="SimpleNeighbor.cpp" />
     <ClCompile Include="SpringField.cpp" />
     <ClCompile Include="test.cpp" />
-    <ClCompile Include="Type.cpp" />
+    <ClCompile Include="Ref.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Box.h" />
@@ -160,7 +160,7 @@
     <ClInclude Include="SemiIntegrator.h" />
     <ClInclude Include="SimpleNeighbor.h" />
     <ClInclude Include="SpringField.h" />
-    <ClInclude Include="Type.h" />
+    <ClInclude Include="Ref.h" />
     <ClInclude Include="Error.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

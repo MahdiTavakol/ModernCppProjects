@@ -1,15 +1,15 @@
 #pragma once
 
-#include "Type.h"
+#include "Ref.h"
 #include "Engine.h"
 
-class Integrator : public Type {
+class Integrator : public Ref {
 public:
 	Integrator(Engine& engine_) :
-		Type{ engine_,"1" }
+		Ref{ engine_,"1" }
 	{}
 	Integrator(Engine& engine_, double dt_) :
-		Type{ engine_,"1" },
+		Ref{ engine_,"1" },
 		dt{ dt_ }
 	{}
 	void setDt(double dt_) { dt = dt_; }

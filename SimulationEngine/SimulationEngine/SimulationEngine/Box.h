@@ -1,15 +1,15 @@
 #pragma once
 #include <array>
 
-#include "Type.h"
+#include "Ref.h"
 
 
-class Box : public Type {
+class Box : public Ref {
 public:
 	Box(Engine& engine_,
 		const std::array<double, 3>& min_,
 		const std::array<double, 3>& max_) :
-		Type{ engine_, "Box-1" },
+		Ref{ engine_, "Box-1" },
 		min{ min_ }, max{ max_ }
 	{
 	}

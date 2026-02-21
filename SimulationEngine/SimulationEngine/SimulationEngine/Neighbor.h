@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Type.h"
+#include "Ref.h"
 #include "Engine.h"
 
-class Neighbor : public Type {
+class Neighbor : public Ref {
 public:
 	Neighbor(Engine& engine_, double neighbor_cutoff_) :
-		Type{ engine_,"1" },
+		Ref{ engine_,"1" },
 		nNeigh{ 0 },
 		neighbor_cutoff{ neighbor_cutoff_ }
 	{}

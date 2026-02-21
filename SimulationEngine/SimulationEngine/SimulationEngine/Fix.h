@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Type.h"
+#include "Ref.h"
 #include "Engine.h"
 
 enum FixMask {
@@ -10,13 +10,13 @@ enum FixMask {
 	FINAL_INTEGRATE = 1 << 4
 };
 
-class Fix : public Type
+class Fix : public Ref
 {
 public:
 	Fix(Engine& engine_,
 		std::string id_,
 		int nevery_ = 1) :
-		Type{ engine_, id_},
+		Ref{ engine_, id_},
 		nevery{nevery_}
 	{}
 	virtual ~Fix() {}
