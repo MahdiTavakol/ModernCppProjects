@@ -1,6 +1,19 @@
 #include "Neighbor.h"
 #include "Particles.h"
 
+
+Neighbor::Neighbor(Engine& engine_) :
+	Ref{ engine_,"1" },
+	nNeigh{ 0 },
+	neighbor_cutoff{ 0.0 }
+{}
+
+Neighbor::Neighbor(Engine& engine_, double neighbor_cutoff_) :
+	Ref{ engine_,"1" },
+	nNeigh{ 0 },
+	neighbor_cutoff{ neighbor_cutoff_ }
+{}
+
 void Neighbor::init() {
 	auto& particles = engine().getParticles();
 	int nmax, nlocal;

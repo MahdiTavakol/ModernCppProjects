@@ -12,19 +12,21 @@ class Error;
 class Fix;
 class Neighbor;
 class Ref;
+class Run;
 
 
 class Engine {
 public:
 	enum class Run_Status {SILENT,VERBOSE};
-	enum class ItemRef { UNKNOWN,
+	enum class ItemRef {  UNKNOWN,
 		                  BOX,
 		                  PARTICLES,
 	                      INTEGRATOR,
 	                      FORCEFIELD,
 	                      FIX,
 	                      NEIGHBOR,
-	                      ERROR};
+	                      ERROR,
+	                      RUN};
 
 	// constructor with prebuilt Refs
 	Engine(std::unique_ptr<Box>& box_,
@@ -34,14 +36,18 @@ public:
 	// Since the engine is a resource manager we need to remove the copy constructor and copy assignment operator
 	Engine(const Engine&) = delete;
 	Engine& operator=(const Engine&) = delete;
-	// we do not need the move constructor and move assignment operator for now, but we can add them later if needed
-	Engine(Engine&&) = delete;
-	Engine& operator=(Engine&&) = delete;
+	// here we just have unique_ptr and vector which are movable so we can
+	// just use the default move constructor and move assignment operator
+	Engine(Engine&&) noexcept = default;
+	Engine& operator=(Engine&&) noexcept = default;
 	// passing the run_status as an argument
 	Engine(Run_Status& run_status_);
 	// put the destructor in the cpp file since
 	// it needs the definition of the Box, Particles, Integrator, etc
 	~Engine();
+
+
+
 	// setting items into the engine, the Ref of the item will be detected by the engine and put into the right place
 	void setItem(std::unique_ptr<Ref>&& Ref_);
 	// getting the item by the Ref, the return Ref is Ref* and needs to be casted to the right Ref by the user
@@ -57,7 +63,9 @@ public:
 	std::unique_ptr<Neighbor>& getNeighbor();
 	std::unique_ptr<Error>& getError();
 	// getting the run status of the engine
+	void setStatus(const std::string newStatus_);
 	const Run_Status& getStatus() const;
+	std::unique_ptr<Run>& getRunCommand();
 
 private:
 	Run_Status run_status = Run_Status::SILENT;
@@ -72,8 +80,7 @@ private:
 	std::unique_ptr<Neighbor> neighbor;
 	std::vector<std::unique_ptr<Fix>> fixList;
 	std::unique_ptr<Error> error;
+	std::unique_ptr<Run> run;
 	int nmax;
 
-	// a helper function to detect the Ref of the input unique_ptr<Ref> 
-	static ItemRef detectRef(const std::unique_ptr<Ref>& Ref_);
 };

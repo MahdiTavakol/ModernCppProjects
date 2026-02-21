@@ -1,6 +1,32 @@
 #include "Run.h"
 #include "Integrator.h"
+#include "Error.h"
+#include "Engine.h"
 #include <iostream>
+
+Run::Run(Engine& engine_) :
+	Ref{ engine_,"1" },
+	dt{ 1.0 }
+{
+}
+
+Run::Run(Engine& engine_, std::vector<std::string>& args_) :
+	Ref{ engine_,"1" },
+	dt{1.0}
+{
+	int nargs = args_.size();
+	if (nargs < 2) {
+		engine().getError()->one("Not enough arguments for run command! Expected at least 2, got " + std::to_string(nargs));
+		nSteps = 0;
+		return;
+	}
+	nSteps = std::stoi(args_[1]);
+}
+
+Run::Run(Engine& engine_, double dt_) :
+	Ref{ engine_,"1" },
+	dt{ 1.0 }
+{}
 
 void Run::setup() {
 	auto& integrator = engine().getIntegrator();
@@ -28,4 +54,8 @@ void Run::start(int nSteps_, int timestep_ ) {
 		integrator->post_force();
 		integrator->final_integrate();
 	}
+}
+
+int Run::getSteps() {
+	return nSteps;
 }

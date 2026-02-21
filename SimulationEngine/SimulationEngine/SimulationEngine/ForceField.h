@@ -6,9 +6,7 @@
 
 class ForceField: public Ref {
 public:
-	ForceField(Engine& engine_) :
-		Ref{ engine_,"1" }
-	{}
+	ForceField(Engine& engine_);
 	void init();
 	void update();
 

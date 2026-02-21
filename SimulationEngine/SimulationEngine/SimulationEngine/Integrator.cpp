@@ -46,7 +46,6 @@ void Integrator::pre_force() {
 }
 
 void Integrator::force() {
-	int nmax, nlocal;
  	auto& forcefield = engine().getForceField();
 	forcefield->update();
 }

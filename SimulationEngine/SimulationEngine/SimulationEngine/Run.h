@@ -5,19 +5,15 @@
 
 class Run : public Ref {
 public:
-	Run(Engine& engine_) :
-		Ref{ engine_,"1" },
-		dt{ 1.0 }
-	{}
-	Run(Engine& engine_, double dt_) :
-		Ref{ engine_,"1" },
-		dt{ 1.0 }
-	{}
+	Run(Engine& engine_);
+	Run(Engine& engine_, std::vector<std::string>& args_);
+	Run(Engine& engine_, double dt_);
 	void setup();
 	void start(int nSteps_, int timestep_ = 0);
+	int getSteps();
 
 private:
 	double dt;
-	int nSteps;
+	int nSteps = 0;
 	int currentStep = 0;
 };

@@ -6,6 +6,7 @@
 #include "Box.h"
 #include "Fix.h"
 #include "Error.h"
+#include "Run.h"
 
 
 #include <utility>
@@ -39,33 +40,40 @@ Engine::Engine(Run_Status& run_status_) :
 Engine::~Engine() = default;
 
 void Engine::setItem(std::unique_ptr<Ref>&& Ref_) {
-	ItemRef iRef = detectRef(Ref_);
-
-	switch (iRef) {
-		case ItemRef::BOX:
-			box.reset(dynamic_cast<Box*>(Ref_.release()));
-			break;
-		case ItemRef::PARTICLES:
-			particles.reset(dynamic_cast<Particles*>(Ref_.release()));
-			break;
-		case ItemRef::INTEGRATOR:
-			integrator.reset(dynamic_cast<Integrator*>(Ref_.release()));
-			break;
-		case ItemRef::FORCEFIELD:
-			forcefield.reset(dynamic_cast<ForceField*>(Ref_.release()));
-			break;
-		case ItemRef::FIX:
-			fixList.push_back(std::unique_ptr<Fix>(dynamic_cast<Fix*>(Ref_.release())));
-			break;
-		case ItemRef::NEIGHBOR:
-			neighbor.reset(dynamic_cast<Neighbor*>(Ref_.release()));
-			break;
-		case ItemRef::ERROR:
-			error.reset(dynamic_cast<Error*>(Ref_.release()));
-			break;
-		default:
-			throw std::invalid_argument("The Ref is not recognized!");
-	}	
+	if (auto boxPtr = dynamic_cast<Box*>(Ref_.get())) {
+		box.reset(dynamic_cast<Box*>(Ref_.release()));
+		return;
+	}
+	else if (auto intPtr = dynamic_cast<Integrator*>(Ref_.get())) {
+		integrator.reset(dynamic_cast<Integrator*>(Ref_.release()));
+		return;
+	}
+	else if (auto frcPtr = dynamic_cast<ForceField*>(Ref_.get())) {
+		forcefield.reset(dynamic_cast<ForceField*>(Ref_.release()));
+		return;
+	}
+	else if (auto fixPtr = dynamic_cast<Fix*>(Ref_.get())) {
+		fixList.push_back(std::unique_ptr<Fix>(dynamic_cast<Fix*>(Ref_.release())));
+		return;
+	}
+	else if (auto prtPtr = dynamic_cast<Particles*>(Ref_.get())) {
+		particles.reset(dynamic_cast<Particles*>(Ref_.release()));
+		return;
+	}
+	else if (auto nbrPtr = dynamic_cast<Neighbor*>(Ref_.get())) {
+		neighbor.reset(dynamic_cast<Neighbor*>(Ref_.release()));
+		return;
+	}
+	else if (auto errPtr = dynamic_cast<Error*>(Ref_.get())) {
+		error.reset(dynamic_cast<Error*>(Ref_.release()));
+		return;
+	}
+	else if (auto runPtr = dynamic_cast<Run*>(Ref_.get())) {
+		run.reset(dynamic_cast<Run*>(Ref_.release()));
+		return;
+	}
+	else
+		throw std::invalid_argument("The Ref is not recognized!");
 }
 
 Ref* Engine::getItem(ItemRef Ref_) {
@@ -84,6 +92,8 @@ Ref* Engine::getItem(ItemRef Ref_) {
 			return neighbor.get();
 		case ItemRef::ERROR:
 			return error.get();
+		case ItemRef::RUN:
+			return run.get();
 		default:
 			throw std::invalid_argument("The Ref is not recognized!");
 	}
@@ -115,6 +125,18 @@ unique_ptr<Fix>& Engine::returnFixById(string id_) {
 	throw std::invalid_argument("The fix was not find!");
 }
 
+void Engine::setStatus(const std::string newStatus_) {
+	if (newStatus_ == "silent") {
+		run_status = Run_Status::SILENT;
+	}
+	else if (newStatus_ == "verbose") {
+		run_status = Run_Status::VERBOSE;
+	}
+	else {
+		throw std::invalid_argument("The run status is not recognized!");
+	}
+}
+
 const Engine::Run_Status& Engine::getStatus() const {
 	return run_status;
 }
@@ -127,29 +149,6 @@ std::unique_ptr<Error>& Engine::getError() {
 	return error;
 }
 
-Engine::ItemRef Engine::detectRef(const std::unique_ptr<Ref>& Ref_)
-{
-	if (auto boxPtr = dynamic_cast<Box*>(Ref_.get())) {
-		return ItemRef::BOX;
-	}
-	else if (auto intPtr = dynamic_cast<Integrator*>(Ref_.get())) {
-		return ItemRef::INTEGRATOR;
-	}
-	else if (auto frcPtr = dynamic_cast<ForceField*>(Ref_.get())) {
-		return ItemRef::FORCEFIELD;
-	}
-	else if (auto fixPtr = dynamic_cast<Fix*>(Ref_.get())) {
-		return ItemRef::FIX;
-	}
-	else if (auto prtPtr = dynamic_cast<Particles*>(Ref_.get())) {
-		return ItemRef::PARTICLES;
-	}
-	else if (auto nbrPtr = dynamic_cast<Neighbor*>(Ref_.get())) {
-		return ItemRef::NEIGHBOR;
-	}
-	else if (auto errPtr = dynamic_cast<Error*>(Ref_.get())) {
-		return ItemRef::ERROR;
-	}
-	else
-		throw std::invalid_argument("The Ref is not recognized!");
+std::unique_ptr<Run>& Engine::getRunCommand() {
+	return run;
 }

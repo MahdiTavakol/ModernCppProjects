@@ -1,4 +1,16 @@
 #include "Particles.h"
+#include "Engine.h"
+#include "Error.h"
+
+Particles::Particles(Engine& engine_) :
+	Ref{ engine_,"Particles-1" },
+	nmax{ 0 }
+{
+	x.reserve(0);
+	v.reserve(0);
+	f.reserve(0);
+	m.reserve(0);
+}
 
 Particles::Particles(Engine& engine_, int nmax_) :
 	Ref{ engine_,"Particles-1" },
@@ -9,6 +21,18 @@ Particles::Particles(Engine& engine_, int nmax_) :
 	f.reserve(3 * nmax);
 	m.reserve(nmax);
 }
+Particles::Particles(Engine& engine_, std::vector<std::string> args_):
+	Ref{ engine_, "Particles-1" }
+{
+	auto nargs = args_.size();
+	if (nargs < 2) {
+		engine().getError()->one("Not enough arguments for particles command! Expected at least 2, got " + std::to_string(nargs));
+		nmax = 0;
+		return;
+	}
+	nmax = std::stoi(args_[1]);
+}
+
 void Particles::addParticle(std::array<double, 3> newX_,
 	std::array<double, 3> newV_ ,
 	std::array<double, 3> newF_ ,

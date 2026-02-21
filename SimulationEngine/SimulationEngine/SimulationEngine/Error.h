@@ -12,6 +12,7 @@ public:
 		std::string id_ = "1");
 	Error(Engine& engine_,
 		std::string id_ = "1");
+	Error(Engine& engine_, std::vector<std::string> args_);
 
 	void one(std::string message);
 	void warning(std::string message);

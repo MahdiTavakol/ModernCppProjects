@@ -8,6 +8,9 @@ class Engine;
 // a class to hold shared items among all the classes
 class Ref {
 public:
+	// since there must be a reference to an engine for each Ref, the default constructor is deleted
+	Ref() = delete;
+	// the constructor of the Ref class takes the reference of the engine and the id of the Ref
 	Ref(Engine& engine_, std::string id_);
 	/* Since there is just one engine,
 	 * we should have special handling for the 

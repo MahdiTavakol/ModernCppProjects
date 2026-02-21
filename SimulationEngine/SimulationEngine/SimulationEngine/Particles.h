@@ -9,7 +9,9 @@
 
 class Particles : public Ref {
 public:
+	Particles(Engine& engine_);
 	Particles(Engine& engine_, int nmax_);
+	Particles(Engine& engine_, std::vector<std::string> args_);
 	void addParticle(std::array<double, 3> newX_,
 		std::array<double, 3> newV_ = { 0.0,0.0,0.0 },
 		std::array<double, 3> newF_ = { 0.0,0.0,0.0 },

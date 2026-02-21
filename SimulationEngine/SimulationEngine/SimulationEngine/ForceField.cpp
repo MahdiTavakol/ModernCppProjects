@@ -2,6 +2,11 @@
 #include "Particles.h"
 #include <iostream>
 
+ForceField::ForceField(Engine& engine_) :
+	Ref{ engine_,"1" }
+{}
+
+
 void ForceField::init() {
 	int nlocal, nmax;
 	return;

@@ -6,18 +6,15 @@
 
 class Box : public Ref {
 public:
+	Box(Engine& engine_);
 	Box(Engine& engine_,
 		const std::array<double, 3>& min_,
-		const std::array<double, 3>& max_) :
-		Ref{ engine_, "Box-1" },
-		min{ min_ }, max{ max_ }
-	{
-	}
+		const std::array<double, 3>& max_);
+	Box(Engine& engine_, std::vector<std::string> args_);
+
 	void getDimensions(std::array<double, 3>& min_,
-		std::array<double, 3>& max_) const {
-		min_ = min;
-		max_ = max;
-	}
+		std::array<double, 3>& max_) const;
+
 private:
 	std::array<double, 3> min, max;
 };
