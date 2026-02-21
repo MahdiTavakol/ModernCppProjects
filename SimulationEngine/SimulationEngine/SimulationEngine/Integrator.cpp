@@ -3,8 +3,31 @@
 #include "Fix.h"
 #include "ForceField.h"
 #include "Neighbor.h"
+#include "Engine.h"
+#include "Error.h"
 
 #include <iostream>
+
+Integrator::Integrator(Engine& engine_,
+	std::vector<std::string> args_) :
+	Ref{ engine_, "1" }
+{
+	auto nargs = args_.size();
+	if (nargs < 3) {
+		engine().getError()->one("Not enough arguments for integrator command! Expected at least 2, got " + std::to_string(nargs));
+		return;
+	}
+	dt = std::stod(args_[2]);
+}
+
+Integrator::Integrator(Engine& engine_) :
+	Ref{ engine_,"1" }
+{}
+Integrator::Integrator(Engine& engine_, double dt_) :
+	Ref{ engine_,"1" },
+	dt{ dt_ }
+{}
+void Integrator::setDt(double dt_) { dt = dt_; }
 
 void Integrator::init() {
 	auto& neighbor = engine().getNeighbor();

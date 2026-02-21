@@ -13,7 +13,8 @@ public:
 
 	// Classes with multiple inheritance levels
 	// they finally will have their own factory class
-
+	void buildIntegrator(std::vector<std::string> args_);
+	void buildFix(std::vector<std::string> args_);
 
 private:
 	std::vector<std::string> args;

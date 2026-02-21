@@ -840,10 +840,10 @@ TEST_CASE("Testing the engine factory class to build the engine from commands") 
 	std::vector<std::string> commands = {
 		"box 0.0 0.0 0.0 100000.0 100000.0 100000.0",
 		"particles 10",
-		"integrator semiEuler",
+		"integrator semi 1",
 		"error screen",
-		"fix print1 1 init_integrate x 0",
-		"fix print2 1 init_integrate v 0",
+		"fix print 1 1 init_integrate x 0",
+		"fix print 2 1 init_integrate v 0",
 		"forcefield spring 10.0",
 		"neighbor simple 90.0",
 		"run_status verbose",
@@ -874,14 +874,14 @@ TEST_CASE("Testing the engine factory class to build the engine from commands") 
 	REQUIRE(nmax == 10);
 
 	// 3 - checking the integrator type
-	//auto& integratorRef = engine->getIntegrator();
-	//REQUIRE(integratorRef);
-	//if (auto semiIntegratorPtr = dynamic_cast<SemiIntegrator*>(integratorRef.get())) {
-	//	SUCCEED("The integrator is of type SemiIntegrator");
-	//}
-	//else {
-	//	FAIL("The integrator is not of type SemiIntegrator");
-	//}
+	Integrator* integratorRaw = engine.getIntegrator().get();
+	REQUIRE(integratorRaw);
+	if (auto semiIntegratorPtr = dynamic_cast<SemiIntegrator*>(integratorRaw)) {
+		SUCCEED("The integrator is of type SemiIntegrator");
+	}
+	else {
+		FAIL("The integrator is not of type SemiIntegrator");
+	}
 
 	// 4 - checking the error streams
 	auto& errorRef = engine.getError();
@@ -896,17 +896,17 @@ TEST_CASE("Testing the engine factory class to build the engine from commands") 
 	}
 
 	// 5 - checking the fix prints
-	//auto& fix1Ref = engine.returnFixById("print1");
-	//auto& fix2Ref = engine.returnFixById("print2");
-	//REQUIRE(fix1Ref);
-	//REQUIRE(fix2Ref);
-	//if (auto fixPtr = dynamic_cast<FixPrint*>(fix1Ref.get())
-	//	&& dynamic_cast<FixPrint*>(fix2Ref.get())) {
-	//	SUCCEED("The fixs with ids print1 and print2 are of type print");
-	//}
-	//else {
-	//	FAIL("The fixs with ids print1 and print2 are not of type print");
-	//}
+	Fix* fix1Ref = engine.returnFixById("1").get();
+	Fix* fix2Ref = engine.returnFixById("2").get();
+	REQUIRE(fix1Ref);
+	REQUIRE(fix2Ref);
+	if (auto fixPtr = dynamic_cast<FixPrint*>(fix1Ref)
+		&& dynamic_cast<FixPrint*>(fix2Ref)) {
+		SUCCEED("The fixs with ids print1 and print2 are of type print");
+	}
+	else {
+		FAIL("The fixs with ids print1 and print2 are not of type print");
+	}
 
 	// 6 - checking the force field
 	//auto& forcefield = engine.getForceField();

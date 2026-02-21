@@ -13,12 +13,10 @@ enum FixMask {
 class Fix : public Ref
 {
 public:
+	Fix(Engine& engine_, std::vector<std::string>& args_);
 	Fix(Engine& engine_,
 		std::string id_,
-		int nevery_ = 1) :
-		Ref{ engine_, id_},
-		nevery{nevery_}
-	{}
+		int nevery_ = 1);
 	virtual ~Fix() {}
 	
 	virtual void init() {};
@@ -31,6 +29,7 @@ public:
 	int mask = 0;
 
 protected:
+	FixMask parseMaskString(const std::string& maskString);
 	int nevery;
 };
 

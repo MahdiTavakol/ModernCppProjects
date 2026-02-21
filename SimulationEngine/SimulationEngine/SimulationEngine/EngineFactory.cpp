@@ -11,6 +11,14 @@
 #include "Run.h"
 
 
+// Integrator class
+#include "EulerIntegrator.h"
+#include "SemiIntegrator.h"
+
+// Fix types
+#include "FixPrint.h"
+
+
 
 #include <sstream>
 #include <stdexcept>
@@ -82,7 +90,7 @@ void EngineFactory::parseCommand(const std::string& command) {
 		error = make_unique<Error>(*engine, tokens);
 	} else if (++itemId && tokens[0] == "fix") {
 		// parse fix command
-		// fixList.push_back(make_unique<Fix>(tokens));
+		buildFix(tokens);
 	} else if (++itemId && tokens[0] == "forcefield") {
 		// parse forcefield command
 		commandNumCheck(commandCount[itemId-1], tokens[0]);
@@ -90,7 +98,7 @@ void EngineFactory::parseCommand(const std::string& command) {
 	} else if (++itemId && tokens[0] == "integrator") {
 		// parse integrator command
 		commandNumCheck(commandCount[itemId-1], tokens[0]);
-		//integrator = make_unique<Integrator>(*engine, tokens);
+		buildIntegrator(tokens);
 	} else if (++itemId && tokens[0] == "neighbor") {
 		// parse neighbor command
 		commandNumCheck(commandCount[itemId-1], tokens[0]);
@@ -120,5 +128,30 @@ void EngineFactory::commandNumCheck(int& itemCount, const std::string commandTyp
 		(*error) << "Duplicate command: " << commandType << " " << itemCount << std::endl;
 		(*error) << "Using the last one" << std::endl;
 		return;
+	}
+}
+
+void EngineFactory::buildIntegrator(std::vector<std::string> args_) {
+	// parse the integrator command and create the integrator
+	if (args_.size() < 2) {
+		(*error) << "integrator command needs a type (euler/semi)\n";
+	}
+	if (args_[1] == "euler")
+		integrator = make_unique<EulerIntegrator>(*engine, args_);
+	else if (args_[1] == "semi")
+		integrator = make_unique<SemiIntegrator>(*engine, args_);
+	else
+		(*error) << "Unknown integrator type: " << args_[1] << std::endl;
+}
+
+void EngineFactory::buildFix(std::vector<std::string> args_) {
+	if (args_.size() < 2) {
+		(*error) << "fix command needs a type\n";
+	}
+	if (args_[1] == "print") {
+		fixList.push_back(make_unique<FixPrint>(*engine, args_));
+	}
+	else {
+		(*error) << "Unknown fix type: " << args_[1] << std::endl;
 	}
 }

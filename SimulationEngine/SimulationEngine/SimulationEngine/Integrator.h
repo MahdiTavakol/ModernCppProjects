@@ -5,14 +5,11 @@
 
 class Integrator : public Ref {
 public:
-	Integrator(Engine& engine_) :
-		Ref{ engine_,"1" }
-	{}
-	Integrator(Engine& engine_, double dt_) :
-		Ref{ engine_,"1" },
-		dt{ dt_ }
-	{}
-	void setDt(double dt_) { dt = dt_; }
+	Integrator(Engine& engine_,
+		std::vector<std::string> args_);
+	Integrator(Engine& engine_);
+	Integrator(Engine& engine_, double dt_);
+	void setDt(double dt_);
 
 
 	virtual void init();

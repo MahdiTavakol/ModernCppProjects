@@ -122,7 +122,8 @@ unique_ptr<Fix>& Engine::returnFixById(string id_) {
 			return fix;
 		}
 	}
-	throw std::invalid_argument("The fix was not find!");
+	std::string errorMessage = "The fix with id " + id_ + " was not found!";
+	throw std::invalid_argument(errorMessage.c_str());
 }
 
 void Engine::setStatus(const std::string newStatus_) {

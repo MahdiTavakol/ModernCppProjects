@@ -9,6 +9,9 @@ class Engine;
 class Ref {
 public:
 	// since there must be a reference to an engine for each Ref, the default constructor is deleted
+	// Since we have deleted the default constructor
+	// we do not need to delete the default constructor
+	// of derived classes.
 	Ref() = delete;
 	// the constructor of the Ref class takes the reference of the engine and the id of the Ref
 	Ref(Engine& engine_, std::string id_);
