@@ -16,7 +16,8 @@ class Type;
 class Engine {
 public:
 	enum class Run_Status {SILENT,VERBOSE};
-	enum class ItemType { BOX,
+	enum class ItemType { UNKNOWN,
+		                  BOX,
 		                  PARTICLES,
 	                      INTEGRATOR,
 	                      FORCEFIELD,
@@ -33,15 +34,11 @@ public:
 	// put the destructor in the cpp file since
 	// it needs the definition of the Box, Particles, Integrator, etc
 	~Engine();
-	void registerItem(std::unique_ptr<Type>&& type_);
-	void resetBox(std::unique_ptr<Box>& box_);
-	void resetParticles(std::unique_ptr<Particles> particles_);
-	void registerBox(std::unique_ptr<Box>& box_);
-	void registerParticles(std::unique_ptr<Particles>& particles_);
-	void registerIntegrator(std::unique_ptr<Integrator>& integrator_);
-	void registerForceField(std::unique_ptr<ForceField>& forcefield_);
-	void registerFix(std::unique_ptr<Fix> fix_);
-	void registerNeighbor(std::unique_ptr<Neighbor>& neighbor_);
+	// setting items into the engine, the type of the item will be detected by the engine and put into the right place
+	void setItem(std::unique_ptr<Type>&& type_);
+	// getting the item by the type, the return type is Type* and needs to be casted to the right type by the user
+	Type* getItem(ItemType type_);
+	// getting the item by the type, the return type is the unique_ptr of the right type
 	const std::unique_ptr<Box>& getBox() const;
 	const std::unique_ptr<Particles>& getParticles() const;
 	std::unique_ptr<Particles>& getParticlesForUpdate();
@@ -49,9 +46,9 @@ public:
 	std::unique_ptr<ForceField>& getForceField();
 	std::vector<std::unique_ptr<Fix>>& getFixList();
 	std::unique_ptr<Fix>& returnFixById(std::string id_);
-	const Run_Status& getStatus() const;
 	std::unique_ptr<Neighbor>& getNeighbor();
-	std::unique_ptr<Type>& getItem(ItemType type_);
+	// getting the run status of the engine
+	const Run_Status& getStatus() const;
 
 private:
 	Run_Status run_status = Run_Status::SILENT;
@@ -66,4 +63,7 @@ private:
 	std::unique_ptr<Neighbor> neighbor;
 	std::vector<std::unique_ptr<Fix>> fixList;
 	int nmax;
+
+	// a helper function to detect the type of the input unique_ptr<Type> 
+	static ItemType detectType(const std::unique_ptr<Type>& type_);
 };

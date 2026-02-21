@@ -63,6 +63,9 @@
     <ClCompile Include="SimpleNeighbor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Error.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="catch_amalgamated.hpp">
@@ -108,6 +111,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="SimpleNeighbor.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Error.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

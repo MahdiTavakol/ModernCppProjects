@@ -42,13 +42,13 @@ TEST_CASE("Starting and registering each class of the Engine class with minimal 
 	box->getDimensions(rMin1, rMax1);
 	particles->getNmaxNlocal(rNmax1, rNlocal1);
 	// adding these to the engine
-	mockedEngine.registerItem(std::move(box));
-	mockedEngine.registerItem(std::move(particles));
+	mockedEngine.setItem(std::move(box));
+	mockedEngine.setItem(std::move(particles));
 	// parameters afer registering into the engine
-	const unique_ptr<Box> boxE;
-	mockedEngine.getItem(boxE);
+	Type* boxPtrBase = mockedEngine.getItem(Engine::ItemType::BOX);
+	auto boxPtr = dynamic_cast<Box*>(boxPtrBase);
 	const unique_ptr<Particles>& particlesE = mockedEngine.getParticles();
-	boxE->getDimensions(rMin2, rMax2);
+	boxPtr->getDimensions(rMin2, rMax2);
 	particlesE->getNmaxNlocal(rNmax2, rNlocal2);
 	// checking if they are equal
 	REQUIRE(rMin1 == rMin2);
@@ -74,9 +74,9 @@ TEST_CASE("Testing the Euler integration in 100 steps for 3 particles under cons
 	// Integrator
 	unique_ptr<Integrator> integrator = make_unique<EulerIntegrator>(mockedEngine);
 	// adding these to the engine
-	mockedEngine.registerBox(box);
-	mockedEngine.registerParticles(particles);
-	mockedEngine.registerIntegrator(integrator);
+	mockedEngine.setItem(std::move(box));
+	mockedEngine.setItem(std::move(particles));
+	mockedEngine.setItem(std::move(integrator));
 	// getting a reference to particles
 	auto& engineParticles = mockedEngine.getParticlesForUpdate();
 	// new particles
@@ -156,9 +156,9 @@ TEST_CASE("Testing the Euler integration in 100 steps for 3 particles under cons
 	// Integrator
 	unique_ptr<Integrator> integrator = make_unique<EulerIntegrator>(mockedEngine);
 	// adding these to the engine
-	mockedEngine.registerBox(box);
-	mockedEngine.registerParticles(particles);
-	mockedEngine.registerIntegrator(integrator);
+	mockedEngine.setItem(std::move(box));
+	mockedEngine.setItem(std::move(particles));
+	mockedEngine.setItem(std::move(integrator));
 	// getting a reference to particles
 	auto& engineParticles = mockedEngine.getParticlesForUpdate();
 	// new particles
@@ -239,9 +239,9 @@ TEST_CASE("Testing the Semi-Euler integration in 100 steps for 3 particles under
 	// Integrator
 	unique_ptr<Integrator> integrator = make_unique<SemiIntegrator>(mockedEngine);
 	// adding these to the engine
-	mockedEngine.registerBox(box);
-	mockedEngine.registerParticles(particles);
-	mockedEngine.registerIntegrator(integrator);
+	mockedEngine.setItem(std::move(box));
+	mockedEngine.setItem(std::move(particles));
+	mockedEngine.setItem(std::move(integrator));
 	// getting a reference to particles
 	auto& engineParticles = mockedEngine.getParticlesForUpdate();
 	// new particles
@@ -321,9 +321,9 @@ TEST_CASE("Testing the Semi-Euler integration in 100 steps for 3 particles under
 	// Integrator
 	unique_ptr<Integrator> integrator = make_unique<SemiIntegrator>(mockedEngine);
 	// adding these to the engine
-	mockedEngine.registerBox(box);
-	mockedEngine.registerParticles(particles);
-	mockedEngine.registerIntegrator(integrator);
+	mockedEngine.setItem(std::move(box));
+	mockedEngine.setItem(std::move(particles));
+	mockedEngine.setItem(std::move(integrator));
 	// getting a reference to particles
 	auto& engineParticles = mockedEngine.getParticlesForUpdate();
 	// new particles
@@ -409,15 +409,15 @@ TEST_CASE("Testing fixes invoked at initial_integrate and final_integrate steps"
 	auto fixPrint5 = make_unique<FixPrint>(mockedEngine, "5", 1, FINAL_INTEGRATE, "v", 0);
 	auto fixPrint6 = make_unique<FixPrint>(mockedEngine, "6", 1, FINAL_INTEGRATE, "f", 0);
 	// adding these to the engine
-	mockedEngine.registerBox(box);
-	mockedEngine.registerParticles(particles);
-	mockedEngine.registerIntegrator(integrator);
-	mockedEngine.registerFix(std::move(fixPrint1));
-	mockedEngine.registerFix(std::move(fixPrint2));
-	mockedEngine.registerFix(std::move(fixPrint3));
-	mockedEngine.registerFix(std::move(fixPrint4));
-	mockedEngine.registerFix(std::move(fixPrint5));
-	mockedEngine.registerFix(std::move(fixPrint6));
+	mockedEngine.setItem(std::move(box));
+	mockedEngine.setItem(std::move(particles));
+	mockedEngine.setItem(std::move(integrator));
+	mockedEngine.setItem(std::move(fixPrint1));
+	mockedEngine.setItem(std::move(fixPrint2));
+	mockedEngine.setItem(std::move(fixPrint3));
+	mockedEngine.setItem(std::move(fixPrint4));
+	mockedEngine.setItem(std::move(fixPrint5));
+	mockedEngine.setItem(std::move(fixPrint6));
 	// getting a reference to particles
 	auto& engineParticles = mockedEngine.getParticlesForUpdate();
 	// new particles
@@ -531,12 +531,12 @@ TEST_CASE("Calculating the force from the forcefield equation") {
 	auto fixPrint1 = make_unique<FixPrint>(mockedEngine, "1", 1, POST_FORCE, "f", 0);
 	auto fixPrint2 = make_unique<FixPrint>(mockedEngine, "2", 1, POST_FORCE, "f", 1);
 	// adding these to the engine
-	mockedEngine.registerBox(box);
-	mockedEngine.registerParticles(particles);
-	mockedEngine.registerForceField(forcefield);
-	mockedEngine.registerIntegrator(integrator);
-	mockedEngine.registerFix(std::move(fixPrint1));
-	mockedEngine.registerFix(std::move(fixPrint2));
+	mockedEngine.setItem(std::move(box));
+	mockedEngine.setItem(std::move(particles));
+	mockedEngine.setItem(std::move(integrator));
+	mockedEngine.setItem(std::move(forcefield));
+	mockedEngine.setItem(std::move(fixPrint1));
+	mockedEngine.setItem(std::move(fixPrint2));
 
 	// getting a reference to particles
 	auto& engineParticles = mockedEngine.getParticlesForUpdate();
@@ -634,9 +634,9 @@ TEST_CASE("Testing the silent and verbose version of the engine") {
 		// Integrator
 		unique_ptr<Integrator> integrator = make_unique<SemiIntegrator>(mockedEngine);
 		// adding these to the engine
-		mockedEngine.registerBox(box);
-		mockedEngine.registerParticles(particles);
-		mockedEngine.registerIntegrator(integrator);
+		mockedEngine.setItem(std::move(box));
+		mockedEngine.setItem(std::move(particles));
+		mockedEngine.setItem(std::move(integrator));
 
 		// getting a reference to particles
 		auto& engineParticles = mockedEngine.getParticlesForUpdate();
@@ -690,10 +690,10 @@ TEST_CASE("Testing the neighbor list construction and updating") {
 	// neighbor list
 	unique_ptr<Neighbor> neighbor = make_unique<SimpleNeighbor>(mockedEngine, neighbor_cutoff);
 	// adding these to the engine
-	mockedEngine.registerBox(box);
-	mockedEngine.registerParticles(particles);
-	mockedEngine.registerIntegrator(integrator);
-	mockedEngine.registerNeighbor(neighbor);
+	mockedEngine.setItem(std::move(box));
+	mockedEngine.setItem(std::move(particles));
+	mockedEngine.setItem(std::move(integrator));
+	mockedEngine.setItem(std::move(neighbor));
 
 	// getting a reference to particles
 	auto& engineParticles = mockedEngine.getParticlesForUpdate();
@@ -755,4 +755,54 @@ TEST_CASE("Testing the neighbor list construction and updating") {
 		}
 		REQUIRE_THAT(actualNeighbors, Catch::Matchers::UnorderedEquals(expectedNeighbors));
 	}
+}
+
+TEST_CASE("Testing various error and warning messages")
+{
+	// constant variables
+	int nmax = 10;
+	array<double, 3> min = { 0.0,0.0,0.0 };
+	array<double, 3> max = { 10.0,10.0,10.0 };
+	// the mocked Engine object
+	Engine mockedEngine;
+	// box 
+	auto box = make_unique<Box>(mockedEngine, min, max);
+	// particles
+	// Error streams
+	std::ostringstream errorStream1, errorStream2, errorStream3;
+	std::vector<std::reference_wrapper<std::ostream>> errorStreams = {
+		std::ref(errorStream1),
+		std::ref(errorStream2),
+		std::ref(errorStream3)
+	};
+	auto error = make_unique<Error>(mockedEngine, errorStreams);
+	// setting items into the engine
+	mockedEngine.setItem(std::move(box));
+	mockedEngine.setItem(std::move(error));
+	// get error reference from the engine
+	auto& errorRef = mockedEngine.getError();
+	// invoking the error function with different messages
+	std::cout << "Using single error and warning messages:" << std::endl;
+	errorRef->one("Error message 1");
+	errorRef->warning("Warning message 1");
+	errorRef->one("Error message 2");
+	errorRef->warning("Warning message 2");
+	errorRef->one("Error message 3");
+	errorRef->warning("Warning message 3");
+	// checking the outputs
+	std::cout << "The ostringstreams contain:" << std::endl;
+	auto& errorStreams = errorRef->getErrorStreams();
+	for (auto& stream : errorStreams) {
+		std::cout << stream.str() << std::endl;
+	}
+	
+	std::vector<std::reference_wrapper<std::ostream>> newErrorStreams = {
+		std::ref(std::cout)
+	};
+	errorRef->setStreams(newErrorStreams);
+	std::cout << "Chaining the warning messages:" << std::endl;
+	(*errorRef) << "Chained warning message 1" << std::endl
+				<< "Chained warning message 2" << std::endl
+		        << "Chained warning message 3" << std::endl;
+	SUCCEED("Error and warning messages were successfully written to the provided ostringstreams");
 }

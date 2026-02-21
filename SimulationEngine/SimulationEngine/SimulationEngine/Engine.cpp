@@ -36,68 +36,50 @@ Engine::Engine(Run_Status& run_status_) :
 
 Engine::~Engine() = default;
 
-void Engine::resetBox(unique_ptr<Box>& box_) {
-	box = std::move(box_);
-}
-void Engine::resetParticles(unique_ptr<Particles> particles_) {
-	particles = std::move(particles_);
-}
-void Engine::registerItem(std::unique_ptr<Type>&& type_) {
+void Engine::setItem(std::unique_ptr<Type>&& type_) {
+	ItemType iType = detectType(type_);
 
-	// A new get item type function should be added.
-	// Also  getter and setter functions should be made
-	// from the same template to avoid the code repetition.
-	if (auto boxPtr = dynamic_cast<Box*>(type_.get())) {
-		box.reset(boxPtr);
-	}
-	else if (auto intPtr = dynamic_cast<Integrator*>(type_.get())) {
-		integrator.reset(intPtr);
-	} 
-	else if (auto frcPtr = dynamic_cast<ForceField*>(type_.get())) {
-		forcefield.reset(frcPtr);
-	}
-	else if (auto fixPtr = dynamic_cast<Fix*>(type_.get())) {
-		std::unique_ptr<Fix> fixUniquePtr;
-		fixUniquePtr.reset(fixPtr);
-		fixList.push_back(std::move(fixUniquePtr));
-	}
-	else if (auto prtPtr = dynamic_cast<Particles*>(type_.get())) {
-		particles.reset(prtPtr);
-	}
-	else if (auto nbrPtr = dynamic_cast<Neighbor*>(type_.get())) {
-		neighbor.reset(nbrPtr);
-	}
-	else 
-		throw std::invalid_argument("The type is not recognized!");
-
-	type_.release();
-
-	
+	switch (iType) {
+		case ItemType::BOX:
+			box.reset(dynamic_cast<Box*>(type_.release()));
+			break;
+		case ItemType::PARTICLES:
+			particles.reset(dynamic_cast<Particles*>(type_.release()));
+			break;
+		case ItemType::INTEGRATOR:
+			integrator.reset(dynamic_cast<Integrator*>(type_.release()));
+			break;
+		case ItemType::FORCEFIELD:
+			forcefield.reset(dynamic_cast<ForceField*>(type_.release()));
+			break;
+		case ItemType::FIX:
+			fixList.push_back(std::unique_ptr<Fix>(dynamic_cast<Fix*>(type_.release())));
+			break;
+		case ItemType::NEIGHBOR:
+			neighbor.reset(dynamic_cast<Neighbor*>(type_.release()));
+			break;
+		default:
+			throw std::invalid_argument("The type is not recognized!");
+	}	
 }
 
-void Engine::registerBox(unique_ptr<Box>& box_)
-{
-	box = std::move(box_);
-}
-void Engine::registerParticles(unique_ptr<Particles>& particles_)
-{
-	particles = std::move(particles_);
-}
-void Engine::registerIntegrator(unique_ptr<Integrator>& integrator_)
-{
-	integrator = std::move(integrator_);
-}
-void Engine::registerForceField(std::unique_ptr<ForceField>& forcefield_)
-{
-	forcefield = std::move(forcefield_);
-}
-void Engine::registerFix(unique_ptr<Fix> fix_)
-{
-	fixList.push_back(std::move(fix_));
-}
-void Engine::registerNeighbor(unique_ptr<Neighbor>& neighbor_)
-{
-	neighbor = std::move(neighbor_);
+Type* Engine::getItem(ItemType type_) {
+	switch (type_) {
+		case ItemType::BOX:
+			return box.get();
+		case ItemType::PARTICLES:
+			return particles.get();
+		case ItemType::INTEGRATOR:
+			return integrator.get();
+		case ItemType::FORCEFIELD:
+			return forcefield.get();
+		case ItemType::FIX:
+			throw std::invalid_argument("There can be multiple fixes, please use getFixList() to get the list of fixes!");
+		case ItemType::NEIGHBOR:
+			return neighbor.get();
+		default:
+			throw std::invalid_argument("The type is not recognized!");
+	}
 }
 const unique_ptr<Box>& Engine::getBox() const {
 	return box;
@@ -132,4 +114,28 @@ const Engine::Run_Status& Engine::getStatus() const {
 
 std::unique_ptr<Neighbor>& Engine::getNeighbor() {
 	return neighbor;
+}
+
+Engine::ItemType Engine::detectType(const std::unique_ptr<Type>& type_)
+{
+	if (auto boxPtr = dynamic_cast<Box*>(type_.get())) {
+		return ItemType::BOX;
+	}
+	else if (auto intPtr = dynamic_cast<Integrator*>(type_.get())) {
+		return ItemType::INTEGRATOR;
+	}
+	else if (auto frcPtr = dynamic_cast<ForceField*>(type_.get())) {
+		return ItemType::FORCEFIELD;
+	}
+	else if (auto fixPtr = dynamic_cast<Fix*>(type_.get())) {
+		return ItemType::FIX;
+	}
+	else if (auto prtPtr = dynamic_cast<Particles*>(type_.get())) {
+		return ItemType::PARTICLES;
+	}
+	else if (auto nbrPtr = dynamic_cast<Neighbor*>(type_.get())) {
+		return ItemType::NEIGHBOR;
+	}
+	else
+		throw std::invalid_argument("The type is not recognized!");
 }
