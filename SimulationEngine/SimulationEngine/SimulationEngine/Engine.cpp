@@ -153,3 +153,22 @@ std::unique_ptr<Error>& Engine::getError() {
 std::unique_ptr<Run>& Engine::getRunCommand() {
 	return run;
 }
+
+void Engine::setupSim() {
+	if (run) {
+		run->setup();
+	}
+	else {
+		throw std::runtime_error("The run command is not set up in the engine!");
+	}
+}
+
+void Engine::runSim(int timestep_) {
+	if (run) {
+		int nSteps = run->getSteps();
+		run->start(nSteps, timestep_);
+	}
+	else {
+		throw std::runtime_error("The run command is not set up in the engine!");
+	}
+}

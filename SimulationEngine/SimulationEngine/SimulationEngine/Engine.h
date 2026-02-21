@@ -67,6 +67,10 @@ public:
 	const Run_Status& getStatus() const;
 	std::unique_ptr<Run>& getRunCommand();
 
+	// Running
+	void setupSim();
+	void runSim(int timestep_ = 0);
+
 private:
 	Run_Status run_status = Run_Status::SILENT;
 	std::unique_ptr<Box> box = nullptr;
@@ -81,6 +85,7 @@ private:
 	std::vector<std::unique_ptr<Fix>> fixList;
 	std::unique_ptr<Error> error;
 	std::unique_ptr<Run> run;
+
 	int nmax;
 
 };

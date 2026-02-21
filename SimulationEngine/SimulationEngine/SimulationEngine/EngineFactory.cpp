@@ -122,6 +122,8 @@ void EngineFactory::parseCommand(const std::string& command) {
 	else if (++itemId && tokens[0] == "run_status") {
 		commandNumCheck(commandCount[itemId - 1], tokens[0]);
 		engine->setStatus(tokens[1]);
+	} else if (++itemId && tokens[0] == "particle") {
+		addParticle(tokens);
 	}
 	else {
 		(*error) << "Unknown command: " << tokens[0] << std::endl;
@@ -149,6 +151,9 @@ void EngineFactory::buildIntegrator(std::vector<std::string> args_) {
 		integrator = make_unique<SemiIntegrator>(*engine, args_);
 	else
 		(*error) << "Unknown integrator type: " << args_[1] << std::endl;
+	if (integrator == nullptr) {
+		throw std::runtime_error("Failed to create integrator");
+	}
 }
 
 void EngineFactory::buildFix(std::vector<std::string> args_) {
@@ -186,4 +191,16 @@ void EngineFactory::buildNeighbor(std::vector<std::string> args_) {
 	else {
 		(*error) << "Unknown neighbor type: " << args_[1] << std::endl;
 	}
+}
+
+void EngineFactory::addParticle(std::vector<std::string> args_) {
+	if (args_.size() < 12) {
+		(*error) << "particle command needs at least 10 arguments\n";
+		return;
+	}
+	std::array<double, 3> newX = { std::stod(args_[2]), std::stod(args_[3]), std::stod(args_[4]) };
+	std::array<double, 3> newV = { std::stod(args_[5]), std::stod(args_[6]), std::stod(args_[7]) };
+	std::array<double, 3> newF = { std::stod(args_[8]), std::stod(args_[9]), std::stod(args_[10]) };
+	double newM = std::stod(args_[11]);
+	particles->addParticle(newX, newV, newF, newM);
 }

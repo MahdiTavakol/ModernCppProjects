@@ -22,6 +22,7 @@ private:
 	std::vector<std::string> args;
 	void parseCommand(const std::string& command);
 	void commandNumCheck(int& itemCount, const std::string commandType);
+	void addParticle(std::vector<std::string> args_);
 
 	// Tracking the number of each commands
 	int commandCount[maxCommandTypes];

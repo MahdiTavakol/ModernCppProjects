@@ -689,82 +689,64 @@ TEST_CASE("Testing the silent and verbose version of the engine") {
 TEST_CASE("Testing the neighbor list construction and updating") {
 	std::cout << "Testing the neighbor list construction and updating" << std::endl;
 	std::cout << std::string(80, '=') << std::endl;
+	// number of steps
 	constexpr int nSteps = 5;
-	// constant variables
-	int nmax = 10;
-	// max and min
-	array<double, 3> min = { -100000.0,-100000.0,-100000.0 };
-	array<double, 3> max = { 100000.0,100000.0,100000.0 };
+	std::string run_command = "run " + std::to_string(nSteps);
 	// neighbor cutoff
 	double neighbor_cutoff = 90.0;
-	//
-	Engine::Run_Status run_status = Engine::Run_Status::SILENT;
-	// the mocked Engine object
-	Engine mockedEngine(run_status);
-	// box 
-	auto box = make_unique<Box>(mockedEngine, min, max);
-	// particles
-	auto particles = make_unique<Particles>(mockedEngine, nmax);
-	// Integrator
-	unique_ptr<Integrator> integrator = make_unique<SemiIntegrator>(mockedEngine);
-	// neighbor list
-	unique_ptr<Neighbor> neighbor = make_unique<SimpleNeighbor>(mockedEngine, neighbor_cutoff);
-	// adding these to the engine
-	mockedEngine.setItem(std::move(box));
-	mockedEngine.setItem(std::move(particles));
-	mockedEngine.setItem(std::move(integrator));
-	mockedEngine.setItem(std::move(neighbor));
-
-	// getting a reference to particles
-	auto& engineParticles = mockedEngine.getParticlesForUpdate();
-	// new particles
-	std::vector<std::array<double, 3>> newXs = {
-	{ -24.0, -94.0, -37.0 },
-	{ -27.0, -20.0, -25.0 },
-	{ -49.0,  98.0,  96.0 },
-	{  13.0,  -3.0,  23.0 },
-	{  22.0, -27.0,  89.0 },
-	{  97.0,  19.0,  80.0 },
-	{ -10.0,  14.0, -23.0 },
-	{ -79.0, -89.0, -71.0 },
-	{ 100.0, -58.0, -90.0 },
-	{ -86.0,  32.0,  85.0 }
+	std::string neighbor_command = "neighbor simple " + std::to_string(neighbor_cutoff);
+	// the commands vector to build the engine
+	std::vector<std::string> commands = {
+		"box -100000.0 -100000.0 -100000.0 100000.0 100000.0 100000.0",
+		"particles 10",
+        "particle 1 -24.0 -94.0 -37.0 0.0 0.0 0.0 0.0 0.0 0.0 5.0",
+        "particle 2 -27.0 -20.0 -25.0 0.0 0.0 0.0 0.0 0.0 0.0 5.0",
+		"particle 3 -49.0 98.0 96.0 0.0 0.0 0.0 0.0 0.0 0.0 5.0",
+		"particle 4 13.0 -3.0 23.0 0.0 0.0 0.0 0.0 0.0 0.0 5.0",
+		"particle 5 22.0 -27.0 89.0 0.0 0.0 0.0 0.0 0.0 0.0 5.0",
+		"particle 6 97.0 19.0 80.0 0.0 0.0 0.0 0.0 0.0 0.0 5.0",
+		"particle 7 -10.0 14.0 -23.0 0.0 0.0 0.0 0.0 0.0 0.0 5.0",
+		"particle 8 -79.0 -89.0 -71.0 0.0 0.0 0.0 0.0 0.0 0.0 5.0",
+		"particle 9 100.0 -58.0 -90.0 0.0 0.0 0.0 0.0 0.0 0.0 5.0",
+		"particle 10 -86.0 32.0 85.0 0.0 0.0 0.0 0.0 0.0 0.0 5.0",
+		"integrator semi 1",
+		"error screen",
+		"fix print 1 1 init_integrate x 0",
+		"fix print 2 1 init_integrate v 0",
+		neighbor_command,
+		"run_status silent",
+	 	run_command
 	};
-	vector<array<double, 3>> newVs, newFs;
-	vector<double> newMs;
-	for (int i = 0; i < 10; i++) {
-		newVs.push_back({ 0.0,0.0,0.0 });
-		newFs.push_back({ 0.0,0.0,0.0 });
-		newMs.push_back(5.0);
+	// building the engine factory
+	EngineFactory factory(commands);
+	// building the engine using the factory
+	auto engine = factory.returnEngine();
+	auto& integrator = engine.getIntegrator();
+	if (integrator == nullptr) {
+		std::cout << "Error: dfdsgsfg set up correctly" << std::endl;
+		return;
 	}
+	// running the engine
+	engine.setupSim();
+	engine.runSim();
+	// expected neighbor list
 	std::map<int, std::vector<int>> expectedNeighborList = {
-	{1, {2, 8}},
-	{2, {1, 4, 7}},
-	{3, {10}},
-	{4, {2, 5, 7}},
-	{5, {4, 6}},
-	{6, {5}},
-	{7, {2, 4}},
-	{8, {1}},
-	{10,{3}}
-	};
-	// adding it 
-	for (int i = 0; i < 10; i++) {
-		engineParticles->addParticle(newXs[i], newVs[i], newFs[i], newMs[i]);
-	}
-
-	// creating the run object
-	auto run = make_unique<Run>(mockedEngine);
-	// setting it up
-	run->setup();
-	// running it for 100 steps
-	run->start(nSteps);
+	{ 1, { 2, 8 } },
+	{ 2, {1, 4, 7} },
+	{ 3, {10} },
+	{ 4, {2, 5, 7} },
+	{ 5, {4, 6} },
+	{ 6, {5} },
+	{ 7, {2, 4} },
+	{ 8, {1} },
+	{ 10,{3} } };
 	// getting the neighbor list
-	auto& neighborPtr = mockedEngine.getNeighbor();
+	auto& neighborPtr = engine.getNeighbor();
 	int nNeigh = 0;
 	int* neighList = nullptr, * firstNeigh = nullptr, * numNeigh = nullptr;
 	neighborPtr->getNeighborList(nNeigh, neighList,  firstNeigh, numNeigh);
-	// comparing the results
+	std::cout << "here" << std::endl;
+ 	// comparing the results
 	for (int i = 0;i < nNeigh; i++) {
 		 std::cout << std::endl;
 		int particleId = i + 1;
@@ -840,6 +822,9 @@ TEST_CASE("Testing the engine factory class to build the engine from commands") 
 	std::vector<std::string> commands = {
 		"box 0.0 0.0 0.0 100000.0 100000.0 100000.0",
 		"particles 10",
+		"particle 1 0.0 0.0 0.0 2.0 1.0 5.0 0.0 0.0 0.0 5.0",
+		"particle 2 3.0 100.0 1000.0 8.0 -0.1 -10.0 0.0 0.0 0.0 5.0",
+		"particle 3 700.0 20.0 50.0 -5.0 0.1 7.0 0.0 0.0 0.0 5.0",
 		"integrator semi 1",
 		"error screen",
 		"fix print 1 1 init_integrate x 0",
@@ -941,4 +926,33 @@ TEST_CASE("Testing the engine factory class to build the engine from commands") 
 	int expectedSteps = 100;
 	int actualSteps = runCommand->getSteps();
 	REQUIRE(expectedSteps == actualSteps);
+
+	// 10 - checking the particles
+	std::vector<std::array<double, 3>> expectedXs = {
+	{ 0.0,0.0,0.0 },
+	{ 3.0,100.0,1000.0 },
+	{ 700.0,20.0,50.0 }
+	};
+	std::vector<std::array<double, 3>> expectedVs = {
+	{ 2.0,1.0,5.0 },
+	{ 8.0,-0.1,-10.0 },
+	{ -5.0,0.1,7.0 }
+	};
+	std::vector<std::array<double, 3>> expectedFs = {
+	{ 0.0,0.0,0.0 },
+	{ 0.0,0.0,0.0 },
+	{ 0.0,0.0,0.0 }
+	};
+	auto& particlesForUpdate = engine.getParticlesForUpdate();
+	for (int i = 0; i < 3; i++) {
+		std::array<double, 3> actualX, actualV, actualF;
+		double actualM;
+		particlesForUpdate->getAtomVec(i, actualX, actualV, actualF, actualM);
+		for (int j = 0; j < 3; j++) {
+			REQUIRE_THAT(expectedXs[i][j], Catch::Matchers::WithinAbs(actualX[j], 1e-6));
+			REQUIRE_THAT(expectedVs[i][j], Catch::Matchers::WithinAbs(actualV[j], 1e-6));
+			REQUIRE_THAT(expectedFs[i][j], Catch::Matchers::WithinAbs(actualF[j], 1e-6));
+		}
+		REQUIRE_THAT(5.0, Catch::Matchers::WithinAbs(actualM, 1e-6));
+	}
 }
