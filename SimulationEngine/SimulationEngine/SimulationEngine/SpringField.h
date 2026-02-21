@@ -4,10 +4,8 @@
 
 class SpringField : public ForceField {
 public:
-	SpringField(Engine& engine_, double coeff_) :
-		ForceField{ engine_ },
-		coeff{coeff_}
-	{}
+	SpringField(Engine& engine_, std::vector<std::string> args_);
+	SpringField(Engine& engine_, double coeff_);
 
 protected:
 	void calculate_pair(std::array<double,3>& dist,

@@ -6,6 +6,7 @@
 
 class ForceField: public Ref {
 public:
+	ForceField(Engine& engine_, std::vector<std::string> args_);
 	ForceField(Engine& engine_);
 	void init();
 	void update();

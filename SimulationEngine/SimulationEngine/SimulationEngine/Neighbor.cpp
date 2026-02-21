@@ -1,6 +1,19 @@
 #include "Neighbor.h"
 #include "Particles.h"
+#include "Error.h"
 
+Neighbor::Neighbor(Engine& engine_, std::vector<std::string> args_):
+	Ref{ engine_, "1" }
+{
+	int nargs = args_.size();
+	auto& error = engine().getError();
+	if (nargs < 3) {
+		error->one("Not enough arguments for neighbor command! Expected at least 2, got " + std::to_string(nargs));
+		neighbor_cutoff = 0.0;
+		return;
+	}
+	neighbor_cutoff = std::stod(args_[2]);
+}
 
 Neighbor::Neighbor(Engine& engine_) :
 	Ref{ engine_,"1" },

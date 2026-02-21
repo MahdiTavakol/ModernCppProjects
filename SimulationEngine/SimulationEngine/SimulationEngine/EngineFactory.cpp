@@ -18,6 +18,13 @@
 // Fix types
 #include "FixPrint.h"
 
+// Forcefields
+#include "SpringField.h"
+
+// Neighbor types
+#include "SimpleNeighbor.h"
+
+
 
 
 #include <sstream>
@@ -94,7 +101,7 @@ void EngineFactory::parseCommand(const std::string& command) {
 	} else if (++itemId && tokens[0] == "forcefield") {
 		// parse forcefield command
 		commandNumCheck(commandCount[itemId-1], tokens[0]);
-		//forcefield = make_unique<ForceField>(*engine, tokens);
+		buildForceField(tokens);
 	} else if (++itemId && tokens[0] == "integrator") {
 		// parse integrator command
 		commandNumCheck(commandCount[itemId-1], tokens[0]);
@@ -102,7 +109,7 @@ void EngineFactory::parseCommand(const std::string& command) {
 	} else if (++itemId && tokens[0] == "neighbor") {
 		// parse neighbor command
 		commandNumCheck(commandCount[itemId-1], tokens[0]);
-		//neighbor = make_unique<Neighbor>(*engine, tokens);
+		buildNeighbor(tokens);
 	} else if (++itemId && tokens[0] == "particles") {
 		// parse particles command
 		commandNumCheck(commandCount[itemId-1], tokens[0]);
@@ -153,5 +160,30 @@ void EngineFactory::buildFix(std::vector<std::string> args_) {
 	}
 	else {
 		(*error) << "Unknown fix type: " << args_[1] << std::endl;
+	}
+}
+
+
+void EngineFactory::buildForceField(std::vector<std::string> args_) {
+	if (args_.size() < 2) {
+		(*error) << "forcefield command needs a type\n";
+	}
+	if (args_[1] == "spring") {
+		forcefield = make_unique<SpringField>(*engine, args_);
+	}
+	else {
+		(*error) << "Unknown forcefield type: " << args_[1] << std::endl;
+	}
+}
+
+void EngineFactory::buildNeighbor(std::vector<std::string> args_) {
+	if (args_.size() < 2) {
+		(*error) << "neighbor command needs a type\n";
+	}
+	if (args_[1] == "simple") {
+		neighbor = make_unique<SimpleNeighbor>(*engine, args_);
+	}
+	else {
+		(*error) << "Unknown neighbor type: " << args_[1] << std::endl;
 	}
 }

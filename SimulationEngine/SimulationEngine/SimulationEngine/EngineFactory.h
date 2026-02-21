@@ -15,6 +15,8 @@ public:
 	// they finally will have their own factory class
 	void buildIntegrator(std::vector<std::string> args_);
 	void buildFix(std::vector<std::string> args_);
+	void buildForceField(std::vector<std::string> args_);
+	void buildNeighbor(std::vector<std::string> args_);
 
 private:
 	std::vector<std::string> args;

@@ -1,6 +1,18 @@
 #include "ForceField.h"
 #include "Particles.h"
+#include "Error.h"
 #include <iostream>
+
+ForceField::ForceField(Engine& engine_, std::vector<std::string> args_) :
+	Ref{ engine_, "1" }
+{
+	auto nargs = args_.size();
+	auto& error = engine().getError();
+	if (nargs < 2) {
+		error->one("Not enough arguments for forcefield command! Expected at least 2, got " + std::to_string(nargs));
+		return;
+	}
+}
 
 ForceField::ForceField(Engine& engine_) :
 	Ref{ engine_,"1" }

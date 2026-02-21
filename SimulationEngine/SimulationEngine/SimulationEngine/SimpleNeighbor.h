@@ -5,10 +5,8 @@
 class SimpleNeighbor : public Neighbor
 {
 public:
-	SimpleNeighbor(Engine& engine_, double neighbor_cutoff_) :
-		Neighbor{ engine_, neighbor_cutoff_ }
-	{
-	}
+	SimpleNeighbor(Engine& engine_, std::vector<std::string> args_);
+	SimpleNeighbor(Engine& engine_, double neighbor_cutoff_);
 	void init() override;
 	void update() override;
 

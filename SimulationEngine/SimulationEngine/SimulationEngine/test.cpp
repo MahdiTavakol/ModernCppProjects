@@ -896,12 +896,12 @@ TEST_CASE("Testing the engine factory class to build the engine from commands") 
 	}
 
 	// 5 - checking the fix prints
-	Fix* fix1Ref = engine.returnFixById("1").get();
-	Fix* fix2Ref = engine.returnFixById("2").get();
+	auto& fix1Ref = engine.returnFixById("1");
+	auto& fix2Ref = engine.returnFixById("2");
 	REQUIRE(fix1Ref);
 	REQUIRE(fix2Ref);
-	if (auto fixPtr = dynamic_cast<FixPrint*>(fix1Ref)
-		&& dynamic_cast<FixPrint*>(fix2Ref)) {
+	if (auto fixPtr = dynamic_cast<FixPrint*>(fix1Ref.get())
+		&& dynamic_cast<FixPrint*>(fix2Ref.get())) {
 		SUCCEED("The fixs with ids print1 and print2 are of type print");
 	}
 	else {
@@ -909,27 +909,27 @@ TEST_CASE("Testing the engine factory class to build the engine from commands") 
 	}
 
 	// 6 - checking the force field
-	//auto& forcefield = engine.getForceField();
-	//REQUIRE(forcefield);
-	//if (auto springFieldPtr = dynamic_cast<SpringField*>(forcefield.get())) {
-	//	SUCCEED("The force field is of type SpringField");
-	//}
-	//else {
-	//	FAIL("The force field is not of type SpringField");
-	//}
+	auto& forcefield = engine.getForceField();
+	REQUIRE(forcefield);
+	if (auto springFieldPtr = dynamic_cast<SpringField*>(forcefield.get())) {
+		SUCCEED("The force field is of type SpringField");
+	}
+	else {
+		FAIL("The force field is not of type SpringField");
+	}
 
 	// 7 - checking the neighbor
-	// auto& neighbor = engine.getNeighbor();
-	//REQUIRE(neighbor);
-	//double expectedCutoff = 90.0;
-	//double actualCutoff = neighbor->getCutoff();
-	//REQUIRE(expectedCutoff == actualCutoff);
-	//if (auto simpleNeighborPtr = dynamic_cast<SimpleNeighbor*>(neighbor.get())) {
-	//	SUCCEED("The neighbor is of type SimpleNeighbor");
-	//}
-	//else {
-	//	FAIL("The neighbor is not of type SimpleNeighbor");
-	//}
+	auto& neighbor = engine.getNeighbor();
+	REQUIRE(neighbor);
+	double expectedCutoff = 90.0;
+	double actualCutoff = neighbor->getCutoff();
+	REQUIRE(expectedCutoff == actualCutoff);
+	if (auto simpleNeighborPtr = dynamic_cast<SimpleNeighbor*>(neighbor.get())) {
+		SUCCEED("The neighbor is of type SimpleNeighbor");
+	}
+	else {
+		FAIL("The neighbor is not of type SimpleNeighbor");
+	}
 
 	// 8 - checking the run status
 	auto& runStatus = engine.getStatus();
