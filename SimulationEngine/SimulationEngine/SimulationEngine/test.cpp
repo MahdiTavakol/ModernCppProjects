@@ -950,3 +950,75 @@ TEST_CASE("Testing the engine factory class to build the engine from commands") 
 		REQUIRE_THAT(5.0, Catch::Matchers::WithinAbs(actualM, 1e-6));
 	}
 }
+
+TEST_CASE("Testing collision integrator")
+{
+	std::cout << "Testing the collision integrator" << std::endl;
+	std::cout << std::string(80, '=') << std::endl;
+	// number of steps
+	constexpr int nSteps = 15;
+	std::string run_command = "run " + std::to_string(nSteps);
+	// neighbor cutoff
+	double neighbor_cutoff = 90.0;
+	std::string neighbor_command = "neighbor simple " + std::to_string(neighbor_cutoff);
+	// the commands vector to build the engine
+	std::vector<std::string> commands = {
+		"box -100000.0 -100000.0 -100000.0 100000.0 100000.0 100000.0",
+		"particles 10",
+		"particle 1 0.0 0.0 0.0 2.0 1.0 5.0 0.0 0.0 0.0 5.0 radius 100",
+		"particle 2 3.0 100 1000.0 8.0 -0.1 -10.0 0.0 0.0 0.0 5.0 radius 100",
+		"fix print 1 1 init_integrate x 0",
+		"integrator collision 0.1",
+		"error screen",
+		neighbor_command,
+		"run_status silent",
+		run_command
+	};
+	// building the engine factory
+	EngineFactory factory(commands);
+	// building the engine using the factory
+	auto engine = factory.returnEngine();
+	auto& run = engine->getRunCommand();
+	// running the engine
+	engine->setupSim();
+	engine->runSim();
+	// expected values
+	// Particle #1
+	std::vector<std::array<double, 3>> expectedX1s;
+	expectedX1s.push_back({ 0.0, 0.0, 0.0 });
+	expectedX1s.push_back({ 0.26, 2.1, 20.5 });
+	expectedX1s.push_back({ 0.5896, 6.1178, 60.17 });
+	expectedX1s.push_back({ 0.995616, 11.894488, 117.4132 });
+	expectedX1s.push_back({ 1.48180736, 19.20079648, 189.929872 });
+	expectedX1s.push_back({ 2.048726426, 27.7462731, 274.8093491 });
+	expectedX1s.push_back({ 2.693696434, 37.1908988, 368.6464523 });
+	expectedX1s.push_back({ 3.410918585, 47.15868854, 467.6776973 });
+	expectedX1s.push_back({ 3.693696434, 37.2808988, 368.1464523 });
+	expectedX1s.push_back({ 4.048726426, 27.9262731, 273.8093491 });
+	expectedX1s.push_back({ 4.48180736, 19.47079648, 188.429872 });
+	expectedX1s.push_back({ 4.995616, 12.254488, 115.4132 });
+	expectedX1s.push_back({ 5.5896, 6.5678, 57.67 });
+	expectedX1s.push_back({ 6.26, 2.64, 17.5 });
+	expectedX1s.push_back({ 7.0, 0.63, -3.5 });
+	expectedX1s.push_back({ 7.8, 0.62, -4.5 });
+
+
+	// getting a reference to particles
+	auto& engineParticles = engine->getParticlesForUpdate();
+
+	// getting the fixprints
+	auto& fix1ref = engine->returnFixById("1");
+	// casting the fixPrint
+	FixPrint* const fixPrintPtr1 = dynamic_cast<FixPrint*>(fix1ref.get());
+	// checking the Ref of the Fix
+	REQUIRE(fixPrintPtr1); 
+	// getting fixprint outputs;
+	auto Xs = fixPrintPtr1->getOutputVector();
+
+	for (int i = 0; i < nSteps; i++) {
+		for (int j = 0; j < 3; j++) {
+			REQUIRE_THAT(expectedX1s[i][j], Catch::Matchers::WithinAbs(Xs[i][j], 1e-6));
+		}
+
+	}
+}
