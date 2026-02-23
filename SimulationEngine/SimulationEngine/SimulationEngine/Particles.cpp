@@ -10,6 +10,7 @@ Particles::Particles(Engine& engine_) :
 	v.reserve(0);
 	f.reserve(0);
 	m.reserve(0);
+	r.reserve(0);
 }
 
 Particles::Particles(Engine& engine_, int nmax_) :
@@ -20,6 +21,7 @@ Particles::Particles(Engine& engine_, int nmax_) :
 	v.reserve(3 * nmax);
 	f.reserve(3 * nmax);
 	m.reserve(nmax);
+	r.reserve(nmax);
 }
 Particles::Particles(Engine& engine_, std::vector<std::string> args_):
 	Ref{ engine_, "Particles-1" }
@@ -36,7 +38,8 @@ Particles::Particles(Engine& engine_, std::vector<std::string> args_):
 void Particles::addParticle(std::array<double, 3> newX_,
 	std::array<double, 3> newV_ ,
 	std::array<double, 3> newF_ ,
-	double newM_ )
+	double newM_ ,
+	double newR_)
 {
 	//check the boundary conditions
 	// new positions
@@ -53,7 +56,10 @@ void Particles::addParticle(std::array<double, 3> newX_,
 	f.push_back(newF_[2]);
 	// new masses
 	m.push_back(newM_);
+	// new radiuses
+	r.push_back(newR_);
 }
+
 void Particles::getNmaxNlocal(int& nmax_, int& nlocal_) const {
 	nmax_ = nmax; nlocal_ = static_cast<int>(x.size()) / 3;
 }

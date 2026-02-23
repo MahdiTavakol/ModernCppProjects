@@ -129,6 +129,7 @@
   <ItemGroup>
     <ClCompile Include="Box.cpp" />
     <ClCompile Include="catch_amalgamated.cpp" />
+    <ClCompile Include="ColliIntegrator.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EngineFactory.cpp" />
     <ClCompile Include="Error.cpp" />
@@ -149,6 +150,7 @@
   <ItemGroup>
     <ClInclude Include="Box.h" />
     <ClInclude Include="catch_amalgamated.hpp" />
+    <ClInclude Include="ColliIntegrator.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="EngineFactory.h" />
     <ClInclude Include="EulerIntegrator.h" />

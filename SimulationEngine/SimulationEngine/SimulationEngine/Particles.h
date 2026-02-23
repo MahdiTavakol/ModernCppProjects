@@ -15,7 +15,8 @@ public:
 	void addParticle(std::array<double, 3> newX_,
 		std::array<double, 3> newV_ = { 0.0,0.0,0.0 },
 		std::array<double, 3> newF_ = { 0.0,0.0,0.0 },
-		double newM_ = 10.0);
+		double newM_ = 10.0, 
+		double newR_ = 10.0);
 	void getNmaxNlocal(int& nmax_, int& nlocal_) const;
 	// get atom i position
 	void getAtomVec(const int& i,
@@ -29,6 +30,7 @@ public:
 	double* const getVData() { return v.data(); }
 	double* const getFData() { return f.data(); }
 	double* const getMData() { return m.data(); }
+	double* const getRData() { return r.data(); }
 
 private:
 	int nmax;
@@ -36,5 +38,6 @@ private:
 	std::vector<double> v;
 	std::vector<double> f;
 	std::vector<double> m;
+	std::vector<double> r;
 };
 
