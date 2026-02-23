@@ -194,7 +194,8 @@ void EngineFactory::buildNeighbor(std::vector<std::string> args_) {
 }
 
 void EngineFactory::addParticle(std::vector<std::string> args_) {
-	if (args_.size() < 12) {
+	auto nargs = args_.size();
+	if (nargs < 12) {
 		(*error) << "particle command needs at least 10 arguments\n";
 		return;
 	}
@@ -202,5 +203,15 @@ void EngineFactory::addParticle(std::vector<std::string> args_) {
 	std::array<double, 3> newV = { std::stod(args_[5]), std::stod(args_[6]), std::stod(args_[7]) };
 	std::array<double, 3> newF = { std::stod(args_[8]), std::stod(args_[9]), std::stod(args_[10]) };
 	double newM = std::stod(args_[11]);
+	double newR = 0.0;
+	
+
+	int iarg = 12;
+	while (iarg < nargs) {
+		if (args_[iarg] == "radius") {
+			newR = std::stod(args_[iarg + 1]);
+			iarg += 2;
+		}
+	}
 	particles->addParticle(newX, newV, newF, newM);
 }

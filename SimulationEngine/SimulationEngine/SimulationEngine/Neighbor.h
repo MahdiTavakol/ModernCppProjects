@@ -10,7 +10,7 @@ public:
 	Neighbor(Engine& engine_, double neighbor_cutoff_);
 	virtual void init();
 	virtual void update() {}
-	void getNeighborList(int nNeigh_, int* neighList_, int* firstNeigh_, int* numNeigh_);
+	void getNeighborList(int& nNeigh_, int*& neighList_, int*& firstNeigh_, int*& numNeigh_);
 	double getCutoff() const { return neighbor_cutoff; }
 
 protected:

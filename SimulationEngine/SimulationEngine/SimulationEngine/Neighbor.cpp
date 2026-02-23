@@ -49,7 +49,7 @@ void Neighbor::init() {
 
 }
 
-void Neighbor::getNeighborList(int nNeigh_, int* neighList_, int* firstNeigh_, int* numNeigh_) {
+void Neighbor::getNeighborList(int& nNeigh_, int*& neighList_, int*& firstNeigh_, int*& numNeigh_) {
 	nNeigh_ = this->nNeigh;
 	neighList_ = this->neighList.get();
 	firstNeigh_ = this->firstNeigh.get();

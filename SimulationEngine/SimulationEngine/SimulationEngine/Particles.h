@@ -16,7 +16,7 @@ public:
 		std::array<double, 3> newV_ = { 0.0,0.0,0.0 },
 		std::array<double, 3> newF_ = { 0.0,0.0,0.0 },
 		double newM_ = 10.0, 
-		double newR_ = 10.0);
+		double newR_ = 0.0);
 	void getNmaxNlocal(int& nmax_, int& nlocal_) const;
 	// get atom i position
 	void getAtomVec(const int& i,

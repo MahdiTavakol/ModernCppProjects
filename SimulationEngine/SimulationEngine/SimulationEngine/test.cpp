@@ -958,17 +958,24 @@ TEST_CASE("Testing collision integrator")
 	// number of steps
 	constexpr int nSteps = 15;
 	std::string run_command = "run " + std::to_string(nSteps);
+	// spring coeff
+	constexpr double spring_coeff = 0.95;
+	std::string spring_command = "forcefield spring " + std::to_string(spring_coeff);
 	// neighbor cutoff
 	double neighbor_cutoff = 90.0;
 	std::string neighbor_command = "neighbor simple " + std::to_string(neighbor_cutoff);
+	// timestep
+	double dt = 0.1;
+	std::string integrator_command = "integrator collison " + std::to_string(dt);
 	// the commands vector to build the engine
 	std::vector<std::string> commands = {
 		"box -100000.0 -100000.0 -100000.0 100000.0 100000.0 100000.0",
 		"particles 10",
 		"particle 1 0.0 0.0 0.0 2.0 1.0 5.0 0.0 0.0 0.0 5.0 radius 100",
-		"particle 2 3.0 100 1000.0 8.0 -0.1 -10.0 0.0 0.0 0.0 5.0 radius 100",
+		"particle 2 3.0 100 1000.0 8.0 -0.1 -10.0 0.0 0.0 0.0 10.0 radius 100",
 		"fix print 1 1 init_integrate x 0",
-		"integrator collision 0.1",
+		spring_command,
+		integrator_command,
 		"error screen",
 		neighbor_command,
 		"run_status silent",
