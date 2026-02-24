@@ -47,6 +47,7 @@ public:
 		}
 	}
 	// running the engine
+	// should return the engine
 	void runEngine() {
 		// it possibly has been returned
 		checkPtrs();
@@ -57,12 +58,18 @@ public:
 	}
 
 	// building and returning the engine
+	// should be removed run and return should be the same
+	// may be it is better to return the engine_ptr by ref
+	// it is dangerious... not it is not good at all.
 	std::unique_ptr<Engine> returnEngine() {
 		checkPtrs();
 		return std::move(engine_ptr);
 	}
 
 	std::unique_ptr<Fix>& returnFixById(const std::string id_) {
+		// an status should be added to the engine to check 
+		// if it is run or not and if it is not run 
+		// it runs.
 		checkPtrs();
 		return engine_ptr->returnFixById(id_);
 	}
