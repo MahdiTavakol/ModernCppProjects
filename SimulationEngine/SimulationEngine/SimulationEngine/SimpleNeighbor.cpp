@@ -14,10 +14,10 @@ void SimpleNeighbor::init() {
 }
 
 void SimpleNeighbor::update() {
-	auto& particles = engine().getParticles();
+	auto& P = engine().getParticles();
 	int nmax, nlocal;
-	particles->getNmaxNlocal(nmax, nlocal);
-	double* x = particles->getXData();
+	P->getNmaxNlocal(nmax, nlocal);
+	auto x = P->getXData();
 	nNeigh = nlocal;
 	neighList = std::make_unique<int[]>(nlocal * nlocal);
 	firstNeigh = std::make_unique<int[]>(nlocal);

@@ -15,7 +15,6 @@ ColliIntegrator::ColliIntegrator(Engine& engine) :
 
 void ColliIntegrator::post_force()
 {
-
 	Integrator::post_force();
 	velocityUpdate();
 	deltaVUpdate();
@@ -29,14 +28,7 @@ void ColliIntegrator::deltaVUpdate() {
 	auto& neighbor = engine().getNeighbor();
 	// getting particles
 	auto& particles = engine().getParticlesForUpdate();
-	// getting xs
-	double* x = particles->getXData();
-	// getting vs
-	double* v = particles->getVData();
-	// getting radius
-	double* r = particles->getRData();
-	// getting the mass values
-	double* m = particles->getMData();
+	auto& P = *particles;
 	// getting the neighbor list
 	int nNeigh; 
 	int* neighList, * firstNeigh, * numNeigh;
@@ -64,23 +56,23 @@ void ColliIntegrator::deltaVUpdate() {
 		{
 			int j = neighList[firstNeighI + jj];
 
-			double dX = x[3 * i] - x[3 * j];
-			double dY = x[3 * i + 1] - x[3 * i + 1];
-			double dZ = x[3 * i + 2] - x[3 * i + 2];
+			double dX = P.X(i, 0) - P.X(j, 0);
+			double dY = P.X(i, 1) - P.X(j, 1);
+			double dZ = P.X(i, 2) - P.X(j, 2);
 			double dist2 = dX * dX + dY * dY + dZ * dZ;
 
-			double dVX = v[3 * i] - v[3 * j];
-			double dVY = v[3 * i + 1] - v[3 * j + 1];
-			double dVZ = v[3 * i + 2] - v[3 * j + 2];
+			double dVX = P.V(i, 0) - P.V(j, 0);
+			double dVY = P.V(i, 1) - P.V(j, 1);
+			double dVZ = P.V(i, 2) - P.V(j, 2);
 
-			double r2 = (r[i] + r[j]) * (r[i] + r[j]);
+			double r2 = (P.R(i) + P.R(j)) * (P.R(i) + P.R(j));
 			double vrel = (dVX * dX + dVY * dY + dVZ * dZ) / std::sqrt(dist2);
 
 			if (dist2 < r2 && vrel < 0)
 			{
-				dv[3 * i] = -(2 * m[j] / (m[i] + m[j])) * (dVX * dX + dVY * dY + dVZ * dZ) * dX / dist2;
-				dv[3 * i + 1] = -(2 * m[j] / (m[i] + m[j])) * (dVX * dX + dVY * dY + dVZ * dZ) * dY / dist2;
-				dv[3 * i + 2] = -(2 * m[j] / (m[i] + m[j])) * (dVX * dX + dVY * dY + dVZ * dZ) * dZ / dist2;
+				dV(i, 0) = -(2 * P.M(j) / (P.M(i) + P.M(j))) * (dVX * dX + dVY * dY + dVZ * dZ) * dX / dist2;
+				dV(i, 1) = -(2 * P.M(j) / (P.M(i) + P.M(j))) * (dVX * dX + dVY * dY + dVZ * dZ) * dY / dist2;
+				dV(i, 2) = -(2 * P.M(j) / (P.M(i) + P.M(j))) * (dVX * dX + dVY * dY + dVZ * dZ) * dZ / dist2;
 			}
 
 		}

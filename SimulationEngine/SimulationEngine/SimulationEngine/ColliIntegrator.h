@@ -23,4 +23,8 @@ private:
 	void deltaVUpdate();
 	// adding deltaV
 	void velocityUpdate_2();
+	//
+	inline double& dV(const int& i, const int& j) {
+		return dv[3 * i + j];
+	}
 };

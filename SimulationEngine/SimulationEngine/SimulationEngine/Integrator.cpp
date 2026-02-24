@@ -92,30 +92,25 @@ void Integrator::final_integrate() {
 void Integrator::velocityUpdate()
 {
 	int nlocal, nmax;
-	auto& particles = engine().getParticlesForUpdate();
-	auto v = particles->getVData();
-	auto f = particles->getFData();
-	auto m = particles->getMData();
-	particles->getNmaxNlocal(nmax, nlocal);
+	auto& P = engine().getParticlesForUpdate();
+	P->getNmaxNlocal(nmax, nlocal);
 
 	for (int i = 0; i < nlocal; i++)
 		for (int j = 0; j < 3; j++)
 		{
-			double a = f[3 * i + j] / m[i];
-			v[3 * i + j] += dt * a;
+			double a = P->F(i ,j) / P->M(i);
+			P->V(i , j) += dt * a;
 		}
 }
 void Integrator::positionUpdate()
 {
 	int nlocal, nmax;
-	auto& particles = engine().getParticlesForUpdate();
-	auto x = particles->getXData();
-	auto v = particles->getVData();
-	particles->getNmaxNlocal(nmax, nlocal);
+	auto& P = engine().getParticlesForUpdate();
+	P->getNmaxNlocal(nmax, nlocal);
 
 	for (int i = 0; i < nlocal; i++)
 		for (int j = 0; j < 3; j++)
 		{
-			x[3 * i + j] += dt * v[3 * i + j];
+			P->X(i, j) += dt * P->V(i, j);
 		}
 }

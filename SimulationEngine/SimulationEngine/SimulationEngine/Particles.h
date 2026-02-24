@@ -31,6 +31,21 @@ public:
 	double* const getFData() { return f.data(); }
 	double* const getMData() { return m.data(); }
 	double* const getRData() { return r.data(); }
+	inline double& X(const int& i, const int& j) {
+		return x[3 * i + j];
+	}
+	inline double& V(const int& i, const int& j) {
+		return v[3 * i + j];
+	}
+	inline double& F(const int& i, const int& j) {
+		return f[3 * i + j];
+	}
+	inline double& M(const int& i) {
+		return m[i];
+	}
+	inline double& R(const int& i) {
+		return r[i];
+	}
 
 private:
 	int nmax;
