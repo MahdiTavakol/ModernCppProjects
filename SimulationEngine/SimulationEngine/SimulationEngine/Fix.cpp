@@ -24,9 +24,9 @@ Fix::Fix(Engine& engine_,
 	nevery{ nevery_ }
 {}
 
-FixMask Fix::parseMaskString(const std::string& maskString)
+void Fix::parseMaskString(const std::string& maskString)
 {
-	FixMask mask = static_cast<FixMask>(0);
+	mask = static_cast<FixMask>(0);
 	if (maskString.find("init_integrate") != std::string::npos) {
 		mask = static_cast<FixMask>(mask | INIT_INTEGRATE);
 	}
@@ -39,5 +39,4 @@ FixMask Fix::parseMaskString(const std::string& maskString)
 	if (maskString.find("final_integrate") != std::string::npos) {
 		mask = static_cast<FixMask>(mask | FINAL_INTEGRATE);
 	}
-	return mask;
 }

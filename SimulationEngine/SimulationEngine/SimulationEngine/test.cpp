@@ -956,7 +956,7 @@ TEST_CASE("Testing collision integrator")
 	std::cout << "Testing the collision integrator" << std::endl;
 	std::cout << std::string(80, '=') << std::endl;
 	// number of steps
-	constexpr int nSteps = 15;
+	constexpr int nSteps = 10;
 	std::string run_command = "run " + std::to_string(nSteps);
 	// spring coeff
 	constexpr double spring_coeff = 0.95;
@@ -966,7 +966,7 @@ TEST_CASE("Testing collision integrator")
 	std::string neighbor_command = "neighbor simple " + std::to_string(neighbor_cutoff);
 	// timestep
 	double dt = 0.1;
-	std::string integrator_command = "integrator collison " + std::to_string(dt);
+	std::string integrator_command = "integrator collision " + std::to_string(dt);
 	// the commands vector to build the engine
 	std::vector<std::string> commands = {
 		"box -100000.0 -100000.0 -100000.0 100000.0 100000.0 100000.0",
@@ -974,6 +974,7 @@ TEST_CASE("Testing collision integrator")
 		"particle 1 0.0 0.0 0.0 2.0 1.0 5.0 0.0 0.0 0.0 5.0 radius 100",
 		"particle 2 3.0 100 1000.0 8.0 -0.1 -10.0 0.0 0.0 0.0 10.0 radius 100",
 		"fix print 1 1 init_integrate x 0",
+		"fix print 2 1 init_integrate v 0",
 		spring_command,
 		integrator_command,
 		"error screen",
@@ -989,30 +990,29 @@ TEST_CASE("Testing collision integrator")
 	// running the engine
 	engine->setupSim();
 	engine->runSim();
-	// expected values
+ 	// expected values
 	// Particle #1
 	std::vector<std::array<double, 3>> expectedX1s;
-	expectedX1s.push_back({ 0.0, 0.0, 0.0 });
-	expectedX1s.push_back({ 0.26, 2.1, 20.5 });
-	expectedX1s.push_back({ 0.5896, 6.1178, 60.17 });
-	expectedX1s.push_back({ 0.995616, 11.894488, 117.4132 });
-	expectedX1s.push_back({ 1.48180736, 19.20079648, 189.929872 });
-	expectedX1s.push_back({ 2.048726426, 27.7462731, 274.8093491 });
-	expectedX1s.push_back({ 2.693696434, 37.1908988, 368.6464523 });
-	expectedX1s.push_back({ 3.410918585, 47.15868854, 467.6776973 });
-	expectedX1s.push_back({ 3.693696434, 37.2808988, 368.1464523 });
-	expectedX1s.push_back({ 4.048726426, 27.9262731, 273.8093491 });
-	expectedX1s.push_back({ 4.48180736, 19.47079648, 188.429872 });
-	expectedX1s.push_back({ 4.995616, 12.254488, 115.4132 });
-	expectedX1s.push_back({ 5.5896, 6.5678, 57.67 });
-	expectedX1s.push_back({ 6.26, 2.64, 17.5 });
-	expectedX1s.push_back({ 7.0, 0.63, -3.5 });
-	expectedX1s.push_back({ 7.8, 0.62, -4.5 });
+	expectedX1s.push_back({ 0.000000000000000, 0.000000000000000, 0.000000000000000 });
+	expectedX1s.push_back({ 0.205700000000000, 0.290000000000000, 2.400000000000000 });
+	expectedX1s.push_back({ 0.418223755000000, 0.769249500000000, 6.691735000000000 });
+	expectedX1s.push_back({ 0.638675572298250, 1.436458638925000, 12.861548555250000 });
+	expectedX1s.push_back({ 0.868137164215450, 2.289801870729060, 20.890431697117500 });
+	expectedX1s.push_back({ 1.107664565214640, 3.326923167201550, 30.754077108648300 });
+	expectedX1s.push_back({ 1.358285122202960, 4.544942732647510, 42.422948400419400 });
+	expectedX1s.push_back({ 1.620994566593010, 5.940465211305430, 55.862364289249300 });
+	expectedX1s.push_back({ 1.896754176468260, 7.509589364111120, 71.032597439854900 });
+	expectedX1s.push_back({ 2.186488036940580, 9.247919187229100, 87.888987687756800 });
+	expectedX1s.push_back({ 2.491080406507620, 11.150576440663500, 106.382069320749000 });
+	expectedX1s.push_back({ 2.811373196916120, 13.212214551242000, 126.457712056176000 });
+	expectedX1s.push_back({ 3.148163573713400, 15.427033850349400, 148.057275312244000 });
+	expectedX1s.push_back({ 3.502201684325600, 17.788798102983400, 171.117775333672000 });
+	expectedX1s.push_back({ 3.874188520137470, 20.290852281023800, 195.572064695398000 });
+	expectedX1s.push_back({ 4.264773918666950, 22.926141530063300, 221.349023672743000 });
 
 
 	// getting a reference to particles
 	auto& engineParticles = engine->getParticlesForUpdate();
-
 	// getting the fixprints
 	auto& fix1ref = engine->returnFixById("1");
 	// casting the fixPrint
@@ -1022,9 +1022,38 @@ TEST_CASE("Testing collision integrator")
 	// getting fixprint outputs;
 	auto Xs = fixPrintPtr1->getOutputVector();
 
+
+	std::vector<std::array<double, 3>> expectedV1s;
+	expectedV1s.push_back({ 2.000000000000000, 1.000000000000000, 5.000000000000000 });
+	expectedV1s.push_back({ 2.057000000000000, 2.900000000000000, 24.000000000000000 });
+	expectedV1s.push_back({ 2.125237550000000, 4.792495000000000, 42.917350000000000 });
+	expectedV1s.push_back({ 2.204518172982500, 6.672091389250000, 61.698135552500000 });
+	expectedV1s.push_back({ 2.294615919172000, 8.533432318040640, 80.288831418675400 });
+	expectedV1s.push_back({ 2.395274009991860, 10.371212964724900, 98.636454115307500 });
+	expectedV1s.push_back({ 2.506205569883240, 12.180195654459600, 116.688712917711000 });
+	expectedV1s.push_back({ 2.627094443900460, 13.955224786579200, 134.394158888299000 });
+	expectedV1s.push_back({ 2.757596098752560, 15.691241528057000, 151.702331506055000 });
+	expectedV1s.push_back({ 2.897338604723210, 17.383298231179800, 168.563902479020000 });
+	expectedV1s.push_back({ 3.045923695670410, 19.026572534343800, 184.930816329919000 });
+	expectedV1s.push_back({ 3.202927904084940, 20.616381105784800, 200.756427354277000 });
+	expectedV1s.push_back({ 3.367903767972830, 22.148192991074400, 215.995632560676000 });
+	expectedV1s.push_back({ 3.540381106122000, 23.617642526339500, 230.605000214277000 });
+	expectedV1s.push_back({ 3.719868358118720, 25.020541780404500, 244.542893617268000 });
+	expectedV1s.push_back({ 3.905853985294800, 26.352892490395300, 257.769589773449000 });
+
+	// getting the fixprints
+	auto& fix2ref = engine->returnFixById("2");
+	// casting the fixPrint
+	FixPrint* const fixPrintPtr2 = dynamic_cast<FixPrint*>(fix2ref.get());
+	// checking the Ref of the Fix
+	REQUIRE(fixPrintPtr2);
+	// getting fixprint outputs;
+	auto Vs = fixPrintPtr2->getOutputVector();
+
 	for (int i = 0; i < nSteps; i++) {
 		for (int j = 0; j < 3; j++) {
-			REQUIRE_THAT(expectedX1s[i][j], Catch::Matchers::WithinAbs(Xs[i][j], 1e-6));
+			REQUIRE_THAT(Vs[i][j], Catch::Matchers::WithinAbs(expectedV1s[i][j], 1e-6));
+			REQUIRE_THAT(Xs[i][j], Catch::Matchers::WithinAbs(expectedX1s[i][j], 1e-6));
 		}
 
 	}

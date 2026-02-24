@@ -5,13 +5,11 @@
 #include <iostream>
 
 Run::Run(Engine& engine_) :
-	Ref{ engine_,"1" },
-	dt{ 1.0 }
+	Ref{ engine_,"1" }
 {}
 
 Run::Run(Engine& engine_, std::vector<std::string>& args_) :
-	Ref{ engine_,"1" },
-	dt{1.0}
+	Ref{ engine_,"1" }
 {
 	int nargs = args_.size();
 	if (nargs < 2) {
@@ -23,15 +21,13 @@ Run::Run(Engine& engine_, std::vector<std::string>& args_) :
 }
 
 Run::Run(Engine& engine_, double dt_) :
-	Ref{ engine_,"1" },
-	dt{ 1.0 }
+	Ref{ engine_,"1" }
 {}
 
 void Run::setup() {
 	auto& integrator = engine().getIntegrator();
 	auto& err = engine().getError();
 	auto& particles = engine().getParticlesForUpdate();
-	integrator->setDt(dt);
 }
 void Run::start(int nSteps_, int timestep_ ) {
 	auto& integrator = engine().getIntegrator();

@@ -48,7 +48,7 @@ void FixPrint::init()
 }
 
 void FixPrint::initial_integrate() {
-	if (mask & INIT_INTEGRATE)
+	if (mask & INIT_INTEGRATE) 
 		fillData();
 }
 

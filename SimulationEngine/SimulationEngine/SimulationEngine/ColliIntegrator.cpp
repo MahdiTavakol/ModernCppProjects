@@ -1,6 +1,7 @@
 #include "ColliIntegrator.h"
 #include "Particles.h"
 #include "Neighbor.h"
+#include <iostream>
 
 ColliIntegrator::ColliIntegrator(Engine& engine_, std::vector<std::string> args_) :
 	Integrator{ engine_, args_ }
@@ -55,8 +56,6 @@ void ColliIntegrator::deltaVUpdate() {
 		dv.resize(3*nlocal);
 	}
 
-
-
 	for (int ii = 0; ii < nNeigh; ii++) {
 		int i = ii;
 		int numJs = numNeigh[ii];
@@ -75,8 +74,9 @@ void ColliIntegrator::deltaVUpdate() {
 			double dVZ = v[3 * i + 2] - v[3 * j + 2];
 
 			double r2 = (r[i] + r[j]) * (r[i] + r[j]);
+			double vrel = (dVX * dX + dVY * dY + dVZ * dZ) / std::sqrt(dist2);
 
-			if (dist2 < r2)
+			if (dist2 < r2 && vrel < 0)
 			{
 				dv[3 * i] = -(2 * m[j] / (m[i] + m[j])) * (dVX * dX + dVY * dY + dVZ * dZ) * dX / dist2;
 				dv[3 * i + 1] = -(2 * m[j] / (m[i] + m[j])) * (dVX * dX + dVY * dY + dVZ * dZ) * dY / dist2;

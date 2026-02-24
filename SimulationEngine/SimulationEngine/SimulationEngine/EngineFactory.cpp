@@ -12,6 +12,7 @@
 
 
 // Integrator class
+#include "ColliIntegrator.h"
 #include "EulerIntegrator.h"
 #include "SemiIntegrator.h"
 
@@ -149,6 +150,8 @@ void EngineFactory::buildIntegrator(std::vector<std::string> args_) {
 		integrator = make_unique<EulerIntegrator>(*engine, args_);
 	else if (args_[1] == "semi")
 		integrator = make_unique<SemiIntegrator>(*engine, args_);
+	else if (args_[1] == "collision")
+		integrator = make_unique<ColliIntegrator>(*engine, args_);
 	else
 		(*error) << "Unknown integrator type: " << args_[1] << std::endl;
 	if (integrator == nullptr) {

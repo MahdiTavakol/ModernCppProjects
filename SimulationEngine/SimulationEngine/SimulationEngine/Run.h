@@ -13,7 +13,6 @@ public:
 	int getSteps();
 
 private:
-	double dt;
 	int nSteps = 0;
 	int currentStep = 0;
 };

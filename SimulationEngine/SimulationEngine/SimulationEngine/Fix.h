@@ -29,7 +29,7 @@ public:
 	int mask = 0;
 
 protected:
-	FixMask parseMaskString(const std::string& maskString);
+	void parseMaskString(const std::string& maskString);
 	int nevery;
 };
 
