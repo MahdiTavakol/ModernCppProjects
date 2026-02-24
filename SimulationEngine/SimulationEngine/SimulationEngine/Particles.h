@@ -47,7 +47,7 @@ public:
 		return r[i];
 	}
 
-private:
+protected:
 	int nmax;
 	std::vector<double> x;
 	std::vector<double> v;

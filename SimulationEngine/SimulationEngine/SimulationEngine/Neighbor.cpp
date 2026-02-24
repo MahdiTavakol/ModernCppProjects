@@ -32,26 +32,25 @@ void Neighbor::init() {
 	int nmax, nlocal;
 	particles->getNmaxNlocal(nmax, nlocal);
 	nNeigh = nlocal;
-	neighList = std::make_unique<int[]>(nlocal * nlocal);
-	firstNeigh = std::make_unique<int[]>(nlocal);
-	numNeigh = std::make_unique<int[]>(nlocal);
+	neighList.resize(nlocal * nlocal);
+	firstNeigh.reserve(nlocal);
+	numNeigh.reserve(nlocal);
 	int neighIndex = 0;
 	for (int i = 0; i < nlocal; i++) {
-		firstNeigh[i] = neighIndex;
-		numNeigh[i] = 0;
+		firstNeigh.push_back(neighIndex);
 		for (int j = 0; j < nlocal; j++) {
 			if (i != j) {
 				neighList[neighIndex++] = j;
 			}
 		}
-		numNeigh[i] = neighIndex - firstNeigh[i];
+		numNeigh.push_back(neighIndex - firstNeigh[i]);
 	}
 
 }
 
 void Neighbor::getNeighborList(int& nNeigh_, int*& neighList_, int*& firstNeigh_, int*& numNeigh_) {
 	nNeigh_ = this->nNeigh;
-	neighList_ = this->neighList.get();
-	firstNeigh_ = this->firstNeigh.get();
-	numNeigh_ = this->numNeigh.get();
+	neighList_ = this->neighList.data();
+	firstNeigh_ = this->firstNeigh.data();
+	numNeigh_ = this->numNeigh.data();
 }

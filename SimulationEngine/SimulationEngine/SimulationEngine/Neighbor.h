@@ -15,6 +15,6 @@ public:
 
 protected:
 	int nNeigh;
-	std::unique_ptr<int[]> neighList, numNeigh, firstNeigh;
+	std::vector<int> neighList, numNeigh, firstNeigh;
 	double neighbor_cutoff;
 };

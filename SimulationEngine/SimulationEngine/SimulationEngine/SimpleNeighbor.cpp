@@ -19,13 +19,12 @@ void SimpleNeighbor::update() {
 	P->getNmaxNlocal(nmax, nlocal);
 	auto x = P->getXData();
 	nNeigh = nlocal;
-	neighList = std::make_unique<int[]>(nlocal * nlocal);
-	firstNeigh = std::make_unique<int[]>(nlocal);
-	numNeigh = std::make_unique<int[]>(nlocal);
+	neighList.resize(nlocal * nlocal);
+	firstNeigh.reserve(nlocal);
+	numNeigh.reserve(nlocal);
 	int neighIndex = 0;
 	for (int i = 0; i < nlocal; i++) {
-		firstNeigh[i] = neighIndex;
-		numNeigh[i] = 0;
+		firstNeigh.push_back(neighIndex);
 		for (int j = 0; j < nlocal; j++) {
 			if (i == j) continue;
 			double r = distance(x, i, j);
@@ -33,7 +32,7 @@ void SimpleNeighbor::update() {
 					neighList[neighIndex++] = j;
 			}
 		}
-		numNeigh[i] = neighIndex - firstNeigh[i];
+		numNeigh.push_back(neighIndex - firstNeigh[i]);
 	}
 }
 

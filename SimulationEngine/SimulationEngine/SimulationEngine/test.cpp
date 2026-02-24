@@ -76,6 +76,101 @@ public:
 };
 
 
+// box unittests
+TEST_CASE("Testing a box object") {
+	std::cout << "Testing the box object" << std::endl;
+	std::cout << std::string(80, '=') << std::endl;
+
+	class MockedEngine : public Engine
+	{
+	public:
+		MockedEngine() = default;
+		void registerBox(std::unique_ptr<Box>&& newBox_) {
+			box = std::move(newBox_);
+		}
+		std::unique_ptr<Box>& getBox() {
+			return box;
+		}
+	private:
+		std::unique_ptr<Box> box;
+	};
+	// creating a mockedEngine
+	MockedEngine mockedEngine;
+	// box dimensions
+	array<double, 3> min = { 0.0,0.0,0.0 };
+	array<double, 3> max = { 10.0,10.0,10.0 };
+	// box 
+	auto box = make_unique<Box>(mockedEngine, min, max);
+	// registering the box
+	mockedEngine.registerBox(std::move(box));
+	// getting the box
+	auto& boxPtr = mockedEngine.getBox();
+	// getting rmin and rmax
+	array<double, 3> bMin;
+	array<double, 3> bMax;
+	boxPtr->getDimensions(bMin, bMax);
+	// checking if they are equal
+	REQUIRE(min == bMin);
+	REQUIRE(max == bMax);
+}
+
+// unittest for collintegrator
+TEST_CASE("Testing the collision integrator")
+{
+	std::cout << "Testing the collision integrator" << std::endl;
+
+	class MockedNeighbor : public Neighbor {
+		public:
+			MockedNeighbor(Engine& engine_):
+				Neighbor(engine_)
+			{
+				nNeigh = 5; 
+				// Each particle starts at a different offset
+				firstNeighVec = { 0, 3, 4, 7, 9 };
+				// Different number of neighbors per particle
+				numNeighVec = { 3, 1, 3, 2, 3 };
+				// Flat neighbor list storage
+				neighListVec = {
+					1, 2, 4,      // particle 0 (3 neighbors)
+					0,            // particle 1 (1 neighbor)
+					0, 3, 4,      // particle 2 (3 neighbors)
+					2, 4,         // particle 3 (2 neighbors)
+					0, 2, 3       // particle 4 (3 neighbor)
+				};
+			}
+			~MockedNeighbor() = default;
+			void getNeighborList(int nNeigh_, int* neighList_, int* firstNeigh_, int* numNeigh_) {
+				nNeigh_ = nNeigh;
+				neighList_ = neighListVec.data();
+				firstNeigh_ = firstNeighVec.data();
+				numNeigh_ = numNeighVec.data();
+			}
+
+	private:
+		int nNeigh;
+		vector<int> neighListVec, firstNeighVec, numNeighVec;
+	};
+
+	class MockedParticles : public Particles {
+	public:
+		MockedParticles(Engine& engine_) :
+			Particles(engine_)
+		{
+			nmax = 5;
+			// put some particles in the same neighbor into crashing condition
+			x = {};
+			v = {};
+			f = {};
+			r = {100,100,100,100,100};
+			m = {5,5,5,10,10};
+		}
+
+	private:
+	};
+
+
+	SUCCEED("Empty test succedded");
+}
 
 TEST_CASE("Starting and registering each class of the Engine class with minimal input args")
 {
