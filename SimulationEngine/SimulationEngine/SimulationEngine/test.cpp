@@ -13,6 +13,7 @@
 #include "Integrator.h"
 #include "EulerIntegrator.h"
 #include "Forcefield.h"
+#include "ColliIntegrator.h"
 #include "Neighbor.h"
 #include "SimpleNeighbor.h"
 #include "SemiIntegrator.h"
@@ -158,16 +159,91 @@ TEST_CASE("Testing the collision integrator")
 		{
 			nmax = 5;
 			// put some particles in the same neighbor into crashing condition
-			x = {};
-			v = {};
-			f = {};
-			r = {100,100,100,100,100};
+			x = {  150.0,80.0,50.0, // particle 0
+				   150.0,180.0,0.0, // particle 1
+				   0.0,0.0,0.0, // particle 2
+				   0.0,-200.0,0.0, // particle 3
+				   200.0,0.0,0.0, // particle 4
+			      };
+			v = { 0.0,0.0,0.0, // particle 0
+				  0.0,0.0,0.0, // particle 1
+				  1.0,0.0,0.0, // particle 2
+				  0.0,-1.0,0.0, // particle 3
+				 -1.0,0.0,0.0, // particle 4
+			    };
+			f = { 0.0,0.0,0.0, // particle 0
+				  0.0,0.0,0.0, // particle 1
+				  0.0,0.0,0.0, // particle 2
+				  0.0,0.0,0.0, // particle 3
+				  0.0,0.0,0.0, // particle 4
+			   };
+			r = {10,10,100,100,100};
 			m = {5,5,5,10,10};
 		}
 
 	private:
 	};
 
+
+	// creating the engine
+	Engine engine;
+	// creating the mockedNeighbor object
+	std::unique_ptr<Neighbor> mockedNeighbor = std::make_unique<MockedNeighbor>(engine);
+	// creating the mockedParticles object
+	std::unique_ptr<Particles> mockedParticles = std::make_unique<MockedParticles>(engine);
+	// creating the collision object under test
+	std::unique_ptr<Integrator> colliIntegrator = std::make_unique<ColliIntegrator>(engine);
+	// registering the items
+	engine.setItem(std::move(mockedNeighbor));
+	engine.setItem(std::move(mockedParticles));
+	engine.setItem(std::move(colliIntegrator));
+	// getting the integrator from the engine
+	auto& integratorRef = engine.getIntegrator();
+	// running one integration step
+	integratorRef->post_force();
+	// getting the particle coordinates from the engine
+	auto& particlesRef = engine.getParticles();
+	// checking if the engine has particles
+	REQUIRE(particlesRef);
+	// getting particle coordinates
+	double *x = particlesRef->getXData();
+	// getting particle velocities 
+	double* v = particlesRef->getVData();
+	// getting particle forces
+	double* f = particlesRef->getFData();
+
+
+
+	vector<double> expectedVs = { 
+		          0.0,0.0,0.0, // particle 0
+				  0.0,0.0,0.0, // particle 1
+				 -1.66,0.0,0.0, // particle 2
+				  0.0,-1.0,0.0, // particle 3
+				  0.33,0.0,0.0, // particle 4
+	             };
+
+	vector<double> expectedXs = { 
+		           150.0,80.0,50.0, // particle 0
+				   150.0,180.0,0.0, // particle 1
+				  -1.66,0.0,0.0, // particle 2
+				   0.0,-201.0,0.0, // particle 3
+				   200.33,0.0,0.0, // particle 4
+	             };
+
+	vector<double> expectedFs = { 
+		          0.0,0.0,0.0, // particle 0
+				  0.0,0.0,0.0, // particle 1
+				  0.0,0.0,0.0, // particle 2
+				  0.0,0.0,0.0, // particle 3
+				  0.0,0.0,0.0, // particle 4
+	            };
+
+
+	for (int i = 0; i < 3*5; i++) {
+		//REQUIRE_THAT(x[i], Catch::Matchers::WithinAbs(expectedXs[i], 1e-6));
+		//REQUIRE_THAT(v[i], Catch::Matchers::WithinAbs(expectedVs[i], 1e-6));
+		//REQUIRE_THAT(f[i], Catch::Matchers::WithinAbs(expectedFs[i], 1e-6));
+	}
 
 	SUCCEED("Empty test succedded");
 }
