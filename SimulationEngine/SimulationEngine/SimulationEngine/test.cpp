@@ -26,6 +26,7 @@
 using std::vector, std::array;
 using std::make_unique, std::unique_ptr;
 
+// EngineFixture used for integration and regression tests
 class EngineFixture {
 public:
 	EngineFixture(std::vector<std::string>& args_) :
@@ -76,6 +77,56 @@ public:
 	}
 };
 
+// MockedNeighbor class
+class MockedNeighbor : public Neighbor {
+public:
+	MockedNeighbor(Engine& engine_,
+		int nNeigh_,
+		std::vector<int>& neighListVec_,
+		std::vector<int>& firstNeighVec_,
+		std::vector<int>& numNeighVec_) :
+		Neighbor{ engine_ },
+		nNeigh{nNeigh_},
+		neighListVec{ std::move(neighListVec_) },
+		firstNeighVec{ std::move(firstNeighVec_) },
+		numNeighVec{ std::move(numNeighVec_) }
+	{}
+	~MockedNeighbor() = default;
+	void getNeighborList(int& nNeigh_, int*& neighList_, int*& firstNeigh_, int*& numNeigh_) override {
+		nNeigh_ = nNeigh;
+		neighList_ = neighListVec.data();
+		firstNeigh_ = firstNeighVec.data();
+		numNeigh_ = numNeighVec.data();
+	}
+
+private:
+	int nNeigh;
+	vector<int> neighListVec, firstNeighVec, numNeighVec;
+};
+
+// Mocked Particles class
+class MockedParticles : public Particles {
+public:
+	MockedParticles(Engine& engine_,
+		int nmax_,
+		std::vector<double>& x_,
+		std::vector<double>& v_,
+		std::vector<double>& f_,
+		std::vector<double>& r_,
+		std::vector<double>& m_) :
+		Particles{ engine_ }
+	{
+		nmax = nmax_;
+		x = std::move(x_);
+		v = std::move(v_);
+		f = std::move(f_);
+		r = std::move(r_);
+		m = std::move(m_);
+	}
+
+private:
+};
+
 
 // box unittests
 TEST_CASE("Testing a box object") {
@@ -120,77 +171,53 @@ TEST_CASE("Testing the collision integrator")
 {
 	std::cout << "Testing the collision integrator" << std::endl;
 
-	class MockedNeighbor : public Neighbor {
-		public:
-			MockedNeighbor(Engine& engine_):
-				Neighbor(engine_)
-			{
-				nNeigh = 5; 
-				// Each particle starts at a different offset
-				firstNeighVec = { 0, 3, 4, 7, 9 };
-				// Different number of neighbors per particle
-				numNeighVec = { 3, 1, 3, 2, 3 };
-				// Flat neighbor list storage
-				neighListVec = {
-					1, 2, 4,      // particle 0 (3 neighbors)
-					0,            // particle 1 (1 neighbor)
-					0, 3, 4,      // particle 2 (3 neighbors)
-					2, 4,         // particle 3 (2 neighbors)
-					0, 2, 3       // particle 4 (3 neighbor)
-				};
-			}
-			~MockedNeighbor() = default;
-			void getNeighborList(int nNeigh_, int* neighList_, int* firstNeigh_, int* numNeigh_) {
-				nNeigh_ = nNeigh;
-				neighList_ = neighListVec.data();
-				firstNeigh_ = firstNeighVec.data();
-				numNeigh_ = numNeighVec.data();
-			}
-
-	private:
-		int nNeigh;
-		vector<int> neighListVec, firstNeighVec, numNeighVec;
-	};
-
-	class MockedParticles : public Particles {
-	public:
-		MockedParticles(Engine& engine_) :
-			Particles(engine_)
-		{
-			nmax = 5;
-			// put some particles in the same neighbor into crashing condition
-			x = {  150.0,80.0,50.0, // particle 0
-				   150.0,180.0,0.0, // particle 1
-				   0.0,0.0,0.0, // particle 2
-				   0.0,-200.0,0.0, // particle 3
-				   200.0,0.0,0.0, // particle 4
-			      };
-			v = { 0.0,0.0,0.0, // particle 0
-				  0.0,0.0,0.0, // particle 1
-				  1.0,0.0,0.0, // particle 2
-				  0.0,-1.0,0.0, // particle 3
-				 -1.0,0.0,0.0, // particle 4
-			    };
-			f = { 0.0,0.0,0.0, // particle 0
-				  0.0,0.0,0.0, // particle 1
-				  0.0,0.0,0.0, // particle 2
-				  0.0,0.0,0.0, // particle 3
-				  0.0,0.0,0.0, // particle 4
-			   };
-			r = {10,10,100,100,100};
-			m = {5,5,5,10,10};
-		}
-
-	private:
-	};
-
 
 	// creating the engine
 	Engine engine;
 	// creating the mockedNeighbor object
-	std::unique_ptr<Neighbor> mockedNeighbor = std::make_unique<MockedNeighbor>(engine);
+	int nNeigh = 5;
+	// Each particle starts at a different offset
+	std::vector<int> firstNeighVec = { 0, 3, 4, 7, 9 };
+	// Different number of neighbors per particle
+	std::vector<int> numNeighVec = { 3, 1, 3, 2, 3 };
+	// Flat neighbor list storage
+	std::vector<int> neighListVec = {
+		1, 2, 4,      // particle 0 (3 neighbors)
+		0,            // particle 1 (1 neighbor)
+		0, 3, 4,      // particle 2 (3 neighbors)
+		2, 4,         // particle 3 (2 neighbors)
+		0, 2, 3       // particle 4 (3 neighbor)
+	};
+	std::unique_ptr<Neighbor> mockedNeighbor =
+		std::make_unique<MockedNeighbor>(engine, nNeigh, neighListVec, firstNeighVec, numNeighVec);
 	// creating the mockedParticles object
-	std::unique_ptr<Particles> mockedParticles = std::make_unique<MockedParticles>(engine);
+	// put some particles.
+	int nmax = 5;
+	std::vector<double> x = {
+		   150.0,80.0,50.0, // particle 0
+		   150.0,180.0,0.0, // particle 1
+		   0.0,0.0,0.0, // particle 2
+		   0.0,-200.0,0.0, // particle 3
+		   200.0,0.0,0.0, // particle 4
+	};
+	std::vector<double> v = { 
+		  0.0,0.0,0.0, // particle 0
+		  0.0,0.0,0.0, // particle 1
+		  1.0,0.0,0.0, // particle 2
+		  0.0,-1.0,0.0, // particle 3
+		 -1.0,0.0,0.0, // particle 4
+	};
+	std::vector<double> f = { 
+		  0.0,0.0,0.0, // particle 0
+		  0.0,0.0,0.0, // particle 1
+		  0.0,0.0,0.0, // particle 2
+		  0.0,0.0,0.0, // particle 3
+		  0.0,0.0,0.0, // particle 4
+	};
+	std::vector<double> r = { 10,10,100,100,100 };
+	std::vector<double> m = { 5,5,5,10,10 };
+	std::unique_ptr<Particles> mockedParticles = 
+		std::make_unique<MockedParticles>(engine,nmax,x,v,f,r,m);
 	// creating the collision object under test
 	std::unique_ptr<Integrator> colliIntegrator = std::make_unique<ColliIntegrator>(engine);
 	// registering the items
@@ -199,18 +226,22 @@ TEST_CASE("Testing the collision integrator")
 	engine.setItem(std::move(colliIntegrator));
 	// getting the integrator from the engine
 	auto& integratorRef = engine.getIntegrator();
+	// checking if the engine has integrator
+	REQUIRE(integratorRef);
 	// running one integration step
+	std::cout << "b4" << std::endl;
 	integratorRef->post_force();
+	std::cout << "b5" << std::endl;
 	// getting the particle coordinates from the engine
 	auto& particlesRef = engine.getParticles();
 	// checking if the engine has particles
 	REQUIRE(particlesRef);
 	// getting particle coordinates
-	double *x = particlesRef->getXData();
+	double* Xs = particlesRef->getXData();
 	// getting particle velocities 
-	double* v = particlesRef->getVData();
+	double* Vs = particlesRef->getVData();
 	// getting particle forces
-	double* f = particlesRef->getFData();
+	double* Fs = particlesRef->getFData();
 
 
 
@@ -225,9 +256,9 @@ TEST_CASE("Testing the collision integrator")
 	vector<double> expectedXs = { 
 		           150.0,80.0,50.0, // particle 0
 				   150.0,180.0,0.0, // particle 1
-				  -1.66,0.0,0.0, // particle 2
+				  -1.66667,0.0,0.0, // particle 2
 				   0.0,-201.0,0.0, // particle 3
-				   200.33,0.0,0.0, // particle 4
+				   200.33333,0.0,0.0, // particle 4
 	             };
 
 	vector<double> expectedFs = { 
@@ -240,9 +271,9 @@ TEST_CASE("Testing the collision integrator")
 
 
 	for (int i = 0; i < 3*5; i++) {
-		//REQUIRE_THAT(x[i], Catch::Matchers::WithinAbs(expectedXs[i], 1e-6));
-		//REQUIRE_THAT(v[i], Catch::Matchers::WithinAbs(expectedVs[i], 1e-6));
-		//REQUIRE_THAT(f[i], Catch::Matchers::WithinAbs(expectedFs[i], 1e-6));
+	    REQUIRE_THAT(Xs[i], Catch::Matchers::WithinAbs(expectedXs[i], 1e-6));
+		REQUIRE_THAT(Vs[i], Catch::Matchers::WithinAbs(expectedVs[i], 1e-6));
+		REQUIRE_THAT(Fs[i], Catch::Matchers::WithinAbs(expectedFs[i], 1e-6));
 	}
 
 	SUCCEED("Empty test succedded");

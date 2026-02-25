@@ -23,7 +23,6 @@ void ColliIntegrator::post_force()
 }
 
 void ColliIntegrator::deltaVUpdate() {
-
 	// check the distance criteria based on the neighbors
 	auto& neighbor = engine().getNeighbor();
 	// getting particles
@@ -48,6 +47,9 @@ void ColliIntegrator::deltaVUpdate() {
 		dv.resize(3*nlocal);
 	}
 
+
+	std::cout << "b6 " << nNeigh << std::endl;
+
 	for (int ii = 0; ii < nNeigh; ii++) {
 		int i = ii;
 		int numJs = numNeigh[ii];
@@ -68,8 +70,11 @@ void ColliIntegrator::deltaVUpdate() {
 			double r2 = (P.R(i) + P.R(j)) * (P.R(i) + P.R(j));
 			double vrel = (dVX * dX + dVY * dY + dVZ * dZ) / std::sqrt(dist2);
 
+
 			if (dist2 < r2 && vrel < 0)
 			{
+
+				std::cout << "fuck " << i << "," << j << "," << dist2 << "," << vrel << "," << r2 << std::endl;
 				dV(i, 0) = -(2 * P.M(j) / (P.M(i) + P.M(j))) * (dVX * dX + dVY * dY + dVZ * dZ) * dX / dist2;
 				dV(i, 1) = -(2 * P.M(j) / (P.M(i) + P.M(j))) * (dVX * dX + dVY * dY + dVZ * dZ) * dY / dist2;
 				dV(i, 2) = -(2 * P.M(j) / (P.M(i) + P.M(j))) * (dVX * dX + dVY * dY + dVZ * dZ) * dZ / dist2;
