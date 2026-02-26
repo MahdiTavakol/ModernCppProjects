@@ -2,8 +2,8 @@
 #include "test.hpp"
 
 // unittest for the fixList class which orchestrate the fixes
-// the job of the fixList is to keep the fixes and return it
-// and also run them in right times in each step
+// The main job of the fixList is to run each fix at designated time in the timestep
+// It also keeps and returns a reference to fixes.
 // Here we are testing 
 // (1) putting fixes
 // (2) getting fixes

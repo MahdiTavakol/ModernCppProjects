@@ -154,6 +154,7 @@
     <ClCompile Include="test_fixList.cpp" />
     <ClCompile Include="test_integrator.cpp" />
     <ClCompile Include="test_regression.cpp" />
+    <ClCompile Include="test_run.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Box.h" />

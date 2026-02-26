@@ -96,6 +96,9 @@
     <ClCompile Include="test_fixList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="test_run.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="catch_amalgamated.hpp">
