@@ -149,6 +149,8 @@
     <ClCompile Include="Ref.cpp" />
     <ClCompile Include="test_box.cpp" />
     <ClCompile Include="test_colliintegrator.cpp" />
+    <ClCompile Include="test_enginefactory.cpp" />
+    <ClCompile Include="test_error.cpp" />
     <ClCompile Include="test_regression.cpp" />
   </ItemGroup>
   <ItemGroup>

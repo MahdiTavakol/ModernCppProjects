@@ -76,11 +76,6 @@ void Integrator::force() {
 }
 
 void Integrator::post_force() {
- 	auto& fixList = engine().getFixList();
-	for (auto& fix : fixList) {
-		if (fix->mask & POST_FORCE)
-			fix->post_force();
-	}
 }
 
 void Integrator::final_integrate() {

@@ -10,6 +10,9 @@ public:
 	Run(Engine& engine_, double dt_);
 	void setup();
 	void start(int nSteps_, int timestep_ = 0);
+	void start() {
+		start(nSteps, 0);
+	}
 	int getSteps();
 
 private:

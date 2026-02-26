@@ -34,10 +34,18 @@ void Run::setup() {
 }
 void Run::start(int nSteps_, int timestep_ ) {
 	auto& integrator = engine().getIntegrator();
+	if (integrator == nullptr)
+		std::cout << "The integrator is nullptr" << std::endl;
 	auto& run_status = engine().getStatus();
 	auto& fixList = engine().getFixListObj();
+	if (fixList == nullptr)
+		std::cout << "The fixList is nullptr" << std::endl;
 	auto& neighbor = engine().getNeighbor();
+	if (neighbor == nullptr)
+		std::cout << "The neighbor is nullptr" << std::endl;
 	auto& forcefield = engine().getForceField();
+	if (forcefield == nullptr)
+		std::cout << "The forcefield is nullptr" << std::endl;
 	if (run_status == Engine::Run_Status::VERBOSE)
 		std::cout << "Initialization" << std::endl;
 	forcefield->init();
