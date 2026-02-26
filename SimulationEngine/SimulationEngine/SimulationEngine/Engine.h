@@ -59,7 +59,6 @@ public:
 	std::unique_ptr<Particles>& getParticlesForUpdate();
 	std::unique_ptr<Integrator>& getIntegrator();
 	std::unique_ptr<ForceField>& getForceField();
-	std::vector<std::unique_ptr<Fix>>& getFixList();
 	std::unique_ptr<FixList>& getFixListObj();
 	std::unique_ptr<Fix>& returnFixById(std::string id_);
 	std::unique_ptr<Neighbor>& getNeighbor();
@@ -68,10 +67,6 @@ public:
 	void setStatus(const std::string newStatus_);
 	const Run_Status& getStatus() const;
 	std::unique_ptr<Run>& getRunCommand();
-
-	// Running
-	void setupSim();
-	void runSim(int timestep_ = 0);
 
 private:
 	Run_Status run_status = Run_Status::SILENT;
@@ -84,7 +79,6 @@ private:
 	 */
 	std::unique_ptr<ForceField> forcefield;
 	std::unique_ptr<Neighbor> neighbor;
-	std::vector<std::unique_ptr<Fix>> fixList;
 	std::unique_ptr<FixList> fixListObj;
 	std::unique_ptr<Error> error;
 	std::unique_ptr<Run> run;

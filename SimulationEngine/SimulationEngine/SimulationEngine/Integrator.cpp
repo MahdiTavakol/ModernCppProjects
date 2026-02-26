@@ -29,62 +29,10 @@ Integrator::Integrator(Engine& engine_, double dt_) :
 {}
 void Integrator::setDt(double dt_) { dt = dt_; }
 
-void Integrator::init() {
-	// these should be moved to the run class to make things simpler
-	auto& neighbor = engine().getNeighbor();
-	neighbor->init();
-	auto& forcefield = engine().getForceField();
-	forcefield->init();
-	// to be moved to the fixList
-  	auto& fixList = engine().getFixList();
- 	for (auto& fix : fixList) {
-		fix->init();
-	}
-}
-
-void Integrator::setup() {
-	auto& fixList = engine().getFixList();
-	for (auto& fix : fixList) {
-		fix->setup();
-	}
-}
-
-void Integrator::neighbor_build() {
-	auto& neighbor = engine().getNeighbor();
-	neighbor->update();
-}
-
-void Integrator::initial_integrate() {
-	auto& fixList = engine().getFixList();
-	for (auto& fix : fixList) {
-		if (fix->mask & INIT_INTEGRATE)
-			fix->initial_integrate();
-	}
-}
-
-void Integrator::pre_force() {
-	auto& fixList = engine().getFixList();
-	for (auto& fix : fixList) {
-		if (fix->mask & PRE_FORCE)
-			fix->pre_force();
-	}
-}
-
-void Integrator::force() {
- 	auto& forcefield = engine().getForceField();
-	forcefield->update();
-}
 
 void Integrator::post_force() {
 }
 
-void Integrator::final_integrate() {
-	auto& fixList = engine().getFixList();
-	for (auto& fix : fixList) {
-		if (fix->mask & FINAL_INTEGRATE)
-			fix->final_integrate();
-	}
-}
 
 void Integrator::velocityUpdate()
 {

@@ -61,8 +61,7 @@ void Engine::setItem(std::unique_ptr<Ref>&& Ref_) {
 		return;
 	}
 	else if (auto fixPtr = dynamic_cast<Fix*>(Ref_.get())) {
-		//fixList.push_back(std::unique_ptr<Fix>(dynamic_cast<Fix*>(Ref_.release())));
-		// backward compatibility
+		// adding the fix
 		if (fixListObj == nullptr)
 			fixListObj = std::make_unique<FixList>(*this);
 		fixListObj->addFix(std::move(std::unique_ptr<Fix>(dynamic_cast<Fix*>(Ref_.release()))));
@@ -122,9 +121,6 @@ unique_ptr<Particles>& Engine::getParticlesForUpdate() {
 unique_ptr<Integrator>& Engine::getIntegrator() {
 	return integrator;
 }
-vector<unique_ptr<Fix>>& Engine::getFixList() {
-	return fixList;
-}
 std::unique_ptr<FixList>& Engine::getFixListObj()
 {
 	return fixListObj;
@@ -173,21 +169,3 @@ std::unique_ptr<Run>& Engine::getRunCommand() {
 	return run;
 }
 
-void Engine::setupSim() {
-	if (run) {
-		run->setup();
-	}
-	else {
-		throw std::runtime_error("The run command is not set up in the engine!");
-	}
-}
-
-void Engine::runSim(int timestep_) {
-	if (run) {
-		int nSteps = run->getSteps();
-		run->start(nSteps, timestep_);
-	}
-	else {
-		throw std::runtime_error("The run command is not set up in the engine!");
-	}
-}

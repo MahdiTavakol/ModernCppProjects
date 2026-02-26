@@ -18,7 +18,7 @@ Box::Box(Engine& engine_,
 	Ref{ engine_, "Box-1" }
 {
 	auto& error = engine().getError();
-	int narg = args_.size();
+	auto narg = args_.size();
 	if (narg < 7)
 		error->one("Not enough arguments for box command! Expected 7, got " + std::to_string(narg));
 	min = std::array<double, 3>{ std::stod(args_[1]), std::stod(args_[2]), std::stod(args_[3]) };

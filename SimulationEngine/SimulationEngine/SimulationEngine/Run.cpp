@@ -62,12 +62,6 @@ void Run::start(int nSteps_, int timestep_ ) {
 	for (currentStep = timestep_; currentStep < nSteps; currentStep++) {
 		if (run_status == Engine::Run_Status::VERBOSE)
 			std::cout << "Step " << currentStep << std::endl;
-		//integrator->neighbor_build();
-		//integrator->initial_integrate();
-		//integrator->pre_force();
-		//integrator->force();
-		//integrator->post_force();
-		//integrator->final_integrate();
 		fixList->initial_integrate();
 		fixList->pre_force();
 		neighbor->update();

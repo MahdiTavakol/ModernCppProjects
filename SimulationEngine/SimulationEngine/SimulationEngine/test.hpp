@@ -46,10 +46,12 @@ public:
 	void runEngine() {
 		// it possibly has been returned
 		checkPtrs();
+		// getting the run command
+		auto& run_ptr = engine_ptr->getRunCommand();
 		// setting up the simulation
-		engine_ptr->setupSim();
+		run_ptr->setup();
 		// running the simualation
-		engine_ptr->runSim();
+		run_ptr->start();
 	}
 
 	// building and returning the engine
@@ -68,6 +70,36 @@ public:
 		checkPtrs();
 		return engine_ptr->returnFixById(id_);
 	}
+};
+
+class CallNumbersRef : public Ref {
+public:
+	CallNumbersRef(Engine& engine_) :
+		Ref{ engine_,"-1" }
+	{
+	}
+
+	void init() {
+		nInit++;
+	}
+	void setup() {
+		nSetup++;
+	}
+	virtual void initial_integrate() {
+		nTimes++;
+	}
+	virtual void pre_force() {
+	}
+	virtual void post_force() {
+		nTimes++;
+	}
+	virtual void final_integrate() {
+		nTimes++;
+	}
+
+	int nInit = 0;
+	int nSetup = 0;
+	int nTimes = 0;
 };
 
 class MockedBox : public Box {
@@ -241,28 +273,38 @@ public:
 		Integrator{ engine_ }
 	{}
 
-	void init() override {
-		nInit++;
-	};
-	void setup() override {
-		nSetup++;
-	}
-	void neighbor_build() override {}
-	void initial_integrate() override {}
-	void pre_force() override {}
-	void force() override {}
-	void post_force() override {
+	void post_force() override
+	{
 		nTimes++;
-	};
-	void final_integrate() override {};
+	}
 
 	int nTimes = 0;
-	int nInit = 0;
-	int nSetup = 0;
-
 };
 
+class MockedFixCallNum : public CallNumbersRef, public Fix {
+	MockedFixCallNum(Engine& engine_, FixMask mask_, std::string id_) :
+		Fix{ engine_, mask_, id_ },
+		CallNumbersRef{engine_}
+	{}
 
+	void initial_integrate() override {
+		if (mask & INIT_INTEGRATE)
+			nTimes++;
+	}
+	void pre_force()  override {
+		if (mask & PRE_FORCE)
+			nTimes++;
+	}
+	void post_force()  override {
+		if (mask & POST_FORCE)
+			nTimes++;
+	}
+	void final_integrate()  override {
+		if (mask & FINAL_INTEGRATE)
+			nTimes++;
+	}
+
+};
 
 class MockedFix : public Fix {
 public:
@@ -298,3 +340,5 @@ public:
 	int nSetup = 0;
 	int nTimes = 0;
 };
+
+

@@ -76,7 +76,6 @@ std::unique_ptr<Engine> EngineFactory::returnEngine() {
 	engine->setItem(std::move(neighbor));
 	engine->setItem(std::move(particles));
 	engine->setItem(std::move(run));
-	engine->getFixList() = std::move(fixList);
 	engine->setItem(std::move(fixListObj));
 
 	return std::move(engine);
