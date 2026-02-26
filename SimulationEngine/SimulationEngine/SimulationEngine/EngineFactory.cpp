@@ -77,6 +77,8 @@ std::unique_ptr<Engine> EngineFactory::returnEngine() {
 	engine->setItem(std::move(particles));
 	engine->setItem(std::move(run));
 	engine->setItem(std::move(fixList));
+	// injecting dependencies
+	engine->injectDependencies();
 
 	return std::move(engine);
 }

@@ -49,6 +49,9 @@ public:
 
 
 
+
+	// injecting dependencies
+	void injectDependencies();
 	// setting items into the engine, the Ref of the item will be detected by the engine and put into the right place
 	void setItem(std::unique_ptr<Ref>&& Ref_);
 	// getting the item by the Ref, the return Ref is Ref* and needs to be casted to the right Ref by the user

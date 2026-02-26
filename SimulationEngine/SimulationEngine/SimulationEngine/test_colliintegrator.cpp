@@ -64,6 +64,8 @@ TEST_CASE("Testing the collision integrator")
 	engine.setItem(std::move(mockedNeighbor));
 	engine.setItem(std::move(mockedParticles));
 	engine.setItem(std::move(colliIntegrator));
+	// injecting dependencies
+	engine.injectDependencies();
 	// getting the integrator from the engine
 	auto& integratorRef = engine.getIntegrator();
 	// checking if the engine has integrator

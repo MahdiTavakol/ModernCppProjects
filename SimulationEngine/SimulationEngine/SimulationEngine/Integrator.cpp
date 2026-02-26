@@ -27,6 +27,11 @@ Integrator::Integrator(Engine& engine_, double dt_) :
 	Ref{ engine_,"1" },
 	dt{ dt_ }
 {}
+
+void Integrator::injectDependencies() {
+	particles = engine().getParticlesForUpdate().get();
+}
+
 void Integrator::setDt(double dt_) { dt = dt_; }
 
 
@@ -37,25 +42,23 @@ void Integrator::post_force() {
 void Integrator::velocityUpdate()
 {
 	int nlocal, nmax;
-	auto& P = engine().getParticlesForUpdate();
-	P->getNmaxNlocal(nmax, nlocal);
+	particles->getNmaxNlocal(nmax, nlocal);
 
 	for (int i = 0; i < nlocal; i++)
 		for (int j = 0; j < 3; j++)
 		{
-			double a = P->F(i ,j) / P->M(i);
-			P->V(i , j) += dt * a;
+			double a = particles->F(i ,j) / particles->M(i);
+			particles->V(i , j) += dt * a;
 		}
 }
 void Integrator::positionUpdate()
 {
 	int nlocal, nmax;
-	auto& P = engine().getParticlesForUpdate();
-	P->getNmaxNlocal(nmax, nlocal);
+	particles->getNmaxNlocal(nmax, nlocal);
 
 	for (int i = 0; i < nlocal; i++)
 		for (int j = 0; j < 3; j++)
 		{
-			P->X(i, j) += dt * P->V(i, j);
+			particles->X(i, j) += dt * particles->V(i, j);
 		}
 }

@@ -104,6 +104,8 @@ TEST_CASE("Testing the Euler integration in 100 steps for 3 particles under cons
 	for (int i = 0; i < 3; i++) {
 		engineParticles->addParticle(newXs[i], newVs[i], newFs[i], newMs[i]);
 	}
+	// injecting dependencies
+	mockedEngine.injectDependencies();
 	// creating the run object
 	auto run = make_unique<Run>(mockedEngine);
 	// setting it up
@@ -188,6 +190,8 @@ TEST_CASE("Testing the Euler integration in 100 steps for 3 particles under cons
 	for (int i = 0; i < 3; i++) {
 		engineParticles->addParticle(newXs[i], newVs[i], newFs[i], newMs[i]);
 	}
+	// injecting dependencies
+	mockedEngine.injectDependencies();
 	// creating the run object
 	auto run = make_unique<Run>(mockedEngine);
 	// setting it up
@@ -273,6 +277,8 @@ TEST_CASE("Testing the Semi-Euler integration in 100 steps for 3 particles under
 	for (int i = 0; i < 3; i++) {
 		engineParticles->addParticle(newXs[i], newVs[i], newFs[i], newMs[i]);
 	}
+	// injecting dependencies
+	mockedEngine.injectDependencies();
 	// creating the run object
 	auto run = make_unique<Run>(mockedEngine);
 	// setting it up
@@ -357,6 +363,8 @@ TEST_CASE("Testing the Semi-Euler integration in 100 steps for 3 particles under
 	for (int i = 0; i < 3; i++) {
 		engineParticles->addParticle(newXs[i], newVs[i], newFs[i], newMs[i]);
 	}
+	// injecting dependencies
+	mockedEngine.injectDependencies();
 	// creating the run object
 	auto run = make_unique<Run>(mockedEngine);
 	// setting it up

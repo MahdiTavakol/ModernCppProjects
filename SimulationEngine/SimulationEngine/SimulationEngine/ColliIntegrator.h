@@ -10,9 +10,12 @@ class ColliIntegrator : public Integrator {
 public:
 	ColliIntegrator(Engine& engine_, std::vector<std::string> args_);
 	ColliIntegrator(Engine& engine);
-	void post_force() override;
+	void injectDependencies() override;
+ 	void post_force() override;
 
 private:
+	// pointer to neighbors
+	Neighbor* neighbor = nullptr;
 	// delta velocity vector
 	std::vector<double> dv;
 	// the vector capacity (reserve)

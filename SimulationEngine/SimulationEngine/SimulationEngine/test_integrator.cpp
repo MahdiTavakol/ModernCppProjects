@@ -42,6 +42,8 @@ TEST_CASE("Testing the integrator class update positions") {
 	// registering Particles and Integrator objects
 	engine.setItem(std::move(integrator));
 	engine.setItem(std::move(mockedParticles));
+	// injecting dependencies
+	engine.injectDependencies();
 	// calling the update_positions function of the integrator
 	auto& integratorRef = engine.getIntegrator();
 	REQUIRE(integratorRef);
@@ -102,6 +104,8 @@ TEST_CASE("Testing the integrator class update velocities") {
 	// registering Particles and Integrator objects
 	engine.setItem(std::move(integrator));
 	engine.setItem(std::move(mockedParticles));
+	// injecting dependencies
+	engine.injectDependencies();
 	// calling the update_positions function of the integrator
 	auto& integratorRef = engine.getIntegrator();
 	REQUIRE(integratorRef);

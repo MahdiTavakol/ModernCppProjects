@@ -13,6 +13,11 @@ ColliIntegrator::ColliIntegrator(Engine& engine) :
 {
 }
 
+void ColliIntegrator::injectDependencies() {
+	Integrator::injectDependencies();
+	neighbor = engine().getNeighbor().get();
+}
+
 void ColliIntegrator::post_force()
 {
 	Integrator::post_force();
@@ -23,10 +28,6 @@ void ColliIntegrator::post_force()
 }
 
 void ColliIntegrator::deltaVUpdate() {
-	// check the distance criteria based on the neighbors
-	auto& neighbor = engine().getNeighbor();
-	// getting particles
-	auto& particles = engine().getParticlesForUpdate();
 	auto& P = *particles;
 	// getting the neighbor list
 	int nNeigh; 
@@ -83,8 +84,6 @@ void ColliIntegrator::deltaVUpdate() {
 
 void ColliIntegrator::velocityUpdate_2()
 {
-	// particles
-	auto& particles = engine().getParticlesForUpdate();
 	// velocities
 	double* v = particles->getVData();
 	// updating the velocities

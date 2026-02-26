@@ -42,6 +42,11 @@ Engine::Engine(Run_Status& run_status_) :
 
 Engine::~Engine() = default;
 
+// injecting dependencies
+void Engine::injectDependencies() {
+	integrator->injectDependencies();
+}
+
 void Engine::setItem(std::unique_ptr<Ref>&& Ref_) {
 	if (auto boxPtr = dynamic_cast<Box*>(Ref_.get())) {
 		box.reset(dynamic_cast<Box*>(Ref_.release()));
