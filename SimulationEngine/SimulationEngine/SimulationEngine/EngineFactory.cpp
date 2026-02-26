@@ -4,6 +4,7 @@
 #include "Box.h"
 #include "Error.h"
 #include "Fix.h"
+#include "FixList.h"
 #include "ForceField.h"
 #include "Integrator.h"
 #include "Neighbor.h"
@@ -57,6 +58,7 @@ EngineFactory::EngineFactory(std::vector<std::string> args) :
 	neighbor = std::make_unique<Neighbor>(*engine);
 	particles = std::make_unique<Particles>(*engine);
 	run = std::make_unique<Run>(*engine);
+	fixListObj = std::make_unique<FixList>(*engine);
 }
 
 std::unique_ptr<Engine> EngineFactory::returnEngine() {
@@ -75,6 +77,7 @@ std::unique_ptr<Engine> EngineFactory::returnEngine() {
 	engine->setItem(std::move(particles));
 	engine->setItem(std::move(run));
 	engine->getFixList() = std::move(fixList);
+	engine->setItem(std::move(fixListObj));
 
 	return std::move(engine);
 }
@@ -164,6 +167,7 @@ void EngineFactory::buildFix(std::vector<std::string> args_) {
 		(*error) << "fix command needs a type\n";
 	}
 	if (args_[1] == "print") {
+		fixListObj->addFix(make_unique<FixPrint>(*engine, args_));
 		fixList.push_back(make_unique<FixPrint>(*engine, args_));
 	}
 	else {

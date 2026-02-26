@@ -463,7 +463,7 @@ TEST_CASE("Testing fixes invoked at initial_integrate and final_integrate steps"
 	// comparing the results
 	for (int i = 0; i < nSteps; i++) {
 		for (int j = 0; j < 3; j++) {
-			REQUIRE_THAT(expectedXs[i][j], Catch::Matchers::WithinAbs(initXs[i][j], 1e-6));
+ 			REQUIRE_THAT(expectedXs[i][j], Catch::Matchers::WithinAbs(initXs[i][j], 1e-6));
 			REQUIRE_THAT(expectedVs[i][j], Catch::Matchers::WithinAbs(initVs[i][j], 1e-6));
 			REQUIRE_THAT(expectedFs[i][j], Catch::Matchers::WithinAbs(initFs[i][j], 1e-6));
 			REQUIRE_THAT(expectedXs[i + 1][j], Catch::Matchers::WithinAbs(finalXs[i][j], 1e-6));

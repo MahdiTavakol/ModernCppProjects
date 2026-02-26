@@ -24,12 +24,14 @@ Engine::Engine(unique_ptr<Box>& box_,
 	particles{ std::move(particles_) },
 	forcefield{ std::make_unique<ForceField>(*this)},
 	neighbor{ std::make_unique<Neighbor>(*this,0.0)},
-	error{std::make_unique<Error>(*this)}
+	error{std::make_unique<Error>(*this)},
+	fixListObj{std::make_unique<FixList>(*this)}
 {}
 
 Engine::Engine() : 
 	forcefield{std::make_unique<ForceField>(*this)},
-	neighbor{ std::make_unique<Neighbor>(*this,0.0) }
+	neighbor{ std::make_unique<Neighbor>(*this,0.0) },
+	fixListObj{std::make_unique<FixList>(*this)}
 {}
 
 Engine::Engine(Run_Status& run_status_) :
@@ -59,7 +61,11 @@ void Engine::setItem(std::unique_ptr<Ref>&& Ref_) {
 		return;
 	}
 	else if (auto fixPtr = dynamic_cast<Fix*>(Ref_.get())) {
-		fixList.push_back(std::unique_ptr<Fix>(dynamic_cast<Fix*>(Ref_.release())));
+		//fixList.push_back(std::unique_ptr<Fix>(dynamic_cast<Fix*>(Ref_.release())));
+		// backward compatibility
+		if (fixListObj == nullptr)
+			fixListObj = std::make_unique<FixList>(*this);
+		fixListObj->addFix(std::move(std::unique_ptr<Fix>(dynamic_cast<Fix*>(Ref_.release()))));
 		return;
 	}
 	else if (auto prtPtr = dynamic_cast<Particles*>(Ref_.get())) {
@@ -127,6 +133,8 @@ std::unique_ptr<ForceField>& Engine::getForceField() {
 	return forcefield;
 }
 unique_ptr<Fix>& Engine::returnFixById(string id_) {
+	return fixListObj->returnFixById(id_);
+	/*
 	for (auto& fix : fixList) {
 		if (fix->getId() == id_) {
 			return fix;
@@ -134,6 +142,7 @@ unique_ptr<Fix>& Engine::returnFixById(string id_) {
 	}
 	std::string errorMessage = "The fix with id " + id_ + " was not found!";
 	throw std::invalid_argument(errorMessage.c_str());
+	*/
 }
 
 void Engine::setStatus(const std::string newStatus_) {

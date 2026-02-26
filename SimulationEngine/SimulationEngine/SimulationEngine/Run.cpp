@@ -2,6 +2,9 @@
 #include "Integrator.h"
 #include "Error.h"
 #include "Engine.h"
+#include "FixList.h"
+#include "ForceField.h"
+#include "Neighbor.h"
 #include <iostream>
 
 Run::Run(Engine& engine_) :
@@ -32,24 +35,38 @@ void Run::setup() {
 void Run::start(int nSteps_, int timestep_ ) {
 	auto& integrator = engine().getIntegrator();
 	auto& run_status = engine().getStatus();
+	auto& fixList = engine().getFixListObj();
+	auto& neighbor = engine().getNeighbor();
+	auto& forcefield = engine().getForceField();
 	if (run_status == Engine::Run_Status::VERBOSE)
 		std::cout << "Initialization" << std::endl;
-	integrator->init();
+	forcefield->init();
+	neighbor->init();
+	fixList->init();
+	//integrator->init();
 	if (run_status == Engine::Run_Status::VERBOSE)
 		std::cout << "Setting up" << std::endl;
-	integrator->setup();
+	fixList->setup();
+	//integrator->setup();
 	nSteps = nSteps_;
 	if (run_status == Engine::Run_Status::VERBOSE)
 		std::cout << "Running for " << nSteps << " steps" << std::endl;
 	for (currentStep = timestep_; currentStep < nSteps; currentStep++) {
 		if (run_status == Engine::Run_Status::VERBOSE)
 			std::cout << "Step " << currentStep << std::endl;
-		integrator->neighbor_build();
-		integrator->initial_integrate();
-		integrator->pre_force();
-		integrator->force();
+		//integrator->neighbor_build();
+		//integrator->initial_integrate();
+		//integrator->pre_force();
+		//integrator->force();
+		//integrator->post_force();
+		//integrator->final_integrate();
+		fixList->initial_integrate();
+		fixList->pre_force();
+		neighbor->update();
+		forcefield->update();
+		fixList->post_force();
 		integrator->post_force();
-		integrator->final_integrate();
+		fixList->final_integrate();
 	}
 }
 

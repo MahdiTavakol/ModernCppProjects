@@ -8,8 +8,8 @@ class ForceField: public Ref {
 public:
 	ForceField(Engine& engine_, std::vector<std::string> args_);
 	ForceField(Engine& engine_);
-	void init();
-	void update();
+	virtual void init();
+	virtual void update();
 
 protected:
 	virtual void calculate_pair(std::array<double, 3>& dist_,

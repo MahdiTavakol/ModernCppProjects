@@ -120,6 +120,24 @@ private:
 	bool haveIupdatedForces = false;
 };
 
+class MockedForceField2 : public ForceField {
+public:
+	MockedForceField2(Engine& engine_) :
+		ForceField{ engine_ }
+	{}
+
+	virtual void init() override {
+		nInit++;
+	}
+
+	virtual void update() override {
+		nUpdates++;
+	}
+
+	int nInit = 0;
+	int nUpdates = 0;
+};
+
 // MockedNeighbor class
 class MockedNeighbor : public Neighbor {
 public:
@@ -152,6 +170,28 @@ public:
 private:
 	int nNeigh;
 	vector<int> neighListVec, firstNeighVec, numNeighVec;
+};
+
+class MockedNeighbor2 : public Neighbor {
+public:
+	MockedNeighbor2(Engine& engine_):
+		Neighbor{engine_}{}
+
+	void init() override {
+		nInit++;
+	}
+
+	void update() override {
+		nUpdates++;
+	}
+
+	void getNeighborList(int& nNeigh_, int*& neighList_, int*& firstNeigh_, int*& numNeigh_) override
+	{
+		throw std::invalid_argument("This mock type does not support the getNeighborList function!");
+	}
+
+	int nInit = 0;
+	int nUpdates = 0;
 };
 
 // Mocked Particles class
@@ -207,13 +247,13 @@ public:
 	void setup() override {
 		nSetup++;
 	}
-	void neighbor_build() override {};
-	void initial_integrate() override {};
-	void pre_force() override {};
-	void force() override {
+	void neighbor_build() override {}
+	void initial_integrate() override {}
+	void pre_force() override {}
+	void force() override {}
+	void post_force() override {
 		nTimes++;
 	};
-	void post_force() override {};
 	void final_integrate() override {};
 
 	int nTimes = 0;
