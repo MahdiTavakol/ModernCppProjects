@@ -8,6 +8,7 @@ class Box;
 class Particles;
 class Integrator;
 class ForceField;
+class FixList;
 class Error;
 class Fix;
 class Neighbor;
@@ -59,6 +60,7 @@ public:
 	std::unique_ptr<Integrator>& getIntegrator();
 	std::unique_ptr<ForceField>& getForceField();
 	std::vector<std::unique_ptr<Fix>>& getFixList();
+	std::unique_ptr<FixList>& getFixListObj();
 	std::unique_ptr<Fix>& returnFixById(std::string id_);
 	std::unique_ptr<Neighbor>& getNeighbor();
 	std::unique_ptr<Error>& getError();
@@ -83,6 +85,7 @@ private:
 	std::unique_ptr<ForceField> forcefield;
 	std::unique_ptr<Neighbor> neighbor;
 	std::vector<std::unique_ptr<Fix>> fixList;
+	std::unique_ptr<FixList> fixListObj;
 	std::unique_ptr<Error> error;
 	std::unique_ptr<Run> run;
 

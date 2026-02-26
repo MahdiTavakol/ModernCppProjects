@@ -135,6 +135,7 @@
     <ClCompile Include="Error.cpp" />
     <ClCompile Include="EulerIntegrator.cpp" />
     <ClCompile Include="Fix.cpp" />
+    <ClCompile Include="FixList.cpp" />
     <ClCompile Include="FixPrint.cpp" />
     <ClCompile Include="ForceField.cpp" />
     <ClCompile Include="Integrator.cpp" />
@@ -146,6 +147,9 @@
     <ClCompile Include="SpringField.cpp" />
     <ClCompile Include="test.cpp" />
     <ClCompile Include="Ref.cpp" />
+    <ClCompile Include="test_box.cpp" />
+    <ClCompile Include="test_colliintegrator.cpp" />
+    <ClCompile Include="test_regression.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Box.h" />
@@ -155,6 +159,7 @@
     <ClInclude Include="EngineFactory.h" />
     <ClInclude Include="EulerIntegrator.h" />
     <ClInclude Include="Fix.h" />
+    <ClInclude Include="FixList.h" />
     <ClInclude Include="FixPrint.h" />
     <ClInclude Include="ForceField.h" />
     <ClInclude Include="Integrator.h" />
@@ -166,6 +171,7 @@
     <ClInclude Include="SpringField.h" />
     <ClInclude Include="Ref.h" />
     <ClInclude Include="Error.h" />
+    <ClInclude Include="test.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -5,6 +5,7 @@
 #include "Neighbor.h"
 #include "Box.h"
 #include "Fix.h"
+#include "FixList.h"
 #include "Error.h"
 #include "Run.h"
 
@@ -50,6 +51,11 @@ void Engine::setItem(std::unique_ptr<Ref>&& Ref_) {
 	}
 	else if (auto frcPtr = dynamic_cast<ForceField*>(Ref_.get())) {
 		forcefield.reset(dynamic_cast<ForceField*>(Ref_.release()));
+		return;
+	}
+	else if (auto fixListPtr = dynamic_cast<FixList*>(Ref_.get()))
+	{
+		fixListObj.reset(dynamic_cast<FixList*>(Ref_.release()));
 		return;
 	}
 	else if (auto fixPtr = dynamic_cast<Fix*>(Ref_.get())) {
@@ -112,6 +118,10 @@ unique_ptr<Integrator>& Engine::getIntegrator() {
 }
 vector<unique_ptr<Fix>>& Engine::getFixList() {
 	return fixList;
+}
+std::unique_ptr<FixList>& Engine::getFixListObj()
+{
+	return fixListObj;
 }
 std::unique_ptr<ForceField>& Engine::getForceField() {
 	return forcefield;

@@ -30,10 +30,12 @@ Integrator::Integrator(Engine& engine_, double dt_) :
 void Integrator::setDt(double dt_) { dt = dt_; }
 
 void Integrator::init() {
+	// these should be moved to the run class to make things simpler
 	auto& neighbor = engine().getNeighbor();
 	neighbor->init();
 	auto& forcefield = engine().getForceField();
 	forcefield->init();
+	// to be moved to the fixList
   	auto& fixList = engine().getFixList();
  	for (auto& fix : fixList) {
 		fix->init();
