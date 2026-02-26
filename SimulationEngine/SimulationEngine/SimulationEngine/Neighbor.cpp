@@ -27,8 +27,12 @@ Neighbor::Neighbor(Engine& engine_, double neighbor_cutoff_) :
 	neighbor_cutoff{ neighbor_cutoff_ }
 {}
 
+void Neighbor::injectDependencies(Engine& engine_) {
+	Ref::injectDependencies(engine_);
+	particles = engine_.getParticlesForUpdate().get();
+}
+
 void Neighbor::init() {
-	auto& particles = engine().getParticles();
 	int nmax, nlocal;
 	particles->getNmaxNlocal(nmax, nlocal);
 	nNeigh = nlocal;

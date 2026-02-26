@@ -4,6 +4,7 @@
 #include <functional>
 
 class Engine;
+class Error;
 
 // a class to hold shared items among all the classes
 class Ref {
@@ -31,11 +32,13 @@ public:
 	bool operator==(const Ref& other) const;
 
 	virtual ~Ref() = default;
-	virtual void injectDependencies() {};
+	virtual void injectDependencies(Engine& engine_);
 	Engine& engine();
 	const std::string& getId() const;
 
 protected:
+	// Error
+	Error* error;
 	// id used for testing
 	std::string id;
 	// the engineRef

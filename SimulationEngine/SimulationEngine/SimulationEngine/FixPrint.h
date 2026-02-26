@@ -16,6 +16,7 @@ public:
 		std::string variable_ = "x",
 		int particleId_ = 0);
 
+	void injectDependencies(Engine& engine_) override;
 	void init() override;
 	void initial_integrate() override;
 	void pre_force() override;
@@ -24,6 +25,8 @@ public:
 	const std::vector<std::array<double,3>>& getOutputVector() const;
 
 private:
+	// Pointer to Particles
+	Particles* particles;
 	double* inData = nullptr;
 	std::string variable;
 	int particleId;

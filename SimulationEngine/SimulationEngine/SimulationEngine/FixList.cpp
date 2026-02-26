@@ -8,6 +8,12 @@ FixList::FixList(Engine& engine_):
 
 FixList::~FixList() = default;
 
+void FixList::injectDependencies(Engine& engine_) {
+	Ref::injectDependencies(engine_);
+	for (auto& fix : fixVec)
+		fix->injectDependencies(engine_);
+}
+
 void FixList::addFix(std::unique_ptr<Fix>&& fix_) {
 	fixVec.push_back(std::move(fix_));
 }

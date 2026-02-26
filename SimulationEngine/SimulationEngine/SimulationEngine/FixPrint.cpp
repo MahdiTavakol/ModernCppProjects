@@ -32,17 +32,21 @@ FixPrint::FixPrint(Engine& engine_,
 	mask = mask_;
 }
 
+void FixPrint::injectDependencies(Engine& engine_) {
+	Ref::injectDependencies(engine_);
+	particles = engine_.getParticlesForUpdate().get();
+}
+
 void FixPrint::init()
 {
-	auto& particle = engine().getParticles();
 	if (variable == "x") {
-		inData = particle->getXData();
+		inData = particles->getXData();
 	}
 	else if (variable == "v") {
-		inData = particle->getVData();
+		inData = particles->getVData();
 	}
 	else if (variable == "f") {
-		inData = particle->getFData();
+		inData = particles->getFData();
 	}
 
 }

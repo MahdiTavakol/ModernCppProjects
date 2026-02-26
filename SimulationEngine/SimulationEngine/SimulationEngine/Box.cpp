@@ -25,6 +25,9 @@ Box::Box(Engine& engine_,
 	max = std::array<double, 3>{ std::stod(args_[4]), std::stod(args_[5]), std::stod(args_[6]) };
 }
 
+void Box::injectDependencies(Engine& engine_) {
+
+}
 
 void Box::getDimensions(std::array<double, 3>& min_,
 	std::array<double, 3>& max_) const {

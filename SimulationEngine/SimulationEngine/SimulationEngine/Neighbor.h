@@ -8,12 +8,15 @@ public:
 	Neighbor(Engine& engine_, std::vector<std::string> args_);
 	Neighbor(Engine& engine_);
 	Neighbor(Engine& engine_, double neighbor_cutoff_);
+	virtual void injectDependencies(Engine& engine_) override;
 	virtual void init();
 	virtual void update() {}
 	virtual void getNeighborList(int& nNeigh_, int*& neighList_, int*& firstNeigh_, int*& numNeigh_);
 	double getCutoff() const { return neighbor_cutoff; }
 
 protected:
+	// Particles pointer
+	Particles* particles;
 	int nNeigh;
 	std::vector<int> neighList, numNeigh, firstNeigh;
 	double neighbor_cutoff;

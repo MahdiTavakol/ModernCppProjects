@@ -14,10 +14,9 @@ void SimpleNeighbor::init() {
 }
 
 void SimpleNeighbor::update() {
-	auto& P = engine().getParticles();
 	int nmax, nlocal;
-	P->getNmaxNlocal(nmax, nlocal);
-	auto x = P->getXData();
+	particles->getNmaxNlocal(nmax, nlocal);
+	auto x = particles->getXData();
 	nNeigh = nlocal;
 	neighList.resize(nlocal * nlocal);
 	firstNeigh.reserve(nlocal);

@@ -11,6 +11,7 @@ public:
 	FixList(Engine& engine_, std::vector<std::string>& args_);
 	virtual ~FixList();
 
+	void injectDependencies(Engine& engine_) override;
 	void addFix(std::unique_ptr<Fix>&& fix_);
 	std::unique_ptr<Fix>& returnFixById(std::string id_);
 

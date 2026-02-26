@@ -1,4 +1,5 @@
 #include "Ref.h"
+#include "Engine.h"
 
 Ref::Ref(Engine& engine_, std::string id_) :
 	id{ id_ },
@@ -36,8 +37,8 @@ bool Ref::operator==(const Ref& other) const
 	return id == other.id && (&(engineRef.get())) == (&(engineRef.get()));
 }
 
-void Engine::injectDependencies(Engine& engine_) {
-	error 
+void Ref::injectDependencies(Engine& engine_) {
+	error = engine_.getError().get();
 }
 
 Engine& Ref::engine() {

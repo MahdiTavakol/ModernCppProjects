@@ -19,6 +19,7 @@ ForceField::ForceField(Engine& engine_) :
 {}
 
 void ForceField::injectDependencies(Engine& engine_) {
+	Ref::injectDependencies(engine_);
 	box = engine_.getBox().get();
 	particles = engine_.getParticlesForUpdate().get();
 }

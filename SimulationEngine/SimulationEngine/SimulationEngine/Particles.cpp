@@ -36,7 +36,7 @@ Particles::Particles(Engine& engine_, std::vector<std::string> args_):
 }
 
 void Particles::injectDependencies(Engine& engine_) {
-	error = engine_.getError().get();
+	Ref::injectDependencies(engine_);
 }
 
 void Particles::addParticle(std::array<double, 3> newX_,

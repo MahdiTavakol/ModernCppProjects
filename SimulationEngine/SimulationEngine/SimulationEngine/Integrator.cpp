@@ -29,6 +29,7 @@ Integrator::Integrator(Engine& engine_, double dt_) :
 {}
 
 void Integrator::injectDependencies(Engine& engine_) {
+	Ref::injectDependencies(engine_);
 	particles = engine_.getParticlesForUpdate().get();
 }
 

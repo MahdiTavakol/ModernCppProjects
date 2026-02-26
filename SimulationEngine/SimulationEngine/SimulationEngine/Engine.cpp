@@ -47,6 +47,9 @@ void Engine::injectDependencies() {
 	integrator->injectDependencies(*this);
 	particles->injectDependencies(*this);
 	forcefield->injectDependencies(*this);
+	fixList->injectDependencies(*this);
+	neighbor->injectDependencies(*this);
+	box->injectDependencies(*this);
 }
 
 void Engine::setItem(std::unique_ptr<Ref>&& Ref_) {
