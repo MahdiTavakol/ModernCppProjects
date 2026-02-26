@@ -96,6 +96,10 @@ public:
 		ForceField{engine_},
 		force{std::move(forces_)}
 	{}
+	MockedForceField(Engine& engine_) :
+		ForceField{ engine_ },
+		haveIupdatedForces{ true }
+	{}
 	void calculate_pair(std::array<double, 3>& dist_,
 		double* fforce_, double& energy_) override
 	{
@@ -134,7 +138,12 @@ public:
 		firstNeighVec{ std::move(firstNeighVec_) },
 		numNeighVec{ std::move(numNeighVec_) }
 	{}
+	MockedNeighbor(Engine& engine_):
+		Neighbor{engine_},
+		nNeigh{0}
+	{}
 	~MockedNeighbor() = default;
+	void init() override {}
 	void getNeighborList(int& nNeigh_, int*& neighList_, int*& firstNeigh_, int*& numNeigh_) override {
 		nNeigh_ = nNeigh;
 		neighList_ = neighListVec.data();
@@ -184,6 +193,40 @@ public:
 	}
 };
 
+class MockedFix : public Fix {
+public:
+	MockedFix(Engine& engine_, FixMask mask_, std::string id_):
+		Fix{engine_, mask_, id_}
+	{ }
+
+	void init() override {
+		nInit++;
+	}
+	void setup() override {
+		nSetup++;
+	}
+	void initial_integrate() override {
+		if (mask & INIT_INTEGRATE)
+			nTimes++;
+	}
+	void pre_force()  override {
+		if (mask & PRE_FORCE)
+			nTimes++;
+	}
+	void post_force()  override {
+		if (mask & POST_FORCE)
+			nTimes++;
+	}
+	void final_integrate()  override {
+		if (mask & FINAL_INTEGRATE)
+			nTimes++;
+	}
+
+	int nInit = 0;
+	int nSetup = 0;
+	int nTimes = 0;
+};
+
 
 // box unittests
 TEST_CASE("Testing a box object") {
@@ -214,6 +257,7 @@ TEST_CASE("Testing a box object") {
 TEST_CASE("Testing the collision integrator")
 {
 	std::cout << "Testing the collision integrator" << std::endl;
+	std::cout << std::string(80, '=') << std::endl;
 	// creating the engine
 	Engine engine;
 	// creating the mockedNeighbor object
@@ -319,6 +363,8 @@ TEST_CASE("Testing the collision integrator")
 
 // integrator unittest
 TEST_CASE("Testing the integrator class update positions") {
+	std::cout << "Testing the integrator class update positions" << std::endl;
+	std::cout << std::string(80, '=') << std::endl;
 	// creating the engine
 	Engine engine;
 	// put some particles.
@@ -433,6 +479,88 @@ TEST_CASE("Testing the integrator class update velocities") {
 	// checking
 	for (int i = 0; i < x.size(); i++)
 		REQUIRE_THAT(Vs[i], Catch::Matchers::WithinAbs(expectedVs[i], 1e-6));
+}
+
+// integrator unittest for orchasterating fixes
+TEST_CASE("Integrator unittest for orchasterating fixes")
+{
+	std::cout << "Integrator unittest for orchasterating fixes" << std::endl;
+	// 
+	constexpr int nInit = 8;
+	constexpr int nSetup = 5;
+	constexpr int nInitInt = 10;
+	constexpr int nPreForce = 7;
+	constexpr int nPostForce = 13;
+	constexpr int nFinInt = 3;
+	// building the mocked engine
+	Engine engine;
+	// building the mockedFixes
+	std::unique_ptr<Fix> fix1 = std::make_unique<MockedFix>(engine, FixMask::INIT_INTEGRATE,"1");
+	std::unique_ptr<Fix> fix2 = std::make_unique<MockedFix>(engine, FixMask::PRE_FORCE,"2");
+	std::unique_ptr<Fix> fix3 = std::make_unique<MockedFix>(engine, FixMask::POST_FORCE,"3");
+	std::unique_ptr<Fix> fix4 = std::make_unique<MockedFix>(engine, FixMask::FINAL_INTEGRATE,"4");
+	// registering those fixes
+	engine.setItem(std::move(fix1));
+	engine.setItem(std::move(fix2));
+	engine.setItem(std::move(fix3));
+	engine.setItem(std::move(fix4));
+	// creating the integrator
+	std::unique_ptr<Integrator> integrator = std::make_unique<Integrator>(engine);
+	// regisetering the integrator
+	engine.setItem(std::move(integrator));
+	// the rest of required mocks
+	std::unique_ptr<Neighbor> mockedNeighbor = std::make_unique<MockedNeighbor>(engine);
+	std::unique_ptr<ForceField> mockedForceField = std::make_unique<MockedForceField>(engine);
+	engine.setItem(std::move(mockedNeighbor));
+	engine.setItem(std::move(mockedForceField));
+	// returning the integrator and mocked fixes
+	auto& integratorRef = engine.getIntegrator();
+	auto& fix1ref = engine.returnFixById("1");
+	auto& fix2ref = engine.returnFixById("2");
+	auto& fix3ref = engine.returnFixById("3");
+	auto& fix4ref = engine.returnFixById("4");
+	// checking if they are present
+	REQUIRE(integratorRef);
+	REQUIRE(fix1ref);
+	REQUIRE(fix2ref);
+	REQUIRE(fix3ref);
+	REQUIRE(fix4ref);
+	// coverting the fixrefs
+	MockedFix* fix1mockRef = dynamic_cast<MockedFix*>(fix1ref.get());
+	MockedFix* fix2mockRef = dynamic_cast<MockedFix*>(fix2ref.get());
+	MockedFix* fix3mockRef = dynamic_cast<MockedFix*>(fix3ref.get());
+	MockedFix* fix4mockRef = dynamic_cast<MockedFix*>(fix4ref.get());
+	// checking the mockedfixrefs
+	REQUIRE(fix1mockRef);
+	REQUIRE(fix2mockRef);
+	REQUIRE(fix3mockRef);
+	REQUIRE(fix4mockRef);
+	// calling the differnt functions various times.
+	for (int i = 0; i < nInit; i++)
+		integratorRef->init();
+	for (int i = 0; i < nSetup; i++)
+		integratorRef->setup();
+	for (int i = 0; i < nInitInt; i++)
+		integratorRef->initial_integrate();
+	for (int i = 0; i < nPreForce; i++)
+		integratorRef->pre_force();
+	for (int i = 0; i < nPostForce; i++)
+		integratorRef->post_force();
+	for (int i = 0; i < nFinInt; i++)
+		integratorRef->final_integrate();
+	// checking the output
+	REQUIRE(fix1mockRef->nInit == nInit);
+	REQUIRE(fix2mockRef->nInit == nInit);
+	REQUIRE(fix3mockRef->nInit == nInit);
+	REQUIRE(fix4mockRef->nInit == nInit);
+	REQUIRE(fix1mockRef->nSetup == nSetup);
+	REQUIRE(fix2mockRef->nSetup == nSetup);
+	REQUIRE(fix3mockRef->nSetup == nSetup);
+	REQUIRE(fix4mockRef->nSetup == nSetup);
+	REQUIRE(fix1mockRef->nTimes == nInitInt);
+	REQUIRE(fix2mockRef->nTimes == nPreForce);
+	REQUIRE(fix3mockRef->nTimes == nPostForce);
+	REQUIRE(fix4mockRef->nTimes == nFinInt);
 }
 
 TEST_CASE("Starting and registering each class of the Engine class with minimal input args")

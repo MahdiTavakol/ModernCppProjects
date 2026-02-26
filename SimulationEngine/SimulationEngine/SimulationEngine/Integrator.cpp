@@ -35,7 +35,7 @@ void Integrator::init() {
 	auto& forcefield = engine().getForceField();
 	forcefield->init();
   	auto& fixList = engine().getFixList();
-	for (auto& fix : fixList) {
+ 	for (auto& fix : fixList) {
 		fix->init();
 	}
 }

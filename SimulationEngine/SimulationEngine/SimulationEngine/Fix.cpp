@@ -1,6 +1,15 @@
 #include "Fix.h"
 #include "Error.h"
 
+Fix::Fix(Engine& engine_):
+	Ref{engine_,"1"}
+{}
+
+Fix::Fix(Engine& engine_, FixMask mask_, std::string id_) :
+	Ref{ engine_,id_ },
+	mask{ mask_ }
+{}
+
 Fix::Fix(Engine& engine_, std::vector<std::string>& args_):
 	Ref{ engine_, args_[0] },
 	nevery{ 1 }
