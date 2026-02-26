@@ -25,13 +25,13 @@ Engine::Engine(unique_ptr<Box>& box_,
 	forcefield{ std::make_unique<ForceField>(*this)},
 	neighbor{ std::make_unique<Neighbor>(*this,0.0)},
 	error{std::make_unique<Error>(*this)},
-	fixListObj{std::make_unique<FixList>(*this)}
+	fixList{std::make_unique<FixList>(*this)}
 {}
 
 Engine::Engine() : 
 	forcefield{std::make_unique<ForceField>(*this)},
 	neighbor{ std::make_unique<Neighbor>(*this,0.0) },
-	fixListObj{std::make_unique<FixList>(*this)}
+	fixList{std::make_unique<FixList>(*this)}
 {}
 
 Engine::Engine(Run_Status& run_status_) :
@@ -57,14 +57,14 @@ void Engine::setItem(std::unique_ptr<Ref>&& Ref_) {
 	}
 	else if (auto fixListPtr = dynamic_cast<FixList*>(Ref_.get()))
 	{
-		fixListObj.reset(dynamic_cast<FixList*>(Ref_.release()));
+		fixList.reset(dynamic_cast<FixList*>(Ref_.release()));
 		return;
 	}
 	else if (auto fixPtr = dynamic_cast<Fix*>(Ref_.get())) {
 		// adding the fix
-		if (fixListObj == nullptr)
-			fixListObj = std::make_unique<FixList>(*this);
-		fixListObj->addFix(std::move(std::unique_ptr<Fix>(dynamic_cast<Fix*>(Ref_.release()))));
+		if (fixList == nullptr)
+			fixList = std::make_unique<FixList>(*this);
+		fixList->addFix(std::move(std::unique_ptr<Fix>(dynamic_cast<Fix*>(Ref_.release()))));
 		return;
 	}
 	else if (auto prtPtr = dynamic_cast<Particles*>(Ref_.get())) {
@@ -121,24 +121,15 @@ unique_ptr<Particles>& Engine::getParticlesForUpdate() {
 unique_ptr<Integrator>& Engine::getIntegrator() {
 	return integrator;
 }
-std::unique_ptr<FixList>& Engine::getFixListObj()
+std::unique_ptr<FixList>& Engine::getFixList()
 {
-	return fixListObj;
+	return fixList;
 }
 std::unique_ptr<ForceField>& Engine::getForceField() {
 	return forcefield;
 }
 unique_ptr<Fix>& Engine::returnFixById(string id_) {
-	return fixListObj->returnFixById(id_);
-	/*
-	for (auto& fix : fixList) {
-		if (fix->getId() == id_) {
-			return fix;
-		}
-	}
-	std::string errorMessage = "The fix with id " + id_ + " was not found!";
-	throw std::invalid_argument(errorMessage.c_str());
-	*/
+	return fixList->returnFixById(id_);
 }
 
 void Engine::setStatus(const std::string newStatus_) {

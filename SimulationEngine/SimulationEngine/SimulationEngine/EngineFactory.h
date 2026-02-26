@@ -34,8 +34,7 @@ private:
 	// the items created by the factory to be added to the engine
 	std::unique_ptr<Box> box;
 	std::unique_ptr<Error> error;
-	std::vector<std::unique_ptr<Fix>> fixList;
-	std::unique_ptr<FixList> fixListObj;
+	std::unique_ptr<FixList> fixList;
 	std::unique_ptr<ForceField> forcefield;
 	std::unique_ptr<Integrator> integrator;
 	std::unique_ptr<Neighbor> neighbor;

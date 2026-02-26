@@ -59,7 +59,7 @@ public:
 	std::unique_ptr<Particles>& getParticlesForUpdate();
 	std::unique_ptr<Integrator>& getIntegrator();
 	std::unique_ptr<ForceField>& getForceField();
-	std::unique_ptr<FixList>& getFixListObj();
+	std::unique_ptr<FixList>& getFixList();
 	std::unique_ptr<Fix>& returnFixById(std::string id_);
 	std::unique_ptr<Neighbor>& getNeighbor();
 	std::unique_ptr<Error>& getError();
@@ -79,7 +79,7 @@ private:
 	 */
 	std::unique_ptr<ForceField> forcefield;
 	std::unique_ptr<Neighbor> neighbor;
-	std::unique_ptr<FixList> fixListObj;
+	std::unique_ptr<FixList> fixList;
 	std::unique_ptr<Error> error;
 	std::unique_ptr<Run> run;
 

@@ -37,7 +37,7 @@ void Run::start(int nSteps_, int timestep_ ) {
 	if (integrator == nullptr)
 		std::cout << "The integrator is nullptr" << std::endl;
 	auto& run_status = engine().getStatus();
-	auto& fixList = engine().getFixListObj();
+	auto& fixList = engine().getFixList();
 	if (fixList == nullptr)
 		std::cout << "The fixList is nullptr" << std::endl;
 	auto& neighbor = engine().getNeighbor();

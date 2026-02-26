@@ -90,6 +90,12 @@
     <ClCompile Include="test_enginefactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="test_integrator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test_fixList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="catch_amalgamated.hpp">

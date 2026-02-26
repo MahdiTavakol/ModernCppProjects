@@ -58,7 +58,7 @@ EngineFactory::EngineFactory(std::vector<std::string> args) :
 	neighbor = std::make_unique<Neighbor>(*engine);
 	particles = std::make_unique<Particles>(*engine);
 	run = std::make_unique<Run>(*engine);
-	fixListObj = std::make_unique<FixList>(*engine);
+	fixList = std::make_unique<FixList>(*engine);
 }
 
 std::unique_ptr<Engine> EngineFactory::returnEngine() {
@@ -76,7 +76,7 @@ std::unique_ptr<Engine> EngineFactory::returnEngine() {
 	engine->setItem(std::move(neighbor));
 	engine->setItem(std::move(particles));
 	engine->setItem(std::move(run));
-	engine->setItem(std::move(fixListObj));
+	engine->setItem(std::move(fixList));
 
 	return std::move(engine);
 }
@@ -166,8 +166,7 @@ void EngineFactory::buildFix(std::vector<std::string> args_) {
 		(*error) << "fix command needs a type\n";
 	}
 	if (args_[1] == "print") {
-		fixListObj->addFix(make_unique<FixPrint>(*engine, args_));
-		fixList.push_back(make_unique<FixPrint>(*engine, args_));
+		fixList->addFix(make_unique<FixPrint>(*engine, args_));
 	}
 	else {
 		(*error) << "Unknown fix type: " << args_[1] << std::endl;
