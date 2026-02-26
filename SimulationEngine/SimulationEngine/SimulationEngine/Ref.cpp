@@ -36,6 +36,10 @@ bool Ref::operator==(const Ref& other) const
 	return id == other.id && (&(engineRef.get())) == (&(engineRef.get()));
 }
 
+void Engine::injectDependencies(Engine& engine_) {
+	error 
+}
+
 Engine& Ref::engine() {
 	return engineRef.get();
 }

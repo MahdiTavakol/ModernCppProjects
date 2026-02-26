@@ -46,6 +46,7 @@ Engine::~Engine() = default;
 void Engine::injectDependencies() {
 	integrator->injectDependencies(*this);
 	particles->injectDependencies(*this);
+	forcefield->injectDependencies(*this);
 }
 
 void Engine::setItem(std::unique_ptr<Ref>&& Ref_) {
