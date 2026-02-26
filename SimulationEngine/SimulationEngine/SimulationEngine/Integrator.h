@@ -9,7 +9,7 @@ public:
 		std::vector<std::string> args_);
 	Integrator(Engine& engine_);
 	Integrator(Engine& engine_, double dt_);
-	virtual void injectDependencies();
+	virtual void injectDependencies(Engine& engine_) override;
 	void setDt(double dt_);
 	virtual void post_force();
 

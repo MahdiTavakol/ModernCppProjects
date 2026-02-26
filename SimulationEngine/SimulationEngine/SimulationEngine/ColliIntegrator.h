@@ -10,7 +10,7 @@ class ColliIntegrator : public Integrator {
 public:
 	ColliIntegrator(Engine& engine_, std::vector<std::string> args_);
 	ColliIntegrator(Engine& engine);
-	void injectDependencies() override;
+	void injectDependencies(Engine& engine_) override;
  	void post_force() override;
 
 private:

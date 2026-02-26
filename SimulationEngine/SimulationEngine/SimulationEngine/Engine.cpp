@@ -44,7 +44,8 @@ Engine::~Engine() = default;
 
 // injecting dependencies
 void Engine::injectDependencies() {
-	integrator->injectDependencies();
+	integrator->injectDependencies(*this);
+	particles->injectDependencies(*this);
 }
 
 void Engine::setItem(std::unique_ptr<Ref>&& Ref_) {

@@ -28,8 +28,8 @@ Integrator::Integrator(Engine& engine_, double dt_) :
 	dt{ dt_ }
 {}
 
-void Integrator::injectDependencies() {
-	particles = engine().getParticlesForUpdate().get();
+void Integrator::injectDependencies(Engine& engine_) {
+	particles = engine_.getParticlesForUpdate().get();
 }
 
 void Integrator::setDt(double dt_) { dt = dt_; }

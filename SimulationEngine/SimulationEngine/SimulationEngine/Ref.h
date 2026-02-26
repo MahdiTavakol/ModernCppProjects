@@ -31,6 +31,7 @@ public:
 	bool operator==(const Ref& other) const;
 
 	virtual ~Ref() = default;
+	virtual void injectDependencies(Engine& engine_) {};
 	Engine& engine();
 	const std::string& getId() const;
 

@@ -13,9 +13,9 @@ ColliIntegrator::ColliIntegrator(Engine& engine) :
 {
 }
 
-void ColliIntegrator::injectDependencies() {
-	Integrator::injectDependencies();
-	neighbor = engine().getNeighbor().get();
+void ColliIntegrator::injectDependencies(Engine& engine_) {
+	Integrator::injectDependencies(engine_);
+	neighbor = engine_.getNeighbor().get();
 }
 
 void ColliIntegrator::post_force()

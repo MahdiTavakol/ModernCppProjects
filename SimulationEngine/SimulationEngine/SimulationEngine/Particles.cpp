@@ -35,6 +35,10 @@ Particles::Particles(Engine& engine_, std::vector<std::string> args_):
 	nmax = std::stoi(args_[1]);
 }
 
+void Particles::injectDependencies(Engine& engine_) {
+	error = engine_.getError().get();
+}
+
 void Particles::addParticle(std::array<double, 3> newX_,
 	std::array<double, 3> newV_ ,
 	std::array<double, 3> newF_ ,

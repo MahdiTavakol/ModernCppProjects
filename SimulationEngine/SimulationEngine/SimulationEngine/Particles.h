@@ -12,6 +12,7 @@ public:
 	Particles(Engine& engine_);
 	Particles(Engine& engine_, int nmax_);
 	Particles(Engine& engine_, std::vector<std::string> args_);
+	void injectDependencies(Engine& engine_) override;
 	void addParticle(std::array<double, 3> newX_,
 		std::array<double, 3> newV_ = { 0.0,0.0,0.0 },
 		std::array<double, 3> newF_ = { 0.0,0.0,0.0 },
@@ -48,6 +49,8 @@ public:
 	}
 
 protected:
+	// pointer to errors
+	Error* error;
 	int nmax;
 	std::vector<double> x;
 	std::vector<double> v;
