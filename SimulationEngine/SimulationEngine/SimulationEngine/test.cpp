@@ -77,6 +77,49 @@ public:
 	}
 };
 
+class MockedBox : public Box {
+public:
+	MockedBox(Engine& engine_,
+		std::array<double,3> min_, std::array<double,3> max_):
+		Box{engine_},
+		min{std::move(min_)},
+		max{std::move(max_)}
+	{ }
+private:
+	std::array<double, 3> min, max;
+};
+
+class MockedForceField : public ForceField {
+public:
+	MockedForceField(Engine& engine_,
+		             std::vector<double> forces_):
+		ForceField{engine_},
+		force{std::move(forces_)}
+	{}
+	void calculate_pair(std::array<double, 3>& dist_,
+		double* fforce_, double& energy_) override
+	{
+		if (haveIupdatedForces)
+			return;
+		auto& box = engine().getBox();
+		auto& P = engine().getParticlesForUpdate();
+		int nmax, nlocal;
+		P->getNmaxNlocal(nmax, nlocal);
+		int nlocalForces = static_cast<int>(force.size() / 3);
+		if (nlocal != force.size())
+			throw std::invalid_argument("Wrong force vector size!");
+		for (int i = 0; i < nlocal; i++) {
+			P->F(i, 0) = force[3 * i];
+			P->F(i, 1) = force[3 * i + 1];
+			P->F(i, 2) = force[3 * i + 2];
+		}
+		haveIupdatedForces = true;
+	}
+private:
+	std::vector<double> force;
+	bool haveIupdatedForces = false;
+};
+
 // MockedNeighbor class
 class MockedNeighbor : public Neighbor {
 public:
@@ -127,36 +170,37 @@ public:
 private:
 };
 
+class MockedIntegrator : public Integrator
+{
+public:
+	MockedIntegrator(Engine& engine_):
+		Integrator{engine_}
+	{ }
+	void updateX() {
+		positionUpdate();
+	}
+	void updateV() {
+		velocityUpdate();
+	}
+};
+
 
 // box unittests
 TEST_CASE("Testing a box object") {
 	std::cout << "Testing the box object" << std::endl;
 	std::cout << std::string(80, '=') << std::endl;
 
-	class MockedEngine : public Engine
-	{
-	public:
-		MockedEngine() = default;
-		void registerBox(std::unique_ptr<Box>&& newBox_) {
-			box = std::move(newBox_);
-		}
-		std::unique_ptr<Box>& getBox() {
-			return box;
-		}
-	private:
-		std::unique_ptr<Box> box;
-	};
-	// creating a mockedEngine
-	MockedEngine mockedEngine;
+	// Engine
+	Engine engine;
 	// box dimensions
 	array<double, 3> min = { 0.0,0.0,0.0 };
 	array<double, 3> max = { 10.0,10.0,10.0 };
 	// box 
-	auto box = make_unique<Box>(mockedEngine, min, max);
+	auto box = make_unique<Box>(engine, min, max);
 	// registering the box
-	mockedEngine.registerBox(std::move(box));
+	engine.setItem(std::move(box));
 	// getting the box
-	auto& boxPtr = mockedEngine.getBox();
+	auto& boxPtr = engine.getBox();
 	// getting rmin and rmax
 	array<double, 3> bMin;
 	array<double, 3> bMax;
@@ -170,8 +214,6 @@ TEST_CASE("Testing a box object") {
 TEST_CASE("Testing the collision integrator")
 {
 	std::cout << "Testing the collision integrator" << std::endl;
-
-
 	// creating the engine
 	Engine engine;
 	// creating the mockedNeighbor object
@@ -214,7 +256,7 @@ TEST_CASE("Testing the collision integrator")
 		  0.0,0.0,0.0, // particle 3
 		  0.0,0.0,0.0, // particle 4
 	};
-	std::vector<double> r = { 10,10,100,100,100 };
+	std::vector<double> r = { 1,10,100,100,100 };
 	std::vector<double> m = { 5,5,5,10,10 };
 	std::unique_ptr<Particles> mockedParticles = 
 		std::make_unique<MockedParticles>(engine,nmax,x,v,f,r,m);
@@ -229,9 +271,7 @@ TEST_CASE("Testing the collision integrator")
 	// checking if the engine has integrator
 	REQUIRE(integratorRef);
 	// running one integration step
-	std::cout << "b4" << std::endl;
 	integratorRef->post_force();
-	std::cout << "b5" << std::endl;
 	// getting the particle coordinates from the engine
 	auto& particlesRef = engine.getParticles();
 	// checking if the engine has particles
@@ -248,17 +288,17 @@ TEST_CASE("Testing the collision integrator")
 	vector<double> expectedVs = { 
 		          0.0,0.0,0.0, // particle 0
 				  0.0,0.0,0.0, // particle 1
-				 -1.66,0.0,0.0, // particle 2
+				 -1.66666666666666666,0.0,0.0, // particle 2
 				  0.0,-1.0,0.0, // particle 3
-				  0.33,0.0,0.0, // particle 4
+				  0.33333333333333333,0.0,0.0, // particle 4
 	             };
 
 	vector<double> expectedXs = { 
 		           150.0,80.0,50.0, // particle 0
 				   150.0,180.0,0.0, // particle 1
-				  -1.66667,0.0,0.0, // particle 2
+				  -1.6666666666666666,0.0,0.0, // particle 2
 				   0.0,-201.0,0.0, // particle 3
-				   200.33333,0.0,0.0, // particle 4
+				   200.333333333333333,0.0,0.0, // particle 4
 	             };
 
 	vector<double> expectedFs = { 
@@ -275,8 +315,124 @@ TEST_CASE("Testing the collision integrator")
 		REQUIRE_THAT(Vs[i], Catch::Matchers::WithinAbs(expectedVs[i], 1e-6));
 		REQUIRE_THAT(Fs[i], Catch::Matchers::WithinAbs(expectedFs[i], 1e-6));
 	}
+}
 
-	SUCCEED("Empty test succedded");
+// integrator unittest
+TEST_CASE("Testing the integrator class update positions") {
+	// creating the engine
+	Engine engine;
+	// put some particles.
+	constexpr int nmax = 5;
+	constexpr int nlocal = 5;
+	std::vector<double> x = {
+		   100.0,30.0,40.0, // particle 0
+		  -150.0,200.0,-10.0, // particle 1
+		   5.0,7.5,200.95, // particle 2
+		   0.0,-349.5,1000.54, // particle 3
+		   230.5,0.95,145.78, // particle 4
+	};
+	std::vector<double> v = {
+	  42.73,  -88.19,   15.64,   // particle 0
+	 -73.52,   94.07,  -36.28,   // particle 1
+	  11.95,  -59.83,   78.44,   // particle 2
+	 -98.61,   23.17,  -44.92,   // particle 3
+	  67.08,  -12.54,   99.31,   // particle 4
+	};
+	std::vector<double> f;
+	std::vector<double> r;
+	std::vector<double> m;
+	f.resize(3 * nlocal);
+	r.resize(3 * nlocal);
+	m.resize(3 * nlocal);
+	std::unique_ptr<Particles> mockedParticles =
+		std::make_unique<MockedParticles>(engine, nmax, x, v, f, r, m);
+	// the integrator instance
+	constexpr double dt = 1.0;
+	std::unique_ptr<Integrator> integrator =
+		std::make_unique<MockedIntegrator>(engine);
+	integrator->setDt(dt);
+	// registering Particles and Integrator objects
+	engine.setItem(std::move(integrator));
+	engine.setItem(std::move(mockedParticles));
+	// calling the update_positions function of the integrator
+	auto& integratorRef = engine.getIntegrator();
+	REQUIRE(integratorRef);
+	MockedIntegrator* integratorRaw = dynamic_cast<MockedIntegrator*>(integratorRef.get());
+	REQUIRE(integratorRaw);
+	integratorRaw->updateX();
+	// extracting the results
+	auto& particlesRef = engine.getParticles();
+	REQUIRE(particlesRef);
+	double* Xs = particlesRef->getXData();
+	REQUIRE(Xs);
+	// expected results
+	std::vector<double> expectedXs;
+	REQUIRE(x.size() == v.size());
+	for (int i = 0; i < x.size(); i++)
+		expectedXs.push_back(x[i] + dt * v[i]);
+
+	// checking
+	for (int i = 0; i < x.size(); i++)
+		REQUIRE_THAT(Xs[i], Catch::Matchers::WithinAbs(expectedXs[i], 1e-6));
+}
+
+// integrator unittest
+TEST_CASE("Testing the integrator class update velocities") {
+	// creating the engine
+	Engine engine;
+	// put some particles.
+	constexpr int nmax = 5;
+	constexpr int nlocal = 5;
+	std::vector<double> x;
+	x.resize(nlocal * 3);
+	std::vector<double> v = {
+	  42.73,  -88.19,   15.64,   // particle 0
+	 -73.52,   94.07,  -36.28,   // particle 1
+	  11.95,  -59.83,   78.44,   // particle 2
+	 -98.61,   23.17,  -44.92,   // particle 3
+	  67.08,  -12.54,   99.31,   // particle 4
+	};
+	std::vector<double> f = {
+	  3.72,  -8.15,   1.94,   // particle 0
+	 -6.48,   9.03,  -2.67,   // particle 1
+	  0.58,  -4.91,   7.36,   // particle 2
+	 -9.27,   2.14,  -5.83,   // particle 3
+	  8.61,  -1.32,   4.75,   // particle 4
+	};
+	std::vector<double> r;
+	r.resize(3 * nlocal);
+	std::vector<double> m = { 5,5,5,10,10 };
+	std::unique_ptr<Particles> mockedParticles =
+		std::make_unique<MockedParticles>(engine, nmax, x, v, f, r, m);
+	// the integrator instance
+	constexpr double dt = 1.0;
+	std::unique_ptr<Integrator> integrator =
+		std::make_unique<MockedIntegrator>(engine);
+	integrator->setDt(dt);
+	// registering Particles and Integrator objects
+	engine.setItem(std::move(integrator));
+	engine.setItem(std::move(mockedParticles));
+	// calling the update_positions function of the integrator
+	auto& integratorRef = engine.getIntegrator();
+	REQUIRE(integratorRef);
+	MockedIntegrator* integratorRaw = dynamic_cast<MockedIntegrator*>(integratorRef.get());
+	REQUIRE(integratorRaw);
+	integratorRaw->updateX();
+	// extracting the results
+	auto& particlesRef = engine.getParticles();
+	REQUIRE(particlesRef);
+	double* Vs = particlesRef->getVData();
+	REQUIRE(Vs);
+	// expected results
+	std::vector<double> expectedVs;
+	REQUIRE(v.size() == f.size());
+	REQUIRE(f.size() == m.size());
+	for (int i = 0; i < x.size(); i++)
+		expectedVs.push_back(v[i] + dt * f[i]/m[i]);
+
+	// checking
+	for (int i = 0; i < x.size(); i++)
+		REQUIRE_THAT(Vs[i], Catch::Matchers::WithinAbs(expectedVs[i], 1e-6));
 }
 
 TEST_CASE("Starting and registering each class of the Engine class with minimal input args")
