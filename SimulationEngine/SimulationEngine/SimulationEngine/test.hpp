@@ -177,6 +177,8 @@ public:
 private:
 };
 
+
+// mocked integrator to do some updates on the particles object
 class MockedIntegrator : public Integrator
 {
 public:
@@ -191,6 +193,36 @@ public:
 		velocityUpdate();
 	}
 };
+
+// mocked integrator to count how many times it was called.
+class MockedIntegrator2 : public Integrator {
+public:
+	MockedIntegrator2(Engine& engine_) :
+		Integrator{ engine_ }
+	{}
+
+	void init() override {
+		nInit++;
+	};
+	void setup() override {
+		nSetup++;
+	}
+	void neighbor_build() override {};
+	void initial_integrate() override {};
+	void pre_force() override {};
+	void force() override {
+		nTimes++;
+	};
+	void post_force() override {};
+	void final_integrate() override {};
+
+	int nTimes = 0;
+	int nInit = 0;
+	int nSetup = 0;
+
+};
+
+
 
 class MockedFix : public Fix {
 public:

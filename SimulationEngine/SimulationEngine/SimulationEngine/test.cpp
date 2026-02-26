@@ -293,7 +293,96 @@ TEST_CASE("testing the fix orchasterator class")
 	REQUIRE(fix2mockRef->nTimes == nPreForce);
 	REQUIRE(fix3mockRef->nTimes == nPostForce);
 	REQUIRE(fix4mockRef->nTimes == nFinInt);
+}
 
-
+// unittest for the run command
+TEST_CASE("testing the run class")
+{
+	std::cout << "testing the fix orchasterator class" << std::endl;
+	std::cout << std::string(80, '=');
+	// constant parameters
+	constexpr int nSteps = 10;
+	constexpr int nInit = 8;
+	constexpr int nSetup = 5;
+	constexpr int nInitInt = 10;
+	constexpr int nPreForce = 7;
+	constexpr int nPostForce = 13;
+	constexpr int nFinInt = 3;
+	// building the mocked engine
+	Engine engine;
+	// building the mockedFixes
+	std::unique_ptr<Fix> fix1 = std::make_unique<MockedFix>(engine, FixMask::INIT_INTEGRATE, "1");
+	std::unique_ptr<Fix> fix2 = std::make_unique<MockedFix>(engine, FixMask::PRE_FORCE, "2");
+	std::unique_ptr<Fix> fix3 = std::make_unique<MockedFix>(engine, FixMask::POST_FORCE, "3");
+	std::unique_ptr<Fix> fix4 = std::make_unique<MockedFix>(engine, FixMask::FINAL_INTEGRATE, "4");
+	// creating the fix list
+	std::unique_ptr<FixList> fixList = std::make_unique<FixList>(engine);
+	// registering those fixes to the fixList
+	fixList->addFix(std::move(fix1));
+	fixList->addFix(std::move(fix2));
+	fixList->addFix(std::move(fix3));
+	fixList->addFix(std::move(fix4));
+	// regisetering the for list
+	engine.setItem(std::move(fixList));
+	// creating the mockedIntegrator
+	std::unique_ptr<Integrator> integrator = std::make_unique<MockedIntegrator2>(engine);
+	// registering that mocked integrator
+	engine.setItem(std::move(integrator));
+	// creating the run object
+	std::unique_ptr<Run> run = std::make_unique<Run>(engine);
+	// registering that run into the engine
+	engine.setItem(std::move(run));
+	// returning the fixList and mocked fixes
+	auto& fixListRef = engine.getFixListObj();
+	auto& fix1ref = fixListRef->returnFixById("1");
+	auto& fix2ref = fixListRef->returnFixById("2");
+	auto& fix3ref = fixListRef->returnFixById("3");
+	auto& fix4ref = fixListRef->returnFixById("4");
+	// checking if they are present
+	REQUIRE(fixListRef);
+	REQUIRE(fix1ref);
+	REQUIRE(fix2ref);
+	REQUIRE(fix3ref);
+	REQUIRE(fix4ref);
+	// coverting the fixrefs
+	MockedFix* fix1mockRef = dynamic_cast<MockedFix*>(fix1ref.get());
+	MockedFix* fix2mockRef = dynamic_cast<MockedFix*>(fix2ref.get());
+	MockedFix* fix3mockRef = dynamic_cast<MockedFix*>(fix3ref.get());
+	MockedFix* fix4mockRef = dynamic_cast<MockedFix*>(fix4ref.get());
+	// checking the mockedfixrefs
+	REQUIRE(fix1mockRef);
+	REQUIRE(fix2mockRef);
+	REQUIRE(fix3mockRef);
+	REQUIRE(fix4mockRef);
+	// returning the integrator
+	auto& integratorRef = engine.getIntegrator();
+	// checking if it exits
+	REQUIRE(integratorRef);
+	// coverting it
+	MockedIntegrator2* integratormockRef = dynamic_cast<MockedIntegrator2*>(integratorRef.get());
+	// checking the conversion
+	REQUIRE(integratormockRef);
+	// returning the run object
+	auto& runRef = engine.getRunCommand();
+	// checking if it exits
+	REQUIRE(runRef);
+	// running for 10 steps (previously the unittest of the fixlist has verified that fixs
+	// are called in the right time)
+	runRef->start(nSteps, 1.0);
+	REQUIRE(fix1mockRef->nInit == 1);
+	REQUIRE(fix2mockRef->nInit == 1);
+	REQUIRE(fix3mockRef->nInit == 1);
+	REQUIRE(fix4mockRef->nInit == 1);
+	REQUIRE(integratormockRef->nInit == 1);
+	REQUIRE(fix1mockRef->nSetup == 1);
+	REQUIRE(fix2mockRef->nSetup == 1);
+	REQUIRE(fix3mockRef->nSetup == 1);
+	REQUIRE(fix4mockRef->nSetup == 1);
+	REQUIRE(integratormockRef->nSetup == 1);
+	REQUIRE(fix1mockRef->nTimes == nSteps);
+	REQUIRE(fix2mockRef->nTimes == nSteps);
+	REQUIRE(fix3mockRef->nTimes == nSteps);
+	REQUIRE(fix4mockRef->nTimes == nSteps);
+	REQUIRE(integratormockRef->nTimes == nSteps);
 }
 
