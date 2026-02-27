@@ -99,19 +99,31 @@ make
 
 ## ✅ 5. Concurrent Simulation Engine (Phase 5)
 
-**Goal:** Simulate a 2D agent-based system (e.g., particles or traffic) in parallel.
+**Goal:** Develop a modular 3D particle simulation engine with extensible physics and parallel-ready architecture.
+
+---
 
 ### 🧩 Concepts Practiced:
 
-* STL with concurrency support
-* RAII + design patterns (Factory, Strategy)
-* `std::variant` for agent polymorphism
+- Modern C++ (STL containers, smart pointers, RAII)
+- Strategy Pattern (Integrator, ForceField, Neighbor models)
+- Factory Pattern (EngineFactory command-based construction)
+- Composite Pattern (FixList runtime hook system)
+- Mediator-style central architecture (Engine)
+- Unit & regression testing with Catch2
+
+---
 
 ### 🎯 Features:
 
-* Agents interact with neighbors
-* Step or async loop simulation
-* Configurable parameters & performance metrics
+- Modular physics components (ForceField, Neighbor, Integrator)
+- Runtime-extensible Fix system (init/setup/integrate hooks)
+- Configurable simulation via command-driven factory
+- Neighbor-based particle interactions
+- Multiple integration strategies (Euler, Semi-implicit, Collision-aware)
+- Structured simulation run loop
+- Performance-conscious particle data layout
+- End-to-end and unit-level validation tests
 
 ---
 
