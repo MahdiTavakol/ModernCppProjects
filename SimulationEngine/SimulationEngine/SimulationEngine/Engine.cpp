@@ -62,6 +62,12 @@ void Engine::injectDependencies() {
 		run->injectDependencies(*this);
 }
 
+void Engine::resetError(std::unique_ptr<Error>&& error_) {
+	error = std::move(error_);
+	// since the error has changed the dependencies must be reinjected.
+	injectDependencies();
+}
+
 void Engine::setItem(std::unique_ptr<Ref>&& Ref_) {
 	if (auto boxPtr = dynamic_cast<Box*>(Ref_.get())) {
 		box.reset(dynamic_cast<Box*>(Ref_.release()));

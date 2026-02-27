@@ -56,6 +56,8 @@ public:
 	void setItem(std::unique_ptr<Ref>&& Ref_);
 	// getting the item by the Ref, the return Ref is Ref* and needs to be casted to the right Ref by the user
 	Ref* getItem(ItemRef Ref_);
+	// resetting the error
+	void resetError(std::unique_ptr<Error>&& error_);
 	// getting the item by the Ref, the return Ref is the unique_ptr of the right Ref
 	const std::unique_ptr<Box>& getBox() const;
 	const std::unique_ptr<Particles>& getParticles() const;

@@ -52,7 +52,7 @@ TEST_CASE("Testing various error and warning messages")
 
 TEST_CASE("Setting the error")
 {
-	std::cout << "Resetting the error object" << std::endl;
+	std::cout << "Setting the error object" << std::endl;
 	std::cout << std::string(80, '=') << std::endl;
 	// building the engine
 	Engine engine;
@@ -105,3 +105,60 @@ TEST_CASE("Setting the error")
 	}
 }
 
+TEST_CASE("Resetting the error")
+{
+	std::cout << "Resetting the error object" << std::endl;
+	std::cout << std::string(80, '=') << std::endl;
+	// building the engine
+	Engine engine;
+	// mocked box with an function to get the Error*
+	std::unique_ptr<Box> box = std::make_unique<MockedBox>();
+	// Error streams
+	std::ostringstream stream1, stream2, stream3;
+	std::vector<std::reference_wrapper<std::ostream>> errorStreams1 = {
+		std::ref(stream1),
+		std::ref(stream2)
+	};
+	std::vector<std::reference_wrapper<std::ostream>> errorStreams2 = {
+		std::ref(stream3)
+	};
+	// Error objects
+	std::unique_ptr<Error> error1 = std::make_unique<Error>(errorStreams1);
+	std::unique_ptr<Error> error2 = std::make_unique<Error>(errorStreams2);
+	// registering everything with the first Error object
+	engine.setItem(std::move(box));
+	engine.setItem(std::move(error1));
+	// injecting the dependencies
+	engine.injectDependencies();
+	// returning the box  object
+	auto& boxRef1 = engine.getBox();
+	// checking those references
+	REQUIRE(boxRef1);
+	// converting them
+	auto mockedBoxPtr1 = dynamic_cast<MockedBox*>(boxRef1.get());
+	// checking the conversion
+	REQUIRE(mockedBoxPtr1);
+	// getting the error refs
+	Error* boxError1 = mockedBoxPtr1->getError();
+	// checking the streams
+	auto& boxStreams1 = boxError1->getStreams();
+	// testing the streams sizes
+	REQUIRE(boxStreams1.size() == 2);
+
+	// resetting the error stream
+	engine.resetError(std::move(error2));
+	// returning the box  object
+	auto& boxRef2 = engine.getBox();
+	// checking those references
+	REQUIRE(boxRef2);
+	// converting them
+	auto mockedBoxPtr2 = dynamic_cast<MockedBox*>(boxRef2.get());
+	// checking the conversion
+	REQUIRE(mockedBoxPtr2);
+	// getting the error refs
+	Error* boxError2 = mockedBoxPtr2->getError();
+	// checking the streams
+	auto& boxStreams2 = boxError2->getStreams();
+	// testing the streams sizes
+	REQUIRE(boxStreams2.size() == 1);
+}
