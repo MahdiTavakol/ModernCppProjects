@@ -48,8 +48,6 @@ public:
 	}
 
 protected:
-	// pointer to errors
-	Error* error;
 	int nmax;
 	std::vector<double> x;
 	std::vector<double> v;

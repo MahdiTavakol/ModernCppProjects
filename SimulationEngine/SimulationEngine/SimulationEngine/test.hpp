@@ -74,16 +74,23 @@ public:
 
 class MockedBox : public Box {
 public:
-	MockedBox(Engine& engine_,
-		std::array<double, 3> min_, std::array<double, 3> max_) :
+	MockedBox() :
+		Box{},
+		min{ std::array<double,3>{0.0,0.0,0.0} },
+		max{ std::array<double,3>{0.0,0.0,0.0} }
+	{}
+	MockedBox(std::array<double, 3> min_, std::array<double, 3> max_) :
 		Box{},
 		min{ std::move(min_) },
 		max{ std::move(max_) }
-	{
+	{}
+	Error* getError() {
+		return error;
 	}
 private:
 	std::array<double, 3> min, max;
 };
+
 
 class MockedForceField : public ForceField {
 public:
@@ -196,6 +203,9 @@ public:
 // Mocked Particles class
 class MockedParticles : public Particles {
 public:
+	MockedParticles():
+		Particles{}
+	{}
 	MockedParticles(
 		int nmax_,
 		std::vector<double>& x_,
@@ -211,6 +221,10 @@ public:
 		f = std::move(f_);
 		r = std::move(r_);
 		m = std::move(m_);
+	}
+	Error* getError()
+	{
+		return error;
 	}
 
 private:

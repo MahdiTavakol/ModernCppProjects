@@ -32,7 +32,8 @@ Engine::Engine() :
 	forcefield{std::make_unique<ForceField>()},
 	neighbor{ std::make_unique<Neighbor>(0.0) },
 	fixList{std::make_unique<FixList>()},
-	particles{std::make_unique<Particles>(0)}
+	particles{std::make_unique<Particles>(0)},
+	error{std::make_unique<Error>()}
 {}
 
 Engine::Engine(Run_Status& run_status_) :

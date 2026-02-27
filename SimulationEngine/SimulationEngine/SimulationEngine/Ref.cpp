@@ -12,7 +12,9 @@ Ref::Ref(const Ref& other):
 {}
 
 void Ref::injectDependencies(Engine& engine_) {
-	//error = engine_.getError().get();
+	error = engine_.getError().get();
+	if (error == nullptr)
+		throw std::invalid_argument("The error object is not present!");
 	//checkPointer(error, "error");
 }
 
