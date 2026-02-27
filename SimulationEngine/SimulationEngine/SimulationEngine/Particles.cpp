@@ -2,8 +2,8 @@
 #include "Engine.h"
 #include "Error.h"
 
-Particles::Particles(Engine& engine_) :
-	Ref{ engine_,"Particles-1" },
+Particles::Particles() :
+	Ref{"Particles-1" },
 	nmax{ 0 }
 {
 	x.reserve(0);
@@ -13,8 +13,8 @@ Particles::Particles(Engine& engine_) :
 	r.reserve(0);
 }
 
-Particles::Particles(Engine& engine_, int nmax_) :
-	Ref{ engine_,"Particles-1" },
+Particles::Particles(int nmax_) :
+	Ref{ "Particles-1" },
 	nmax{ nmax_ }
 {
 	x.reserve(3 * nmax);
@@ -23,21 +23,18 @@ Particles::Particles(Engine& engine_, int nmax_) :
 	m.reserve(nmax);
 	r.reserve(nmax);
 }
-Particles::Particles(Engine& engine_, std::vector<std::string> args_):
-	Ref{ engine_, "Particles-1" }
+Particles::Particles(std::vector<std::string> args_):
+	Ref{"Particles-1" }
 {
 	auto nargs = args_.size();
 	if (nargs < 2) {
-		engine().getError()->one("Not enough arguments for particles command! Expected at least 2, got " + std::to_string(nargs));
+		throw std::invalid_argument("Not enough arguments for particles command! Expected at least 2, got " + std::to_string(nargs));
 		nmax = 0;
 		return;
 	}
 	nmax = std::stoi(args_[1]);
 }
 
-void Particles::injectDependencies(Engine& engine_) {
-	Ref::injectDependencies(engine_);
-}
 
 void Particles::addParticle(std::array<double, 3> newX_,
 	std::array<double, 3> newV_ ,

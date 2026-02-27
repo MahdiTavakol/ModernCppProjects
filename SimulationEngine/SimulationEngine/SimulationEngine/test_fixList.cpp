@@ -22,17 +22,19 @@ TEST_CASE("testing the fixList class")
 	// building the mocked engine
 	Engine engine;
 	// building the mockedFixes
-	std::unique_ptr<Fix> fix1 = std::make_unique<MockedFix>(engine, FixMask::INIT_INTEGRATE, "1");
-	std::unique_ptr<Fix> fix2 = std::make_unique<MockedFix>(engine, FixMask::PRE_FORCE, "2");
-	std::unique_ptr<Fix> fix3 = std::make_unique<MockedFix>(engine, FixMask::POST_FORCE, "3");
-	std::unique_ptr<Fix> fix4 = std::make_unique<MockedFix>(engine, FixMask::FINAL_INTEGRATE, "4");
+	std::unique_ptr<Fix> fix1 = std::make_unique<MockedFix>(FixMask::INIT_INTEGRATE, "1");
+	std::unique_ptr<Fix> fix2 = std::make_unique<MockedFix>(FixMask::PRE_FORCE, "2");
+	std::unique_ptr<Fix> fix3 = std::make_unique<MockedFix>(FixMask::POST_FORCE, "3");
+	std::unique_ptr<Fix> fix4 = std::make_unique<MockedFix>(FixMask::FINAL_INTEGRATE, "4");
 	// creating the integrator
-	std::unique_ptr<FixList> fixList = std::make_unique<FixList>(engine);
+	std::unique_ptr<FixList> fixList = std::make_unique<FixList>();
 	// registering those fixes to the fixList
 	fixList->addFix(std::move(fix1));
 	fixList->addFix(std::move(fix2));
 	fixList->addFix(std::move(fix3));
 	fixList->addFix(std::move(fix4));
+	// injecting the dependencies
+	fixList->injectDependencies(engine);
 	// regisetering the for list
 	engine.setItem(std::move(fixList));
 	// returning the fixList and mocked fixes

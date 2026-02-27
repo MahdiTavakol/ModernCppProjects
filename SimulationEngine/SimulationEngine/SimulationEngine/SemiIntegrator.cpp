@@ -1,12 +1,11 @@
 #include "SemiIntegrator.h"
 
-SemiIntegrator::SemiIntegrator(Engine& engine_,
-	std::vector<std::string> args_) :
-	Integrator{ engine_, std::move(args_) }
+SemiIntegrator::SemiIntegrator(std::vector<std::string> args_) :
+	Integrator{ std::move(args_) }
 {}
 
-SemiIntegrator::SemiIntegrator(Engine& engine) :
-	Integrator{ engine }
+SemiIntegrator::SemiIntegrator() :
+	Integrator{}
 {}
 
 void SemiIntegrator::post_force()

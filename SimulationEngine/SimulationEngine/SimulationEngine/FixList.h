@@ -7,8 +7,8 @@
 class FixList : public Fix
 {
 public:
-	FixList(Engine& engine_);
-	FixList(Engine& engine_, std::vector<std::string>& args_);
+	FixList();
+	FixList( std::vector<std::string>& args_);
 	virtual ~FixList();
 
 	void injectDependencies(Engine& engine_) override;

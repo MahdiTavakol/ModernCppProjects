@@ -13,11 +13,10 @@ enum FixMask {
 class Fix : public Ref
 {
 public:
-	Fix(Engine& engine_);
-	Fix(Engine& engine_, FixMask mask_, std::string id_);
-	Fix(Engine& engine_, std::vector<std::string>& args_);
-	Fix(Engine& engine_,
-		std::string id_,
+	Fix();
+	Fix(FixMask mask_, std::string id_);
+	Fix(std::vector<std::string>& args_);
+	Fix(std::string id_,
 		int nevery_ = 1);
 	virtual ~Fix() {}
 	

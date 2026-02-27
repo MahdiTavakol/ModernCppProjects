@@ -1,24 +1,24 @@
 #include "Fix.h"
 #include "Error.h"
+#include <stdexcept>
 
-Fix::Fix(Engine& engine_):
-	Ref{engine_,"1"}
+Fix::Fix():
+	Ref{"1"}
 {}
 
-Fix::Fix(Engine& engine_, FixMask mask_, std::string id_) :
-	Ref{ engine_,id_ },
+Fix::Fix(FixMask mask_, std::string id_) :
+	Ref{ id_ },
 	mask{ mask_ }
 {}
 
-Fix::Fix(Engine& engine_, std::vector<std::string>& args_):
-	Ref{ engine_, args_[0] },
+Fix::Fix(std::vector<std::string>& args_):
+	Ref{ args_[0] },
 	nevery{ 1 }
 {
 	// fix type id nevery mask ......
-	auto& error = engine().getError();
 	int nargs = args_.size();
 	if (nargs < 3) {
-		engine().getError()->one("Not enough arguments for fix command! Expected at least 3, got " + std::to_string(nargs));
+		throw std::invalid_argument("Not enough arguments for fix command! Expected at least 3, got " + std::to_string(nargs));
 		return;
 	}
 	id = args_[2];
@@ -26,10 +26,9 @@ Fix::Fix(Engine& engine_, std::vector<std::string>& args_):
 	parseMaskString(args_[4]);
 }
 
-Fix::Fix(Engine& engine_,
-	std::string id_,
+Fix::Fix(std::string id_,
 	int nevery_) :
-	Ref{ engine_, id_ },
+	Ref{ id_ },
 	nevery{ nevery_ }
 {}
 

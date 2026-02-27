@@ -2,11 +2,10 @@
 #include "Particles.h"
 #include "Error.h"
 
-Neighbor::Neighbor(Engine& engine_, std::vector<std::string> args_):
-	Ref{ engine_, "1" }
+Neighbor::Neighbor(std::vector<std::string> args_):
+	Ref{  "1" }
 {
 	int nargs = args_.size();
-	auto& error = engine().getError();
 	if (nargs < 3) {
 		error->one("Not enough arguments for neighbor command! Expected at least 2, got " + std::to_string(nargs));
 		neighbor_cutoff = 0.0;
@@ -15,14 +14,14 @@ Neighbor::Neighbor(Engine& engine_, std::vector<std::string> args_):
 	neighbor_cutoff = std::stod(args_[2]);
 }
 
-Neighbor::Neighbor(Engine& engine_) :
-	Ref{ engine_,"1" },
+Neighbor::Neighbor() :
+	Ref{"1" },
 	nNeigh{ 0 },
 	neighbor_cutoff{ 0.0 }
 {}
 
-Neighbor::Neighbor(Engine& engine_, double neighbor_cutoff_) :
-	Ref{ engine_,"1" },
+Neighbor::Neighbor( double neighbor_cutoff_) :
+	Ref{ "1" },
 	nNeigh{ 0 },
 	neighbor_cutoff{ neighbor_cutoff_ }
 {}
@@ -30,6 +29,7 @@ Neighbor::Neighbor(Engine& engine_, double neighbor_cutoff_) :
 void Neighbor::injectDependencies(Engine& engine_) {
 	Ref::injectDependencies(engine_);
 	particles = engine_.getParticlesForUpdate().get();
+	checkPointer(particles, "particles");
 }
 
 void Neighbor::init() {

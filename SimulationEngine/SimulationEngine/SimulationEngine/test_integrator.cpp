@@ -33,11 +33,11 @@ TEST_CASE("Testing the integrator class update positions") {
 	r.resize(3 * nlocal);
 	m.resize(3 * nlocal);
 	std::unique_ptr<Particles> mockedParticles =
-		std::make_unique<MockedParticles>(engine, nmax, x, v, f, r, m);
+		std::make_unique<MockedParticles>(nmax, x, v, f, r, m);
 	// the integrator instance
 	constexpr double dt = 1.0;
 	std::unique_ptr<Integrator> integrator =
-		std::make_unique<MockedIntegrator>(engine);
+		std::make_unique<MockedIntegrator>();
 	integrator->setDt(dt);
 	// registering Particles and Integrator objects
 	engine.setItem(std::move(integrator));
@@ -95,11 +95,11 @@ TEST_CASE("Testing the integrator class update velocities") {
 	r.resize(3 * nlocal);
 	std::vector<double> m = { 5,5,5,10,10 };
 	std::unique_ptr<Particles> mockedParticles =
-		std::make_unique<MockedParticles>(engine, nmax, x, v, f, r, m);
+		std::make_unique<MockedParticles>(nmax, x, v, f, r, m);
 	// the integrator instance
 	constexpr double dt = 1.0;
 	std::unique_ptr<Integrator> integrator =
-		std::make_unique<MockedIntegrator>(engine);
+		std::make_unique<MockedIntegrator>();
 	integrator->setDt(dt);
 	// registering Particles and Integrator objects
 	engine.setItem(std::move(integrator));

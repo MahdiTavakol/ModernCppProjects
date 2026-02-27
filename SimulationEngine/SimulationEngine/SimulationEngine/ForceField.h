@@ -6,8 +6,8 @@
 
 class ForceField: public Ref {
 public:
-	ForceField(Engine& engine_, std::vector<std::string> args_);
-	ForceField(Engine& engine_);
+	ForceField( std::vector<std::string> args_);
+	ForceField();
 	virtual void injectDependencies(Engine& engine_) override;
 	virtual void init();
 	virtual void update();

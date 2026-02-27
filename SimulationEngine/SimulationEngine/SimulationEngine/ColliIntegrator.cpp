@@ -3,19 +3,18 @@
 #include "Neighbor.h"
 #include <iostream>
 
-ColliIntegrator::ColliIntegrator(Engine& engine_, std::vector<std::string> args_) :
-	Integrator{ engine_, args_ }
-{
-}
+ColliIntegrator::ColliIntegrator(std::vector<std::string> args_) :
+	Integrator{ args_ }
+{}
 
-ColliIntegrator::ColliIntegrator(Engine& engine) :
-	Integrator{ engine }
-{
-}
+ColliIntegrator::ColliIntegrator() :
+	Integrator{}
+{}
 
 void ColliIntegrator::injectDependencies(Engine& engine_) {
 	Integrator::injectDependencies(engine_);
 	neighbor = engine_.getNeighbor().get();
+	checkPointer(neighbor, "neighbor");
 }
 
 void ColliIntegrator::post_force()

@@ -51,14 +51,14 @@ EngineFactory::EngineFactory(std::vector<std::string> args) :
 	// so that each class itself can handle the default values 
 	// of its parameters and the error handling of missing parameters
 	// to avoid coupling the factory with the details of each class.
-	box = std::make_unique<Box>(*engine);
-	error = std::make_unique<Error>(*engine);
-	forcefield = std::make_unique<ForceField>(*engine);
-	integrator = std::make_unique<Integrator>(*engine);
-	neighbor = std::make_unique<Neighbor>(*engine);
-	particles = std::make_unique<Particles>(*engine);
-	run = std::make_unique<Run>(*engine);
-	fixList = std::make_unique<FixList>(*engine);
+	box = std::make_unique<Box>();
+	error = std::make_unique<Error>();
+	forcefield = std::make_unique<ForceField>();
+	integrator = std::make_unique<Integrator>();
+	neighbor = std::make_unique<Neighbor>();
+	particles = std::make_unique<Particles>();
+	run = std::make_unique<Run>();
+	fixList = std::make_unique<FixList>();
 }
 
 std::unique_ptr<Engine> EngineFactory::returnEngine() {
@@ -95,11 +95,11 @@ void EngineFactory::parseCommand(const std::string& command) {
 	if (++itemId && tokens[0] == "box") {
 		// parse box command
 		commandNumCheck(commandCount[itemId-1], tokens[0]);
-		box = make_unique<Box>(*engine, tokens);
+		box = make_unique<Box>(tokens);
 	} else if (++itemId && tokens[0] == "error") {
 		// parse particles command
 		commandNumCheck(commandCount[itemId-1], tokens[0]);
-		error = make_unique<Error>(*engine, tokens);
+		error = make_unique<Error>(tokens);
 	} else if (++itemId && tokens[0] == "fix") {
 		// parse fix command
 		buildFix(tokens);
@@ -118,11 +118,11 @@ void EngineFactory::parseCommand(const std::string& command) {
 	} else if (++itemId && tokens[0] == "particles") {
 		// parse particles command
 		commandNumCheck(commandCount[itemId-1], tokens[0]);
-		particles = make_unique<Particles>(*engine, tokens);
+		particles = make_unique<Particles>(tokens);
 	} else if (++itemId && tokens[0] == "run") {
 		// parse run command
 		commandNumCheck(commandCount[itemId-1], tokens[0]);
-		run = make_unique<Run>(*engine, tokens);
+		run = make_unique<Run>(tokens);
 	}
 	else if (++itemId && tokens[0] == "run_status") {
 		commandNumCheck(commandCount[itemId - 1], tokens[0]);
@@ -151,11 +151,11 @@ void EngineFactory::buildIntegrator(std::vector<std::string> args_) {
 		(*error) << "integrator command needs a type (euler/semi)\n";
 	}
 	if (args_[1] == "euler")
-		integrator = make_unique<EulerIntegrator>(*engine, args_);
+		integrator = make_unique<EulerIntegrator>(args_);
 	else if (args_[1] == "semi")
-		integrator = make_unique<SemiIntegrator>(*engine, args_);
+		integrator = make_unique<SemiIntegrator>(args_);
 	else if (args_[1] == "collision")
-		integrator = make_unique<ColliIntegrator>(*engine, args_);
+		integrator = make_unique<ColliIntegrator>(args_);
 	else
 		(*error) << "Unknown integrator type: " << args_[1] << std::endl;
 	if (integrator == nullptr) {
@@ -168,7 +168,7 @@ void EngineFactory::buildFix(std::vector<std::string> args_) {
 		(*error) << "fix command needs a type\n";
 	}
 	if (args_[1] == "print") {
-		fixList->addFix(make_unique<FixPrint>(*engine, args_));
+		fixList->addFix(make_unique<FixPrint>(args_));
 	}
 	else {
 		(*error) << "Unknown fix type: " << args_[1] << std::endl;
@@ -181,7 +181,7 @@ void EngineFactory::buildForceField(std::vector<std::string> args_) {
 		(*error) << "forcefield command needs a type\n";
 	}
 	if (args_[1] == "spring") {
-		forcefield = make_unique<SpringField>(*engine, args_);
+		forcefield = make_unique<SpringField>(args_);
 	}
 	else {
 		(*error) << "Unknown forcefield type: " << args_[1] << std::endl;
@@ -193,7 +193,7 @@ void EngineFactory::buildNeighbor(std::vector<std::string> args_) {
 		(*error) << "neighbor command needs a type\n";
 	}
 	if (args_[1] == "simple") {
-		neighbor = make_unique<SimpleNeighbor>(*engine, args_);
+		neighbor = make_unique<SimpleNeighbor>(args_);
 	}
 	else {
 		(*error) << "Unknown neighbor type: " << args_[1] << std::endl;

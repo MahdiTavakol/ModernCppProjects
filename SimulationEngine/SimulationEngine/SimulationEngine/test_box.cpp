@@ -13,7 +13,9 @@ TEST_CASE("Testing a box object") {
 	array<double, 3> min = { 0.0,0.0,0.0 };
 	array<double, 3> max = { 10.0,10.0,10.0 };
 	// box 
-	auto box = make_unique<Box>(engine, min, max);
+	auto box = make_unique<Box>(min, max);
+	// injecting the dependencies
+	box->injectDependencies(engine);
 	// registering the box
 	engine.setItem(std::move(box));
 	// getting the box

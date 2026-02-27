@@ -1,11 +1,11 @@
 #include "EulerIntegrator.h"
 
-EulerIntegrator::EulerIntegrator(Engine& engine_, std::vector<std::string> args_):
-	Integrator{ engine_, args_ }
+EulerIntegrator::EulerIntegrator(std::vector<std::string> args_):
+	Integrator{args_ }
 {}
 
-EulerIntegrator::EulerIntegrator(Engine& engine) :
-		Integrator{ engine }
+EulerIntegrator::EulerIntegrator() :
+		Integrator{}
 {}
 
 void EulerIntegrator::post_force()

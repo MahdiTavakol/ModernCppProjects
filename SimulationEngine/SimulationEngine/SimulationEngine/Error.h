@@ -7,12 +7,10 @@
 
 class Error : public Ref {
 public:
-	Error(Engine& engine_,
-		std::vector<std::reference_wrapper<std::ostream>>& errorStreams_,
-		std::string id_ = "1");
-	Error(Engine& engine_,
-		std::string id_ = "1");
-	Error(Engine& engine_, std::vector<std::string> args_);
+	Error(std::vector<std::reference_wrapper<std::ostream>>& errorStreams_,
+		  std::string id_ = "1");
+	Error(std::string id_ = "1");
+	Error(std::vector<std::string> args_);
 
 	void one(std::string message);
 	void warning(std::string message);

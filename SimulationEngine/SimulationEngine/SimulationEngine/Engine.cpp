@@ -22,34 +22,43 @@ Engine::Engine(unique_ptr<Box>& box_,
 	unique_ptr<Particles>& particles_) :
 	box{ std::move(box_) },
 	particles{ std::move(particles_) },
-	forcefield{ std::make_unique<ForceField>(*this)},
-	neighbor{ std::make_unique<Neighbor>(*this,0.0)},
-	error{std::make_unique<Error>(*this)},
-	fixList{std::make_unique<FixList>(*this)}
+	forcefield{ std::make_unique<ForceField>()},
+	neighbor{ std::make_unique<Neighbor>(0.0)},
+	error{std::make_unique<Error>()},
+	fixList{std::make_unique<FixList>()}
 {}
 
 Engine::Engine() : 
-	forcefield{std::make_unique<ForceField>(*this)},
-	neighbor{ std::make_unique<Neighbor>(*this,0.0) },
-	fixList{std::make_unique<FixList>(*this)}
+	forcefield{std::make_unique<ForceField>()},
+	neighbor{ std::make_unique<Neighbor>(0.0) },
+	fixList{std::make_unique<FixList>()},
+	particles{std::make_unique<Particles>(0)}
 {}
 
 Engine::Engine(Run_Status& run_status_) :
 	run_status{ run_status_ },
-	forcefield{std::make_unique<ForceField>(*this)},
-	neighbor{ std::make_unique<Neighbor>(*this,0.0) }
+	forcefield{std::make_unique<ForceField>()},
+	neighbor{ std::make_unique<Neighbor>(0.0) }
 {}
 
 Engine::~Engine() = default;
 
 // injecting dependencies
 void Engine::injectDependencies() {
-	integrator->injectDependencies(*this);
-	particles->injectDependencies(*this);
-	forcefield->injectDependencies(*this);
-	fixList->injectDependencies(*this);
-	neighbor->injectDependencies(*this);
-	box->injectDependencies(*this);
+	if (integrator)
+		integrator->injectDependencies(*this);
+	if (particles)
+		particles->injectDependencies(*this);
+	if (forcefield)
+		forcefield->injectDependencies(*this);
+	if (fixList)
+		fixList->injectDependencies(*this);
+	if (neighbor)
+		neighbor->injectDependencies(*this);
+	if (box)
+		box->injectDependencies(*this);
+	if (run)
+		run->injectDependencies(*this);
 }
 
 void Engine::setItem(std::unique_ptr<Ref>&& Ref_) {
@@ -73,7 +82,7 @@ void Engine::setItem(std::unique_ptr<Ref>&& Ref_) {
 	else if (auto fixPtr = dynamic_cast<Fix*>(Ref_.get())) {
 		// adding the fix
 		if (fixList == nullptr)
-			fixList = std::make_unique<FixList>(*this);
+			fixList = std::make_unique<FixList>();
 		fixList->addFix(std::move(std::unique_ptr<Fix>(dynamic_cast<Fix*>(Ref_.release()))));
 		return;
 	}
@@ -155,6 +164,10 @@ void Engine::setStatus(const std::string newStatus_) {
 }
 
 const Engine::Run_Status& Engine::getStatus() const {
+	return run_status;
+}
+
+Engine::Run_Status Engine::getStatusVal() const {
 	return run_status;
 }
 

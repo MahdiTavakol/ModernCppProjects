@@ -6,8 +6,7 @@
 // Semi-implicit Euler integration
 class SemiIntegrator : public Integrator {
 public:
-	SemiIntegrator(Engine& engine_,
-		std::vector<std::string> args_);
-	SemiIntegrator(Engine& engine);
+	SemiIntegrator(std::vector<std::string> args_);
+	SemiIntegrator();
 	void post_force() override;
 };

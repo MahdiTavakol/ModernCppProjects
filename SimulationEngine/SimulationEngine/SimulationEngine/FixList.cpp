@@ -2,8 +2,8 @@
 #include <stdexcept>
 #include <iostream>
 
-FixList::FixList(Engine& engine_):
-	Fix{engine_}
+FixList::FixList():
+	Fix{}
 {}
 
 FixList::~FixList() = default;

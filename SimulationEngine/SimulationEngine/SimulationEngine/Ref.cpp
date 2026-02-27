@@ -1,49 +1,29 @@
 #include "Ref.h"
 #include "Engine.h"
+#include "Error.h"
+#include <stdexcept>
 
-Ref::Ref(Engine& engine_, std::string id_) :
-	id{ id_ },
-	engineRef{ engine_ }
+Ref::Ref(std::string id_):
+	id{id_}
 {}
 
 Ref::Ref(const Ref& other):
-	id{other.id + "_"},
-	engineRef{ other.engineRef }
+	id{other.id + "_"}
 {}
-
-Ref& Ref::operator=(const Ref& other) {
-	if (*this != other) {
-		id = other.id + "_";
-		engineRef = other.engineRef;
-	}
-	return *this;
-}
-
-Ref::Ref(Ref&& other) noexcept :
-	id{ std::move(other.id) },
-	engineRef{ std::move(other.engineRef) }
-{}
-
-Ref& Ref::operator=(Ref&& other) noexcept {
-	if (*this != other) {
-		id = std::move(other.id);
-		engineRef = std::move(other.engineRef);
-	}
-	return *this;
-}
-
-bool Ref::operator==(const Ref& other) const
-{
-	return id == other.id && (&(engineRef.get())) == (&(engineRef.get()));
-}
 
 void Ref::injectDependencies(Engine& engine_) {
-	error = engine_.getError().get();
+	//error = engine_.getError().get();
+	//checkPointer(error, "error");
 }
 
-Engine& Ref::engine() {
-	return engineRef.get();
+void Ref::checkPointer(Ref* pointer_, std::string name_) const
+{
+	if (pointer_ == nullptr) {
+		std::string errorMessage = "Error: The " + name_ + " pointer is null!";
+		error->one(errorMessage);
+	}	
 }
+
 const std::string& Ref::getId() const {
 	return id;
 }

@@ -29,7 +29,7 @@ TEST_CASE("Testing the collision integrator")
 		0, 2, 3       // particle 4 (3 neighbor)
 	};
 	std::unique_ptr<Neighbor> mockedNeighbor =
-		std::make_unique<MockedNeighbor>(engine, nNeigh, neighListVec, firstNeighVec, numNeighVec);
+		std::make_unique<MockedNeighbor>(nNeigh, neighListVec, firstNeighVec, numNeighVec);
 	// creating the mockedParticles object
 	// put some particles.
 	int nmax = 5;
@@ -57,9 +57,9 @@ TEST_CASE("Testing the collision integrator")
 	std::vector<double> r = { 1,10,100,100,100 };
 	std::vector<double> m = { 5,5,5,10,10 };
 	std::unique_ptr<Particles> mockedParticles =
-		std::make_unique<MockedParticles>(engine, nmax, x, v, f, r, m);
+		std::make_unique<MockedParticles>(nmax, x, v, f, r, m);
 	// creating the collision object under test
-	std::unique_ptr<Integrator> colliIntegrator = std::make_unique<ColliIntegrator>(engine);
+	std::unique_ptr<Integrator> colliIntegrator = std::make_unique<ColliIntegrator>();
 	// registering the items
 	engine.setItem(std::move(mockedNeighbor));
 	engine.setItem(std::move(mockedParticles));

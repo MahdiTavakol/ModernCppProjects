@@ -1,12 +1,12 @@
 #include "SimpleNeighbor.h"
 #include "Particles.h"
 
-SimpleNeighbor::SimpleNeighbor(Engine& engine_, std::vector<std::string> args_) :
-	Neighbor{ engine_, args_ }
+SimpleNeighbor::SimpleNeighbor(std::vector<std::string> args_) :
+	Neighbor{ args_ }
 {}
 
-SimpleNeighbor::SimpleNeighbor(Engine& engine_, double neighbor_cutoff_) :
-	Neighbor{ engine_, neighbor_cutoff_ }
+SimpleNeighbor::SimpleNeighbor(double neighbor_cutoff_) :
+	Neighbor{neighbor_cutoff_ }
 {}
 
 void SimpleNeighbor::init() {

@@ -8,8 +8,8 @@
 // forward Euler integration
 class ColliIntegrator : public Integrator {
 public:
-	ColliIntegrator(Engine& engine_, std::vector<std::string> args_);
-	ColliIntegrator(Engine& engine);
+	ColliIntegrator(std::vector<std::string> args_);
+	ColliIntegrator();
 	void injectDependencies(Engine& engine_) override;
  	void post_force() override;
 

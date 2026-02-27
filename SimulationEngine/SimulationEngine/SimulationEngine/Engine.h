@@ -69,6 +69,7 @@ public:
 	// getting the run status of the engine
 	void setStatus(const std::string newStatus_);
 	const Run_Status& getStatus() const;
+	Run_Status getStatusVal() const;
 	std::unique_ptr<Run>& getRunCommand();
 
 private:

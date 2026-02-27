@@ -6,7 +6,7 @@
 // forward Euler integration
 class EulerIntegrator : public Integrator {
 public:
-	EulerIntegrator(Engine& engine_, std::vector<std::string> args_);
-	EulerIntegrator(Engine& engine);
+	EulerIntegrator(std::vector<std::string> args_);
+	EulerIntegrator();
 	void post_force() override;
 };

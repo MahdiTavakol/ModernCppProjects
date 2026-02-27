@@ -20,29 +20,31 @@ TEST_CASE("testing the run class")
 	// building the mocked engine
 	Engine engine;
 	// building the mockedFixes
-	std::unique_ptr<Fix> fix1 = std::make_unique<MockedFix>(engine, FixMask::INIT_INTEGRATE, "1");
+	std::unique_ptr<Fix> fix1 = std::make_unique<MockedFix>(FixMask::INIT_INTEGRATE, "1");
 	// creating the fix list
-	std::unique_ptr<FixList> fixList = std::make_unique<FixList>(engine);
+	std::unique_ptr<FixList> fixList = std::make_unique<FixList>();
 	// registering those fixes to the fixList
-	fixList->addFix(std::move(fix1));;
+	fixList->addFix(std::move(fix1));
 	// regisetering the for list
 	engine.setItem(std::move(fixList));
 	// creating the mockedIntegrator
-	std::unique_ptr<Integrator> integrator = std::make_unique<MockedIntegrator2>(engine);
+	std::unique_ptr<Integrator> integrator = std::make_unique<MockedIntegrator2>();
 	// registering that mocked integrator
 	engine.setItem(std::move(integrator));
 	// creating the mockedNeighbor
-	std::unique_ptr<Neighbor> neighbor = std::make_unique<MockedNeighbor2>(engine);
+	std::unique_ptr<Neighbor> neighbor = std::make_unique<MockedNeighbor2>();
 	// registering the neighborlist
 	engine.setItem(std::move(neighbor));
 	// creating the mocked forcefield
-	std::unique_ptr<ForceField> forcefield = std::make_unique<MockedForceField2>(engine);
+	std::unique_ptr<ForceField> forcefield = std::make_unique<MockedForceField2>();
 	// registering the forcefield
 	engine.setItem(std::move(forcefield));
 	// creating the run object 
-	std::unique_ptr<Run> run = std::make_unique<Run>(engine);
+	std::unique_ptr<Run> run = std::make_unique<Run>();
 	// registering that run into the engine
 	engine.setItem(std::move(run));
+	// injecting dependencies
+	engine.injectDependencies();
 	// returning the fixList and mocked fixes
 	auto& fixListRef = engine.getFixList();
 	auto& fix1ref = fixListRef->returnFixById("1");

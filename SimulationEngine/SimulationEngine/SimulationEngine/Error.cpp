@@ -1,19 +1,18 @@
 #include "Error.h"
 
-Error::Error(Engine& engine_, std::string id_) :
-	Ref{ engine_, id_ },
+Error::Error(std::string id_) :
+	Ref{  id_ },
 	errorStreams{ std::ref(std::cout) }
 {}
 
-Error::Error(Engine& engine_,
-	std::vector<std::reference_wrapper<std::ostream>>& errorStreams_,
+Error::Error(std::vector<std::reference_wrapper<std::ostream>>& errorStreams_,
 	std::string id_):
-	Ref{ engine_, id_ },
+	Ref{ id_ },
 	errorStreams{ errorStreams_ }
 { }
 
-Error::Error(Engine& engine_, std::vector<std::string> args_) :
-	Ref{ engine_,std::string("Error-1") }
+Error::Error(std::vector<std::string> args_) :
+	Ref{ std::string("Error-1") }
 {
 	int nargs = args_.size();
 	if (nargs < 2) {

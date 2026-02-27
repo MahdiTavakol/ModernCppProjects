@@ -5,9 +5,9 @@
 
 class Neighbor : public Ref {
 public:
-	Neighbor(Engine& engine_, std::vector<std::string> args_);
-	Neighbor(Engine& engine_);
-	Neighbor(Engine& engine_, double neighbor_cutoff_);
+	Neighbor(std::vector<std::string> args_);
+	Neighbor();
+	Neighbor(double neighbor_cutoff_);
 	virtual void injectDependencies(Engine& engine_) override;
 	virtual void init();
 	virtual void update() {}

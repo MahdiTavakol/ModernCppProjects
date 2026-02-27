@@ -7,9 +7,9 @@
 
 class FixPrint : public Fix {
 public:
-	FixPrint(Engine& engine_, std::vector<std::string> args_);
+	FixPrint( std::vector<std::string> args_);
 
-	FixPrint(Engine& engine_,
+	FixPrint(
 		std::string id_,
 		int nevery_ = 1,
 		int mask_ = POST_FORCE,

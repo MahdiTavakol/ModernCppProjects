@@ -22,7 +22,7 @@ TEST_CASE("Testing various error and warning messages")
 		std::ref(errorStream2),
 		std::ref(errorStream3)
 	};
-	auto error = make_unique<Error>(*engine, errorStreams);
+	auto error = make_unique<Error>(errorStreams);
 	// setting items into the engine
 	engine->setItem(std::move(error));
 	// get error reference from the engine

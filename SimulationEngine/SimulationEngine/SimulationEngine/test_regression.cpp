@@ -15,9 +15,12 @@ TEST_CASE("Starting and registering each class of the Engine class with minimal 
 	// the mocked Engine object
 	Engine mockedEngine;
 	// box 
-	auto box = make_unique<Box>(mockedEngine, min, max);
+	auto box = make_unique<Box>(min, max);
 	// particles
-	auto particles = make_unique<Particles>(mockedEngine, nmax);
+	auto particles = make_unique<Particles>(nmax);
+	// injecting dependencies
+	box->injectDependencies(mockedEngine);
+	particles->injectDependencies(mockedEngine);
 	// parameters before registering into the engine
 	array<double, 3> rMin1, rMax1, rMin2, rMax2;
 	int rNmax1, rNlocal1, rNmax2, rNlocal2;
@@ -52,15 +55,25 @@ TEST_CASE("Testing the Euler integration in 100 steps for 3 particles under cons
 	// the mocked Engine object
 	Engine mockedEngine;
 	// box 
-	auto box = make_unique<Box>(mockedEngine, min, max);
+	auto box = make_unique<Box>(min, max);
 	// particles
-	auto particles = make_unique<Particles>(mockedEngine, nmax);
+	auto particles = make_unique<Particles>(nmax);
 	// Integrator
-	unique_ptr<Integrator> integrator = make_unique<EulerIntegrator>(mockedEngine);
+	unique_ptr<Integrator> integrator = make_unique<EulerIntegrator>();
+	// mocked forcefield
+	//unique_ptr<ForceField> forcefield = make_unique<MockedForceField>();
+	// mocked neighbor
+	//unique_ptr<Neighbor> neighbor = make_unique<MockedNeighbor>();
+
+	// creating the run object
+	auto run = make_unique<Run>();
 	// adding these to the engine
 	mockedEngine.setItem(std::move(box));
 	mockedEngine.setItem(std::move(particles));
 	mockedEngine.setItem(std::move(integrator));
+	mockedEngine.setItem(std::move(run));
+	// injecting dependencies
+	mockedEngine.injectDependencies();
 	// getting a reference to particles
 	auto& engineParticles = mockedEngine.getParticlesForUpdate();
 	// new particles
@@ -104,14 +117,12 @@ TEST_CASE("Testing the Euler integration in 100 steps for 3 particles under cons
 	for (int i = 0; i < 3; i++) {
 		engineParticles->addParticle(newXs[i], newVs[i], newFs[i], newMs[i]);
 	}
-	// injecting dependencies
-	mockedEngine.injectDependencies();
-	// creating the run object
-	auto run = make_unique<Run>(mockedEngine);
+	// getting the run command
+	auto& runCommand = mockedEngine.getRunCommand();
 	// setting it up
-	run->setup();
+	runCommand->setup();
 	// running it for 100 steps
-	run->start(nSteps);
+	runCommand->start(nSteps);
 	// comparing the results
 	for (int i = 0; i < 3; i++) {
 		array<double, 3> xi, vi, fi;
@@ -138,11 +149,11 @@ TEST_CASE("Testing the Euler integration in 100 steps for 3 particles under cons
 	// the mocked Engine object
 	Engine mockedEngine;
 	// box 
-	auto box = make_unique<Box>(mockedEngine, min, max);
+	auto box = make_unique<Box>(min, max);
 	// particles
-	auto particles = make_unique<Particles>(mockedEngine, nmax);
+	auto particles = make_unique<Particles>( nmax);
 	// Integrator
-	unique_ptr<Integrator> integrator = make_unique<EulerIntegrator>(mockedEngine);
+	unique_ptr<Integrator> integrator = make_unique<EulerIntegrator>();
 	// adding these to the engine
 	mockedEngine.setItem(std::move(box));
 	mockedEngine.setItem(std::move(particles));
@@ -193,7 +204,9 @@ TEST_CASE("Testing the Euler integration in 100 steps for 3 particles under cons
 	// injecting dependencies
 	mockedEngine.injectDependencies();
 	// creating the run object
-	auto run = make_unique<Run>(mockedEngine);
+	auto run = make_unique<Run>();
+	// injecting dependencies
+	run->injectDependencies(mockedEngine);
 	// setting it up
 	run->setup();
 	// running it for 100 steps
@@ -225,11 +238,11 @@ TEST_CASE("Testing the Semi-Euler integration in 100 steps for 3 particles under
 	// the mocked Engine object
 	Engine mockedEngine;
 	// box 
-	auto box = make_unique<Box>(mockedEngine, min, max);
+	auto box = make_unique<Box>(min, max);
 	// particles
-	auto particles = make_unique<Particles>(mockedEngine, nmax);
+	auto particles = make_unique<Particles>(nmax);
 	// Integrator
-	unique_ptr<Integrator> integrator = make_unique<SemiIntegrator>(mockedEngine);
+	unique_ptr<Integrator> integrator = make_unique<SemiIntegrator>();
 	// adding these to the engine
 	mockedEngine.setItem(std::move(box));
 	mockedEngine.setItem(std::move(particles));
@@ -280,7 +293,9 @@ TEST_CASE("Testing the Semi-Euler integration in 100 steps for 3 particles under
 	// injecting dependencies
 	mockedEngine.injectDependencies();
 	// creating the run object
-	auto run = make_unique<Run>(mockedEngine);
+	auto run = make_unique<Run>();
+	// injecting dependencies
+	run->injectDependencies(mockedEngine);
 	// setting it up
 	run->setup();
 	// running it for 100 steps
@@ -311,11 +326,11 @@ TEST_CASE("Testing the Semi-Euler integration in 100 steps for 3 particles under
 	// the mocked Engine object
 	Engine mockedEngine;
 	// box 
-	auto box = make_unique<Box>(mockedEngine, min, max);
+	auto box = make_unique<Box>(min, max);
 	// particles
-	auto particles = make_unique<Particles>(mockedEngine, nmax);
+	auto particles = make_unique<Particles>(nmax);
 	// Integrator
-	unique_ptr<Integrator> integrator = make_unique<SemiIntegrator>(mockedEngine);
+	unique_ptr<Integrator> integrator = make_unique<SemiIntegrator>();
 	// adding these to the engine
 	mockedEngine.setItem(std::move(box));
 	mockedEngine.setItem(std::move(particles));
@@ -366,7 +381,9 @@ TEST_CASE("Testing the Semi-Euler integration in 100 steps for 3 particles under
 	// injecting dependencies
 	mockedEngine.injectDependencies();
 	// creating the run object
-	auto run = make_unique<Run>(mockedEngine);
+	auto run = make_unique<Run>();
+	// injecting dependencies
+	run->injectDependencies(mockedEngine);
 	// setting it up
 	run->setup();
 	// running it for 100 steps

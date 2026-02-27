@@ -23,8 +23,7 @@ class EngineFixture {
 public:
 	EngineFixture(std::vector<std::string>& args_) :
 		commands{ std::move(args_) }
-	{
-	}
+	{}
 
 	// std::string commands vector
 	std::vector<std::string> commands;
@@ -77,7 +76,7 @@ class MockedBox : public Box {
 public:
 	MockedBox(Engine& engine_,
 		std::array<double, 3> min_, std::array<double, 3> max_) :
-		Box{ engine_ },
+		Box{},
 		min{ std::move(min_) },
 		max{ std::move(max_) }
 	{
@@ -88,14 +87,13 @@ private:
 
 class MockedForceField : public ForceField {
 public:
-	MockedForceField(Engine& engine_,
-		std::vector<double> forces_) :
-		ForceField{ engine_ },
+	MockedForceField(std::vector<double> forces_) :
+		ForceField{},
 		force{ std::move(forces_) }
 	{
 	}
-	MockedForceField(Engine& engine_) :
-		ForceField{ engine_ },
+	MockedForceField() :
+		ForceField{},
 		haveIupdatedForces{ true }
 	{
 	}
@@ -104,17 +102,15 @@ public:
 	{
 		if (haveIupdatedForces)
 			return;
-		auto& box = engine().getBox();
-		auto& P = engine().getParticlesForUpdate();
 		int nmax, nlocal;
-		P->getNmaxNlocal(nmax, nlocal);
+		particles->getNmaxNlocal(nmax, nlocal);
 		int nlocalForces = static_cast<int>(force.size() / 3);
 		if (nlocal != force.size())
 			throw std::invalid_argument("Wrong force vector size!");
 		for (int i = 0; i < nlocal; i++) {
-			P->F(i, 0) = force[3 * i];
-			P->F(i, 1) = force[3 * i + 1];
-			P->F(i, 2) = force[3 * i + 2];
+			particles->F(i, 0) = force[3 * i];
+			particles->F(i, 1) = force[3 * i + 1];
+			particles->F(i, 2) = force[3 * i + 2];
 		}
 		haveIupdatedForces = true;
 	}
@@ -125,8 +121,8 @@ private:
 
 class MockedForceField2 : public ForceField {
 public:
-	MockedForceField2(Engine& engine_) :
-		ForceField{ engine_ }
+	MockedForceField2() :
+		ForceField{}
 	{}
 
 	virtual void init() override {
@@ -144,20 +140,20 @@ public:
 // MockedNeighbor class
 class MockedNeighbor : public Neighbor {
 public:
-	MockedNeighbor(Engine& engine_,
+	MockedNeighbor(
 		int nNeigh_,
 		std::vector<int>& neighListVec_,
 		std::vector<int>& firstNeighVec_,
 		std::vector<int>& numNeighVec_) :
-		Neighbor{ engine_ },
+		Neighbor{},
 		nNeigh{ nNeigh_ },
 		neighListVec{ std::move(neighListVec_) },
 		firstNeighVec{ std::move(firstNeighVec_) },
 		numNeighVec{ std::move(numNeighVec_) }
 	{
 	}
-	MockedNeighbor(Engine& engine_) :
-		Neighbor{ engine_ },
+	MockedNeighbor() :
+		Neighbor{},
 		nNeigh{ 0 }
 	{
 	}
@@ -177,8 +173,8 @@ private:
 
 class MockedNeighbor2 : public Neighbor {
 public:
-	MockedNeighbor2(Engine& engine_):
-		Neighbor{engine_}{}
+	MockedNeighbor2():
+		Neighbor{}{}
 
 	void init() override {
 		nInit++;
@@ -200,14 +196,14 @@ public:
 // Mocked Particles class
 class MockedParticles : public Particles {
 public:
-	MockedParticles(Engine& engine_,
+	MockedParticles(
 		int nmax_,
 		std::vector<double>& x_,
 		std::vector<double>& v_,
 		std::vector<double>& f_,
 		std::vector<double>& r_,
 		std::vector<double>& m_) :
-		Particles{ engine_ }
+		Particles{}
 	{
 		nmax = nmax_;
 		x = std::move(x_);
@@ -225,8 +221,8 @@ private:
 class MockedIntegrator : public Integrator
 {
 public:
-	MockedIntegrator(Engine& engine_) :
-		Integrator{ engine_ }
+	MockedIntegrator() :
+		Integrator{}
 	{
 	}
 	void updateX() {
@@ -240,8 +236,8 @@ public:
 // mocked integrator to count how many times it was called.
 class MockedIntegrator2 : public Integrator {
 public:
-	MockedIntegrator2(Engine& engine_) :
-		Integrator{ engine_ }
+	MockedIntegrator2() :
+		Integrator{}
 	{}
 
 	void post_force() override
@@ -254,8 +250,8 @@ public:
 
 class MockedFix : public Fix {
 public:
-	MockedFix(Engine& engine_, FixMask mask_, std::string id_) :
-		Fix{ engine_, mask_, id_ }
+	MockedFix(FixMask mask_, std::string id_) :
+		Fix{mask_, id_ }
 	{
 	}
 
