@@ -19,8 +19,6 @@ TEST_CASE("testing the fixList class")
 	constexpr int nPreForce = 7;
 	constexpr int nPostForce = 13;
 	constexpr int nFinInt = 3;
-	// building the mocked engine
-	Engine engine;
 	// building the mockedFixes
 	std::unique_ptr<Fix> fix1 = std::make_unique<MockedFix>(FixMask::INIT_INTEGRATE, "1");
 	std::unique_ptr<Fix> fix2 = std::make_unique<MockedFix>(FixMask::PRE_FORCE, "2");
@@ -28,23 +26,18 @@ TEST_CASE("testing the fixList class")
 	std::unique_ptr<Fix> fix4 = std::make_unique<MockedFix>(FixMask::FINAL_INTEGRATE, "4");
 	// creating the integrator
 	std::unique_ptr<FixList> fixList = std::make_unique<FixList>();
-	// registering those fixes to the fixList
+	// addting to the fixList
 	fixList->addFix(std::move(fix1));
 	fixList->addFix(std::move(fix2));
 	fixList->addFix(std::move(fix3));
 	fixList->addFix(std::move(fix4));
-	// injecting the dependencies
-	fixList->injectDependencies(engine);
-	// regisetering the for list
-	engine.setItem(std::move(fixList));
 	// returning the fixList and mocked fixes
-	auto& fixListRef = engine.getFixList();
-	auto& fix1ref = fixListRef->returnFixById("1");
-	auto& fix2ref = fixListRef->returnFixById("2");
-	auto& fix3ref = fixListRef->returnFixById("3");
-	auto& fix4ref = fixListRef->returnFixById("4");
+	auto& fix1ref = fixList->returnFixById("1");
+	auto& fix2ref = fixList->returnFixById("2");
+	auto& fix3ref = fixList->returnFixById("3");
+	auto& fix4ref = fixList->returnFixById("4");
 	// checking if they are present
-	REQUIRE(fixListRef);
+	REQUIRE(fixList);
 	REQUIRE(fix1ref);
 	REQUIRE(fix2ref);
 	REQUIRE(fix3ref);
@@ -61,17 +54,17 @@ TEST_CASE("testing the fixList class")
 	REQUIRE(fix4mockRef);
 	// calling the differnt functions various times.
 	for (int i = 0; i < nInit; i++)
-		fixListRef->init();
+		fixList->init();
 	for (int i = 0; i < nSetup; i++)
-		fixListRef->setup();
+		fixList->setup();
 	for (int i = 0; i < nInitInt; i++)
-		fixListRef->initial_integrate();
+		fixList->initial_integrate();
 	for (int i = 0; i < nPreForce; i++)
-		fixListRef->pre_force();
+		fixList->pre_force();
 	for (int i = 0; i < nPostForce; i++)
-		fixListRef->post_force();
+		fixList->post_force();
 	for (int i = 0; i < nFinInt; i++)
-		fixListRef->final_integrate();
+		fixList->final_integrate();
 	// checking the output
 	REQUIRE(fix1mockRef->nInit == nInit);
 	REQUIRE(fix2mockRef->nInit == nInit);

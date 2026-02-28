@@ -12,8 +12,6 @@ TEST_CASE("Testing the collision integrator")
 {
 	std::cout << "Testing the collision integrator" << std::endl;
 	std::cout << std::string(80, '=') << std::endl;
-	// creating the engine
-	Engine engine;
 	// creating the mockedNeighbor object
 	int nNeigh = 5;
 	// Each particle starts at a different offset
@@ -36,9 +34,9 @@ TEST_CASE("Testing the collision integrator")
 	std::vector<double> x = {
 		   150.0,80.0,50.0, // particle 0
 		   150.0,180.0,0.0, // particle 1
-		   0.0,0.0,0.0, // particle 2
-		   0.0,-200.0,0.0, // particle 3
-		   200.0,0.0,0.0, // particle 4
+		   0.0,0.0,0.0,     // particle 2
+		   0.0,-200.0,0.0,  // particle 3
+		   200.0,0.0,0.0,   // particle 4
 	};
 	std::vector<double> v = {
 		  0.0,0.0,0.0, // particle 0
@@ -60,20 +58,23 @@ TEST_CASE("Testing the collision integrator")
 		std::make_unique<MockedParticles>(nmax, x, v, f, r, m);
 	// creating the collision object under test
 	std::unique_ptr<Integrator> colliIntegrator = std::make_unique<ColliIntegrator>();
-	// registering the items
-	engine.setItem(std::move(mockedNeighbor));
-	engine.setItem(std::move(mockedParticles));
-	engine.setItem(std::move(colliIntegrator));
-	// injecting dependencies
-	engine.injectDependencies();
+	// the test_engine_fixture
+	// input args
+	std::vector<std::unique_ptr<Ref>> inputs;
+	inputs.push_back(std::move(mockedNeighbor));
+	inputs.push_back(std::move(mockedParticles));
+	inputs.push_back(std::move(colliIntegrator));
+	EngineFixture engineFixture(inputs);
+	// getting the engine_ptr
+	auto engine_ptr = engineFixture.returnEngine();
 	// getting the integrator from the engine
-	auto& integratorRef = engine.getIntegrator();
+	auto& integratorRef = engine_ptr->getIntegrator();
 	// checking if the engine has integrator
 	REQUIRE(integratorRef);
 	// running one integration step
 	integratorRef->post_force();
 	// getting the particle coordinates from the engine
-	auto& particlesRef = engine.getParticles();
+	auto& particlesRef = engine_ptr->getParticles();
 	// checking if the engine has particles
 	REQUIRE(particlesRef);
 	// getting particle coordinates

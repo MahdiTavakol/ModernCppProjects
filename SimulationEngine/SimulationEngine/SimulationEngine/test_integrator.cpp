@@ -3,61 +3,6 @@
 #include <iostream>
 
 
-class Test_integrator_fixture {
-public:
-	Test_integrator_fixture(
-		double & dt_,
-		std::unique_ptr<Integrator>& integrator_,
-		std::vector<double>& x_,
-		std::vector<double>& v_,
-		std::vector<double>& f_,
-		std::vector<double>& r_,
-		std::vector<double>& m_):
-		dt{dt_},
-		integrator{std::move(integrator_)},
-		x{std::move(x_)},
-		v{std::move(v_)},
-		f{std::move(f_)},
-		r{std::move(r_)},
-		m{std::move(m_)}
-	{}
-	void setup()
-	{
-		// number of particles
-		int nlocal = x.size();
-		int nmax = x.size();
-		// particles
-		mockedParticles = std::make_unique<MockedParticles>(nmax, x, v, f, r, m);
-		// the timestep
-		constexpr double dt = 1.0;
-		// setting the timestep
-		integrator->setDt(dt);
-		// registering Particles and Integrator objects
-		engine.setItem(std::move(integrator));
-		engine.setItem(std::move(mockedParticles));
-		// injecting dependencies
-		engine.injectDependencies();
-	}
-	std::unique_ptr<Integrator>& return_integrator()
-	{
-		// returning the integrator object
-		auto& integratorRef = engine.getIntegrator();
-		return integratorRef;
-	}
-	std::unique_ptr<Particles>& return_particles()
-	{
-		auto& particlesRef = engine.getParticlesForUpdate();
-		return particlesRef;
-	}
-
-private:
-	double dt;
-	Engine engine;
-	std::unique_ptr<Particles> mockedParticles;
-	std::unique_ptr<Integrator> integrator;
-	std::vector<double> x, v, f, r, m;
-};
-
 // shared variables
 constexpr int nmax = 5;
 constexpr int nlocal = 5;

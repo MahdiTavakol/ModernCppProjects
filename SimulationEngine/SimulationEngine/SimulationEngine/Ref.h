@@ -22,6 +22,8 @@ public:
 	bool operator==(const Ref& other) const = default;
 	virtual ~Ref() = default;
 	virtual void injectDependencies(Engine& engine_);
+	// the initialization processes which are dependent on other classes
+	virtual void init() {}
 	void checkPointer(Ref* pointer_, std::string name_) const;
 	const std::string& getId() const;
 

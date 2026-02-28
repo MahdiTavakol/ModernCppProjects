@@ -413,7 +413,7 @@ TEST_CASE("Testing fixes invoked at initial_integrate and final_integrate steps"
 		"particles 10",
 		"particle 1 0.0 0.0 0.0 2.0 1.0 5.0 5.0 8.0 -10.0 5.0",
 		"integrator semi 1",
-		"forcefield spring 10.0",
+		"forcefield fixed 5.0 8.0 -10.0",
 		"run_status silent",
 		"fix print 1 1 init_integrate x 0",
 		"fix print 2 1 init_integrate v 0",
@@ -428,7 +428,7 @@ TEST_CASE("Testing fixes invoked at initial_integrate and final_integrate steps"
 	EngineFixture engineFixture{ commands };
 	// running the engine
 	engineFixture.runEngine();
-
+	// getting the engine
 
 	// expected values
 	vector<array<double, 3>> expectedXs, expectedVs, expectedFs;
@@ -541,6 +541,10 @@ TEST_CASE("Calculating the force from the forcefield equation") {
 	auto F1s = fixPrintPtr1->getOutputVector();
 	auto F2s = fixPrintPtr2->getOutputVector();
 
+	// getting the integrator
+	auto& integrator = engine->getIntegrator();
+	REQUIRE(integrator);
+
 
 	// expected values
 	vector<array<double, 3>> expectedF1s, expectedF2s;
@@ -558,7 +562,6 @@ TEST_CASE("Calculating the force from the forcefield equation") {
 
 	// comparing the results
 	for (int i = 0; i < nSteps; i++) {
-		std::cout << i << std::endl;
 		for (int j = 0; j < 3; j++) {
 			REQUIRE_THAT(expectedF1s[i][j], Catch::Matchers::WithinAbs(F1s[i][j], 1e-6));
 			REQUIRE_THAT(expectedF2s[i][j], Catch::Matchers::WithinAbs(F2s[i][j], 1e-6));

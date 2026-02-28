@@ -17,6 +17,13 @@ public:
 		std::array<double, 3> newF_ = { 0.0,0.0,0.0 },
 		double newM_ = 10.0, 
 		double newR_ = 0.0);
+	void getParticle(const int& id_,
+		std::array<double, 3>& newX_,
+		std::array<double, 3>& newV_,
+		std::array<double, 3>& newF_,
+		double& newM_,
+		double& newR_);
+	void copyParticle(Particles* other_, const int& id_);
 	void getNmaxNlocal(int& nmax_, int& nlocal_) const;
 	// get atom i position
 	void getAtomVec(const int& i,

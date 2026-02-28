@@ -61,9 +61,40 @@ void Particles::addParticle(std::array<double, 3> newX_,
 	r.push_back(newR_);
 }
 
+void Particles::getParticle(const int& id_,
+	std::array<double, 3>& newX_,
+	std::array<double, 3>& newV_,
+	std::array<double, 3>& newF_,
+	double& newM_,
+	double& newR_)
+{
+	newX_[0] = X(id_, 0);
+	newX_[1] = X(id_, 1);
+	newX_[2] = X(id_, 2);
+	newV_[0] = V(id_, 0);
+	newV_[1] = V(id_, 1);
+	newV_[2] = V(id_, 2);
+	newF_[0] = F(id_, 0);
+	newF_[1] = F(id_, 1);
+	newF_[2] = F(id_, 2);
+	newR_ = R(id_);
+	newM_ = M(id_);
+}
+
+void Particles::copyParticle(Particles* other_,
+	                        const int& id_)
+{
+	std::array<double, 3> newX, newV, newF;
+	double newM, newR;
+	other_->getParticle(id_, newX, newV, newF, newM, newR);
+	this->addParticle(newX, newV, newF, newM, newR);
+}
+
 void Particles::getNmaxNlocal(int& nmax_, int& nlocal_) const {
 	nmax_ = nmax; nlocal_ = static_cast<int>(x.size()) / 3;
 }
+
+
 // get atom i position
 void Particles::getAtomVec(const int& i,
 	std::array<double, 3>& xi,

@@ -130,6 +130,8 @@
     <ClCompile Include="Box.cpp" />
     <ClCompile Include="catch_amalgamated.cpp" />
     <ClCompile Include="ColliIntegrator.cpp" />
+    <ClCompile Include="Communicator.cpp" />
+    <ClCompile Include="DamperField.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EngineFactory.cpp" />
     <ClCompile Include="Error.cpp" />
@@ -149,17 +151,21 @@
     <ClCompile Include="Ref.cpp" />
     <ClCompile Include="test_box.cpp" />
     <ClCompile Include="test_colliintegrator.cpp" />
+    <ClCompile Include="test_damperfield.cpp" />
     <ClCompile Include="test_enginefactory.cpp" />
     <ClCompile Include="test_error.cpp" />
     <ClCompile Include="test_fixList.cpp" />
     <ClCompile Include="test_integrator.cpp" />
     <ClCompile Include="test_regression.cpp" />
     <ClCompile Include="test_run.cpp" />
+    <ClCompile Include="test_springfield.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Box.h" />
     <ClInclude Include="catch_amalgamated.hpp" />
     <ClInclude Include="ColliIntegrator.h" />
+    <ClInclude Include="Communicator.h" />
+    <ClInclude Include="DamperField.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="EngineFactory.h" />
     <ClInclude Include="EulerIntegrator.h" />

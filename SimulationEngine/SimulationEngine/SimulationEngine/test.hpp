@@ -9,68 +9,24 @@
 #include "SimpleNeighbor.h"
 #include "SemiIntegrator.h"
 #include "SpringField.h"
+#include "DamperField.h"
 #include "FixPrint.h"
 #include "FixList.h"
 #include "Box.h"
 #include "Run.h"
 #include "Error.h"
 
+
+/*
+ * using commands for std functions
+ */
 using std::vector, std::array;
 using std::make_unique, std::unique_ptr;
 
-// EngineFixture used for integration and regression tests
-class EngineFixture {
-public:
-	EngineFixture(std::vector<std::string>& args_) :
-		commands{ std::move(args_) }
-	{}
 
-	// std::string commands vector
-	std::vector<std::string> commands;
-	// the factory_ptr
-	std::unique_ptr<EngineFactory> factory_ptr = nullptr;
-	// the engine pointer
-	std::unique_ptr<Engine> engine_ptr = nullptr;
-	// checking if we have created those pointers before
-	void checkPtrs()
-	{
-		if (engine_ptr == nullptr) {
-			if (factory_ptr == nullptr)
-				factory_ptr = std::make_unique<EngineFactory>(commands);
-			engine_ptr = factory_ptr->returnEngine();
-		}
-	}
-	// running the engine
-	// should return the engine
-	void runEngine() {
-		// it possibly has been returned
-		checkPtrs();
-		// getting the run command
-		auto& run_ptr = engine_ptr->getRunCommand();
-		// setting up the simulation
-		run_ptr->setup();
-		// running the simualation
-		run_ptr->start();
-	}
-
-	// building and returning the engine
-	// should be removed run and return should be the same
-	// may be it is better to return the engine_ptr by ref
-	// it is dangerious... not it is not good at all.
-	std::unique_ptr<Engine> returnEngine() {
-		checkPtrs();
-		return std::move(engine_ptr);
-	}
-
-	std::unique_ptr<Fix>& returnFixById(const std::string id_) {
-		// an status should be added to the engine to check 
-		// if it is run or not and if it is not run 
-		// it runs.
-		checkPtrs();
-		return engine_ptr->returnFixById(id_);
-	}
-};
-
+/*
+ * Mocked types
+ */
 
 class MockedBox : public Box {
 public:
@@ -78,12 +34,14 @@ public:
 		Box{},
 		min{ std::array<double,3>{0.0,0.0,0.0} },
 		max{ std::array<double,3>{0.0,0.0,0.0} }
-	{}
+	{
+	}
 	MockedBox(std::array<double, 3> min_, std::array<double, 3> max_) :
 		Box{},
 		min{ std::move(min_) },
 		max{ std::move(max_) }
-	{}
+	{
+	}
 	Error* getError() {
 		return error;
 	}
@@ -130,7 +88,8 @@ class MockedForceField2 : public ForceField {
 public:
 	MockedForceField2() :
 		ForceField{}
-	{}
+	{
+	}
 
 	virtual void init() override {
 		nInit++;
@@ -180,8 +139,9 @@ private:
 
 class MockedNeighbor2 : public Neighbor {
 public:
-	MockedNeighbor2():
-		Neighbor{}{}
+	MockedNeighbor2() :
+		Neighbor{} {
+	}
 
 	void init() override {
 		nInit++;
@@ -203,9 +163,10 @@ public:
 // Mocked Particles class
 class MockedParticles : public Particles {
 public:
-	MockedParticles():
+	MockedParticles() :
 		Particles{}
-	{}
+	{
+	}
 	MockedParticles(
 		int nmax_,
 		std::vector<double>& x_,
@@ -252,7 +213,8 @@ class MockedIntegrator2 : public Integrator {
 public:
 	MockedIntegrator2() :
 		Integrator{}
-	{}
+	{
+	}
 
 	void post_force() override
 	{
@@ -265,7 +227,7 @@ public:
 class MockedFix : public Fix {
 public:
 	MockedFix(FixMask mask_, std::string id_) :
-		Fix{mask_, id_ }
+		Fix{ mask_, id_ }
 	{
 	}
 
@@ -295,6 +257,133 @@ public:
 	int nInit = 0;
 	int nSetup = 0;
 	int nTimes = 0;
+};
+
+
+/*
+* Test fixtures
+*/
+
+// EngineFixture used for integration and regression tests
+class EngineFixture {
+public:
+	EngineFixture(std::vector<std::unique_ptr<Ref>>& inputObjs) {
+		engine_ptr = std::make_unique<Engine>();
+		for (auto& inputObj : inputObjs)
+			engine_ptr->setItem(std::move(inputObj));
+		// since we first inputted the items
+		// we can now inject dependencies
+		engine_ptr->injectDependencies();
+		engine_ptr->init();
+	}
+	EngineFixture(std::vector<std::string>& args_) :
+		commands{ std::move(args_) }
+	{}
+
+	// std::string commands vector
+	std::vector<std::string> commands;
+	// the factory_ptr
+	std::unique_ptr<EngineFactory> factory_ptr = nullptr;
+	// the engine pointer
+	std::unique_ptr<Engine> engine_ptr = nullptr;
+	// checking if we have created those pointers before
+	void checkPtrs()
+	{
+		if (engine_ptr == nullptr) {
+			if (factory_ptr == nullptr)
+				factory_ptr = std::make_unique<EngineFactory>(commands);
+			engine_ptr = factory_ptr->returnEngine();
+		}
+	}
+	// running the engine
+	// should return the engine
+	void runEngine() {
+		// it possibly has been returned
+		checkPtrs();
+		// getting the run command
+		auto& run_ptr = engine_ptr->getRunCommand();
+		// setting up the simulation
+		run_ptr->setup();
+		// running the simualation
+		run_ptr->start();
+	}
+
+	// building and returning the engine
+	// should be removed run and return should be the same
+	// may be it is better to return the engine_ptr by ref
+	// it is dangerious... not it is not good at all.
+	std::unique_ptr<Engine> returnEngine() {
+		checkPtrs();
+		return std::move(engine_ptr);
+	}
+
+	std::unique_ptr<Engine>& getEngineRef() {
+		return engine_ptr;
+	}
+
+	std::unique_ptr<Fix>& returnFixById(const std::string id_) {
+		// an status should be added to the engine to check 
+		// if it is run or not and if it is not run 
+		// it runs.
+		checkPtrs();
+		return engine_ptr->returnFixById(id_);
+	}
+};
+
+class Test_integrator_fixture {
+public:
+	Test_integrator_fixture(
+		double& dt_,
+		std::unique_ptr<Integrator>& integrator_,
+		std::vector<double>& x_,
+		std::vector<double>& v_,
+		std::vector<double>& f_,
+		std::vector<double>& r_,
+		std::vector<double>& m_) :
+		dt{ dt_ },
+		integrator{ std::move(integrator_) },
+		x{ std::move(x_) },
+		v{ std::move(v_) },
+		f{ std::move(f_) },
+		r{ std::move(r_) },
+		m{ std::move(m_) }
+	{
+	}
+	void setup()
+	{
+		// number of particles
+		int nlocal = x.size();
+		int nmax = x.size();
+		// particles
+		mockedParticles = std::make_unique<MockedParticles>(nmax, x, v, f, r, m);
+		// the timestep
+		constexpr double dt = 1.0;
+		// setting the timestep
+		integrator->setDt(dt);
+		// registering Particles and Integrator objects
+		engine.setItem(std::move(integrator));
+		engine.setItem(std::move(mockedParticles));
+		// injecting dependencies
+		engine.injectDependencies();
+	}
+	std::unique_ptr<Integrator>& return_integrator()
+	{
+		// returning the integrator object
+		auto& integratorRef = engine.getIntegrator();
+		return integratorRef;
+	}
+	std::unique_ptr<Particles>& return_particles()
+	{
+		auto& particlesRef = engine.getParticlesForUpdate();
+		return particlesRef;
+	}
+
+private:
+	double dt;
+	Engine engine;
+	std::unique_ptr<Particles> mockedParticles;
+	std::unique_ptr<Integrator> integrator;
+	std::vector<double> x, v, f, r, m;
 };
 
 

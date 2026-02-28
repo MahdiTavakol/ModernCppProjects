@@ -29,3 +29,10 @@ void Box::getDimensions(std::array<double, 3>& min_,
 	min_ = min;
 	max_ = max;
 }
+
+void Box::setDimensions(const std::array<double, 3>& min_,
+	const std::array<double, 3>& max_)
+{
+	min = min_;
+	max = max_;
+}

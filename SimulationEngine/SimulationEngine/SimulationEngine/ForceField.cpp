@@ -4,7 +4,7 @@
 #include <iostream>
 #include <stdexcept>
 
-ForceField::ForceField(std::vector<std::string> args_) :
+ForceField::ForceField(std::vector<std::string>& args_) :
 	Ref{  "1" }
 {
 	auto nargs = args_.size();
@@ -28,7 +28,6 @@ void ForceField::injectDependencies(Engine& engine_) {
 
 
 void ForceField::init() {
-	int nlocal, nmax;
 	return;
 	auto f = particles->getFData();
 	particles->getNmaxNlocal(nmax, nlocal);
@@ -40,9 +39,14 @@ void ForceField::init() {
 	}
 }
 
-void ForceField::update() {
-	int nlocal, nmax;
+void ForceField::resetForce()
+{
 	particles->getNmaxNlocal(nmax, nlocal);
+	auto f = particles->getFData();
+	std::fill_n(f, 3 * nlocal, 0.0);
+}
+
+void ForceField::update() {
 
 	double energy;
 	for (int i = 0; i < nlocal; i++)
@@ -55,4 +59,26 @@ void ForceField::update() {
 			};
 			calculate_pair(dist, &(particles->F(i,0)), energy);
 		}
+}
+
+FixedForce::FixedForce(std::vector<std::string>& args_):
+	ForceField(args_)
+{
+	// forcefield fixed fx fy fz
+	auto nargs = args_.size();
+	if (nargs != 5)
+		throw std::invalid_argument("Not enough args in the Fixed ForceField!");
+
+	fx = std::stoi(args_[2]);
+	fy = std::stoi(args_[3]);
+	fz = std::stoi(args_[4]);
+}
+
+void FixedForce::update()
+{
+	for (int i = 0; i < nlocal; i++) {
+		particles->F(i, 0) = fx;
+		particles->F(i, 1) = fy;
+		particles->F(i, 2) = fz;
+	}
 }

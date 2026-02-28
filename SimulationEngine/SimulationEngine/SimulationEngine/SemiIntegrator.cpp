@@ -1,4 +1,5 @@
 #include "SemiIntegrator.h"
+#include <iostream>
 
 SemiIntegrator::SemiIntegrator(std::vector<std::string> args_) :
 	Integrator{ std::move(args_) }

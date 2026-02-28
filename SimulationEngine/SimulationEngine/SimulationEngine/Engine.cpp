@@ -62,9 +62,32 @@ void Engine::injectDependencies() {
 		run->injectDependencies(*this);
 }
 
+void Engine::init() {
+	if (integrator)
+		integrator->init();
+	if (particles)
+		particles->init();
+	if (forcefield)
+		forcefield->init();
+	if (fixList)
+		fixList->init();
+	if (neighbor)
+		neighbor->init();
+	if (box)
+		box->init();
+	if (run)
+		run->init();
+}
+
 void Engine::resetError(std::unique_ptr<Error>&& error_) {
 	error = std::move(error_);
 	// since the error has changed the dependencies must be reinjected.
+	injectDependencies();
+}
+
+void Engine::resetParticles(std::unique_ptr<Particles>&& particles_) {
+	particles = std::move(particles_);
+	// since the particles has changed we need to reinject the dependencies
 	injectDependencies();
 }
 

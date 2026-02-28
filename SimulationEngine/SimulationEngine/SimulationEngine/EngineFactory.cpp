@@ -79,6 +79,8 @@ std::unique_ptr<Engine> EngineFactory::returnEngine() {
 	engine->setItem(std::move(fixList));
 	// injecting dependencies
 	engine->injectDependencies();
+	// the initialization process
+	engine->init();
 
 	return std::move(engine);
 }
@@ -123,8 +125,7 @@ void EngineFactory::parseCommand(const std::string& command) {
 		// parse run command
 		commandNumCheck(commandCount[itemId-1], tokens[0]);
 		run = make_unique<Run>(tokens);
-	}
-	else if (++itemId && tokens[0] == "run_status") {
+	} else if (++itemId && tokens[0] == "run_status") {
 		commandNumCheck(commandCount[itemId - 1], tokens[0]);
 		engine->setStatus(tokens[1]);
 	} else if (++itemId && tokens[0] == "particle") {
@@ -183,6 +184,9 @@ void EngineFactory::buildForceField(std::vector<std::string> args_) {
 	if (args_[1] == "spring") {
 		forcefield = make_unique<SpringField>(args_);
 	}
+	else if (args_[1] == "fixed") {
+		forcefield = make_unique<FixedForce>(args_);
+	}
 	else {
 		(*error) << "Unknown forcefield type: " << args_[1] << std::endl;
 	}
@@ -219,6 +223,8 @@ void EngineFactory::addParticle(std::vector<std::string> args_) {
 			newR = std::stod(args_[iarg + 1]);
 			iarg += 2;
 		}
+		else
+			iarg++;
 	}
 	particles->addParticle(newX, newV, newF, newM);
 }

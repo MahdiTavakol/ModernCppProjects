@@ -1,14 +1,14 @@
-#include "SpringField.h"
+#include "DamperField.h"
 #include "Particles.h"
 #include "Error.h"
 
-SpringField::SpringField(std::vector<Connection>& connectionInfo_) :
+DamperField::DamperField(std::vector<Connection>& connectionInfo_) :
 	ForceField{},
-	connectionInfo{connectionInfo_}
+	connectionInfo{ connectionInfo_ }
 {
 }
 
-SpringField::SpringField( std::vector<std::string> args_) :
+DamperField::DamperField(std::vector<std::string> args_) :
 	ForceField{ args_ }
 {
 	auto nargs = args_.size();
@@ -21,7 +21,7 @@ SpringField::SpringField( std::vector<std::string> args_) :
 
 }
 
-void SpringField::init() {
+void DamperField::init() {
 	particles->getNmaxNlocal(nmax, nlocal);
 	coeffMat.reserve(nmax * nmax);
 	coeffMat.resize(nlocal * nlocal);
@@ -32,12 +32,13 @@ void SpringField::init() {
 		fillCoeffMap(coeff);
 }
 
-SpringField::SpringField(double coeff_) :
+DamperField::DamperField(double coeff_) :
 	ForceField{},
 	coeff{ coeff_ }
-{}
+{
+}
 
-void SpringField::update() {
+void DamperField::update() {
 	resetForce();
 	int nlocal_new, nmax_new;
 	particles->getNmaxNlocal(nmax_new, nlocal_new);
@@ -62,9 +63,9 @@ void SpringField::update() {
 		for (int j = 0; j < nlocal; j++) {
 			if (j == i) continue;
 			std::array<double, 3> dist = {
-				particles->X(i,0) - particles->X(j,0),
-				particles->X(i,1) - particles->X(j,1),
-				particles->X(i,2) - particles->X(j,2)
+				particles->V(i,0) - particles->V(j,0),
+				particles->V(i,1) - particles->V(j,1),
+				particles->V(i,2) - particles->V(j,2)
 			};
 			for (int k = 0; k < 3; k++) {
 				particles->F(i, k) += -coeffMatAt(i, j) * dist[k];
@@ -73,18 +74,18 @@ void SpringField::update() {
 		}
 }
 
-void SpringField::calculate_pair(std::array<double,3>& dist_,
+void DamperField::calculate_pair(std::array<double, 3>& dist_,
 	double* fforce_, double& energy_)
 {
 }
 
-void SpringField::fillCoeffMap(const double& coeff_)
+void DamperField::fillCoeffMap(const double& coeff_)
 {
 	for (int i = 0; i < nlocal * nlocal; i++)
 		coeffMat[i] = coeff;
 }
 
-void SpringField::fillCoeffMap(const std::vector<Connection>& connectionInfo_) {
+void DamperField::fillCoeffMap(const std::vector<Connection>& connectionInfo_) {
 	for (auto& connect : connectionInfo_) {
 		coeffMatAt(connect.atom1id, connect.atom2id) = connect.springCoeff;
 		coeffMatAt(connect.atom2id, connect.atom1id) = connect.springCoeff;
