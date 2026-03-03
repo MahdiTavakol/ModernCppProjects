@@ -6,24 +6,30 @@
 
 class Communicator : public Ref {
 public:
+	Communicator();
+	Communicator(std::vector<std::string>& args_);
 	Communicator(const int& myId_, const int& size_);
+	Communicator(const int& myId_, const std::array<int, 3>& size_);
 	void injectDependencies(Engine& engine_) override;
 	void init();
+
 	
 protected:
 	// box ref
-	Box* box;
+	Box* box = nullptr;
 	// Particles ref
-	Particles* particles;
+	Particles* particles = nullptr;
 	// we need a pointer to the engine
-	Engine* engine;
+	Engine* engine = nullptr;
+	// resetting the particles
 	void resetParticles();
+	// the box dimensions
+	std::array<double, 3> myMin = { 0,0,0 }, myMax = { 0,0,0 };
 
-	std::array<double, 3> myMin, myMax;
-
-
-	int nlocal, nmax;
-	int myId;
-	int size;
-	int sizeX = 2, sizeY = 2, sizeZ = 1;
+	// number of particles
+	int nlocal = 0, nmax = 0;
+	// communicator id
+	int myId = 0;
+	// communicator configuration
+	std::array<int, 3> sizeArray = { 2,2,1 };
 };

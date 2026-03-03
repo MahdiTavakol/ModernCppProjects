@@ -127,7 +127,7 @@ TEST_CASE("Testing the integrator class update velocities") {
 TEST_CASE("Testing the integrator class update velocities and positions at the same time")
 {
 	std::cout << "Testing the integrator class update velocities and positions at the same time" << std::endl;
-	std::cout << std::string(80, '=');
+	std::cout << std::string(80, '=') << std::endl;
 	// put some particles
 	std::vector<double> x = {
 	   100.0,30.0,40.0,    // particle 0
@@ -207,7 +207,7 @@ TEST_CASE("Testing the integrator class update velocities and positions at the s
 	  8.61,  -1.32,   4.75,   // particle 4
 	};
 	// checking the results
-	int nData = x.size();
+	auto nData = x.size();
 	for (int i = 0; i < nData; i++) {
 		REQUIRE_THAT(Xs[i], Catch::Matchers::WithinAbs(expectedXs[i], 1e-6));
 		REQUIRE_THAT(Vs[i], Catch::Matchers::WithinAbs(expectedVs[i], 1e-6));

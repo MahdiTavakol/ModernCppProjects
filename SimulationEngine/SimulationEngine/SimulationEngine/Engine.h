@@ -9,6 +9,7 @@ class Particles;
 class Integrator;
 class ForceField;
 class FixList;
+class Communicator;
 class Error;
 class Fix;
 class Neighbor;
@@ -23,6 +24,7 @@ public:
 		                  BOX,
 		                  PARTICLES,
 	                      INTEGRATOR,
+	                      COMMUNICATOR,
 	                      FORCEFIELD,
 	                      FIX,
 	                      NEIGHBOR,
@@ -87,6 +89,7 @@ private:
 	 * The default value of the forcefield 
 	 * is provided in the constructor
 	 */
+	std::unique_ptr<Communicator> communicator;
 	std::unique_ptr<ForceField> forcefield;
 	std::unique_ptr<Neighbor> neighbor;
 	std::unique_ptr<FixList> fixList;

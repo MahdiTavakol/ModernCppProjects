@@ -2,6 +2,7 @@
 #include "EngineFactory.h"
 
 #include "Box.h"
+#include "Communicator.h"
 #include "Error.h"
 #include "Fix.h"
 #include "FixList.h"
@@ -52,6 +53,7 @@ EngineFactory::EngineFactory(std::vector<std::string> args) :
 	// of its parameters and the error handling of missing parameters
 	// to avoid coupling the factory with the details of each class.
 	box = std::make_unique<Box>();
+	communicator = std::make_unique<Communicator>();
 	error = std::make_unique<Error>();
 	forcefield = std::make_unique<ForceField>();
 	integrator = std::make_unique<Integrator>();
@@ -70,6 +72,7 @@ std::unique_ptr<Engine> EngineFactory::returnEngine() {
 	}
 	// adding the items created by the factory into the engine
 	engine->setItem(std::move(box));
+	engine->setItem(std::move(communicator));
 	engine->setItem(std::move(error));
 	engine->setItem(std::move(forcefield));
 	engine->setItem(std::move(integrator));
@@ -81,7 +84,7 @@ std::unique_ptr<Engine> EngineFactory::returnEngine() {
 	engine->injectDependencies();
 	// the initialization process
 	engine->init();
-
+	// returning the engine
 	return std::move(engine);
 }
 
@@ -98,7 +101,12 @@ void EngineFactory::parseCommand(const std::string& command) {
 		// parse box command
 		commandNumCheck(commandCount[itemId-1], tokens[0]);
 		box = make_unique<Box>(tokens);
-	} else if (++itemId && tokens[0] == "error") {
+	}
+	else if (++itemId && tokens[0] == "communicator") {
+		commandNumCheck(commandCount[itemId - 1], tokens[0]);
+		communicator = make_unique<Communicator>(tokens);
+	}
+	else if (++itemId && tokens[0] == "error") {
 		// parse particles command
 		commandNumCheck(commandCount[itemId-1], tokens[0]);
 		error = make_unique<Error>(tokens);

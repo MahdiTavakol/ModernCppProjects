@@ -90,6 +90,10 @@ void Particles::copyParticle(Particles* other_,
 	this->addParticle(newX, newV, newF, newM, newR);
 }
 
+void Particles::setNmax(const int& nmax_) {
+	this->nmax = nmax_;
+}
+
 void Particles::getNmaxNlocal(int& nmax_, int& nlocal_) const {
 	nmax_ = nmax; nlocal_ = static_cast<int>(x.size()) / 3;
 }

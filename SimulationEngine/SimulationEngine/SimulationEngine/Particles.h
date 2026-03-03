@@ -24,6 +24,7 @@ public:
 		double& newM_,
 		double& newR_);
 	void copyParticle(Particles* other_, const int& id_);
+	void setNmax(const int& nmax_);
 	void getNmaxNlocal(int& nmax_, int& nlocal_) const;
 	// get atom i position
 	void getAtomVec(const int& i,

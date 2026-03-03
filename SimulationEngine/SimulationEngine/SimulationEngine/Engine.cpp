@@ -2,6 +2,7 @@
 #include "Integrator.h"
 #include "Particles.h"
 #include "ForceField.h"
+#include "Communicator.h"
 #include "Neighbor.h"
 #include "Box.h"
 #include "Fix.h"
@@ -54,6 +55,8 @@ void Engine::injectDependencies() {
 		forcefield->injectDependencies(*this);
 	if (fixList)
 		fixList->injectDependencies(*this);
+	if (communicator)
+		communicator->injectDependencies(*this);
 	if (neighbor)
 		neighbor->injectDependencies(*this);
 	if (box)
@@ -63,18 +66,26 @@ void Engine::injectDependencies() {
 }
 
 void Engine::init() {
-	if (integrator)
-		integrator->init();
+	/*
+	* The order is important here
+	* since the init() function of the 
+	* communicator is dependent on the box
+	* and particles pointers
+	*/
+	if (box) 
+		box->init();
 	if (particles)
 		particles->init();
+	if (communicator)
+		communicator->init();
+	if (integrator)
+		integrator->init();
 	if (forcefield)
 		forcefield->init();
 	if (fixList)
 		fixList->init();
 	if (neighbor)
 		neighbor->init();
-	if (box)
-		box->init();
 	if (run)
 		run->init();
 }
@@ -90,6 +101,7 @@ void Engine::resetParticles(std::unique_ptr<Particles>&& particles_) {
 	// since the particles has changed we need to reinject the dependencies
 	injectDependencies();
 }
+
 
 void Engine::setItem(std::unique_ptr<Ref>&& Ref_) {
 	if (auto boxPtr = dynamic_cast<Box*>(Ref_.get())) {
@@ -107,6 +119,10 @@ void Engine::setItem(std::unique_ptr<Ref>&& Ref_) {
 	else if (auto fixListPtr = dynamic_cast<FixList*>(Ref_.get()))
 	{
 		fixList.reset(dynamic_cast<FixList*>(Ref_.release()));
+		return;
+	}
+	else if (auto comPtr = dynamic_cast<Communicator*>(Ref_.get())) {
+		communicator.reset(dynamic_cast<Communicator*>(Ref_.release()));
 		return;
 	}
 	else if (auto fixPtr = dynamic_cast<Fix*>(Ref_.get())) {
@@ -146,6 +162,8 @@ Ref* Engine::getItem(ItemRef Ref_) {
 			return integrator.get();
 		case ItemRef::FORCEFIELD:
 			return forcefield.get();
+		case ItemRef::COMMUNICATOR:
+			return communicator.get();
 		case ItemRef::FIX:
 			throw std::invalid_argument("There can be multiple fixes, please use getFixList() to get the list of fixes!");
 		case ItemRef::NEIGHBOR:

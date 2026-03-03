@@ -1,4 +1,5 @@
 #include "Particles.h"
+#include "Communicator.h"
 #include "Engine.h"
 #include "EngineFactory.h"
 #include "Integrator.h"
@@ -269,8 +270,9 @@ class EngineFixture {
 public:
 	EngineFixture(std::vector<std::unique_ptr<Ref>>& inputObjs) {
 		engine_ptr = std::make_unique<Engine>();
-		for (auto& inputObj : inputObjs)
+		for (auto& inputObj : inputObjs) {
 			engine_ptr->setItem(std::move(inputObj));
+		}
 		// since we first inputted the items
 		// we can now inject dependencies
 		engine_ptr->injectDependencies();
@@ -352,8 +354,8 @@ public:
 	void setup()
 	{
 		// number of particles
-		int nlocal = x.size();
-		int nmax = x.size();
+		auto nlocal = x.size();
+		auto nmax = x.size();
 		// particles
 		mockedParticles = std::make_unique<MockedParticles>(nmax, x, v, f, r, m);
 		// the timestep

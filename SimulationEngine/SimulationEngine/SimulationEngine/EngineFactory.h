@@ -33,6 +33,7 @@ private:
 	std::unique_ptr<Engine> engine;
 	// the items created by the factory to be added to the engine
 	std::unique_ptr<Box> box;
+	std::unique_ptr<Communicator> communicator;
 	std::unique_ptr<Error> error;
 	std::unique_ptr<FixList> fixList;
 	std::unique_ptr<ForceField> forcefield;
