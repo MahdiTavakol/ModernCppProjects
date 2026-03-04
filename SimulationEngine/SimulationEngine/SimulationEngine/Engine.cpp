@@ -96,13 +96,6 @@ void Engine::resetError(std::unique_ptr<Error>&& error_) {
 	injectDependencies();
 }
 
-void Engine::resetParticles(std::unique_ptr<Particles>&& particles_) {
-	particles = std::move(particles_);
-	// since the particles has changed we need to reinject the dependencies
-	injectDependencies();
-}
-
-
 void Engine::setItem(std::unique_ptr<Ref>&& Ref_) {
 	if (auto boxPtr = dynamic_cast<Box*>(Ref_.get())) {
 		box.reset(dynamic_cast<Box*>(Ref_.release()));

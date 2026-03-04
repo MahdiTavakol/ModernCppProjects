@@ -39,6 +39,7 @@ TEST_CASE("Testing the engine factory class to build the engine from commands") 
 		REQUIRE_THAT(expectedMin[i], Catch::Matchers::WithinAbs(actualMin[i], 1e-6));
 		REQUIRE_THAT(expectedMax[i], Catch::Matchers::WithinAbs(actualMax[i], 1e-6));
 	}
+
 	// 2 - checking the max particles
 	auto& particlesRef = engine->getParticles();
 	REQUIRE(particlesRef);
@@ -131,6 +132,7 @@ TEST_CASE("Testing the engine factory class to build the engine from commands") 
 	{ 0.0,0.0,0.0 },
 	{ 0.0,0.0,0.0 }
 	};
+
 	auto& particlesForUpdate = engine->getParticlesForUpdate();
 	for (int i = 0; i < 3; i++) {
 		std::array<double, 3> actualX, actualV, actualF;

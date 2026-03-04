@@ -4,11 +4,11 @@
 #include <vector>
 #include <string>
 
-constexpr int maxCommandTypes = 20;
+constexpr int maxCommandTypes = 128;
 
 class EngineFactory {
 public:
-	EngineFactory(std::vector<std::string> args);
+	EngineFactory(std::vector<std::string>& args_);
 	std::unique_ptr<Engine> returnEngine();
 
 	// Classes with multiple inheritance levels

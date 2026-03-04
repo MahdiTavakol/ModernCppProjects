@@ -8,8 +8,8 @@ class Communicator : public Ref {
 public:
 	Communicator();
 	Communicator(std::vector<std::string>& args_);
-	Communicator(const int& myId_, const int& size_);
-	Communicator(const int& myId_, const std::array<int, 3>& size_);
+	Communicator(const int& myId_, const int& size_, const double& skin_ = 0.0);
+	Communicator(const int& myId_, const std::array<int, 3>& size_, const double& skin_ = 0.0);
 	void injectDependencies(Engine& engine_) override;
 	void init();
 
@@ -27,7 +27,9 @@ protected:
 	std::array<double, 3> myMin = { 0,0,0 }, myMax = { 0,0,0 };
 
 	// number of particles
-	int nlocal = 0, nmax = 0;
+	int nlocal = 0, nmax = 0, nghosts = 0;
+	// skin
+	double skin = 0.0;
 	// communicator id
 	int myId = 0;
 	// communicator configuration

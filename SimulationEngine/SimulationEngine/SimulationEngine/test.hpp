@@ -178,6 +178,7 @@ public:
 		Particles{}
 	{
 		nmax = nmax_;
+		nlocal = x_.size()/3;
 		x = std::move(x_);
 		v = std::move(v_);
 		f = std::move(f_);
@@ -292,6 +293,13 @@ public:
 	void checkPtrs()
 	{
 		if (engine_ptr == nullptr) {
+			/* 
+			 * Checking which one the contructors 
+			 * has been used to create the engine
+			 */
+			// the first branch.. As we used the std::move in C'tr we do not have the original parameters
+			if (commands.empty())
+				throw std::invalid_argument("An unrecoverable error!");
 			if (factory_ptr == nullptr)
 				factory_ptr = std::make_unique<EngineFactory>(commands);
 			engine_ptr = factory_ptr->returnEngine();
@@ -317,6 +325,10 @@ public:
 	std::unique_ptr<Engine> returnEngine() {
 		checkPtrs();
 		return std::move(engine_ptr);
+	}
+
+	std::unique_ptr<Engine>& returnEngineRef() {
+		return engine_ptr;
 	}
 
 	std::unique_ptr<Engine>& getEngineRef() {

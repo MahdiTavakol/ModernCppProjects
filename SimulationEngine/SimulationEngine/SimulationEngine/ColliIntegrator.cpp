@@ -48,6 +48,7 @@ void ColliIntegrator::deltaVUpdate() {
 	}
 
 
+
 	for (int ii = 0; ii < nNeigh; ii++) {
 		int i = ii;
 		int numJs = numNeigh[ii];

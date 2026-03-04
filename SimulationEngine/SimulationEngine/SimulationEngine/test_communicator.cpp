@@ -3,7 +3,6 @@
 
 
 
-
 TEST_CASE("Testing the communication class") {
     std::cout << "Testing the communication class" << std::endl;
     std::cout << std::string(80, '=') << std::endl;

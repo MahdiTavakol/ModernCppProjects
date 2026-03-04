@@ -1,15 +1,18 @@
 #include "Communicator.h"
 #include <algorithm>
 #include <iostream>
+#include <utility>
 
 Communicator::Communicator() :
 	Ref{"1"},
+	skin{ 0.0 },
 	myId{ 0 },
 	sizeArray{1,1,1}
 {}
 
 Communicator::Communicator(std::vector<std::string>& args_) :
-	Ref{ "1" }
+	Ref{ "1" },
+	skin{ 0.0 }
 {
 	// communicator sizeX [sizeY sizeZ]
 	int nargs = args_.size();
@@ -30,14 +33,16 @@ Communicator::Communicator(std::vector<std::string>& args_) :
 	sizeArray = std::array<int, 3>{ sizeX,sizeY,sizeZ };
 }
 
-Communicator::Communicator(const int& myId_, const int& size_) :
+Communicator::Communicator(const int& myId_, const int& size_, const double& skin_) :
 	Ref{ "1" },
+	skin{skin_},
 	myId{myId_},
 	sizeArray{size_,1,1}
 {}
 
-Communicator::Communicator(const int& myId_, const std::array<int, 3>& sizeArray_):
+Communicator::Communicator(const int& myId_, const std::array<int, 3>& sizeArray_, const double& skin_):
 	Ref{"1"},
+	skin{skin_},
 	myId{myId_},
 	sizeArray{sizeArray_}
 {}
@@ -76,22 +81,75 @@ void Communicator::init()
 
 void Communicator::resetParticles()
 {
-	particles->getNmaxNlocal(nmax, nlocal);
-	std::unique_ptr<Particles> newParticles = std::make_unique<Particles>();
+	int originalNlocal = 0;
+	particles->getNmaxNlocal(nmax, originalNlocal);
+	std::unique_ptr<Particles> newParticles = std::make_unique<Particles>(nmax);
+
+	std::vector<int> ghostIds;
+	nlocal = 0;
+	nghosts = 0;
+
+
+	double xMinGhost = myMin[0] - skin;
+	double xMaxGhost = myMax[0] + skin;
+
+	double yMinGhost = myMin[1] - skin;
+	double yMaxGhost = myMax[1] + skin;
+
+	double zMinGhost = myMin[2] - skin;
+	double zMaxGhost = myMax[2] + skin;
+
  
-	for (int i = 0; i < nlocal; i++) {
+	for (int i = 0; i < originalNlocal; i++) {
 		double x = particles->X(i, 0);
 		double y = particles->X(i, 1);
 		double z = particles->X(i, 2);
-  		if (x >= myMin[0] &&
-			x < myMax[0] &&
-			y >= myMin[1] &&
-			y < myMax[1] &&
-			z >= myMin[2] &&
-			z < myMax[2]) {
+		bool insideOwned =
+			(x >= myMin[0] && x < myMax[0] &&
+			 y >= myMin[1] && y < myMax[1] &&
+			 z >= myMin[2] && z < myMax[2]);
+
+		bool insideExtended1 =
+			(x >= xMinGhost && x < xMaxGhost &&
+			 y >= myMin[1]  && y < myMax[1]  &&
+			 z >= myMin[2]  && z < myMax[2]);
+
+		bool insideExtended2 =
+			(x >= myMin[0]  && x < myMax[0]  &&
+			 y >= yMinGhost && y < yMaxGhost &&
+			 z >= myMin[2]  && z < myMax[2]);
+
+		bool insideExtended3 =
+			(x >= myMin[0]  && x < myMax[0] &&
+			 y >= myMin[1]  && y < myMax[1] &&
+			 z >= zMinGhost && z < zMinGhost);
+
+
+
+  		if (insideOwned) {
+			nlocal++;
 			newParticles->copyParticle(particles, i);
 		}
+		
+
+		if (!insideOwned && (insideExtended1 ||
+			                 insideExtended2 ||
+			                 insideExtended3 ))
+		{
+			nghosts++;
+			ghostIds.push_back(i);
+		}
+
+
 	}
-	newParticles->setNmax(nmax);
-	engine->resetParticles(std::move(newParticles));
+
+
+	for (const auto& id : ghostIds) {
+		newParticles->copyParticle(particles, id);
+	}
+
+	newParticles->setNGhosts(nghosts);
+	newParticles->setNmaxNlocal(nmax, nlocal);
+
+	*particles = std::move(*newParticles);
 }

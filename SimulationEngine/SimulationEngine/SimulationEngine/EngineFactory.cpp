@@ -39,8 +39,8 @@ using std::string;
 using std::unique_ptr;
 using std::stringstream;
 
-EngineFactory::EngineFactory(std::vector<std::string> args) : 
-	args(std::move(args))
+EngineFactory::EngineFactory(std::vector<std::string>& args_) : 
+	args(std::move(args_))
 
 {
 	// reseting the number of each command type
@@ -234,5 +234,6 @@ void EngineFactory::addParticle(std::vector<std::string> args_) {
 		else
 			iarg++;
 	}
+	//std::cout << "Adding a particle" << std::endl;
 	particles->addParticle(newX, newV, newF, newM);
 }

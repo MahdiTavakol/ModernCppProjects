@@ -45,13 +45,13 @@ void Run::setup() {
 
 void Run::start(int nSteps_, int timestep_ ) {
 	if (forcefield == nullptr)
-		std::cout << "forcefield" << std::endl;
+		error->one("The forcefield is undefined!");
 	if (neighbor == nullptr)
-		std::cout << "neighbor" << std::endl;
+		error->one("The neighbor is undefined!");
 	if (fixList == nullptr)
-		std::cout << "fixlist" << std::endl;
+		error->one("The fixList is undefined!");
 	if (integrator == nullptr)
-		std::cout << "integrator" << std::endl;
+		error->one("The forcefield is undefined!");
 	if (run_status == Engine::Run_Status::VERBOSE)
 		std::cout << "Initialization" << std::endl;
 	forcefield->init();

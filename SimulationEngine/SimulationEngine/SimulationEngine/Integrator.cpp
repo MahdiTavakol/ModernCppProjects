@@ -52,7 +52,9 @@ void Integrator::velocityUpdate()
 			double a = particles->F(i ,j) / particles->M(i);
 			particles->V(i , j) += dt * a;
 		}
+
 }
+
 void Integrator::positionUpdate()
 {
 	int nlocal, nmax;

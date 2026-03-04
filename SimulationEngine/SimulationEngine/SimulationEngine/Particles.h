@@ -12,6 +12,8 @@ public:
 	Particles();
 	Particles(int nmax_);
 	Particles(std::vector<std::string> args_);
+	Particles& operator=(const Particles& rhs_);
+	Particles& operator=(Particles&& rhs_);
 	void addParticle(std::array<double, 3> newX_,
 		std::array<double, 3> newV_ = { 0.0,0.0,0.0 },
 		std::array<double, 3> newF_ = { 0.0,0.0,0.0 },
@@ -25,7 +27,10 @@ public:
 		double& newR_);
 	void copyParticle(Particles* other_, const int& id_);
 	void setNmax(const int& nmax_);
+	void setNGhosts(const int& nghosts_);
+	void setNmaxNlocal(const int& nmax_, const int& nlocal_);
 	void getNmaxNlocal(int& nmax_, int& nlocal_) const;
+	void getNGhosts(int& nghosts_) const;
 	// get atom i position
 	void getAtomVec(const int& i,
 		std::array<double, 3>& xi,
@@ -56,6 +61,8 @@ public:
 	}
 
 protected:
+	int nlocal;
+	int nghosts;
 	int nmax;
 	std::vector<double> x;
 	std::vector<double> v;

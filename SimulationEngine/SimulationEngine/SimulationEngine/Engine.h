@@ -62,8 +62,6 @@ public:
 	Ref* getItem(ItemRef Ref_);
 	// resetting the error
 	void resetError(std::unique_ptr<Error>&& error_);
-	// resetting the particles
-	void resetParticles(std::unique_ptr<Particles>&& particles_);
 	// getting the item by the Ref, the return Ref is the unique_ptr of the right Ref
 	const std::unique_ptr<Box>& getBox() const;
 	const std::unique_ptr<Particles>& getParticles() const;

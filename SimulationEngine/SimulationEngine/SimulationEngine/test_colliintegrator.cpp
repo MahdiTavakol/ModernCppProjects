@@ -116,4 +116,5 @@ TEST_CASE("Testing the collision integrator")
 		REQUIRE_THAT(Vs[i], Catch::Matchers::WithinAbs(expectedVs[i], 1e-6));
 		REQUIRE_THAT(Fs[i], Catch::Matchers::WithinAbs(expectedFs[i], 1e-6));
 	}
+
 }

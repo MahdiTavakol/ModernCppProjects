@@ -4,17 +4,21 @@
 
 Particles::Particles() :
 	Ref{"Particles-1" },
+	nlocal{ 0 },
 	nmax{ 0 }
 {
+	/*
 	x.reserve(0);
 	v.reserve(0);
 	f.reserve(0);
 	m.reserve(0);
 	r.reserve(0);
+	*/
 }
 
 Particles::Particles(int nmax_) :
 	Ref{ "Particles-1" },
+	nlocal{0},
 	nmax{ nmax_ }
 {
 	x.reserve(3 * nmax);
@@ -23,6 +27,7 @@ Particles::Particles(int nmax_) :
 	m.reserve(nmax);
 	r.reserve(nmax);
 }
+
 Particles::Particles(std::vector<std::string> args_):
 	Ref{"Particles-1" }
 {
@@ -33,6 +38,36 @@ Particles::Particles(std::vector<std::string> args_):
 		return;
 	}
 	nmax = std::stoi(args_[1]);
+	nlocal = 0;
+}
+
+
+Particles& Particles::operator=(const Particles& rhs_) {
+	if (*this == rhs_)
+		return *this;
+
+	nlocal = rhs_.nlocal;
+	nghosts = rhs_.nghosts;
+	nmax = rhs_.nmax;
+	x = rhs_.x;
+	v = rhs_.v;
+	f = rhs_.f;
+	m = rhs_.m;
+	r = rhs_.r;
+}
+
+Particles& Particles::operator=(Particles&& rhs_) {
+	if (*this == rhs_)
+		return *this;
+
+	nlocal = rhs_.nlocal;
+	nghosts = rhs_.nghosts;
+	nmax = rhs_.nmax;
+	x = std::move(rhs_.x);
+	v = std::move(rhs_.v);
+	f = std::move(rhs_.f);
+	m = std::move(rhs_.m);
+	r = std::move(rhs_.r);
 }
 
 
@@ -59,6 +94,21 @@ void Particles::addParticle(std::array<double, 3> newX_,
 	m.push_back(newM_);
 	// new radiuses
 	r.push_back(newR_);
+	// increasing the nlocal
+	nlocal++;
+	// checking the nmax 
+	if (nmax == 0)
+		nmax++;
+	// increasing the nmax
+	while (nlocal >= nmax) {
+		std::cout << nmax << std::endl;
+		nmax *= 2;
+		x.reserve(3 * nmax);
+		v.reserve(3 * nmax);
+		f.reserve(3 * nmax);
+		m.reserve(nmax);
+		r.reserve(nmax);
+	}
 }
 
 void Particles::getParticle(const int& id_,
@@ -88,16 +138,41 @@ void Particles::copyParticle(Particles* other_,
 	double newM, newR;
 	other_->getParticle(id_, newX, newV, newF, newM, newR);
 	this->addParticle(newX, newV, newF, newM, newR);
+
+	this->nlocal++;
+	while (nlocal > nmax) {
+		nmax *= 2;
+		x.reserve(3 * nmax);
+		v.reserve(3 * nmax);
+		f.reserve(3 * nmax);
+		m.reserve(nmax);
+		r.reserve(nmax);
+	}
 }
 
 void Particles::setNmax(const int& nmax_) {
 	this->nmax = nmax_;
 }
 
-void Particles::getNmaxNlocal(int& nmax_, int& nlocal_) const {
-	nmax_ = nmax; nlocal_ = static_cast<int>(x.size()) / 3;
+void Particles::setNGhosts(const int& nghosts_) {
+	nghosts = nghosts_;
 }
 
+void Particles::setNmaxNlocal(const int& nmax_, const int& nlocal_)
+{
+	nlocal = nlocal_;
+	nmax = nmax_;
+}
+
+void Particles::getNmaxNlocal(int& nmax_, int& nlocal_) const {
+	nlocal_ = nlocal;
+	nmax_ = nmax;
+}
+
+void Particles::getNGhosts(int& nghosts_) const
+{
+	nghosts_ = nghosts;
+}
 
 // get atom i position
 void Particles::getAtomVec(const int& i,
