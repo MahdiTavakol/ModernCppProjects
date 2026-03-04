@@ -140,6 +140,8 @@ void Particles::copyParticle(Particles* other_,
 	this->addParticle(newX, newV, newF, newM, newR);
 
 	this->nlocal++;
+	if (nmax == 0)
+		nmax = 1;
 	while (nlocal > nmax) {
 		nmax *= 2;
 		x.reserve(3 * nmax);

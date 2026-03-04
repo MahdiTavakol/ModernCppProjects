@@ -96,6 +96,10 @@ void Engine::resetError(std::unique_ptr<Error>&& error_) {
 	injectDependencies();
 }
 
+std::unique_ptr<Communicator>& Engine::getCommunicator() {
+	return communicator;
+}
+
 void Engine::setItem(std::unique_ptr<Ref>&& Ref_) {
 	if (auto boxPtr = dynamic_cast<Box*>(Ref_.get())) {
 		box.reset(dynamic_cast<Box*>(Ref_.release()));

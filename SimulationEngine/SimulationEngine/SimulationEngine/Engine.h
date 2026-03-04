@@ -72,6 +72,7 @@ public:
 	std::unique_ptr<Fix>& returnFixById(std::string id_);
 	std::unique_ptr<Neighbor>& getNeighbor();
 	std::unique_ptr<Error>& getError();
+	std::unique_ptr<Communicator>& getCommunicator();
 	// getting the run status of the engine
 	void setStatus(const std::string newStatus_);
 	const Run_Status& getStatus() const;
