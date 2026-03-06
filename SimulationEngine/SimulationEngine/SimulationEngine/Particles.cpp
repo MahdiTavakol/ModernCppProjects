@@ -101,7 +101,6 @@ void Particles::addParticle(std::array<double, 3> newX_,
 		nmax++;
 	// increasing the nmax
 	while (nlocal >= nmax) {
-		std::cout << nmax << std::endl;
 		nmax *= 2;
 		x.reserve(3 * nmax);
 		v.reserve(3 * nmax);
@@ -127,8 +126,8 @@ void Particles::getParticle(const int& id_,
 	newF_[0] = F(id_, 0);
 	newF_[1] = F(id_, 1);
 	newF_[2] = F(id_, 2);
-	newR_ = R(id_);
 	newM_ = M(id_);
+	newR_ = R(id_);
 }
 
 void Particles::copyParticle(Particles* other_,

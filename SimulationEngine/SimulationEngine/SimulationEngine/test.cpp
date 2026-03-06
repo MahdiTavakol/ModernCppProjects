@@ -9,164 +9,36 @@
 #include "test.hpp"
 
 
-struct transferedData {
-    std::vector<std::array<double, 3>> xData;
-    std::vector<std::array<double, 3>> vData;
-    std::vector<std::array<double, 3>> fData;
-    std::vector<double> mData;
-    std::vector<double> rData;
-};
 
 TEST_CASE("Testing the forward communication") {
     std::cout << "Testing the forward communication" << std::endl;
     std::cout << std::string(80, '=') << std::endl;
 
     // data 
-
-    // Particles
-    std::vector<double> x = {
-     145.32,  -210.77,   89.45,     // particle 0
-    -178.64,   254.19,  -133.58,    // particle 1
-      12.87,   -98.44,   276.31,    // particle 2
-     -45.22,   199.73,  -287.90,    // particle 3
-     233.11,    -5.66,   147.82,    // particle 4
-    -299.45,   120.38,   -44.91,    // particle 5
-      67.59,  -243.80,    18.26,    // particle 6
-     190.74,   -75.33,  -166.48,    // particle 7
-     -88.17,   281.56,   -12.49,    // particle 8
-      54.03,  -132.67,   204.95,    // particle 9
-    -215.90,    33.14,   119.62,    // particle 10
-     174.28,  -299.99,   -63.77,    // particle 11
-     -31.50,   146.22,  -250.84,    // particle 12
-     287.44,   -18.39,    92.71,    // particle 13
-    -122.63,  -187.55,   241.08,    // particle 14
-      39.96,   208.13,  -174.29,    // particle 15
-     256.77,  -264.44,    11.38,    // particle 16
-    -194.05,    77.80,  -299.12,    // particle 17
-      83.61,   -54.27,   165.49,    // particle 18
-    -270.33,   295.88,   -21.76     // particle 19
-    };
-    std::vector<double> v = {
-     72.4, -33.1,  95.0,   // particle 0
-    -88.6,  14.3, -56.7,   // particle 1
-     41.2, -19.8,  63.5,   // particle 2
-    -97.1,  28.9, -74.4,   // particle 3
-      3.6,  89.2, -12.5,   // particle 4
-     54.7, -66.3,  77.1,   // particle 5
-    -45.9,  18.0,  92.6,   // particle 6
-    -11.4,  36.8, -83.2,   // particle 7
-     59.7, -24.6,  10.9,   // particle 8
-    -72.5,  44.3, -95.8,   // particle 9
-     21.7, -38.4,  68.2,   // particle 10
-    -14.9,  87.6, -29.3,   // particle 11
-     46.1, -61.5,  33.8,   // particle 12
-    -79.2,  12.4,  99.1,   // particle 13
-    -53.7,  27.5, -41.6,   // particle 14
-     64.0, -22.8,  15.2,   // particle 15
-    -90.3,  48.6,  -7.4,   // particle 16
-     81.9, -35.0,  24.1,   // particle 17
-     57.8, -69.2,  39.4,   // particle 18
-    -16.7,  73.3, -58.9    // particle 19
-    };
-    std::vector<double> f = {
-     12.4, -33.9,  45.2,   // particle 0
-    -18.6,   7.3, -41.5,   // particle 1
-     29.7,  -5.4,  38.9,   // particle 2
-    -22.1,  16.0, -49.7,   // particle 3
-      3.1,  27.6, -14.8,   // particle 4
-     44.5, -36.7,  21.4,   // particle 5
-     -9.9,   5.6,  31.2,   // particle 6
-    -12.7,  18.9, -28.4,   // particle 7
-     47.3, -19.5,   6.2,   // particle 8
-    -34.8,  25.1, -45.6,   // particle 9
-     14.8,  -7.3,  39.6,   // particle 10
-    -21.9,  30.4, -16.5,   // particle 11
-     41.2, -29.8,   9.7,   // particle 12
-    -48.1,  12.6,  33.9,   // particle 13
-    -25.7,  17.8, -38.6,   // particle 14
-     26.4, -11.3,   4.9,   // particle 15
-    -43.2,  22.5,  -6.8,   // particle 16
-     35.0, -18.1,  13.7,   // particle 17
-     28.6, -31.4,  19.3,   // particle 18
-     -8.2,  46.7, -24.5    // particle 19
-    };
-    std::vector<double> m = {
-     3.4,  // particle 0
-     7.8,  // particle 1
-     0.9,  // particle 2
-     5.6,  // particle 3
-     9.1,  // particle 4
-     2.7,  // particle 5
-     6.0,  // particle 6
-     1.3,  // particle 7
-     8.4,  // particle 8
-     4.1,  // particle 9
-     0.5,  // particle 10
-     9.8,  // particle 11
-     3.0,  // particle 12
-     7.4,  // particle 13
-     5.9,  // particle 14
-     2.1,  // particle 15
-     6.7,  // particle 16
-     8.2,  // particle 17
-     1.8,  // particle 18
-     4.6   // particle 19
-    };
-
-    std::vector<double> r = {
-     12.5,  // particle 0
-     89.3,  // particle 1
-     45.7,  // particle 2
-     3.9,   // particle 3
-     67.1,  // particle 4
-     24.6,  // particle 5
-     98.0,  // particle 6
-     31.4,  // particle 7
-     76.2,  // particle 8
-     54.3,  // particle 9
-     8.7,   // particle 10
-     63.5,  // particle 11
-     19.8,  // particle 12
-     92.4,  // particle 13
-     37.6,  // particle 14
-     71.0,  // particle 15
-     14.2,  // particle 16
-     83.1,  // particle 17
-     58.9,  // particle 18
-     26.4   // particle 19
-    };
-
     // number of ranks 
     constexpr int nranks = 4;
     // Particles
     std::vector<double> x = {
-        -220.40, -180.10,   80.55,   // particle 0  owned by Q00 (-- interior)
-        -140.75, -260.33, -120.18,   // particle 1  owned by Q00 (-- interior)
-
-         180.62, -210.44,   60.91,   // particle 2  owned by Q10 (+- interior)
-         260.11, -140.88, -200.30,   // particle 3  owned by Q10 (+- interior)
-
-        -200.90,  190.36,  -40.58,   // particle 4  owned by Q01 (-+ interior)
-        -270.22,  120.74,  210.46,   // particle 5  owned by Q01 (-+ interior)
-
-         210.83,  220.41, -150.88,   // particle 6  owned by Q11 (++ interior)
-         140.62,  160.33,  198.21,   // particle 7  owned by Q11 (++ interior)
-
-          25.60, -160.15,  -55.27,   // particle 8  
-        -120.33,   20.18, -199.05,   // particle 9 
-          30.25,   22.40,   10.66,   // particle 10 
-
-         -35.10, -140.48,   12.66,   // particle 11 in ghost of Q10 from -x slab (-50<x<=0,y<0); owned by Q00
-         160.81,   35.42,  289.73,   // particle 12 in ghost of Q10 from +y slab (x>0,0<=y<50); owned by Q11
-         -22.80,   18.10, -140.25,   // particle 13 corner ghost for Q10 (-50<x<=0,0<=y<50); owned by Q01
-
-          40.11,  170.25,  204.67,   // particle 14 in ghost of Q01 from +x slab (0<=x<50,y>0); owned by Q11
-        -180.66,  -30.77,   14.95,   // particle 15 in ghost of Q01 from -y slab (x<0,-50<y<=0); owned by Q00
-          18.40,  -22.10,   95.50,   // particle 16 corner ghost for Q01 (0<=x<50,-50<y<=0); owned by Q10
-
-         -28.20,  180.66,   66.03,   // particle 17 in ghost of Q11 from -x slab (-50<x<=0,y>0); owned by Q01
-         190.27,  -40.22, -236.70,   // particle 18 in ghost of Q11 from -y slab (x>0,-50<y<=0); owned by Q10
-         -12.60,  -18.90,  130.10    // particle 19 corner ghost for Q11 (-50<x<=0,-50<y<=0); owned by Q00
+        -220.40, -180.10,   80.55,   // particle 0  owned by Q00 (-- interior) rank1
+        -140.75, -260.33, -120.18,   // particle 1  owned by Q00 (-- interior) rank1
+         180.62, -210.44,   60.91,   // particle 2  owned by Q10 (+- interior) rank2
+         260.11, -140.88, -200.30,   // particle 3  owned by Q10 (+- interior) rank2
+        -200.90,  190.36,  -40.58,   // particle 4  owned by Q01 (-+ interior) rank3
+        -270.22,  120.74,  210.46,   // particle 5  owned by Q01 (-+ interior) rank3
+         210.83,  220.41, -150.88,   // particle 6  owned by Q11 (++ interior) rank4
+         140.62,  160.33,  198.21,   // particle 7  owned by Q11 (++ interior) rank4
+          25.60, -160.15,  -55.27,   // particle 8  owned by Q10 (+- interior) rank2
+        -120.33,   20.18, -199.05,   // particle 9  owned by Q01 (-+ interior) rank3
+          30.25,   22.40,   10.66,   // particle 10 owned by Q11 (++ interior) rank4
+         -35.10, -140.48,   12.66,   // particle 11 owned by Q00 (-- interior) rank1
+         160.81,   35.42,  289.73,   // particle 12 owned by Q11 (++ interior) rank4
+         -22.80,   18.10, -140.25,   // particle 13 owned by Q01 (-+ interior) rank3
+          40.11,  170.25,  204.67,   // particle 14 owned by Q11 (++ interior) rank4
+        -180.66,  -30.77,   14.95,   // particle 15 owned by Q00 (-- interior) rank1
+          18.40,  -22.10,   95.50,   // particle 16 owned by Q10 (+- interior) rank2
+         -28.20,  180.66,   66.03,   // particle 17 owned by Q01 (-+ interior) rank3
+         190.27,  -40.22, -236.70,   // particle 18 owned by Q10 (+- interior) rank2
+         -12.60,  -18.90,  130.10    // particle 19 owned by Q00 (-- interior) rank1
     };
 
     std::vector<double> v = {
@@ -190,6 +62,7 @@ TEST_CASE("Testing the forward communication") {
      81.9, -35.0,  24.1,   // particle 17
      57.8, -69.2,  39.4,   // particle 18
     -16.7,  73.3, -58.9    // particle 19
+
     };
     std::vector<double> f = {
      12.4, -33.9,  45.2,   // particle 0
@@ -213,6 +86,9 @@ TEST_CASE("Testing the forward communication") {
      28.6, -31.4,  19.3,   // particle 18
      -8.2,  46.7, -24.5    // particle 19
     };
+
+
+
     std::vector<double> m = {
      3.4,  // particle 0
      7.8,  // particle 1
@@ -234,7 +110,9 @@ TEST_CASE("Testing the forward communication") {
      8.2,  // particle 17
      1.8,  // particle 18
      4.6   // particle 19
+
     };
+
 
     std::vector<double> r = {
      12.5,  // particle 0
@@ -671,7 +549,7 @@ TEST_CASE("Testing the forward communication") {
      69.6, -22.4,   31.8,   // particle 17
      44.7, -57.9,   53.2,   // particle 18
     };
-    std::vector<double> expectedFs4 = {
+    std::vector<double> fs4 = {
      -9.9,   5.6,  31.2,   // particle 6
     -12.7,  18.9, -28.4,   // particle 7
      14.8,  -7.3,  39.6,   // particle 10
@@ -683,7 +561,7 @@ TEST_CASE("Testing the forward communication") {
      28.4, -14.6,   22.1,   // particle 17
      13.9, -37.5,   41.6,   // particle 18
     };
-    std::vector<double> expectedMs4 = {
+    std::vector<double> ms4 = {
      6.0,  // particle 6
      1.3,  // particle 7
      0.5,  // particle 10
@@ -696,7 +574,7 @@ TEST_CASE("Testing the forward communication") {
      7.3,  // particle 18
     };
 
-    std::vector<double> expectedRs4 = {
+    std::vector<double> rs4 = {
      98.0,  // particle 6
      31.4,  // particle 7
      8.7,   // particle 10
@@ -828,20 +706,20 @@ TEST_CASE("Testing the forward communication") {
     int nlocal = 20;
     int nghosts = 0;
     // copies since we used the std::move in the mockedParticles class
-    std::vector<double> xCopy = x;
-    std::vector<double> vCopy = v;
-    std::vector<double> fCopy = f;
-    std::vector<double> rCopy = r;
-    std::vector<double> mCopy = m;
+    std::vector<double> xCopy1 = x, xCopy2 = x, xCopy3 = x, xCopy4 = x;
+    std::vector<double> vCopy1 = v, vCopy2 = v, vCopy3 = v, vCopy4 = v;
+    std::vector<double> fCopy1 = f, fCopy2 = f, fCopy3 = f, fCopy4 = f;
+    std::vector<double> rCopy1 = r, rCopy2 = r, rCopy3 = r, rCopy4 = r;
+    std::vector<double> mCopy1 = m, mCopy2 = m, mCopy3 = m, mCopy4 = m;
     // creating the mockedParticles object
     std::unique_ptr<Particles> mockedParticles1 =
-        std::make_unique<MockedParticles>(nmax, xCopy, vCopy, fCopy, rCopy, mCopy);
+        std::make_unique<MockedParticles>(nmax, xCopy1, vCopy1, fCopy1, rCopy1, mCopy1);
     std::unique_ptr<Particles> mockedParticles2 =
-        std::make_unique<MockedParticles>(nmax, xCopy, vCopy, fCopy, rCopy, mCopy);
+        std::make_unique<MockedParticles>(nmax, xCopy2, vCopy2, fCopy2, rCopy2, mCopy2);
     std::unique_ptr<Particles> mockedParticles3 =
-        std::make_unique<MockedParticles>(nmax, xCopy, vCopy, fCopy, rCopy, mCopy);
+        std::make_unique<MockedParticles>(nmax, xCopy3, vCopy3, fCopy3, rCopy3, mCopy3);
     std::unique_ptr<Particles> mockedParticles4 =
-        std::make_unique<MockedParticles>(nmax, xCopy, vCopy, fCopy, rCopy, mCopy);
+        std::make_unique<MockedParticles>(nmax, xCopy4, vCopy4, fCopy4, rCopy4, mCopy4);
     // putting everything into the engine
     std::vector<std::unique_ptr<Ref>> inputs1;
     std::vector<std::unique_ptr<Ref>> inputs2;
@@ -876,57 +754,114 @@ TEST_CASE("Testing the forward communication") {
     auto& communicator4Ref = engine_ptr4->getCommunicator();
     // sending data
     // sending data from rank1 to rank2
-    communicator1Ref->forward_send(1, 0, 0, tranData12);
+    communicator1Ref->forward_particle({1,0,0}, tranData12);
     // sending data from rank1 to rank3
-    communicator1Ref->forward_send(0, 1, 0, tranData13);
+    communicator1Ref->forward_particle({0,1,0}, tranData13);
     // sending data from rank2 to rank1
-    communicator2Ref->forward_send(-1, 0, 0, tranData21);
+    communicator2Ref->forward_particle({ -1,0,0 }, tranData21);
     // sending data from rank2 to rank4
-    communicator2Ref->forward_send(0, 1, 0, tranData24);
+    communicator2Ref->forward_particle({ 0,1,0 }, tranData24);
     // sending data from rank3 to rank1
-    communicator3Ref->forward_send(0, -1, 0, tranData31);
+    communicator3Ref->forward_particle({ 0,-1,0 }, tranData31);
     // sending data from rank3 to rank4
-    communicator3Ref->forward_send(1, 0, 0, tranData34);
+    communicator3Ref->forward_particle({ 1,0,0 }, tranData34);
     // sending data from rank4 to rank3
-    communicator4Ref->forward_send(-1, 0, 0, tranData43);
+    communicator4Ref->forward_particle({ -1,0,0 }, tranData43);
     // sending data from rank4 to rank2
-    communicator4Ref->forward_send(0, -1, 0, tranData42);
+    communicator4Ref->forward_particle({ 0,-1,0 }, tranData42);
     // receiving data
     auto& particles1Ref = engine_ptr1->getParticlesForUpdate();
     auto& particles2Ref = engine_ptr2->getParticlesForUpdate();
     auto& particles3Ref = engine_ptr3->getParticlesForUpdate();
     auto& particles4Ref = engine_ptr4->getParticlesForUpdate();
     // updating ghosts
-    particles1Ref->updataGhosts(tranData21);
-    particles1Ref->updataGhosts(tranData31);
-    particles2Ref->updataGhosts(tranData12);
-    particles2Ref->updataGhosts(tranData42);
-    particles3Ref->updataGhosts(tranData13);
-    particles3Ref->updataGhosts(tranData43);
-    particles4Ref->updataGhosts(tranData24);
-    particles4Ref->updataGhosts(tranData34);
+    communicator1Ref->updateGhosts({ 1,0,0 },tranData21);
+    communicator1Ref->updateGhosts({ 0,1,0 }, tranData31);
+    communicator2Ref->updateGhosts({ -1,0,0 }, tranData12);
+    communicator2Ref->updateGhosts({ 0,1,0 }, tranData42);
+    communicator3Ref->updateGhosts({ 1,0,0 }, tranData43);
+    communicator3Ref->updateGhosts({ 0,-1,0 }, tranData13);
+    communicator4Ref->updateGhosts({ -1,0,0 }, tranData34);
+    communicator4Ref->updateGhosts({ 0,-1,0 },tranData24);
     // checking data
-    auto xs1 = particles1Ref->getXData();
-    auto vs1 = particles1Ref->getVData();
-    auto fs1 = particles1Ref->getFData();
-    auto ms1 = particles1Ref->getMData();
-    auto rs1 = particles1Ref->getRData();
-    auto xs2 = particles2Ref->getXData();
-    auto vs2 = particles2Ref->getVData();
-    auto fs2 = particles2Ref->getFData();
-    auto ms2 = particles2Ref->getMData();
-    auto rs2 = particles2Ref->getRData();
-    auto xs3 = particles3Ref->getXData();
-    auto vs3 = particles3Ref->getVData();
-    auto fs3 = particles3Ref->getFData();
-    auto ms3 = particles3Ref->getMData();
-    auto rs3 = particles3Ref->getRData();
-    auto xs4 = particles4Ref->getXData();
-    auto vs4 = particles4Ref->getVData();
-    auto fs4 = particles4Ref->getFData();
-    auto ms4 = particles4Ref->getMData();
-    auto rs4 = particles4Ref->getRData();
+    auto myXs1 = particles1Ref->getXData();
+    auto myVs1 = particles1Ref->getVData();
+    auto myFs1 = particles1Ref->getFData();
+    auto myMs1 = particles1Ref->getMData();
+    auto myRs1 = particles1Ref->getRData();
+    auto myXs2 = particles2Ref->getXData();
+    auto myVs2 = particles2Ref->getVData();
+    auto myFs2 = particles2Ref->getFData();
+    auto myMs2 = particles2Ref->getMData();
+    auto myRs2 = particles2Ref->getRData();
+    auto myXs3 = particles3Ref->getXData();
+    auto myVs3 = particles3Ref->getVData();
+    auto myFs3 = particles3Ref->getFData();
+    auto myMs3 = particles3Ref->getMData();
+    auto myRs3 = particles3Ref->getRData();
+    auto myXs4 = particles4Ref->getXData();
+    auto myVs4 = particles4Ref->getVData();
+    auto myFs4 = particles4Ref->getFData();
+    auto myMs4 = particles4Ref->getMData();
+    auto myRs4 = particles4Ref->getRData();
+    // natoms
+    int natoms1, natoms2, natoms3, natoms4;
+    int nlocal1, nlocal2, nlocal3, nlocal4;
+    int nghost1, nghost2, nghost3, nghost4;
+    particles1Ref->getNmaxNlocal(nmax, nlocal1);
+    particles2Ref->getNmaxNlocal(nmax, nlocal2);
+    particles3Ref->getNmaxNlocal(nmax, nlocal3);
+    particles4Ref->getNmaxNlocal(nmax, nlocal4);
+    particles1Ref->getNGhosts(nghost1);
+    particles2Ref->getNGhosts(nghost2);
+    particles3Ref->getNGhosts(nghost3);
+    particles4Ref->getNGhosts(nghost4);
+    natoms1 = nlocal1 + nghost1;
+    natoms2 = nlocal2 + nghost2;
+    natoms3 = nlocal3 + nghost3;
+    natoms4 = nlocal4 + nghost4;
+    // checking number of particles
+    REQUIRE(expectedXs1.size()/3 == natoms1);
+    REQUIRE(expectedXs2.size()/3 == natoms2);
+    REQUIRE(expectedXs3.size()/3 == natoms3);
+    REQUIRE(expectedXs4.size()/3 == natoms4);
+    for (int i = 0; i < 3*natoms1; i++) {
+        REQUIRE_THAT(expectedXs1[i], Catch::Matchers::WithinAbs(myXs1[i], 1e-6));
+        REQUIRE_THAT(expectedVs1[i], Catch::Matchers::WithinAbs(myVs1[i], 1e-6));
+        REQUIRE_THAT(expectedFs1[i], Catch::Matchers::WithinAbs(myFs1[i], 1e-6));
+    }
+    for (int i = 0; i < 3 * natoms2; i++) {
+        REQUIRE_THAT(expectedXs2[i], Catch::Matchers::WithinAbs(myXs2[i], 1e-6));
+        REQUIRE_THAT(expectedVs2[i], Catch::Matchers::WithinAbs(myVs2[i], 1e-6));
+        REQUIRE_THAT(expectedFs2[i], Catch::Matchers::WithinAbs(myFs2[i], 1e-6));
+    }
+    for (int i = 0; i < 3 * natoms3; i++) {
+        REQUIRE_THAT(expectedXs3[i], Catch::Matchers::WithinAbs(myXs3[i], 1e-6));
+        REQUIRE_THAT(expectedVs3[i], Catch::Matchers::WithinAbs(myVs3[i], 1e-6));
+        REQUIRE_THAT(expectedFs3[i], Catch::Matchers::WithinAbs(myFs3[i], 1e-6));
+    }
+    for (int i = 0; i < 3 * natoms4; i++) {
+        REQUIRE_THAT(expectedXs4[i], Catch::Matchers::WithinAbs(myXs4[i], 1e-6));
+        REQUIRE_THAT(expectedVs4[i], Catch::Matchers::WithinAbs(myVs4[i], 1e-6));
+        REQUIRE_THAT(expectedFs4[i], Catch::Matchers::WithinAbs(myFs4[i], 1e-6));
+    }
+    for (int i = 0; i < natoms1; i++) {
+        REQUIRE_THAT(expectedRs1[i], Catch::Matchers::WithinAbs(myRs1[i], 1e-6));
+        REQUIRE_THAT(expectedMs1[i], Catch::Matchers::WithinAbs(myMs1[i], 1e-6));
+    }
+    for (int i = 0; i < natoms2; i++) {
+        REQUIRE_THAT(expectedRs2[i], Catch::Matchers::WithinAbs(myRs2[i], 1e-6));
+        REQUIRE_THAT(expectedMs2[i], Catch::Matchers::WithinAbs(myMs2[i], 1e-6));
+    }
 
+    for (int i = 0; i < natoms3; i++) {
+        REQUIRE_THAT(expectedRs3[i], Catch::Matchers::WithinAbs(myRs3[i], 1e-6));
+        REQUIRE_THAT(expectedMs3[i], Catch::Matchers::WithinAbs(myMs3[i], 1e-6));
+    }
 
+    for (int i = 0; i < natoms4; i++) {
+        REQUIRE_THAT(expectedRs4[i], Catch::Matchers::WithinAbs(myRs4[i], 1e-6));
+        REQUIRE_THAT(expectedMs4[i], Catch::Matchers::WithinAbs(myMs4[i], 1e-6));
+    }
 
 }

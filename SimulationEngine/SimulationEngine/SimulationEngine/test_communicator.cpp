@@ -346,15 +346,17 @@ TEST_CASE("Testing the communication class") {
         REQUIRE(3 * nlocal == expFs.size());
         REQUIRE(nlocal == expRs.size());
         REQUIRE(nlocal == expMs.size());
-        for (int i = 0; i < nlocal; i++) {
+        for (int i = 0; i < 3 * nlocal; i++) {
             REQUIRE_THAT(expXs[i], Catch::Matchers::WithinAbs(myXs[i], 1e-6));
             REQUIRE_THAT(expVs[i], Catch::Matchers::WithinAbs(myVs[i], 1e-6));
             REQUIRE_THAT(expFs[i], Catch::Matchers::WithinAbs(myFs[i], 1e-6));
+        }
+        for (int i = 0; i < nlocal; i++) {
             REQUIRE_THAT(expRs[i], Catch::Matchers::WithinAbs(myRs[i], 1e-6));
             REQUIRE_THAT(expMs[i], Catch::Matchers::WithinAbs(myMs[i], 1e-6));
 
         }
-        };
+    };
 
     // the communicator configuration
     std::array<int, 3> nranks = { 2,2,1 };
@@ -407,28 +409,25 @@ TEST_CASE("Testing updating the ghost atoms in the particles class") {
          140.62,  160.33,  198.21,   // particle 7  owned by Q11 (++ interior)
 
 
-         // ---------- GHOST-SOURCE atoms near boundaries (within 50 across x=0 and/or y=0) ----------
-         // These live on one side but should be imported as ghosts by adjacent region(s).
+        // For Q00 ghosts: need atoms in (0<=x<50,y<0) and/or (x<0,0<=y<50)
+          25.60, -160.15,  -55.27,   // particle 8  in ghost of Q00 from +x slab (0<=x<50,y<0); owned by Q10
+        -120.33,   20.18, -199.05,   // particle 9  in ghost of Q00 from +y slab (x<0,0<=y<50); owned by Q01
+          30.25,   22.40,   10.66,   // particle 10 corner ghost for Q00 (0<=x<50,0<=y<50); owned by Q11
 
-         // For Q00 ghosts: need atoms in (0<=x<50,y<0) and/or (x<0,0<=y<50)
-           25.60, -160.15,  -55.27,   // particle 8  in ghost of Q00 from +x slab (0<=x<50,y<0); owned by Q10
-         -120.33,   20.18, -199.05,   // particle 9  in ghost of Q00 from +y slab (x<0,0<=y<50); owned by Q01
-           30.25,   22.40,   10.66,   // particle 10 corner ghost for Q00 (0<=x<50,0<=y<50); owned by Q11
+        // For Q10 ghosts: need atoms in (-50<x<=0,y<0) and/or (x>0,0<=y<50)
+         -35.10, -140.48,   12.66,   // particle 11 in ghost of Q10 from -x slab (-50<x<=0,y<0); owned by Q00
+         160.81,   35.42,  289.73,   // particle 12 in ghost of Q10 from +y slab (x>0,0<=y<50); owned by Q11
+         -22.80,   18.10, -140.25,   // particle 13 corner ghost for Q10 (-50<x<=0,0<=y<50); owned by Q01
 
-           // For Q10 ghosts: need atoms in (-50<x<=0,y<0) and/or (x>0,0<=y<50)
-           -35.10, -140.48,   12.66,   // particle 11 in ghost of Q10 from -x slab (-50<x<=0,y<0); owned by Q00
-           160.81,   35.42,  289.73,   // particle 12 in ghost of Q10 from +y slab (x>0,0<=y<50); owned by Q11
-           -22.80,   18.10, -140.25,   // particle 13 corner ghost for Q10 (-50<x<=0,0<=y<50); owned by Q01
+        // For Q01 ghosts: need atoms in (0<=x<50,y>0) and/or (x<0,-50<y<=0)
+          40.11,  170.25,  204.67,   // particle 14 in ghost of Q01 from +x slab (0<=x<50,y>0); owned by Q11
+        -180.66,  -30.77,   14.95,   // particle 15 in ghost of Q01 from -y slab (x<0,-50<y<=0); owned by Q00
+          18.40,  -22.10,   95.50,   // particle 16 corner ghost for Q01 (0<=x<50,-50<y<=0); owned by Q10
 
-           // For Q01 ghosts: need atoms in (0<=x<50,y>0) and/or (x<0,-50<y<=0)
-            40.11,  170.25,  204.67,   // particle 14 in ghost of Q01 from +x slab (0<=x<50,y>0); owned by Q11
-          -180.66,  -30.77,   14.95,   // particle 15 in ghost of Q01 from -y slab (x<0,-50<y<=0); owned by Q00
-            18.40,  -22.10,   95.50,   // particle 16 corner ghost for Q01 (0<=x<50,-50<y<=0); owned by Q10
-
-            // For Q11 ghosts: need atoms in (-50<x<=0,y>0) and/or (x>0,-50<y<=0)
-            -28.20,  180.66,   66.03,   // particle 17 in ghost of Q11 from -x slab (-50<x<=0,y>0); owned by Q01
-            190.27,  -40.22, -236.70,   // particle 18 in ghost of Q11 from -y slab (x>0,-50<y<=0); owned by Q10
-            -12.60,  -18.90,  130.10    // particle 19 corner ghost for Q11 (-50<x<=0,-50<y<=0); owned by Q00
+        // For Q11 ghosts: need atoms in (-50<x<=0,y>0) and/or (x>0,-50<y<=0)
+         -28.20,  180.66,   66.03,   // particle 17 in ghost of Q11 from -x slab (-50<x<=0,y>0); owned by Q01
+         190.27,  -40.22, -236.70,   // particle 18 in ghost of Q11 from -y slab (x>0,-50<y<=0); owned by Q10
+         -12.60,  -18.90,  130.10    // particle 19 corner ghost for Q11 (-50<x<=0,-50<y<=0); owned by Q00
     };
 
     std::vector<double> v = {
@@ -812,7 +811,6 @@ TEST_CASE("Testing updating the ghost atoms in the particles class") {
 
     int coreId = 0;
     auto checking_communicator = [&](const int& myId, std::array<int, 3>& nranks) {
-        std::cout << "Rank " << ++coreId << std::endl;
         // creating the communicator object
         // each communicator gets its id from the MPI_Comm_rank before creation
         // in the real scenarios
@@ -864,10 +862,13 @@ TEST_CASE("Testing updating the ghost atoms in the particles class") {
         auto& expMs = expectedMsVec[myId];
         // checking the number of particles
         REQUIRE(expectedNLocalVec[myId] == nlocal);
-        for (int i = 0; i < nlocal + nghosts; i++) {
+        const int natoms = nlocal + nghosts;
+        for (int i = 0; i < 3 * natoms; i++) {
             REQUIRE_THAT(expXs[i], Catch::Matchers::WithinAbs(myXs[i], 1e-6));
             REQUIRE_THAT(expVs[i], Catch::Matchers::WithinAbs(myVs[i], 1e-6));
             REQUIRE_THAT(expFs[i], Catch::Matchers::WithinAbs(myFs[i], 1e-6));
+        }
+        for (int i = 0; i < nlocal + nghosts; i++) {
             REQUIRE_THAT(expRs[i], Catch::Matchers::WithinAbs(myRs[i], 1e-6));
             REQUIRE_THAT(expMs[i], Catch::Matchers::WithinAbs(myMs[i], 1e-6));
         }
