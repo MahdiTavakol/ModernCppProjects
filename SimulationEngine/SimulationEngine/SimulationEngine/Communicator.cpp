@@ -46,6 +46,12 @@ Communicator::Communicator(const int& myId_, const std::array<int, 3>& sizeArray
 	sizeArray{sizeArray_}
 {}
 
+Communicator::~Communicator()
+{
+	if (allocatedBufferSize > 0)
+		delete[] sendBuffer;
+}
+
 void Communicator::injectDependencies(Engine& engine_)
 {
 	particles = engine_.getParticlesForUpdate().get();
@@ -105,7 +111,7 @@ void Communicator::init()
 
 void Communicator::forward_particle(
 	const std::array<int, 3>& dir_,
-	transferedData& trandata_)
+	void*& trandata_)
 {
 	std::vector<int>* vecRef = &interXLo;
 	
@@ -131,7 +137,18 @@ void Communicator::forward_particle(
 		throw std::invalid_argument("Wrong direction!");
 
 
+	int nParticles = (*vecRef).size();
+	int nData = 1 + (3 * 3 + 2)*nParticles; // X, V, F (3) and M, R
 
+	if (allocatedBufferSize != nData) {
+		sendBuffer = new double[nData];
+		nData = allocatedBufferSize;
+	}
+
+
+	int indx = 0;
+	
+	sendBuffer[indx++] = static_cast<double>(nParticles);
 	for (const auto& id : *vecRef)
 	{
 		double x0 = particles->X(id, 0);
@@ -146,17 +163,28 @@ void Communicator::forward_particle(
 		double m  = particles->M(id);
 		double r  = particles->R(id);
 
-		trandata_.xData.push_back({ x0,x1,x2 });
-		trandata_.vData.push_back({ v0,v1,v2 });
-		trandata_.fData.push_back({ f0,f1,f2 });
-		trandata_.mData.push_back(m);
-		trandata_.rData.push_back(r);
+		sendBuffer[indx++] = x0;
+		sendBuffer[indx++] = x1;
+		sendBuffer[indx++] = x2;
+		sendBuffer[indx++] = v0;
+		sendBuffer[indx++] = v1;
+		sendBuffer[indx++] = v2;
+		sendBuffer[indx++] = f0;
+		sendBuffer[indx++] = f1;
+		sendBuffer[indx++] = f2;
+		sendBuffer[indx++] = m;
+		sendBuffer[indx++] = r;
 	}
+	trandata_ = (void *)sendBuffer;
 }
 
-void Communicator::updateGhosts(const std::array<int, 3>& dir_, const transferedData& trandata_)
+void Communicator::updateGhosts(const std::array<int, 3>& dir_, void* trandata_)
 {
 	std::vector<int>* vecRef;
+
+	// checking the trandata_ pointer
+	if (trandata_ == nullptr)
+		throw std::invalid_argument("The buffer memory has not been initialized yet!");
 
 	if (dir_ == std::array<int, 3>{-1, 0, 0}) {
 		vecRef = &ghostsXLo;
@@ -180,31 +208,30 @@ void Communicator::updateGhosts(const std::array<int, 3>& dir_, const transfered
 		throw std::invalid_argument("Wrong direction!");
 
 	// checking the transfered data size
-	if (trandata_.xData.size() != (*vecRef).size() ||
-		trandata_.vData.size() != (*vecRef).size() ||
-		trandata_.fData.size() != (*vecRef).size() ||
-		trandata_.mData.size() != (*vecRef).size() ||
-		trandata_.rData.size() != (*vecRef).size()) {
+	double* recvBuffer = static_cast<double*>(trandata_);
+	int nData = static_cast<int>(recvBuffer[0]);
+
+	if (nData != (*vecRef).size()) {
 		throw std::invalid_argument("Wrong data size");
 	}
 
-	auto dataSize = trandata_.xData.size();
 
-
-	for (int i = 0; i < dataSize; i++) {
+	int indx = 1;
+	for (int i = 0; i < nData; i++) {
 		int id = (*vecRef)[i];
-		particles->X(id, 0) = trandata_.xData[i][0];
-		particles->X(id, 1) = trandata_.xData[i][1];
-		particles->X(id, 2) = trandata_.xData[i][2];
-		particles->V(id, 0) = trandata_.vData[i][0];
-		particles->V(id, 1) = trandata_.vData[i][1];
-		particles->V(id, 2) = trandata_.vData[i][2];
-		particles->F(id, 0) = trandata_.fData[i][0];
-		particles->F(id, 1) = trandata_.fData[i][1];
-		particles->F(id, 2) = trandata_.fData[i][2];
-		particles->M(id) = trandata_.mData[i];
-		particles->R(id) = trandata_.rData[i];
+		particles->X(id, 0) = recvBuffer[indx++];
+		particles->X(id, 1) = recvBuffer[indx++];
+		particles->X(id, 2) = recvBuffer[indx++];
+		particles->V(id, 0) = recvBuffer[indx++];
+		particles->V(id, 1) = recvBuffer[indx++];
+		particles->V(id, 2) = recvBuffer[indx++];
+		particles->F(id, 0) = recvBuffer[indx++];
+		particles->F(id, 1) = recvBuffer[indx++];
+		particles->F(id, 2) = recvBuffer[indx++];
+		particles->M(id) = recvBuffer[indx++];
+		particles->R(id) = recvBuffer[indx++];
 	}
+
 }
 
 void Communicator::resetParticles()

@@ -20,12 +20,13 @@ public:
 	Communicator(std::vector<std::string>& args_);
 	Communicator(const int& myId_, const int& size_, const double& skin_ = 0.0);
 	Communicator(const int& myId_, const std::array<int, 3>& size_, const double& skin_ = 0.0);
+	virtual ~Communicator();
 	void injectDependencies(Engine& engine_) override;
 	void init();
 
 	void forward_particle(const std::array<int,3>& dir_,
-		                  transferedData& trandata_);
-	void updateGhosts(const std::array<int,3>& dir_, const transferedData& trandata_);
+		                  void*& trandata_);
+	void updateGhosts(const std::array<int,3>& dir_, void* trandata_);
 
 	
 protected:
@@ -58,5 +59,13 @@ protected:
 
 	// Reverse_comm Partners
 	int reverse_partner[3][2];
+
+	// last buffer and its size
+	// buffer belongs to the sender
+	// so we do not need to keep a track of the 
+	// allocated recev buffer size
+	double* sendBuffer = nullptr;
+	int allocatedBufferSize = 0;
+
 
 };
