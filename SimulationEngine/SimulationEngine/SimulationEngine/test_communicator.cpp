@@ -520,6 +520,7 @@ TEST_CASE("Testing updating the ghost atoms in the particles class") {
      26.4   // particle 19
     };
 
+
     // the skin values
     double skin = 50.0;
     // expected values for each core
@@ -1609,22 +1610,6 @@ TEST_CASE("Testing the forward communication") {
     communicator4Ref->forward_particle({ -1,0,0 }, tranDataRaw43);
     // sending data from rank4 to rank2
     communicator4Ref->forward_particle({ 0,-1,0 }, tranDataRaw42);
-    if (tranDataRaw12 == nullptr)
-        std::cout << "12" << std::endl;
-    if (tranDataRaw13 == nullptr)
-        std::cout << "13" << std::endl;
-    if (tranDataRaw21 == nullptr)
-        std::cout << "21" << std::endl;
-    if (tranDataRaw24 == nullptr)
-        std::cout << "24" << std::endl;
-    if (tranDataRaw31 == nullptr)
-        std::cout << "31" << std::endl;
-    if (tranDataRaw34 == nullptr)
-        std::cout << "34" << std::endl;
-    if (tranDataRaw43 == nullptr)
-        std::cout << "43" << std::endl;
-    if (tranDataRaw42 == nullptr)
-        std::cout << "42" << std::endl;
     // updating ghosts
     communicator1Ref->updateGhosts({ 1,0,0 }, tranDataRaw21);
     communicator1Ref->updateGhosts({ 0,1,0 }, tranDataRaw31);

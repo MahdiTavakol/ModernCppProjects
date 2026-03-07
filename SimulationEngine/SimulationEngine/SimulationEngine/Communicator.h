@@ -5,15 +5,6 @@
 #include "Box.h"
 
 
-struct transferedData {
-	std::vector<std::array<double, 3>> xData;
-	std::vector<std::array<double, 3>> vData;
-	std::vector<std::array<double, 3>> fData;
-	std::vector<double> mData;
-	std::vector<double> rData;
-};
-
-
 class Communicator : public Ref {
 public:
 	Communicator();
@@ -27,6 +18,16 @@ public:
 	void forward_particle(const std::array<int,3>& dir_,
 		                  void*& trandata_);
 	void updateGhosts(const std::array<int,3>& dir_, void* trandata_);
+
+	// getting the nDests used to see if there is no more data exchange
+	int getNDests();
+	// getting the destination array for the exchange
+	// xlo xhi ylo yhi zlo zhi
+	std::array<int,6> returnExchangeDests();
+	// getting the data for the exchanged particles 
+	std::vector<double>* sendExchangeParticles();
+	// receving the exchanged particle data
+	void recvExchangeParticles(std::vector<double>& messages);
 
 	
 protected:
@@ -60,12 +61,25 @@ protected:
 	// Reverse_comm Partners
 	int reverse_partner[3][2];
 
+
+
 	// last buffer and its size
 	// buffer belongs to the sender
 	// so we do not need to keep a track of the 
 	// allocated recev buffer size
 	double* sendBuffer = nullptr;
 	int allocatedBufferSize = 0;
+
+
+	// the information for exchanging particles between ranks
+	// the neighboring ranks
+	int neighbor_ranks[3][2];
+	//
+	int  nDests = 0;
+	std::vector<double> exchangeMessages[6];
+	void initExchangeData();
+	// adding particles to the exchanged messages
+	void addParticles2ExchangeMessages(const int& loc, const int& particleId);
 
 
 };

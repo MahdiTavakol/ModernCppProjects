@@ -61,6 +61,29 @@ void Communicator::injectDependencies(Engine& engine_)
 
 void Communicator::init()
 {
+	// resetting the exchangeMessages
+	std::for_each(exchangeMessages, exchangeMessages + 6,
+		[&](std::vector<double>& a) {
+			/*
+			* format 
+			* nParticles
+			* x[0]
+			* x[1]
+			* x[2]
+			* v[0]
+			* v[1]
+			* v[2]
+			* f[0]
+			* f[1]
+			* f[2]
+			* r
+			* m
+			* so here we just have one data
+			* which is the 0!
+			*/
+			a.push_back(0.0);
+		});
+	//
 	box->getDimensions(myMin, myMax);
  	double xRange, yRange, zRange;
 	xRange = myMax[0] - myMin[0];
@@ -92,7 +115,7 @@ void Communicator::init()
 	// yhi partner
 	forward_partner[1][1] = myIdY + sizeArray[1];
 	// zlo partner
-	forward_partner[2][0] = myIdZ + sizeArray[0] * sizeArray[1];
+	forward_partner[2][0] = myIdZ - sizeArray[0] * sizeArray[1];
 	// zhi partner
 	forward_partner[2][1] = myIdZ + sizeArray[0] * sizeArray[1];
 	// xlo partner 
@@ -104,10 +127,22 @@ void Communicator::init()
 	// yhi partner
 	reverse_partner[1][1] = myIdY + sizeArray[1];
 	// zlo partner
-	reverse_partner[2][0] = myIdZ + sizeArray[0] * sizeArray[1];
+	reverse_partner[2][0] = myIdZ - sizeArray[0] * sizeArray[1];
 	// zhi partner
 	reverse_partner[2][1] = myIdZ + sizeArray[0] * sizeArray[1];
-}
+	// xlo partner
+	neighbor_ranks[0][0] = myIdX - 1;
+	// xhi partner
+	neighbor_ranks[0][1] = myIdX + 1;
+	// ylo partner
+	neighbor_ranks[1][0] = myIdY - sizeArray[1];
+	// yhi partner
+	neighbor_ranks[1][1] = myIdY + sizeArray[1];
+	// zlo partner 
+	neighbor_ranks[2][0] = myIdZ - sizeArray[0] * sizeArray[1];
+	// zhi partner
+	neighbor_ranks[2][1] = myIdZ + sizeArray[0] * sizeArray[1];
+ }
 
 void Communicator::forward_particle(
 	const std::array<int, 3>& dir_,
@@ -371,4 +406,158 @@ void Communicator::resetParticles()
 	newParticles->setNGhosts(nghosts);
 	newParticles->setNmaxNlocal(nmax, nlocal);
 	*particles = std::move(*newParticles);
+}
+
+std::array<int,6> Communicator::returnExchangeDests()
+{
+	std::array<int, 6> output = {
+		    neighbor_ranks[0][0],
+			neighbor_ranks[0][1],
+			neighbor_ranks[1][0],
+			neighbor_ranks[1][1],
+			neighbor_ranks[2][0],
+			neighbor_ranks[2][1]
+	};
+	return output;
+}
+
+int Communicator::getNDests() {
+	return nDests;
+}
+
+std::vector<double>* Communicator::sendExchangeParticles()
+{	// updating the nmax and nlocal
+	particles->getNmaxNlocal(nmax, nlocal);
+	// getting the min and max of the box dimension
+	std::array<double, 3> min, max;
+	box->getDimensions(min, max);
+
+	// resetting the nDests
+	nDests = 0;
+
+	for (int i = 0; i < nlocal; i++) {
+		// getting particle x, y, z values
+		const double x = particles->X(i, 0);
+		const double y = particles->X(i, 1);
+		const double z = particles->X(i, 2);
+
+		bool removed = false;
+		// checking where does it go out of the rank
+		if (x < min[0]) {
+			removed = true;
+			addParticles2ExchangeMessages(0, i);
+		}
+		else if (x > max[0]) {
+			removed = true;
+			addParticles2ExchangeMessages(1, i);
+		}
+		else if (y < min[1]) {
+			removed = true;
+			addParticles2ExchangeMessages(2, i);
+		}
+		else if (y > max[1]) {
+			removed = true;
+			addParticles2ExchangeMessages(3, i);
+		}
+		else if (z < min[2]) {
+			removed = true;
+			addParticles2ExchangeMessages(4, i);
+		}
+		else if (z > max[2]) {
+			removed = true;
+			addParticles2ExchangeMessages(5, i);
+		}
+
+		if (removed == true) {
+			nDests++;
+			particles->removeParticle(i);
+		}
+	}
+	return exchangeMessages;
+}
+
+void Communicator::recvExchangeParticles(std::vector<double>& message) {
+	int messageSize = static_cast<int>(message.size());
+	int nParticles = static_cast<int>(message[0]);
+	int nData = 11 * nParticles + 1;
+	std::cout << "nParticles is " << nParticles << std::endl;
+	// int nData = static_cast<int>(message[0]);
+	// checking the data container
+	if (nData != messageSize) {
+		std::cout << "nParticles(" << nParticles << ") and messageSize(" << messageSize << ")" << std::endl;
+ 		throw std::invalid_argument("Corrupted data container!");
+	}
+	
+
+	std::array<double, 3> x, v, f;
+	double m, r;
+
+	if (nParticles == 0) {
+		// This is an empty data container
+		return;
+	}
+	
+	for (int i = 0; i < nParticles; i++)
+	{
+		// x values
+		x[0] = message[11 * i + 1];
+		x[1] = message[11 * i + 2];
+		x[2] = message[11 * i + 3];
+		// v values
+		v[0] = message[11 * i + 4];
+		v[1] = message[11 * i + 5];
+		v[2] = message[11 * i + 6];
+		// f values
+		f[0] = message[11 * i + 7];
+		f[1] = message[11 * i + 8];
+		f[2] = message[11 * i + 9];
+		// m value
+		m = message[11 * i + 10];
+		// r values
+		r = message[11 * i + 11];
+		// adding that data to the particles
+		particles->addParticle(x, v, f, m, r);
+	}
+	
+
+	//std::cout << "adding particles" << std::endl;
+	//if (particles == nullptr)
+	//	std::cout << "The particles pointer is null" << std::endl;
+	//particles->addParticle(x, v, f, m, r);
+	//std::cout << "finished adding particles" << std::endl;
+
+}
+
+void Communicator::addParticles2ExchangeMessages(const int& loc, const int& particleId)
+{
+	// 3*x, 3*v, 3*f, m, r
+	int nDataPerParticle = 11;
+	// nData and rest of the data
+	//exchangeMessages[loc].reserve(nData);
+
+	// get particle data
+	std::array<double, 3> x, v, f;
+	double m, r;
+	particles->getParticle(particleId, x, v, f, m, r);
+
+	// Adding the number
+	exchangeMessages[loc][0] += 1;
+
+
+	// adding x info
+	exchangeMessages[loc].push_back(x[0]);
+	exchangeMessages[loc].push_back(x[1]);
+	exchangeMessages[loc].push_back(x[2]);
+	// adding v info
+	exchangeMessages[loc].push_back(v[0]);
+	exchangeMessages[loc].push_back(v[1]);
+	exchangeMessages[loc].push_back(v[2]);
+	// adding f info
+	exchangeMessages[loc].push_back(f[0]);
+	exchangeMessages[loc].push_back(f[1]);
+	exchangeMessages[loc].push_back(f[2]);
+	// adding m info
+	exchangeMessages[loc].push_back(m);
+	// adding r info
+	exchangeMessages[loc].push_back(r);
 }

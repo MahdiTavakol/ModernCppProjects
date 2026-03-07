@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <array>
+#include <iostream>
 
 
 class Particles : public Ref {
@@ -19,6 +20,7 @@ public:
 		std::array<double, 3> newF_ = { 0.0,0.0,0.0 },
 		double newM_ = 10.0, 
 		double newR_ = 0.0);
+	void removeParticle(const int& id_);
 	void getParticle(const int& id_,
 		std::array<double, 3>& newX_,
 		std::array<double, 3>& newV_,
@@ -26,6 +28,8 @@ public:
 		double& newM_,
 		double& newR_);
 	void copyParticle(Particles* other_, const int& id_);
+	void copyParticle(const int& src_, const int& tgt_);
+	void pop_back();
 	void setNmax(const int& nmax_);
 	void setNGhosts(const int& nghosts_);
 	void setNmaxNlocal(const int& nmax_, const int& nlocal_);

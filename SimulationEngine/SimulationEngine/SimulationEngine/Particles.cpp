@@ -77,12 +77,12 @@ void Particles::addParticle(std::array<double, 3> newX_,
 	double newM_ ,
 	double newR_)
 {
-	//check the boundary conditions
+ 	//check the boundary conditions
 	// new positions
 	x.push_back(newX_[0]);
 	x.push_back(newX_[1]);
 	x.push_back(newX_[2]);
-	// new velocities
+ 	// new velocities
 	v.push_back(newV_[0]);
 	v.push_back(newV_[1]);
 	v.push_back(newV_[2]);
@@ -97,17 +97,23 @@ void Particles::addParticle(std::array<double, 3> newX_,
 	// increasing the nlocal
 	nlocal++;
 	// checking the nmax 
-	if (nmax == 0)
-		nmax++;
-	// increasing the nmax
-	while (nlocal >= nmax) {
+
+	/*if (nlocal >= nmax) {
 		nmax *= 2;
 		x.reserve(3 * nmax);
 		v.reserve(3 * nmax);
 		f.reserve(3 * nmax);
 		m.reserve(nmax);
 		r.reserve(nmax);
-	}
+	}*/
+}
+
+void Particles::removeParticle(const int& id_) {
+	int last = nlocal - 1;
+	copyParticle(last, id_);
+	// removing the last particle
+	pop_back();
+	int nmax_new, nlocal_new;
 }
 
 void Particles::getParticle(const int& id_,
@@ -138,7 +144,6 @@ void Particles::copyParticle(Particles* other_,
 	other_->getParticle(id_, newX, newV, newF, newM, newR);
 	this->addParticle(newX, newV, newF, newM, newR);
 
-	this->nlocal++;
 	if (nmax == 0)
 		nmax = 1;
 	while (nlocal > nmax) {
@@ -149,6 +154,33 @@ void Particles::copyParticle(Particles* other_,
 		m.reserve(nmax);
 		r.reserve(nmax);
 	}
+}
+
+void Particles::copyParticle(const int& src_, const int& tgt_)
+{
+	X(tgt_, 0) = X(src_, 0);
+	X(tgt_, 1) = X(src_, 1);
+	X(tgt_, 2) = X(src_, 2);
+	V(tgt_, 0) = V(src_, 0);
+	V(tgt_, 1) = V(src_, 1);
+	V(tgt_, 2) = V(src_, 2);
+	F(tgt_, 0) = F(src_, 0);
+	F(tgt_, 1) = F(src_, 1);
+	F(tgt_, 2) = F(src_, 2);
+	R(tgt_) = R(src_);
+	M(tgt_) = M(src_);
+}
+
+void Particles::pop_back()
+{
+	for (int i = 0; i < 3; i++)
+	{
+		x.pop_back();
+		v.pop_back();
+		f.pop_back();
+	}
+	r.pop_back();
+	m.pop_back();
 }
 
 void Particles::setNmax(const int& nmax_) {

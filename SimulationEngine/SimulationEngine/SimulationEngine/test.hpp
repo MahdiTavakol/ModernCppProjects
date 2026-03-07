@@ -17,12 +17,135 @@
 #include "Run.h"
 #include "Error.h"
 
+#include "catch_amalgamated.hpp"
+#include <algorithm>
+
 
 /*
  * using commands for std functions
  */
 using std::vector, std::array;
 using std::make_unique, std::unique_ptr;
+
+
+/*
+* Non default matcher for X, V and F arrays
+* 
+*/
+
+class Array3DMatcher : public Catch::Matchers::MatcherGenericBase
+{
+	double tol;
+	int nData;
+	typedef struct
+	{
+		double x;
+		double y;
+		double z;
+	}
+	dataStruct;
+	std::vector<dataStruct> expected;
+	double expectedSize;
+
+
+public:
+	Array3DMatcher(double* expected_, int nData_, double tol_) :
+		tol{ tol_ }, nData{ nData_ }, expectedSize{0.0}
+	{
+		for (int i = 0; i < nData; i++)
+		{
+			dataStruct datai = { expected_[3 * i],expected_[3 * i + 1] ,expected_[3 * i + 2] };
+			expected.push_back(datai);
+			expectedSize += datai.x * datai.x + datai.y * datai.y + datai.z * datai.z;
+		}
+		expectedSize = std::sqrt(expectedSize);
+
+		std::sort(expected.begin(), expected.end(),
+			[](const dataStruct& a, const dataStruct& b) {
+				return a.x < b.x;
+			});
+	}
+
+	bool match(double* value_) const
+	{
+		double diff = 0.0;
+		std::vector<dataStruct> value;
+		dataStruct datai;
+		for (int i = 0; i < nData; i++) {
+			datai.x = value_[3 * i];
+			datai.y = value_[3 * i + 1];
+			datai.z = value_[3 * i + 2];
+			value.push_back(datai);
+		}
+		std::sort(value.begin(), value.end(),
+			[](const dataStruct& a, const dataStruct& b) {
+				return a.x < b.x;
+			});
+
+		for (int i = 0; i < nData; i++) {
+			double diffxi = value[i].x - expected[i].x;
+			double diffyi = value[i].y - expected[i].y;
+			double diffzi = value[i].z - expected[i].z;
+
+			diff += diffxi * diffxi + diffyi * diffyi + diffzi * diffzi;
+		}
+		diff = std::sqrt(diff);
+
+		return diff <= tol * expectedSize;
+	}
+
+	std::string describe() const override
+	{
+		return "Comparing two 3D arrays with the tolerance of " + std::to_string(tol);
+	}
+
+};
+
+class Array1DMatcher : public Catch::Matchers::MatcherGenericBase
+{
+	double tol;
+	int nData;
+	std::vector<double> expected;
+	double expectedSize;
+
+
+public:
+	Array1DMatcher(double* expected_, int nData_, double tol_) :
+		tol{ tol_ }, nData{ nData_ }
+	{
+		expectedSize = 0.0;
+		for (int i = 0; i < nData; i++)
+		{
+			expected.push_back(expected_[i]);
+			expectedSize += std::abs(expected_[i]);
+		}
+
+		std::sort(expected.begin(), expected.end());
+	}
+
+	bool match(double* value_) const
+	{
+		double diff = 0.0;
+		std::vector<double> value;
+
+		for (int i = 0; i < nData; i++) {
+			value.push_back(value_[i]);
+		}
+		std::sort(value.begin(), value.end());
+
+		for (int i = 0; i < nData; i++) {
+			diff += std::abs(value[i] - expected[i]);
+		}
+
+		return diff <= tol * expectedSize;
+	}
+
+	std::string describe() const override
+	{
+		return "Comparing two 1D arrays with the tolerance of " + std::to_string(tol);
+	}
+
+};
 
 
 /*
@@ -167,6 +290,7 @@ public:
 	MockedParticles() :
 		Particles{}
 	{
+		nmax = 0;
 	}
 	MockedParticles(
 		int nmax_,
@@ -179,6 +303,23 @@ public:
 	{
 		nmax = nmax_;
 		nlocal = x_.size()/3;
+		x = std::move(x_);
+		v = std::move(v_);
+		f = std::move(f_);
+		r = std::move(r_);
+		m = std::move(m_);
+	}
+	void resetParticles(
+		int nmax_,
+		std::vector<double>& x_,
+		std::vector<double>& v_,
+		std::vector<double>& f_,
+		std::vector<double>& r_,
+		std::vector<double>& m_
+	)
+	{
+		nmax = nmax_;
+		nlocal = x_.size() / 3;
 		x = std::move(x_);
 		v = std::move(v_);
 		f = std::move(f_);
