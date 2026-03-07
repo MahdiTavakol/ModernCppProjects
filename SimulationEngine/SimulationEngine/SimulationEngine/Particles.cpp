@@ -110,7 +110,8 @@ void Particles::addParticle(std::array<double, 3> newX_,
 
 void Particles::removeParticle(const int& id_) {
 	int last = nlocal - 1;
-	copyParticle(last, id_);
+	std::cout << last << "," << nlocal << std::endl;
+ 	copyParticle(last, id_);
 	// removing the last particle
 	pop_back();
 	int nmax_new, nlocal_new;
@@ -181,6 +182,7 @@ void Particles::pop_back()
 	}
 	r.pop_back();
 	m.pop_back();
+	nlocal--;
 }
 
 void Particles::setNmax(const int& nmax_) {

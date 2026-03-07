@@ -47,6 +47,7 @@ class Array3DMatcher : public Catch::Matchers::MatcherGenericBase
 	std::vector<dataStruct> expected;
 	double expectedSize;
 
+	mutable std::vector<int> badIndexes;
 
 public:
 	Array3DMatcher(double* expected_, int nData_, double tol_) :
@@ -87,7 +88,11 @@ public:
 			double diffyi = value[i].y - expected[i].y;
 			double diffzi = value[i].z - expected[i].z;
 
-			diff += diffxi * diffxi + diffyi * diffyi + diffzi * diffzi;
+			double diffi = diffxi*diffxi * diffxi + diffyi * diffyi + diffzi * diffzi;
+			if (std::sqrt(diffi) >= tol * expectedSize / nData) 
+				badIndexes.push_back(i);
+
+			diff += diffi;
 		}
 		diff = std::sqrt(diff);
 
@@ -96,7 +101,14 @@ public:
 
 	std::string describe() const override
 	{
-		return "Comparing two 3D arrays with the tolerance of " + std::to_string(tol);
+		std::string message = "Comparing two 3D arrays with the tolerance of " + std::to_string(tol);
+		
+		if (!badIndexes.empty()) {
+			message += "\nMismatching indexes:";
+			for (const auto& index : badIndexes)
+				message += "\n" + std::to_string(index);
+		}
+		return message;
 	}
 
 };
