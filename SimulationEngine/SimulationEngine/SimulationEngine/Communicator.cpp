@@ -34,13 +34,13 @@ Communicator::Communicator(std::vector<std::string>& args_) :
 }
 
 Communicator::Communicator(const int& myId_, const int& size_, const double& skin_) :
-	Ref{ "1" },
+	Ref{ std::to_string(myId_)},
 	skin{skin_},
 	myId{myId_}
 {}
 
 Communicator::Communicator(const int& myId_, const std::array<int, 3>& sizeArray_, const double& skin_):
-	Ref{"1"},
+	Ref{std::to_string(myId_)},
 	skin{skin_},
 	myId{myId_},
 	sizeArray{sizeArray_}
@@ -434,6 +434,13 @@ std::vector<double>* Communicator::sendExchangeParticles()
 
 	// resetting the nDests
 	nDests = 0;
+	// the id of particles to be removed
+	// we cannot remove them in the loop
+	std::vector<int> ids2beRemoved;
+
+	auto& xRef = particles->xRef();
+	auto nsize = static_cast<int>(xRef.size()) / 3;
+	std::cout << "Communicator-" << id << " has " << nsize << "particles in the begining of sendExchange" << std::endl;
 
 	for (int i = 0; i < nlocal; i++) {
 		// getting particle x, y, z values
@@ -470,9 +477,20 @@ std::vector<double>* Communicator::sendExchangeParticles()
 
 		if (removed == true) {
 			nDests++;
-			particles->removeParticle(i);
+			ids2beRemoved.push_back(i);
 		}
 	}
+
+	// sorting ids
+	std::sort(ids2beRemoved.begin(), ids2beRemoved.end(), [&](double a, double b) {return a > b; });
+	// removing ids
+	for (auto& id : ids2beRemoved)
+		particles->removeParticle(id);
+
+	xRef = particles->xRef();
+	nsize = static_cast<int>(xRef.size()) / 3;
+	std::cout << "Communicator-" << id << " has " << nsize << "particles in the end of sendExchange" << std::endl;
+	// returning the exchanged messages
 	return exchangeMessages;
 }
 
@@ -480,7 +498,6 @@ void Communicator::recvExchangeParticles(std::vector<double>& message) {
 	int messageSize = static_cast<int>(message.size());
 	int nParticles = static_cast<int>(message[0]);
 	int nData = 11 * nParticles + 1;
-	std::cout << "nParticles is " << nParticles << std::endl;
 	// int nData = static_cast<int>(message[0]);
 	// checking the data container
 	if (nData != messageSize) {
@@ -496,6 +513,10 @@ void Communicator::recvExchangeParticles(std::vector<double>& message) {
 		// This is an empty data container
 		return;
 	}
+
+	auto& xRef = particles->xRef();
+	auto nsize = static_cast<int>(xRef.size()) / 3;
+	std::cout << "Communicator-" << id << " has " << nsize << "particles in begining of the recvExchange" << std::endl;
 	
 	for (int i = 0; i < nParticles; i++)
 	{
@@ -519,6 +540,9 @@ void Communicator::recvExchangeParticles(std::vector<double>& message) {
 		particles->addParticle(x, v, f, m, r);
 	}
 	
+	xRef = particles->xRef();
+	nsize = static_cast<int>(xRef.size()) / 3;
+	std::cout << "Communicator-" << id << " has " << nsize << "particles in the end of recvExchange" << std::endl;
 
 	//std::cout << "adding particles" << std::endl;
 	//if (particles == nullptr)

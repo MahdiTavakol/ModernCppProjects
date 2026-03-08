@@ -70,6 +70,9 @@ public:
 	inline double& R(const int& i) {
 		return r[i];
 	}
+	std::vector<double>& xRef() {
+		return x;
+	}
 
 protected:
 	int nlocal;

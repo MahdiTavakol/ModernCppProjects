@@ -10,7 +10,8 @@
 
 
 
-TEST_CASE("Testing the movement of particles between processors without skin" ,"[.][ignore for now]")
+//TEST_CASE("Testing the movement of particles between processors without skin" ,"[.][ignore for now]")
+TEST_CASE("Testing the movement of particles between processors without skin")
 {
     std::cout << "Testing the movement of particles between processors without skin" << std::endl;
 
@@ -573,12 +574,6 @@ TEST_CASE("Testing the movement of particles between processors without skin" ,"
         engine_ptr4.get()
     };
 
-
-    auto& particles1Ref = engine_ptr1->getParticles();
-    auto& particles2Ref = engine_ptr2->getParticles();
-    auto& particles3Ref = engine_ptr3->getParticles();
-    auto& particles4Ref = engine_ptr4->getParticles();
-
     auto& communicator1Ref = engine_ptr1->getCommunicator();
     auto& communicator2Ref = engine_ptr2->getCommunicator();
     auto& communicator3Ref = engine_ptr3->getCommunicator();
@@ -613,6 +608,9 @@ TEST_CASE("Testing the movement of particles between processors without skin" ,"
         auto exchangeDests3 = communicator3Ref->returnExchangeDests();
         auto exchangeDests4 = communicator4Ref->returnExchangeDests();
 
+        auto& particles1Ref = engine_ptr1->getParticlesForUpdate();
+
+
         // an array of double is returned for each communicatoriRef
         std::vector<double>* messages1 = communicator1Ref->sendExchangeParticles();
         std::vector<double>* messages2 = communicator2Ref->sendExchangeParticles();
@@ -645,7 +643,6 @@ TEST_CASE("Testing the movement of particles between processors without skin" ,"
             communicatorArray[exchangeDests3[i]]->recvExchangeParticles(message);
         }
         for (int i = 0; i < 6; i++) {
-            std::cout << "4" << std::endl;
             std::cout << exchangeDests4[i] << std::endl;
             auto message = messages4[i];
             if (exchangeDests4[i] < 0 || exchangeDests4[i] >= 4)
