@@ -41,6 +41,34 @@ Particles::Particles(std::vector<std::string> args_):
 	nlocal = 0;
 }
 
+Particles::Particles(
+	int nmax,
+	std::vector<double>& xs_,
+	std::vector<double>& vs_,
+	std::vector<double>& fs_,
+	std::vector<double>& ms_,
+	std::vector<double>& rs_) :
+	Ref{ "Particles-1" },
+	x{ std::move(xs_) },
+	v{ std::move(vs_) },
+	f{ std::move(fs_) },
+	m{ std::move(ms_) },
+	r{ std::move(rs_) }
+
+{
+	nlocal  = static_cast<int>(x.size()) / 3;
+	int nlocalV = static_cast<int>(v.size()) / 3;
+	int nlocalF = static_cast<int>(f.size()) / 3;
+	int nlocalM = static_cast<int>(m.size());
+	int nlocalR = static_cast<int>(r.size());
+
+	if (nlocal != nlocalV ||
+		nlocal != nlocalF ||
+		nlocal != nlocalM ||
+		nlocal != nlocalR)
+		throw std::invalid_argument("Wrong data size");
+}
+
 
 Particles& Particles::operator=(const Particles& rhs_) {
 	if (*this == rhs_)

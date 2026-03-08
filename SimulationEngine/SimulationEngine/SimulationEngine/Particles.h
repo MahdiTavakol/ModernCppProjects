@@ -13,6 +13,13 @@ public:
 	Particles();
 	Particles(int nmax_);
 	Particles(std::vector<std::string> args_);
+	Particles(
+		int nmax,
+		std::vector<double>& xs_,
+		std::vector<double>& vs_,
+		std::vector<double>& fs_,
+		std::vector<double>& ms_,
+		std::vector<double>& rs_);
 	Particles& operator=(const Particles& rhs_);
 	Particles& operator=(Particles&& rhs_);
 	void addParticle(std::array<double, 3> newX_,
