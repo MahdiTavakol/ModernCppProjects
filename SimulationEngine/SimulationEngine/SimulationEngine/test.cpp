@@ -141,14 +141,13 @@ TEST_CASE("Testing removing a particle from the particle list") {
          -12.60,  -18.90,  130.10,   // particle 3  owned by Q00 (-- interior)
          -35.10, -140.48,   12.66,   // particle 4  owned by Q00 (-- interior)
 
-         180.62, -210.44,   60.91,   // particle 5  owned by Q10 (+- interior)
+
          260.11, -140.88, -200.30,   // particle 6  owned by Q10 (+- interior)
           25.60, -160.15,  -55.27,   // particle 7  owned by Q10 (+- interior)
           18.40,  -22.10,   95.50,   // particle 8  owned by Q10 (+- interior)
          190.27,  -40.22, -236.70,   // particle 9  owned by Q10 (+- interior)
 
         -200.90,  190.36,  -40.58,   // particle 10 owned by Q01 (-+ interior)
-        -270.22,  120.74,  210.46,   // particle 11 owned by Q01 (-+ interior)
         -120.33,   20.18, -199.05,   // particle 12 owned by Q01 (-+ interior)
          -22.80,   18.10, -140.25,   // particle 13 owned by Q01 (-+ interior)
          -28.20,  180.66,   66.03,   // particle 14 owned by Q01 (-+ interior)
@@ -166,13 +165,11 @@ TEST_CASE("Testing removing a particle from the particle list") {
      41.2, -19.8,  63.5,   // particle 2
     -97.1,  28.9, -74.4,   // particle 3
       3.6,  89.2, -12.5,   // particle 4
-     54.7, -66.3,  77.1,   // particle 5
     -45.9,  18.0,  92.6,   // particle 6
     -11.4,  36.8, -83.2,   // particle 7
      59.7, -24.6,  10.9,   // particle 8
     -72.5,  44.3, -95.8,   // particle 9
      21.7, -38.4,  68.2,   // particle 10
-    -14.9,  87.6, -29.3,   // particle 11
      46.1, -61.5,  33.8,   // particle 12
     -79.2,  12.4,  99.1,   // particle 13
     -53.7,  27.5, -41.6,   // particle 14
@@ -188,13 +185,11 @@ TEST_CASE("Testing removing a particle from the particle list") {
      29.7,  -5.4,  38.9,   // particle 2
     -22.1,  16.0, -49.7,   // particle 3
       3.1,  27.6, -14.8,   // particle 4
-     44.5, -36.7,  21.4,   // particle 5
      -9.9,   5.6,  31.2,   // particle 6
     -12.7,  18.9, -28.4,   // particle 7
      47.3, -19.5,   6.2,   // particle 8
     -34.8,  25.1, -45.6,   // particle 9
      14.8,  -7.3,  39.6,   // particle 10
-    -21.9,  30.4, -16.5,   // particle 11
      41.2, -29.8,   9.7,   // particle 12
     -48.1,  12.6,  33.9,   // particle 13
     -25.7,  17.8, -38.6,   // particle 14
@@ -210,13 +205,11 @@ TEST_CASE("Testing removing a particle from the particle list") {
      0.9,  // particle 2
      5.6,  // particle 3
      9.1,  // particle 4
-     2.7,  // particle 5
      6.0,  // particle 6
      1.3,  // particle 7
      8.4,  // particle 8
      4.1,  // particle 9
      0.5,  // particle 10
-     9.8,  // particle 11
      3.0,  // particle 12
      7.4,  // particle 13
      5.9,  // particle 14
@@ -233,13 +226,11 @@ TEST_CASE("Testing removing a particle from the particle list") {
      45.7,  // particle 2
      3.9,   // particle 3
      67.1,  // particle 4
-     24.6,  // particle 5
      98.0,  // particle 6
      31.4,  // particle 7
      76.2,  // particle 8
      54.3,  // particle 9
      8.7,   // particle 10
-     63.5,  // particle 11
      19.8,  // particle 12
      92.4,  // particle 13
      37.6,  // particle 14

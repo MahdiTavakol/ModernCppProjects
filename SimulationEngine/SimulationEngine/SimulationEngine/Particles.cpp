@@ -110,7 +110,6 @@ void Particles::addParticle(std::array<double, 3> newX_,
 
 void Particles::removeParticle(const int& id_) {
 	int last = nlocal - 1;
-	std::cout << last << "," << nlocal << std::endl;
  	copyParticle(last, id_);
 	// removing the last particle
 	pop_back();

@@ -88,9 +88,10 @@ public:
 			double diffyi = value[i].y - expected[i].y;
 			double diffzi = value[i].z - expected[i].z;
 
-			double diffi = diffxi*diffxi * diffxi + diffyi * diffyi + diffzi * diffzi;
-			if (std::sqrt(diffi) >= tol * expectedSize / nData) 
+			double diffi = diffxi*diffxi + diffyi * diffyi + diffzi * diffzi;
+			if (std::sqrt(diffi) > tol * expectedSize / nData) {
 				badIndexes.push_back(i);
+			}
 
 			diff += diffi;
 		}
