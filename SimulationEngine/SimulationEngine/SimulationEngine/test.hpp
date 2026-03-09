@@ -91,6 +91,15 @@ public:
 			double diffi = diffxi*diffxi + diffyi * diffyi + diffzi * diffzi;
 			if (std::sqrt(diffi) > tol * expectedSize / nData) {
 				badIndexes.push_back(i);
+				/*std::cout <<
+					i << "," << value[i].x 
+					  << "," << value[i].y 
+					  << "," << value[i].z
+					  << "," << expected[i].x
+					  << "," << expected[i].y 
+					  << "," << expected[i].z 
+					  << std::endl;
+					  */
 			}
 
 			diff += diffi;
