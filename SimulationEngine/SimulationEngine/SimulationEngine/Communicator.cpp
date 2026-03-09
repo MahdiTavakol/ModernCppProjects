@@ -93,8 +93,8 @@ void Communicator::init()
 	double yRangePerNode = yRange / static_cast<double>(sizeArray[1]);
 	double zRangePerNode = zRange / static_cast<double>(sizeArray[2]);
 	int myIdX = myId % sizeArray[0];
-	int myIdY = myId / sizeArray[1];
-	int myIdZ = myId / (sizeArray[0]*sizeArray[1]);
+	int myIdY = (myId / sizeArray[0]) % sizeArray[1];
+	int myIdZ = (myId / (sizeArray[0]*sizeArray[1])) % sizeArray[2];
 	myMin[0] += myIdX * xRangePerNode;
 	myMin[1] += myIdY * yRangePerNode;
 	myMin[2] += myIdZ * zRangePerNode;
@@ -107,17 +107,23 @@ void Communicator::init()
 	this->resetParticles();
 	// setting the forward and reverse partners
 	// xlo partner
-	forward_partner[0][0] = myIdX - 1;
+	int xlo = myId - 1;
+	forward_partner[0][0] = myIdX > 0 ? xlo : -1;
 	// xhi partner
-	forward_partner[0][1] = myIdX + 1;
+	int xhi = myId + 1;
+	forward_partner[0][1] = myIdX < sizeArray[0]-1 ? xhi : -1;
 	// ylo partner
-	forward_partner[1][0] = myIdY - sizeArray[1];
+	int ylo = myId - sizeArray[0];
+	forward_partner[1][0] = myIdY > 0 ? ylo : -1;
 	// yhi partner
-	forward_partner[1][1] = myIdY + sizeArray[1];
+	int yhi = myId + sizeArray[0];
+	forward_partner[1][1] = myIdY < sizeArray[1]-1 ? yhi : -1;
 	// zlo partner
-	forward_partner[2][0] = myIdZ - sizeArray[0] * sizeArray[1];
+	int zlo = myId - sizeArray[0] * sizeArray[1];
+	forward_partner[2][0] = myIdZ > 0 ? zlo : -1;
 	// zhi partner
-	forward_partner[2][1] = myIdZ + sizeArray[0] * sizeArray[1];
+	int zhi = myId + sizeArray[0] * sizeArray[1];
+	forward_partner[2][1] = myIdZ < sizeArray[2]-1 ? zhi : -1;
 	// xlo partner 
 	reverse_partner[0][0] = myIdX - 1;
 	// xhi partner
@@ -131,17 +137,18 @@ void Communicator::init()
 	// zhi partner
 	reverse_partner[2][1] = myIdZ + sizeArray[0] * sizeArray[1];
 	// xlo partner
-	neighbor_ranks[0][0] = myIdX - 1;
+	neighbor_ranks[0][0] = forward_partner[0][0];
 	// xhi partner
-	neighbor_ranks[0][1] = myIdX + 1;
+	neighbor_ranks[0][1] = forward_partner[0][1];
 	// ylo partner
-	neighbor_ranks[1][0] = myIdY - sizeArray[1];
+	neighbor_ranks[1][0] = forward_partner[1][0];
 	// yhi partner
-	neighbor_ranks[1][1] = myIdY + sizeArray[1];
+	neighbor_ranks[1][1] = forward_partner[1][1];
 	// zlo partner 
-	neighbor_ranks[2][0] = myIdZ - sizeArray[0] * sizeArray[1];
+	neighbor_ranks[2][0] = forward_partner[2][0];
 	// zhi partner
-	neighbor_ranks[2][1] = myIdZ + sizeArray[0] * sizeArray[1];
+	neighbor_ranks[2][1] = forward_partner[2][1];
+
  }
 
 void Communicator::forward_particle(
