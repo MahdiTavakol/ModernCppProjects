@@ -148,24 +148,27 @@ TEST_CASE("Testing the message for sending an out of range particle from a rank"
         -220.40, -180.10,   80.55,   // particle 0  owned by Q00 (-- interior) region 1
         -140.75, -260.33, -120.18,   // particle 1  owned by Q00 (-- interior) region 1
         -180.66,   30.77,   14.95,   // particle 2  owned by Q00 (-+ interior) region 3
-          12.60,  -18.90,  130.10,   // particle 3  owned by Q00 (+- interior) region 2
-          35.10, -140.48,   12.66,   // particle 4  owned by Q00 (+- interior) region 2
+        -280.66,  130.77,  214.95,   // particle 3  owned by Q00 (-+ interior) region 3
+          12.60,  -18.90,  130.10,   // particle 4  owned by Q00 (+- interior) region 2
+          35.10, -140.48,   12.66,   // particle 5  owned by Q00 (+- interior) region 2
     };
 
     std::vector<double> v1 = {
         72.4, -33.1,  95.0,   // particle 0
        -88.6,  14.3, -56.7,   // particle 1
         41.2, -19.8,  63.5,   // particle 2
-       -97.1,  28.9, -74.4,   // particle 3
-         3.6,  89.2, -12.5,   // particle 4
+        51.2, -19.8, 163.5,   // particle 3
+       -97.1,  28.9, -74.4,   // particle 4
+         3.6,  89.2, -12.5,   // particle 5
     };
 
     std::vector<double> f1 = {
        12.4, -33.9,  45.2,   // particle 0
       -18.6,   7.3, -41.5,   // particle 1
        29.7,  -5.4,  38.9,   // particle 2
-      -22.1,  16.0, -49.7,   // particle 3
-        3.1,  27.6, -14.8,   // particle 4
+       39.7, -15.4,  18.9,   // particle 3
+      -22.1,  16.0, -49.7,   // particle 4
+        3.1,  27.6, -14.8,   // particle 5
     };
 
     std::vector<double> m1 =
@@ -173,8 +176,9 @@ TEST_CASE("Testing the message for sending an out of range particle from a rank"
         3.4,  // particle 0
         7.8,  // particle 1
         0.9,  // particle 2
-        5.6,  // particle 3
-        9.1,  // particle 4
+        3.0,  // particle 3
+        5.6,  // particle 4
+        9.1,  // particle 5
     };
 
     std::vector<double> r1 =
@@ -182,8 +186,9 @@ TEST_CASE("Testing the message for sending an out of range particle from a rank"
         42.7,  // particle 0
         18.3,  // particle 1
         73.9,  // particle 2
-        56.4,  // particle 3
-        91.2   // particle 4
+        23.9,  // particle 3
+        56.4,  // particle 4
+        91.2   // particle 5
     };
 
 
@@ -194,7 +199,7 @@ TEST_CASE("Testing the message for sending an out of range particle from a rank"
         1,
         23,
         1,
-        12,
+        23,
         1,
         1
     };
@@ -214,12 +219,17 @@ TEST_CASE("Testing the message for sending an out of range particle from a rank"
             91.2                // r
         }, //  to xhi --> to the region 2
         {0.0}, // to ylo --> no ylo
-        {1.0,
+        {2.0,
          -180.66,30.77, 14.95, // x
           41.2, -19.8,  63.5,  // v
           29.7,  -5.4,  38.9,  // f
           0.9,                 // m
-          73.9                 // r
+          73.9,                // r
+        -280.66,  130.77, 214.95,
+           51.2,   -19.8, 163.5,
+           39.7,   -15.4,  18.9,
+           3.0,
+           23.9
           }, // to yhi  --> to the region 3
         {0.0},  // to zlo
         {0.0},  // to zhi
@@ -782,20 +792,20 @@ TEST_CASE("Testing the movement of particles between processors without skin")
 
     std::vector<double> newR1 =
     {
-        3.4,  // particle 0
-        7.8,  // particle 1
-        0.9,  // particle 2
-        5.6,  // particle 3
-        9.1,  // particle 4
+     12.5,  // particle 0 region 1
+     89.3,  // particle 1 region 1
+     45.7,  // particle 2 region 3
+     3.9,   // particle 3 region 2
+     67.1,  // particle 4 region 2
     };
 
     std::vector<double> newM1 =
     {
-        3.4,  // particle 0
-        7.8,  // particle 1
-        0.9,  // particle 2
-        5.6,  // particle 3
-        9.1,  // particle 4
+        3.4,  // particle 0 region 1
+        7.8,  // particle 1 region 1
+        0.9,  // particle 2 region 3
+        5.6,  // particle 3 region 2
+        9.1,  // particle 4 region 2
     };
 
     std::vector<double> newX2 = 
@@ -827,20 +837,20 @@ TEST_CASE("Testing the movement of particles between processors without skin")
 
     std::vector<double> newM2 =
     {
-        2.7,  // particle 5
-        6.0,  // particle 6
-        1.3,  // particle 7
-        8.4,  // particle 8
-        4.1,  // particle 9
+        2.7,  // particle 5 region 2
+        6.0,  // particle 6 region 2
+        1.3,  // particle 7 region 1
+        8.4,  // particle 8 region 3
+        4.1,  // particle 9 region 2
     };
 
     std::vector<double> newR2 = 
     {
-        2.7,  // particle 5
-        6.0,  // particle 6
-        1.3,  // particle 7
-        8.4,  // particle 8
-        4.1,  // particle 9
+     24.6,  // particle 5 region 2
+     98.0,  // particle 6 region 2
+     31.4,  // particle 7 region 1
+     76.2,  // particle 8 region 3
+     54.3,  // particle 9 region 2
     };
     
     std::vector<double> newX3 = 
@@ -872,20 +882,20 @@ TEST_CASE("Testing the movement of particles between processors without skin")
 
     std::vector<double> newM3 =
     {
-        0.5,  // particle 10
-        9.8,  // particle 11
-        3.0,  // particle 12
-        7.4,  // particle 13
-        5.9,  // particle 14
+        0.5,  // particle 10 region 3
+        9.8,  // particle 11 region 3
+        3.0,  // particle 12 region 3
+        7.4,  // particle 13 region 4
+        5.9,  // particle 14 region 3
     };
 
     std::vector<double> newR3 =
     {
-        0.5,  // particle 10
-        9.8,  // particle 11
-        3.0,  // particle 12
-        7.4,  // particle 13
-        5.9,  // particle 14
+     8.7,   // particle 10 region 3
+     63.5,  // particle 11 region 3
+     19.8,  // particle 12 region 3
+     92.4,  // particle 13 region 4
+     37.6,  // particle 14 region 3
     };
 
     std::vector<double> newX4 =
@@ -917,20 +927,20 @@ TEST_CASE("Testing the movement of particles between processors without skin")
 
     std::vector<double> newM4 =
     {
-       2.1,  // particle 15
-        6.7,  // particle 16
-        8.2,  // particle 17
-        1.8,  // particle 18
-        4.6   // particle 19
+        2.1,  // particle 15 region 4
+        6.7,  // particle 16 region 4
+        8.2,  // particle 17 region 1
+        1.8,  // particle 18 region 3
+        4.6   // particle 19 region 2
     };
 
     std::vector<double> newR4 =
     {
-        2.1,  // particle 15
-        6.7,  // particle 16
-        8.2,  // particle 17
-        1.8,  // particle 18
-        4.6   // particle 19
+     71.0,  // particle 15 region 4
+     14.2,  // particle 16 region 4
+     83.1,  // particle 17 region 1
+     58.9,  // particle 18 region 3
+     26.4   // particle 19 region 2
     };
 
     // expected values for each core
@@ -1155,8 +1165,6 @@ TEST_CASE("Testing the movement of particles between processors without skin")
     do {
         nDestsTotal = 0;
 
-        std::cout << "The attemp #" << ++numberOfAttemps << std::endl;
-
         
         auto exchangeDests1 = communicator1Ref->returnExchangeDests();
         auto exchangeDests2 = communicator2Ref->returnExchangeDests();
@@ -1180,26 +1188,25 @@ TEST_CASE("Testing the movement of particles between processors without skin")
 
 
         for (int i = 0; i < 6; i++) {
-            auto message = messages1[i];
+            auto& message = messages1[i];
             if (exchangeDests1[i] < 0 || exchangeDests1[i] >= 4)
                 continue;
             communicatorArray[exchangeDests1[i]]->recvExchangeParticles(message);
         }
         for (int i = 0; i < 6; i++) {
-            auto message = messages2[i];
+            auto& message = messages2[i];
             if (exchangeDests2[i] < 0 || exchangeDests2[i] >= 4)
                 continue;
             communicatorArray[exchangeDests2[i]]->recvExchangeParticles(message);
         }
         for (int i = 0; i < 6; i++) {
-            auto message = messages3[i];
+            auto& message = messages3[i];
             if (exchangeDests3[i] < 0 || exchangeDests3[i] >= 4)
                 continue;
             communicatorArray[exchangeDests3[i]]->recvExchangeParticles(message);
         }
         for (int i = 0; i < 6; i++) {
-            std::cout << exchangeDests4[i] << std::endl;
-            auto message = messages4[i];
+            auto& message = messages4[i];
             if (exchangeDests4[i] < 0 || exchangeDests4[i] >= 4)
                 continue;
             communicatorArray[exchangeDests4[i]]->recvExchangeParticles(message);
@@ -1228,33 +1235,29 @@ TEST_CASE("Testing the movement of particles between processors without skin")
         auto& expMs = expectedMsVec[myId_];
         // getting number of particles 
         particlesRef->getNmaxNlocal(nmax, nlocal);
-        // checking the number of particles
-        //REQUIRE(3 * nlocal == expXs.size());
-        //REQUIRE(3 * nlocal == expVs.size());
-        //REQUIRE(3 * nlocal == expFs.size());
-        //REQUIRE(nlocal == expRs.size());
-        //REQUIRE(nlocal == expMs.size());
-        // checking per particle data
-        for (int i = 0; i < 3 * nlocal; i++) {
-            std::cout << myXs[i];
-            if (i % 3 == 2)
-                std::cout << std::endl;
-            else
-                std::cout << ",";
-            //REQUIRE_THAT(expXs[i], Catch::Matchers::WithinAbs(myXs[i], 1e-6));
-            //REQUIRE_THAT(expVs[i], Catch::Matchers::WithinAbs(myVs[i], 1e-6));
-            //REQUIRE_THAT(expFs[i], Catch::Matchers::WithinAbs(myFs[i], 1e-6));
-        }
-        for (int i = 0; i < nlocal; i++) {
-            //REQUIRE_THAT(expRs[i], Catch::Matchers::WithinAbs(myRs[i], 1e-6));
-            //REQUIRE_THAT(expMs[i], Catch::Matchers::WithinAbs(myMs[i], 1e-6));
-        }
+        // checking the results
+        REQUIRE_THAT(myXs, Array3DMatcher(expXs.data(), expXs.size()/3, 1e-6));
+        REQUIRE_THAT(myVs, Array3DMatcher(expVs.data(), expVs.size()/3, 1e-6));
+        REQUIRE_THAT(myFs, Array3DMatcher(expFs.data(), expFs.size()/3, 1e-6));
+        REQUIRE_THAT(myRs, Array1DMatcher(expRs.data(), expRs.size(), 1e-6));
+        REQUIRE_THAT(myMs, Array1DMatcher(expMs.data(), expMs.size(), 1e-6));
 
     };
 
-    // testing four ranks
-    for (int i = 0; i < 4; i++) {
-        std::cout << "Rank - " << i << std::endl;
-        checking_communicator(ids[i], engineArray[i]);
-    }
+    // the rank 1
+    int id = 0;
+    Engine* engine = engineArray[id];
+    checking_communicator(id, engine);
+    // rank 2
+    id = 1;
+    engine = engineArray[id];
+    checking_communicator(id, engine);
+    // rank 3
+    id = 2;
+    engine = engineArray[id];
+    checking_communicator(id, engine);
+    // rank 4
+    id = 3;
+    engine = engineArray[id];
+    checking_communicator(id, engine);
 }

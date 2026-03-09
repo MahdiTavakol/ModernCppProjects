@@ -447,7 +447,6 @@ std::vector<double>* Communicator::sendExchangeParticles()
 
 	auto& xRef = particles->xRef();
 	auto nsize = static_cast<int>(xRef.size()) / 3;
-	std::cout << "Communicator-" << id << " has " << nsize << "particles in the begining of sendExchange" << std::endl;
 
 	for (int i = 0; i < nlocal; i++) {
 		// getting particle x, y, z values
@@ -496,7 +495,6 @@ std::vector<double>* Communicator::sendExchangeParticles()
 
 	xRef = particles->xRef();
 	nsize = static_cast<int>(xRef.size()) / 3;
-	std::cout << "Communicator-" << id << " has " << nsize << "particles in the end of sendExchange" << std::endl;
 	// returning the exchanged messages
 	return exchangeMessages;
 }
@@ -523,7 +521,6 @@ void Communicator::recvExchangeParticles(std::vector<double>& message) {
 
 	auto& xRef = particles->xRef();
 	auto nsize = static_cast<int>(xRef.size()) / 3;
-	std::cout << "Communicator-" << id << " has " << nsize << "particles in begining of the recvExchange" << std::endl;
 	
 	for (int i = 0; i < nParticles; i++)
 	{
@@ -549,16 +546,6 @@ void Communicator::recvExchangeParticles(std::vector<double>& message) {
 	// the message has to be cleared so one particle is not added multiple times
 	message.clear();
 	message.push_back(0.0);
-	
-	xRef = particles->xRef();
-	nsize = static_cast<int>(xRef.size()) / 3;
-	std::cout << "Communicator-" << id << " has " << nsize << "particles in the end of recvExchange" << std::endl;
-
-	//std::cout << "adding particles" << std::endl;
-	//if (particles == nullptr)
-	//	std::cout << "The particles pointer is null" << std::endl;
-	//particles->addParticle(x, v, f, m, r);
-	//std::cout << "finished adding particles" << std::endl;
 
 }
 
