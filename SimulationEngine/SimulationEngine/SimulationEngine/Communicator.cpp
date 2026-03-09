@@ -546,6 +546,9 @@ void Communicator::recvExchangeParticles(std::vector<double>& message) {
 		// adding that data to the particles
 		particles->addParticle(x, v, f, m, r);
 	}
+	// the message has to be cleared so one particle is not added multiple times
+	message.clear();
+	message.push_back(0.0);
 	
 	xRef = particles->xRef();
 	nsize = static_cast<int>(xRef.size()) / 3;

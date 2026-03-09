@@ -112,7 +112,7 @@ TEST_CASE("Testing the destination ranks for each rank")
         std::array<int, 3> ranks;
         int myId;
         std::array<int, 6> expected;
-    } testStruct[9] = {
+    } testStruct[] = {
         {ranks1, myId1, expected1},
         {ranks2, myId2, expected2},
         {ranks3, myId3, expected3},
@@ -570,6 +570,12 @@ TEST_CASE("Testing receiving the particles from another processor")
     communicator2Ref->recvExchangeParticles(messages[1]);
     // receiving the messages
     communicator3Ref->recvExchangeParticles(messages[3]);
+    // the message has to be empty after recvExchangeParticles
+    // as the transfer is completed afterwards
+    REQUIRE(messages[1].size() == 1);
+    REQUIRE(messages[3].size() == 1);
+    REQUIRE_THAT(messages[1][0], Catch::Matchers::WithinAbs(0.0, 1e-6));
+    REQUIRE_THAT(messages[3][0], Catch::Matchers::WithinAbs(0.0, 1e-6));
 
     // getting particles
     auto& particles2Ref = engine_ptr2->getParticlesForUpdate();
