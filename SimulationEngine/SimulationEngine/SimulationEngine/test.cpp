@@ -1156,15 +1156,23 @@ TEST_CASE("Testing the movement of particles between processors without skin")
     // number of destinations
     int nDestsTotal = 0;
 
-    int numberOfAttemps = 0;
+    int numberOfAttempts = 0;
 
 
-    constexpr int maxAtempts = 4;
+    constexpr int maxAttempts = 4;
     // repeating the particle reassginement until there is no
     // outside particles in each communicator
+    // The reason for repeating it is that it is a rare possibility 
+    // that x, y, and z values of a particle are all out of the
+    // rank dimensions. In this case at first attempt the particle is 
+    // moved in the rank which is neighboring the current rank 
+    // in the x dimension. The second time in the y dimension
+    // and finally in the z dimension... This way there is a need
+    // for knowing 6 neighboring ranks in contrast to the general 
+    // case of 26 neighboring ranks!
     do {
         nDestsTotal = 0;
-
+        numberOfAttempts++;
         
         auto exchangeDests1 = communicator1Ref->returnExchangeDests();
         auto exchangeDests2 = communicator2Ref->returnExchangeDests();
@@ -1213,7 +1221,7 @@ TEST_CASE("Testing the movement of particles between processors without skin")
         }
 
 
-    } while (nDestsTotal > 0 && numberOfAttemps < maxAtempts);
+    } while (nDestsTotal > 0 && numberOfAttempts < maxAttempts);
 
 
     auto checking_communicator = [&](const int& myId_, Engine* engine_) {
