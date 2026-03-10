@@ -2337,9 +2337,9 @@ TEST_CASE("Testing receiving the particles from another processor")
 
 
 //TEST_CASE("Testing the movement of particles between processors without skin" ,"[.][ignore for now]")
-TEST_CASE("Testing the movement of particles between processors without skin")
+TEST_CASE("Testing the movement of particles between processors without skin (2X2X1)")
 {
-    std::cout << "Testing the movement of particles between processors without skin" << std::endl;
+    std::cout << "Testing the movement of particles between processors without skin (2X2X1)" << std::endl;
     std::cout << std::string(80, '=') << std::endl;
 
 
@@ -2700,45 +2700,53 @@ TEST_CASE("Testing the movement of particles between processors without skin")
     };
 
 
-
+    std::vector<std::vector<double>> newXVec =
+    {
+        newX1, newX2, newX3, newX4
+    };
+    std::vector<std::vector<double>> newVVec =
+    {
+        newV1, newV2, newV3, newV4
+    };
+    std::vector<std::vector<double>> newFVec = 
+    {
+        newF1, newF2, newF3, newF4
+    };
+    std::vector<std::vector<double>> newRVec =
+    {
+        newR1, newR2, newR3, newR4
+    };
+    std::vector<std::vector<double>> newMVec = 
+    {
+        newM1, newM2,newM3, newM4
+    };
 
 
     // running configuration
     std::array<int, 3> ranks = { 2,2,1 };
+    //
+    int nranks = ranks[0] * ranks[1] * ranks[2];
     // ids 
-    int ids[4] = { 0,1,2,3 };
+    std::vector<int> ids;
+    for (int i = 0; i < nranks; i++)
+        ids.push_back(i);
 
-    auto engine_ptr1 = build_engine_set_particles(ids[0], ranks, newX1, newV1, newF1, newR1, newM1);
-    auto engine_ptr2 = build_engine_set_particles(ids[1], ranks, newX2, newV2, newF2, newR2, newM2);
-    auto engine_ptr3 = build_engine_set_particles(ids[2], ranks, newX3, newV3, newF3, newR3, newM3);
-    auto engine_ptr4 = build_engine_set_particles(ids[3], ranks, newX4, newV4, newF4, newR4, newM4);
+    std::vector<unique_ptr<Engine>> engineArray;
 
-    Engine* engineArray[] = {
-        engine_ptr1.get(),
-        engine_ptr2.get(),
-        engine_ptr3.get(),
-        engine_ptr4.get()
-    };
+    for (int i = 0; i < nranks; i++)
+    {
+        auto engine_ptr =
+            build_engine_set_particles(ids[i], ranks, newXVec[i], newVVec[i], newFVec[i], newRVec[i], newMVec[i]);
+        engineArray.push_back(std::move(engine_ptr));
+    }
 
+    std::vector<Communicator*> communicatorArray;
 
-    auto& communicator1Ref = engine_ptr1->getCommunicator();
-    auto& communicator2Ref = engine_ptr2->getCommunicator();
-    auto& communicator3Ref = engine_ptr3->getCommunicator();
-    auto& communicator4Ref = engine_ptr4->getCommunicator();
+    for (int i = 0; i < nranks; i++) {
+        communicatorArray.push_back(engineArray[i]->getCommunicator().get());
+    }
 
-    Communicator* communicatorArray[] = {
-        communicator1Ref.get(),
-        communicator2Ref.get(),
-        communicator3Ref.get(),
-        communicator4Ref.get()
-    };
-
-    std::array<int, 6> exchangeDestArray[] = {
-        std::array<int,6>{},
-        std::array<int,6>{},
-        std::array<int,6>{},
-        std::array<int,6>{}
-    };
+    std::vector<std::array<int, 6>> exchangeDestArray(nranks, std::array<int, 6>{});
 
     std::vector<double>* messagesArray[4];
 
@@ -2794,46 +2802,380 @@ TEST_CASE("Testing the movement of particles between processors without skin")
 
 
 
-    // the rank 1
-    int id = 0;
-    Engine* engine = engineArray[id];
-    checking_communicator(
-        id, engine,
-        expectedXsVec,
-        expectedVsVec,
-        expectedFsVec,
-        expectedRsVec,
-        expectedMsVec);
-    // rank 2
-    id = 1;
-    engine = engineArray[id];
-    checking_communicator(
-        id, engine,
-        expectedXsVec,
-        expectedVsVec,
-        expectedFsVec,
-        expectedRsVec,
-        expectedMsVec);
-    // rank 3
-    id = 2;
-    engine = engineArray[id];
-    checking_communicator(
-        id, engine,
-        expectedXsVec,
-        expectedVsVec,
-        expectedFsVec,
-        expectedRsVec,
-        expectedMsVec);
-    // rank 4
-    id = 3;
-    engine = engineArray[id];
-    checking_communicator(
-        id, engine,
-        expectedXsVec,
-        expectedVsVec,
-        expectedFsVec,
-        expectedRsVec,
-        expectedMsVec);
+    for (int i = 0; i < nranks; i++) {
+        int id = ids[i];
+        Engine* engine_ptr = engineArray[i].get();
+        checking_communicator(
+            id, engine_ptr,
+            expectedXsVec,
+            expectedVsVec,
+            expectedFsVec,
+            expectedRsVec,
+            expectedMsVec
+        );
+    }
+
 }
+
+
+
+TEST_CASE("Testing the movement of particles between processors without skin (3X3X1)")
+{
+    std::cout << "Testing the movement of particles between processors without skin (3X3X1)" << std::endl;
+    std::cout << std::string(80, '=') << std::endl;
+
+
+    // moving particles
+    std::vector<double> newX1 =
+    {
+        -220.0, -220.0,   40.0,   // stays in Q00
+        -150.0, -180.0,  -60.0,   // stays in Q00
+         -80.0, -210.0,   15.0,   // -> Q10 (x high)
+        -170.0,  -80.0,   90.0,   // -> Q01 (y high)
+    };
+
+
+    std::vector<double> newX2 =
+    {
+         -20.0, -220.0,   35.0,   // stays in Q10
+          60.0, -150.0,  -80.0,   // stays in Q10
+        -130.0, -170.0,   10.0,   // -> Q00 (x low)
+         130.0, -190.0,  -25.0,   // -> Q20 (x high)
+          40.0,  -70.0,   55.0,   // -> Q11 (y high)
+    };
+
+
+    std::vector<double> newX3 =
+    {
+         180.0, -220.0,   10.0,   // stays in Q20
+         240.0, -120.0,  -95.0,   // stays in Q20
+          80.0, -160.0,   70.0,   // -> Q10 (x low)
+         170.0,  -90.0,  -40.0,   // -> Q21 (y high)
+    };
+
+    std::vector<double> newX4 =
+    {
+        -240.0,  -20.0,   50.0,   // stays in Q01
+        -160.0,   60.0,  -20.0,   // stays in Q01
+         -90.0,   30.0,   15.0,   // -> Q11 (x high)
+        -180.0, -140.0,   80.0,   // -> Q00 (y low)
+        -210.0,  140.0,  -35.0,   // -> Q02 (y high)
+    };
+
+    std::vector<double> newX5 =
+    {
+         -40.0,  -30.0,   20.0,   // stays in Q11
+          70.0,   80.0,  -60.0,   // stays in Q11
+        -140.0,   10.0,   75.0,   // -> Q01 (x low)
+         140.0,  -20.0,  -10.0,   // -> Q21 (x high)
+          10.0, -130.0,   45.0,   // -> Q10 (y low)
+         -70.0,  160.0,   90.0,   // -> Q12 (y high)
+    };
+
+    std::vector<double> newX6 =
+    {
+         160.0,  -40.0,   25.0,   // stays in Q21
+         250.0,   70.0,  -85.0,   // stays in Q21
+          60.0,   20.0,   35.0,   // -> Q11 (x low)
+         180.0, -170.0,  -15.0,   // -> Q20 (y low)
+         220.0,  150.0,   55.0,   // -> Q22 (y high)
+    };
+
+    std::vector<double> newX7 =
+    {
+        -260.0,  180.0,   40.0,   // stays in Q02
+        -140.0,  260.0,  -70.0,   // stays in Q02
+         -80.0,  210.0,   15.0,   // -> Q12 (x high)
+        -190.0,   80.0,   95.0,   // -> Q01 (y low)
+    };
+
+    std::vector<double> newX8 =
+    {
+         -20.0,  160.0,   35.0,   // stays in Q12
+          80.0,  220.0,  -55.0,   // stays in Q12
+        -130.0,  150.0,   60.0,   // -> Q02 (x low)
+         140.0,  180.0,  -20.0,   // -> Q22 (x high)
+          30.0,   70.0,   75.0,   // -> Q11 (y low)
+    };
+
+    std::vector<double> newX9 =
+    {
+         180.0,  160.0,   10.0,   // stays in Q22
+         260.0,  240.0,  -90.0,   // stays in Q22
+          90.0,  170.0,   45.0,   // -> Q12 (x low)
+         220.0,   90.0,  -35.0,   // -> Q21 (y low)
+    };
+
+    // expected values
+
+    // Q00
+    std::vector<double> expectedX1 =
+    {
+        -220.0, -220.0,   40.0,
+        -150.0, -180.0,  -60.0
+    };
+
+    // Q10
+    std::vector<double> expectedX2 =
+    {
+        -80.0, -210.0,   15.0,
+        -20.0, -220.0,   35.0,
+         60.0, -150.0,  -80.0,
+         80.0, -160.0,   70.0
+    };
+
+    // Q20
+    std::vector<double> expectedX3 =
+    {
+        130.0, -190.0,  -25.0,
+        180.0, -220.0,   10.0,
+        240.0, -120.0,  -95.0
+    };
+
+    // Q01
+    std::vector<double> expectedX4 =
+    {
+        -170.0,  -80.0,   90.0,
+        -240.0,  -20.0,   50.0,
+        -160.0,   60.0,  -20.0,
+        -140.0,   10.0,   75.0
+    };
+
+    // Q11
+    std::vector<double> expectedX5 =
+    {
+        -90.0,   30.0,   15.0,
+        -40.0,  -30.0,   20.0,
+         70.0,   80.0,  -60.0,
+         10.0,  -70.0,   45.0,
+         60.0,   20.0,   35.0,
+         30.0,   70.0,   75.0
+    };
+
+    // Q21
+    std::vector<double> expectedX6 =
+    {
+        170.0,  -90.0,  -40.0,
+        140.0,  -20.0,  -10.0,
+        160.0,  -40.0,   25.0,
+        250.0,   70.0,  -85.0,
+        220.0,   90.0,  -35.0
+    };
+
+    // Q02
+    std::vector<double> expectedX7 =
+    {
+        -210.0, 140.0,  -35.0,
+        -260.0, 180.0,   40.0,
+        -140.0, 260.0,  -70.0,
+        -130.0, 150.0,   60.0
+    };
+
+    // Q12
+    std::vector<double> expectedX8 =
+    {
+        -80.0, 210.0,   15.0,
+        -20.0, 160.0,   35.0,
+         80.0, 220.0,  -55.0,
+         90.0, 170.0,   45.0
+    };
+
+    // Q22
+    std::vector<double> expectedX9 =
+    {
+        220.0, 150.0,   55.0,
+        140.0, 180.0,  -20.0,
+        180.0, 160.0,   10.0,
+        260.0, 240.0,  -90.0
+    };
+
+
+    std::vector<double> newV1(newX1.size(), 0.0), newF1(newX1.size(), 0.0);
+    std::vector<double> newM1(newX1.size() / 3, 0.0), newR1(newX1.size() / 3, 0.0);
+    std::vector<double> newV2(newX2.size(), 0.0), newF2(newX2.size(), 0.0);
+    std::vector<double> newM2(newX2.size() / 3, 0.0), newR2(newX2.size() / 3, 0.0);
+    std::vector<double> newV3(newX3.size(), 0.0), newF3(newX3.size(), 0.0);
+    std::vector<double> newM3(newX3.size() / 3, 0.0), newR3(newX3.size() / 3, 0.0);
+    std::vector<double> newV4(newX4.size(), 0.0), newF4(newX4.size(), 0.0);
+    std::vector<double> newM4(newX4.size() / 3, 0.0), newR4(newX4.size() / 3, 0.0);
+    std::vector<double> newV5(newX5.size(), 0.0), newF5(newX5.size(), 0.0);
+    std::vector<double> newM5(newX5.size() / 3, 0.0), newR5(newX5.size() / 3, 0.0);
+    std::vector<double> newV6(newX6.size(), 0.0), newF6(newX6.size(), 0.0);
+    std::vector<double> newM6(newX6.size() / 3, 0.0), newR6(newX6.size() / 3, 0.0);
+    std::vector<double> newV7(newX7.size(), 0.0), newF7(newX7.size(), 0.0);
+    std::vector<double> newM7(newX7.size() / 3, 0.0), newR7(newX7.size() / 3, 0.0);
+    std::vector<double> newV8(newX8.size(), 0.0), newF8(newX8.size(), 0.0);
+    std::vector<double> newM8(newX8.size() / 3, 0.0), newR8(newX8.size() / 3, 0.0);
+    std::vector<double> newV9(newX9.size(), 0.0), newF9(newX9.size(), 0.0);
+    std::vector<double> newM9(newX9.size() / 3, 0.0), newR9(newX9.size() / 3, 0.0);
+
+
+    std::vector<std::vector<double>> newXVec =
+    {
+        newX1, newX2, newX3, newX4, newX5, newX6, newX7, newX8, newX9
+    };
+    std::vector<std::vector<double>> newVVec =
+    {
+        newV1, newV2, newV3, newV4, newV5, newV6, newV7, newV8, newV9
+    };
+    std::vector<std::vector<double>> newFVec =
+    {
+        newF1, newF2, newF3, newF4, newF5, newF6, newF7, newF8, newF9
+    };
+    std::vector<std::vector<double>> newRVec =
+    {
+        newR1, newR2, newR3, newR4, newR5, newR6, newR7, newR8, newR9
+    };
+    std::vector<std::vector<double>> newMVec =
+    {
+        newM1, newM2, newM3, newM4, newM5, newM6, newM7, newM8, newM9
+    };
+
+    std::vector<double> expectedV1(expectedX1.size(), 0.0), expectedF1(expectedX1.size(), 0.0);
+    std::vector<double> expectedM1(expectedX1.size() / 3, 0.0), expectedR1(expectedX1.size() / 3, 0.0);
+    std::vector<double> expectedV2(expectedX2.size(), 0.0), expectedF2(expectedX2.size(), 0.0);
+    std::vector<double> expectedM2(expectedX2.size() / 3, 0.0), expectedR2(expectedX2.size() / 3, 0.0);
+    std::vector<double> expectedV3(expectedX3.size(), 0.0), expectedF3(expectedX3.size(), 0.0);
+    std::vector<double> expectedM3(expectedX3.size() / 3, 0.0), expectedR3(expectedX3.size() / 3, 0.0);
+    std::vector<double> expectedV4(expectedX4.size(), 0.0), expectedF4(expectedX4.size(), 0.0);
+    std::vector<double> expectedM4(expectedX4.size() / 3, 0.0), expectedR4(expectedX4.size() / 3, 0.0);
+    std::vector<double> expectedV5(expectedX5.size(), 0.0), expectedF5(expectedX5.size(), 0.0);
+    std::vector<double> expectedM5(expectedX5.size() / 3, 0.0), expectedR5(expectedX5.size() / 3, 0.0);
+    std::vector<double> expectedV6(expectedX6.size(), 0.0), expectedF6(expectedX6.size(), 0.0);
+    std::vector<double> expectedM6(expectedX6.size() / 3, 0.0), expectedR6(expectedX6.size() / 3, 0.0);
+    std::vector<double> expectedV7(expectedX7.size(), 0.0), expectedF7(expectedX7.size(), 0.0);
+    std::vector<double> expectedM7(expectedX7.size() / 3, 0.0), expectedR7(expectedX7.size() / 3, 0.0);
+    std::vector<double> expectedV8(expectedX8.size(), 0.0), expectedF8(expectedX8.size(), 0.0);
+    std::vector<double> expectedM8(expectedX8.size() / 3, 0.0), expectedR8(expectedX8.size() / 3, 0.0);
+    std::vector<double> expectedV9(expectedX9.size(), 0.0), expectedF9(expectedX9.size(), 0.0);
+    std::vector<double> expectedM9(expectedX9.size() / 3, 0.0), expectedR9(expectedX9.size() / 3, 0.0);
+
+
+
+    std::vector<std::vector<double>> expectedXsVec = {
+        expectedX1, expectedX2, expectedX3, expectedX4
+    };
+    std::vector<std::vector<double>> expectedVsVec = {
+        expectedV1, expectedV2, expectedV3, expectedV4
+    };
+    std::vector<std::vector<double>> expectedFsVec = {
+        expectedF1, expectedF2, expectedF3, expectedF4
+    };
+    std::vector<std::vector<double>> expectedRsVec = {
+        expectedR1, expectedR2, expectedR3, expectedR4
+    };
+    std::vector<std::vector<double>> expectedMsVec = {
+        expectedM1, expectedM2, expectedM3, expectedM4
+    };
+
+
+
+
+    // running configuration
+    std::array<int, 3> ranks = { 3,3,1 };
+    // 
+    int nranks = ranks[0] * ranks[1] * ranks[2];
+    // ids 
+    std::vector<int> ids;
+    ids.reserve(nranks);
+    // 
+    for (int i = 0; i < nranks; i++)
+        ids.push_back(i);
+
+    // Engine vector
+    std::vector<std::unique_ptr<Engine>> engineArray;
+
+    // creating engine_ptrs
+    for (int i = 0; i < nranks; i++) {
+        auto engine_ptr = build_engine_set_particles(
+            ids[0], ranks, newXVec[i], newVVec[i], newFVec[i], newRVec[i], newMVec[i]);
+        engineArray.push_back(std::move(engine_ptr));
+    }
+
+
+    std::vector<Communicator*> communicatorArray;
+
+    for (auto& engine_ptr : engineArray) {
+        auto& communicatorRef = engine_ptr->getCommunicator();
+        communicatorArray.push_back(communicatorRef.get());
+   }
+
+    std::vector<std::array<int, 6>> exchangeDestArray(9, std::array<int, 6>{});
+
+
+
+    std::vector<double>* messagesArray[9];
+
+
+    // number of destinations
+    int nDestsTotal = 0;
+
+    int numberOfAttempts = 0;
+
+
+    constexpr int maxAttempts = 4;
+    // repeating the particle reassginement until there is no
+    // outside particles in each communicator
+    // The reason for repeating it is that it is a rare possibility 
+    // that x, y, and z values of a particle are all out of the
+    // rank dimensions. In this case at first attempt the particle is 
+    // moved in the rank which is neighboring the current rank 
+    // in the x dimension. The second time in the y dimension
+    // and finally in the z dimension... This way there is a need
+    // for knowing 6 neighboring ranks in contrast to the general 
+    // case of 26 neighboring ranks!
+    do {
+        nDestsTotal = 0;
+        numberOfAttempts++;
+
+        for (int i = 0; i < nranks; i++) {
+
+            exchangeDestArray[i] = communicatorArray[i]->returnExchangeDests();
+            std::cout << "Dall " << i << std::endl; 
+            // an array of vector<double> is returned for each communicatoriRef
+            messagesArray[i] = communicatorArray[i]->sendExchangeParticles();
+        }
+
+        // getting the nDests values
+        for (int i = 0; i < nranks; i++)
+            nDestsTotal += communicatorArray[i]->getNDests();
+
+
+        // ranks
+        for (int i = 0; i < nranks; i++) {
+            // directions xlo, xhi, ylo, yhi, zlo, zhi
+            for (int j = 0; j < 6; j++) {
+                // ref is very important
+                // since the recvExchangeParticles
+                // after setting the new particle 
+                // needs to reset the message
+                auto& message = messagesArray[i][j];
+                if (exchangeDestArray[i][j] < 0)
+                    continue;
+                communicatorArray[exchangeDestArray[i][j]]->recvExchangeParticles(message);
+            }
+        }
+
+    } while (nDestsTotal > 0 && numberOfAttempts < maxAttempts);
+
+
+
+
+    // the rank 1
+    for (int i = 0; i < nranks; i++) {
+        int id = i;
+        Engine* engine = engineArray[id].get();
+        checking_communicator(
+            id, engine,
+            expectedXsVec,
+            expectedVsVec,
+            expectedFsVec,
+            expectedRsVec,
+            expectedMsVec
+        );
+    }
+}
+
+
 
 
