@@ -3176,6 +3176,3 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
     }
 }
 
-
-
-
