@@ -3,13 +3,13 @@
 
 /*
 * TODO : The build_engine might needs to be in the global scope
-* t      There are various versions of check_communicator there should be just one in the global scope
+*        There are various versions of check_communicator there should be just one in the global scope
 */
 
 // a specific modification of the enginefixture
 // which creates the engine first and add out of rank
 // particles next ...
-auto return_engine_ptr = [&](const int& myId_,
+auto build_engine_set_particles = [&](const int& myId_,
     std::array<int, 3> ranks_,
     std::vector<double>& x_,
     std::vector<double>& v_,
@@ -70,8 +70,157 @@ auto return_engine_ptr = [&](const int& myId_,
     };
 
 
+// building the engine .. it first creates particles and then builds the engine
+// so each particle is in the correct rank in the returned engine
+auto set_particles_build_engine = [&](
+    const int& myId_,
+    std::array<int, 3> ranks_,
+    std::vector<double>& x_,
+    std::vector<double>& v_,
+    std::vector<double>& f_,
+    std::vector<double>& r_,
+    std::vector<double>& m_,
+    double skin_) -> std::unique_ptr<Engine> {
+        // communicators
+        std::unique_ptr<Communicator> communicator = std::make_unique<Communicator>(myId_, ranks_, skin_);
+        // box dimensions
+        array<double, 3> min = { -300.0,-300.0,-300.0 };
+        array<double, 3> max = { 300.0, 300.0, 300.0 };
+        // box
+        std::unique_ptr<Box> box = std::make_unique<Box>(min, max);
+        // copy since we used the std::move in the mockedParticles class
+        std::vector<double> xCopy = x_, vCopy = v_, fCopy = f_, rCopy = r_, mCopy = m_;
+        // creating the mockedParticles object
+        int nmax = 20;
+        int nlocal = 20;
+        int nghosts = 0;
+        std::unique_ptr<Particles> mockedParticles =
+            std::make_unique<MockedParticles>(nmax, xCopy, vCopy, fCopy, rCopy, mCopy);
+        // putting everything into the engine
+        std::vector<std::unique_ptr<Ref>> inputs;
+        inputs.push_back(std::move(mockedParticles));
+        inputs.push_back(std::move(box));
+        inputs.push_back(std::move(communicator));
+        // creating the engine fixture
+        EngineFixture engineFixture1(inputs);
+        // getting the engine_ptr
+        auto engine_ptr = engineFixture1.returnEngine();
+        // returning the engine
+        return engine_ptr;
+
+    };
+
+
+// checking the particle coordinates inside the communicator
+auto build_engine_check_communicator = [&](
+    const int& myId_,
+    std::array<int, 3> ranks_,
+    std::vector<double>& x_,
+    std::vector<double>& v_,
+    std::vector<double>& f_,
+    std::vector<double>& r_,
+    std::vector<double>& m_,
+    std::vector<std::vector<double>> expectedXsVec_,
+    std::vector<std::vector<double>> expectedVsVec_,
+    std::vector<std::vector<double>> expectedFsVec_,
+    std::vector<std::vector<double>> expectedRsVec_,
+    std::vector<std::vector<double>> expectedMsVec_,
+    const double& skin_ = 0.0
+    ) {
+    // creating the communicator object
+    // each communicator gets its id from the MPI_Comm_rank before creation
+    // in the real scenarios
+    std::unique_ptr<Communicator> communicator = 
+        std::make_unique<Communicator>(myId_, ranks_, skin_);
+    // box dimensions
+    array<double, 3> min = { -300.0,-300.0,-300.0 };
+    array<double, 3> max = { 300.0, 300.0, 300.0 };
+    // box
+    std::unique_ptr<Box> box = std::make_unique<Box>(min, max);
+    // particles
+    int nmax = 20;
+    int nlocal = 20;
+    // copies since we used the std::move in the mockedParticles class
+    std::vector<double> xCopy = x_;
+    std::vector<double> vCopy = v_;
+    std::vector<double> fCopy = f_;
+    std::vector<double> rCopy = r_;
+    std::vector<double> mCopy = m_;
+    // creating the mockedParticles object
+    std::unique_ptr<Particles> mockedParticles =
+        std::make_unique<MockedParticles>(nmax, xCopy, vCopy, fCopy, rCopy, mCopy);
+    // putting everything into the engine
+    std::vector<std::unique_ptr<Ref>> inputs;
+    inputs.push_back(std::move(mockedParticles));
+    inputs.push_back(std::move(box));
+    inputs.push_back(std::move(communicator));
+    // creating the engine fixture
+    EngineFixture engineFixture(inputs);
+    // getting the engine_ptr
+    auto engine_ptr = engineFixture.returnEngine();
+    // checking the ids of atoms
+    auto& particles = engine_ptr->getParticlesForUpdate();
+    // getting xs, vs, fs, ms and rs
+    double* myXs = particles->getXData();
+    double* myVs = particles->getVData();
+    double* myFs = particles->getFData();
+    double* myMs = particles->getMData();
+    double* myRs = particles->getRData();
+    particles->getNmaxNlocal(nmax, nlocal);
+    // 
+    auto& expXs = expectedXsVec_[myId_];
+    auto& expVs = expectedVsVec_[myId_];
+    auto& expFs = expectedFsVec_[myId_];
+    auto& expRs = expectedRsVec_[myId_];
+    auto& expMs = expectedMsVec_[myId_];
+    // checking output
+    REQUIRE_THAT(myXs, Array3DMatcher(expXs.data(), expXs.size() / 3, 1e-6));
+    REQUIRE_THAT(myVs, Array3DMatcher(expVs.data(), expVs.size() / 3, 1e-6));
+    REQUIRE_THAT(myFs, Array3DMatcher(expFs.data(), expFs.size() / 3, 1e-6));
+    REQUIRE_THAT(myRs, Array1DMatcher(expRs.data(), expRs.size(), 1e-6));
+    REQUIRE_THAT(myMs, Array1DMatcher(expMs.data(), expMs.size(), 1e-6));
+    };
+
+
+
+auto checking_communicator = [&](
+    const int& myId_,
+    Engine* engine_,
+    std::vector<std::vector<double>> expectedXsVec_,
+    std::vector<std::vector<double>> expectedVsVec_,
+    std::vector<std::vector<double>> expectedFsVec_,
+    std::vector<std::vector<double>> expectedRsVec_,
+    std::vector<std::vector<double>> expectedMsVec_) {
+    // the number of particles
+    int nmax, nlocal;
+    // getting the particlesRef
+    auto& particlesRef = engine_->getParticlesForUpdate();
+    // getting xs, vs, fs, rs and ms
+    double* myXs = particlesRef->getXData();
+    double* myVs = particlesRef->getVData();
+    double* myFs = particlesRef->getFData();
+    double* myRs = particlesRef->getRData();
+    double* myMs = particlesRef->getMData();
+    // getting the expected values
+    auto& expXs = expectedXsVec_[myId_];
+    auto& expVs = expectedVsVec_[myId_];
+    auto& expFs = expectedFsVec_[myId_];
+    auto& expRs = expectedRsVec_[myId_];
+    auto& expMs = expectedMsVec_[myId_];
+    // getting number of particles 
+    particlesRef->getNmaxNlocal(nmax, nlocal);
+    // checking the results
+    REQUIRE_THAT(myXs, Array3DMatcher(expXs.data(), expXs.size() / 3, 1e-6));
+    REQUIRE_THAT(myVs, Array3DMatcher(expVs.data(), expVs.size() / 3, 1e-6));
+    REQUIRE_THAT(myFs, Array3DMatcher(expFs.data(), expFs.size() / 3, 1e-6));
+    REQUIRE_THAT(myRs, Array1DMatcher(expRs.data(), expRs.size(), 1e-6));
+    REQUIRE_THAT(myMs, Array1DMatcher(expMs.data(), expMs.size(), 1e-6));
+
+    };
+
+
 /// <summary>
-/// A text with the default value of the skin parameter
+/// The default value of the skin parameter
 /// </summary>
 
 TEST_CASE("Testing the communication class") {
@@ -362,74 +511,48 @@ TEST_CASE("Testing the communication class") {
     };
 
 
-    auto checking_communicator = [&](const int& myId, std::array<int, 3>& nranks) {
-        // creating the communicator object
-        // each communicator gets its id from the MPI_Comm_rank before creation
-        // in the real scenarios
-        std::unique_ptr<Communicator> communicator = std::make_unique<Communicator>(myId, nranks);
-        // box dimensions
-        array<double, 3> min = { -300.0,-300.0,-300.0 };
-        array<double, 3> max = { 300.0, 300.0, 300.0 };
-        // box
-        std::unique_ptr<Box> box = std::make_unique<Box>(min, max);
-        // particles
-        int nmax = 20;
-        int nlocal = 20;
-        // copies since we used the std::move in the mockedParticles class
-        std::vector<double> xCopy = x;
-        std::vector<double> vCopy = v;
-        std::vector<double> fCopy = f;
-        std::vector<double> rCopy = r;
-        std::vector<double> mCopy = m;
-        // creating the mockedParticles object
-        std::unique_ptr<Particles> mockedParticles =
-            std::make_unique<MockedParticles>(nmax, xCopy, vCopy, fCopy, rCopy, mCopy);
-        // putting everything into the engine
-        std::vector<std::unique_ptr<Ref>> inputs;
-        inputs.push_back(std::move(mockedParticles));
-        inputs.push_back(std::move(box));
-        inputs.push_back(std::move(communicator));
-        // creating the engine fixture
-        EngineFixture engineFixture(inputs);
-        // getting the engine_ptr
-        auto engine_ptr = engineFixture.returnEngine();
-        // checking the ids of atoms
-        auto& particles = engine_ptr->getParticlesForUpdate();
-        // getting xs, vs, fs, ms and rs
-        double* myXs = particles->getXData();
-        double* myVs = particles->getVData();
-        double* myFs = particles->getFData();
-        double* myMs = particles->getMData();
-        double* myRs = particles->getRData();
-        particles->getNmaxNlocal(nmax, nlocal);
-        // 
-        auto& expXs = expectedXsVec[myId];
-        auto& expVs = expectedVsVec[myId];
-        auto& expFs = expectedFsVec[myId];
-        auto& expRs = expectedRsVec[myId];
-        auto& expMs = expectedMsVec[myId];
-        // checking output
-        REQUIRE_THAT(myXs, Array3DMatcher(expXs.data(), expXs.size()/3, 1e-6));
-        REQUIRE_THAT(myVs, Array3DMatcher(expVs.data(), expVs.size()/3, 1e-6));
-        REQUIRE_THAT(myFs, Array3DMatcher(expFs.data(), expFs.size()/3, 1e-6));
-        REQUIRE_THAT(myRs, Array1DMatcher(expRs.data(), expRs.size(), 1e-6));
-        REQUIRE_THAT(myMs, Array1DMatcher(expMs.data(), expMs.size(), 1e-6));
-    };
-
     // the communicator configuration
     std::array<int, 3> nranks = { 2,2,1 };
     // first rank
     int id = 0;
-    checking_communicator(id, nranks);
+    build_engine_check_communicator(
+        id,nranks,
+        x,v,f,r,m,
+        expectedXsVec,
+        expectedVsVec,
+        expectedFsVec,
+        expectedRsVec,
+        expectedMsVec);
     // the second rank
     id = 1;
-    checking_communicator(id, nranks);
+    build_engine_check_communicator(
+        id, nranks,
+        x, v, f, r, m,
+        expectedXsVec,
+        expectedVsVec,
+        expectedFsVec,
+        expectedRsVec,
+        expectedMsVec);
     // the third rank
     id = 2;
-    checking_communicator(id, nranks);
+    build_engine_check_communicator(
+        id, nranks,
+        x, v, f, r, m,
+        expectedXsVec,
+        expectedVsVec,
+        expectedFsVec,
+        expectedRsVec,
+        expectedMsVec);
     // the fourth rank
     id = 3;
-    checking_communicator(id, nranks);
+    build_engine_check_communicator(
+        id, nranks,
+        x, v, f, r, m,
+        expectedXsVec,
+        expectedVsVec,
+        expectedFsVec,
+        expectedRsVec,
+        expectedMsVec);
 }
 
 /// <summary>
@@ -869,85 +992,54 @@ TEST_CASE("Testing updating the ghost atoms in the particles class") {
 
 
     int coreId = 0;
-    auto checking_communicator = [&](const int& myId, std::array<int, 3>& nranks) {
-        // creating the communicator object
-        // each communicator gets its id from the MPI_Comm_rank before creation
-        // in the real scenarios
-        std::unique_ptr<Communicator> communicator = std::make_unique<Communicator>(myId, nranks, skin);
-        // box dimensions
-        array<double, 3> min = { -300.0,-300.0,-300.0 };
-        array<double, 3> max = { 300.0, 300.0, 300.0 };
-        // box
-        std::unique_ptr<Box> box = std::make_unique<Box>(min, max);
-        // particles
-        int nmax = 20;
-        int nlocal = 20;
-        int nghosts = 0;
-        // copies since we used the std::move in the mockedParticles class
-        std::vector<double> xCopy = x;
-        std::vector<double> vCopy = v;
-        std::vector<double> fCopy = f;
-        std::vector<double> rCopy = r;
-        std::vector<double> mCopy = m;
-        // creating the mockedParticles object
-        std::unique_ptr<Particles> mockedParticles =
-            std::make_unique<MockedParticles>(nmax, xCopy, vCopy, fCopy, rCopy, mCopy);
-        // putting everything into the engine
-        std::vector<std::unique_ptr<Ref>> inputs;
-        inputs.push_back(std::move(mockedParticles));
-        inputs.push_back(std::move(box));
-        inputs.push_back(std::move(communicator));
-        // creating the engine fixture
-        EngineFixture engineFixture(inputs);
-        // getting the engine_ptr
-        auto engine_ptr = engineFixture.returnEngine();
-        // checking the ids of atoms
-        auto& particles = engine_ptr->getParticlesForUpdate();
-        // getting xs, vs, fs, ms and rs
-        double* myXs = particles->getXData();
-        double* myVs = particles->getVData();
-        double* myFs = particles->getFData();
-        double* myMs = particles->getMData();
-        double* myRs = particles->getRData();
-        particles->getNmaxNlocal(nmax, nlocal);
-        particles->getNGhosts(nghosts);
-        // checking the number of ghost atoms
-        REQUIRE(expectedNGhostVec[myId] == nghosts);
-        // 
-        auto& expXs = expectedXsVec[myId];
-        auto& expVs = expectedVsVec[myId];
-        auto& expFs = expectedFsVec[myId];
-        auto& expRs = expectedRsVec[myId];
-        auto& expMs = expectedMsVec[myId];
-        // checking the number of particles
-        REQUIRE(expectedNLocalVec[myId] == nlocal);
-        const int natoms = nlocal + nghosts;
-        for (int i = 0; i < 3 * natoms; i++) {
-            REQUIRE_THAT(expXs[i], Catch::Matchers::WithinAbs(myXs[i], 1e-6));
-            REQUIRE_THAT(expVs[i], Catch::Matchers::WithinAbs(myVs[i], 1e-6));
-            REQUIRE_THAT(expFs[i], Catch::Matchers::WithinAbs(myFs[i], 1e-6));
-        }
-        for (int i = 0; i < nlocal + nghosts; i++) {
-            REQUIRE_THAT(expRs[i], Catch::Matchers::WithinAbs(myRs[i], 1e-6));
-            REQUIRE_THAT(expMs[i], Catch::Matchers::WithinAbs(myMs[i], 1e-6));
-        }
 
-        };
 
     // the communicator configuration
     std::array<int, 3> nranks = { 2,2,1 };
     // first rank
     int id = 0;
-    checking_communicator(id, nranks);
+    build_engine_check_communicator(
+        id, nranks,
+        x, v, f, r, m,
+        expectedXsVec,
+        expectedVsVec,
+        expectedFsVec,
+        expectedRsVec,
+        expectedMsVec,
+        skin);
     // the second rank
     id = 1;
-    checking_communicator(id, nranks);
+    build_engine_check_communicator(
+        id, nranks,
+        x, v, f, r, m,
+        expectedXsVec,
+        expectedVsVec,
+        expectedFsVec,
+        expectedRsVec,
+        expectedMsVec,
+        skin);
     // the third rank
     id = 2;
-    checking_communicator(id, nranks);
+    build_engine_check_communicator(
+        id, nranks,
+        x, v, f, r, m,
+        expectedXsVec,
+        expectedVsVec,
+        expectedFsVec,
+        expectedRsVec,
+        expectedMsVec,
+        skin);
     // the fourth rank
     id = 3;
-    checking_communicator(id, nranks);
+    build_engine_check_communicator(
+        id, nranks,
+        x, v, f, r, m,
+        expectedXsVec,
+        expectedVsVec,
+        expectedFsVec,
+        expectedRsVec,
+        expectedMsVec,
+        skin);
 }
 
 
@@ -958,7 +1050,7 @@ TEST_CASE("Testing the forward communication") {
 
     // data 
     // number of ranks 
-    constexpr int nranks = 4;
+    std::array<int, 3> ranks = { 2,2,1 };
     // Particles
     std::vector<double> x = {
         -220.40, -180.10,   80.55,   // particle 0  owned by Q00 (-- interior) rank1
@@ -1597,37 +1689,6 @@ TEST_CASE("Testing the forward communication") {
 
 
 
-    // building the engine
-    auto build_engine = [&](const int& myId_, const int& nranks_) -> std::unique_ptr<Engine> {
-        // communicators
-        std::unique_ptr<Communicator> communicator = std::make_unique<Communicator>(myId_, nranks_, skin);
-        // box dimensions
-        array<double, 3> min = { -300.0,-300.0,-300.0 };
-        array<double, 3> max = { 300.0, 300.0, 300.0 };
-        // box
-        std::unique_ptr<Box> box = std::make_unique<Box>(min, max);
-        // copy since we used the std::move in the mockedParticles class
-        std::vector<double> xCopy = x, vCopy = v, fCopy = f, rCopy = r, mCopy = m;
-        // creating the mockedParticles object
-        int nmax = 20;
-        int nlocal = 20;
-        int nghosts = 0;
-        std::unique_ptr<Particles> mockedParticles =
-            std::make_unique<MockedParticles>(nmax, xCopy, vCopy, fCopy, rCopy, mCopy);
-        // putting everything into the engine
-        std::vector<std::unique_ptr<Ref>> inputs;
-        inputs.push_back(std::move(mockedParticles));
-        inputs.push_back(std::move(box));
-        inputs.push_back(std::move(communicator));
-        // creating the engine fixture
-        EngineFixture engineFixture1(inputs);
-        // getting the engine_ptr
-        auto engine_ptr = engineFixture1.returnEngine();
-        // returning the engine
-        return engine_ptr;
-
-        };
-
     // forward communication
     // rank 1 
     int myId1 = 0, myId2 = 1, myId3 = 2, myId4 = 3;
@@ -1642,10 +1703,10 @@ TEST_CASE("Testing the forward communication") {
     void* tranDataRaw43 = nullptr;
 
 
-    auto engine_ptr1 = build_engine(myId1, nranks);
-    auto engine_ptr2 = build_engine(myId2, nranks);
-    auto engine_ptr3 = build_engine(myId3, nranks);
-    auto engine_ptr4 = build_engine(myId4, nranks);
+    auto engine_ptr1 = set_particles_build_engine(myId1, ranks, x, v, f, r, m, skin);
+    auto engine_ptr2 = set_particles_build_engine(myId2, ranks, x, v, f, r, m, skin);
+    auto engine_ptr3 = set_particles_build_engine(myId3, ranks, x, v, f, r, m, skin);
+    auto engine_ptr4 = set_particles_build_engine(myId4, ranks, x, v, f, r, m, skin);
     // returning the communicators
     auto& communicator1Ref = engine_ptr1->getCommunicator();
     auto& communicator2Ref = engine_ptr2->getCommunicator();
@@ -1681,13 +1742,12 @@ TEST_CASE("Testing the forward communication") {
     // data checker struct
     struct {
         std::unique_ptr<Engine>& engine_ptr;
-        int expectedNlocal, expectedNghost;
         std::vector<double> expectedXs, expectedVs, expectedFs, expectedRs, expectedMs;
-    } dataCheckerArray[4] = {
-        {engine_ptr1,expectedNlocal1,expectedNghost1,expectedXs1,expectedVs1,expectedFs1,expectedRs1,expectedMs1},
-        {engine_ptr2,expectedNlocal2,expectedNghost2,expectedXs2,expectedVs2,expectedFs2,expectedRs2,expectedMs2},
-        {engine_ptr3,expectedNlocal3,expectedNghost3,expectedXs3,expectedVs3,expectedFs3,expectedRs3,expectedMs3},
-        {engine_ptr4,expectedNlocal4,expectedNghost4,expectedXs4,expectedVs4,expectedFs4,expectedRs4,expectedMs4}
+    } dataCheckerArray[] = {
+        {engine_ptr1,expectedXs1,expectedVs1,expectedFs1,expectedRs1,expectedMs1},
+        {engine_ptr2,expectedXs2,expectedVs2,expectedFs2,expectedRs2,expectedMs2},
+        {engine_ptr3,expectedXs3,expectedVs3,expectedFs3,expectedRs3,expectedMs3},
+        {engine_ptr4,expectedXs4,expectedVs4,expectedFs4,expectedRs4,expectedMs4}
 
     };
 
@@ -1701,27 +1761,12 @@ TEST_CASE("Testing the forward communication") {
         auto myFs = particlesRef->getFData();
         auto myRs = particlesRef->getRData();
         auto myMs = particlesRef->getMData();
-        // natoms, nlocal, nghosts
-        int natoms, nlocal, nghosts;
-        int nmax;
-        particlesRef->getNmaxNlocal(nmax, nlocal);
-        particlesRef->getNGhosts(nghosts);
-        // checking the total number of particles
-        REQUIRE(nlocal == dataCheck.expectedNlocal);
-        // checking the number of ghost atoms
-        REQUIRE(nghosts == dataCheck.expectedNghost);
         // 
-        natoms = nlocal + nghosts;
-        // checking the data
-        for (int i = 0; i < 3 * natoms; i++) {
-            REQUIRE_THAT(dataCheck.expectedXs[i], Catch::Matchers::WithinAbs(myXs[i], 1e-6));
-            REQUIRE_THAT(dataCheck.expectedVs[i], Catch::Matchers::WithinAbs(myVs[i], 1e-6));
-            REQUIRE_THAT(dataCheck.expectedFs[i], Catch::Matchers::WithinAbs(myFs[i], 1e-6));
-        }
-        for (int i = 0; i < natoms; i++) {
-            REQUIRE_THAT(dataCheck.expectedMs[i], Catch::Matchers::WithinAbs(myMs[i], 1e-6));
-            REQUIRE_THAT(dataCheck.expectedRs[i], Catch::Matchers::WithinAbs(myRs[i], 1e-6));
-        }
+        REQUIRE_THAT(myXs, Array3DMatcher(dataCheck.expectedXs.data(), dataCheck.expectedXs.size()/3, 1e-6));
+        REQUIRE_THAT(myVs, Array3DMatcher(dataCheck.expectedVs.data(), dataCheck.expectedVs.size()/3, 1e-6));
+        REQUIRE_THAT(myFs, Array3DMatcher(dataCheck.expectedFs.data(), dataCheck.expectedFs.size()/3, 1e-6));
+        REQUIRE_THAT(myRs, Array1DMatcher(dataCheck.expectedRs.data(), dataCheck.expectedRs.size(), 1e-6));
+        REQUIRE_THAT(myMs, Array1DMatcher(dataCheck.expectedMs.data(), dataCheck.expectedMs.size(), 1e-6));
     }
 
 }
@@ -1782,7 +1827,7 @@ TEST_CASE("Testing the destination ranks for each rank")
     {
         // building the engine
         std::vector<double> x = {}, v = {}, f = {}, m = {}, r = {};
-        auto engine_ptr = return_engine_ptr(test.myId, test.ranks, x, v, f, m, r);
+        auto engine_ptr = build_engine_set_particles(test.myId, test.ranks, x, v, f, m, r);
         // returning the communicator ref
         auto& communicatorRef = engine_ptr->getCommunicator();
         // checking the reference
@@ -1924,7 +1969,7 @@ TEST_CASE("Testing the message for sending an out of range particle from a rank"
 
     // creating the engine_ptr
     std::vector<double> x0 = {}, v0 = {}, f0 = {}, m0 = {}, r0 = {};
-    auto engine_ptr = return_engine_ptr(myId, ranks, x0, v0, f0, r0, m0);
+    auto engine_ptr = build_engine_set_particles(myId, ranks, x0, v0, f0, r0, m0);
 
     /* After the engine_ptr is created in the engineFixture
      * the init function is called form every Ref object
@@ -2216,11 +2261,11 @@ TEST_CASE("Testing receiving the particles from another processor")
     // engine for the rank2
     int id2 = 1;
     int nmax2 = static_cast<int>(x2.size()) / 3;
-    auto engine_ptr2 = return_engine_ptr(id2, nranks, x2, v2, f2, r2, m2);
+    auto engine_ptr2 = build_engine_set_particles(id2, nranks, x2, v2, f2, r2, m2);
     // engine for the rank3
     int id3 = 2;
     int nmax3 = static_cast<int>(x3.size()) / 3;
-    auto engine_ptr3 = return_engine_ptr(id3, nranks, x3, v3, f3, r3, m3);
+    auto engine_ptr3 = build_engine_set_particles(id3, nranks, x3, v3, f3, r3, m3);
 
     // communicator for the engine2
     auto& communicator2Ref = engine_ptr2->getCommunicator();
@@ -2663,10 +2708,10 @@ TEST_CASE("Testing the movement of particles between processors without skin")
     // ids 
     int ids[4] = { 0,1,2,3 };
 
-    auto engine_ptr1 = return_engine_ptr(ids[0], ranks, newX1, newV1, newF1, newR1, newM1);
-    auto engine_ptr2 = return_engine_ptr(ids[1], ranks, newX2, newV2, newF2, newR2, newM2);
-    auto engine_ptr3 = return_engine_ptr(ids[2], ranks, newX3, newV3, newF3, newR3, newM3);
-    auto engine_ptr4 = return_engine_ptr(ids[3], ranks, newX4, newV4, newF4, newR4, newM4);
+    auto engine_ptr1 = build_engine_set_particles(ids[0], ranks, newX1, newV1, newF1, newR1, newM1);
+    auto engine_ptr2 = build_engine_set_particles(ids[1], ranks, newX2, newV2, newF2, newR2, newM2);
+    auto engine_ptr3 = build_engine_set_particles(ids[2], ranks, newX3, newV3, newF3, newR3, newM3);
+    auto engine_ptr4 = build_engine_set_particles(ids[3], ranks, newX4, newV4, newF4, newR4, newM4);
 
     Engine* engineArray[] = {
         engine_ptr1.get(),
@@ -2747,50 +2792,48 @@ TEST_CASE("Testing the movement of particles between processors without skin")
     } while (nDestsTotal > 0 && numberOfAttempts < maxAttempts);
 
 
-    auto checking_communicator = [&](const int& myId_, Engine* engine_) {
-        // the number of particles
-        int nmax, nlocal;
-        // getting the particlesRef
-        auto& particlesRef = engine_->getParticlesForUpdate();
-        // getting xs, vs, fs, rs and ms
-        double* myXs = particlesRef->getXData();
-        double* myVs = particlesRef->getVData();
-        double* myFs = particlesRef->getFData();
-        double* myRs = particlesRef->getRData();
-        double* myMs = particlesRef->getMData();
-        // getting the expected values
-        auto& expXs = expectedXsVec[myId_];
-        auto& expVs = expectedVsVec[myId_];
-        auto& expFs = expectedFsVec[myId_];
-        auto& expRs = expectedRsVec[myId_];
-        auto& expMs = expectedMsVec[myId_];
-        // getting number of particles 
-        particlesRef->getNmaxNlocal(nmax, nlocal);
-        // checking the results
-        REQUIRE_THAT(myXs, Array3DMatcher(expXs.data(), expXs.size() / 3, 1e-6));
-        REQUIRE_THAT(myVs, Array3DMatcher(expVs.data(), expVs.size() / 3, 1e-6));
-        REQUIRE_THAT(myFs, Array3DMatcher(expFs.data(), expFs.size() / 3, 1e-6));
-        REQUIRE_THAT(myRs, Array1DMatcher(expRs.data(), expRs.size(), 1e-6));
-        REQUIRE_THAT(myMs, Array1DMatcher(expMs.data(), expMs.size(), 1e-6));
 
-        };
 
     // the rank 1
     int id = 0;
     Engine* engine = engineArray[id];
-    checking_communicator(id, engine);
+    checking_communicator(
+        id, engine,
+        expectedXsVec,
+        expectedVsVec,
+        expectedFsVec,
+        expectedRsVec,
+        expectedMsVec);
     // rank 2
     id = 1;
     engine = engineArray[id];
-    checking_communicator(id, engine);
+    checking_communicator(
+        id, engine,
+        expectedXsVec,
+        expectedVsVec,
+        expectedFsVec,
+        expectedRsVec,
+        expectedMsVec);
     // rank 3
     id = 2;
     engine = engineArray[id];
-    checking_communicator(id, engine);
+    checking_communicator(
+        id, engine,
+        expectedXsVec,
+        expectedVsVec,
+        expectedFsVec,
+        expectedRsVec,
+        expectedMsVec);
     // rank 4
     id = 3;
     engine = engineArray[id];
-    checking_communicator(id, engine);
+    checking_communicator(
+        id, engine,
+        expectedXsVec,
+        expectedVsVec,
+        expectedFsVec,
+        expectedRsVec,
+        expectedMsVec);
 }
 
 
