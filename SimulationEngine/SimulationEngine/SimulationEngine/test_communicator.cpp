@@ -1786,6 +1786,7 @@ TEST_CASE("Testing the destination ranks for each rank")
     std::array<int, 3> ranks7 = { 3,4,5 };
     std::array<int, 3> ranks8 = { 3,4,5 };
     std::array<int, 3> ranks9 = { 3,4,5 };
+    std::array<int, 3> ranks10 = { 3,3,1 };
 
     int myId1 = 2;
     int myId2 = 4;
@@ -1796,6 +1797,7 @@ TEST_CASE("Testing the destination ranks for each rank")
     int myId7 = 16;
     int myId8 = 30;
     int myId9 = 28;
+    int myId10 = 1;
 
     std::array<int, 6> expected1 = { 1,-1,-1,5,-1,14 };
     std::array<int, 6> expected2 = { -1,5,2,6,-1,12 };
@@ -1806,6 +1808,7 @@ TEST_CASE("Testing the destination ranks for each rank")
     std::array<int, 6> expected7 = { 15,17,13,19,4,28 };
     std::array<int, 6> expected8 = { -1,31,27,33,18,42 };
     std::array<int, 6> expected9 = { 27,29,25,31,16,40 };
+    std::array<int, 6> expected10 = { 0,2,-1,4,-1,-1 };
 
     struct {
         std::array<int, 3> ranks;
@@ -1820,7 +1823,8 @@ TEST_CASE("Testing the destination ranks for each rank")
         {ranks6, myId6, expected6},
         {ranks7, myId7, expected7},
         {ranks8, myId8, expected8},
-        {ranks9, myId9, expected9}
+        {ranks9, myId9, expected9},
+        {ranks10, myId10, expected10}
     };
 
     for (const auto& test : testStruct)
@@ -2818,7 +2822,6 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
 }
 
 
-
 TEST_CASE("Testing the movement of particles between processors without skin (3X3X1)")
 {
     std::cout << "Testing the movement of particles between processors without skin (3X3X1)" << std::endl;
@@ -2828,165 +2831,171 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
     // moving particles
     std::vector<double> newX1 =
     {
-        -220.0, -220.0,   40.0,   // stays in Q00
-        -150.0, -180.0,  -60.0,   // stays in Q00
-         -80.0, -210.0,   15.0,   // -> Q10 (x high)
-        -170.0,  -80.0,   90.0,   // -> Q01 (y high)
+        -220.0, -220.0,   40.0,   // particle 1 stays in Q00    rank0
+        -150.0, -180.0,  -60.0,   // particle 2 stays in Q00    rank0
+         -80.0, -210.0,   15.0,   // particle 3 -> Q10 (x high) rank1
+        -170.0,  -80.0,   90.0,   // particle 4 -> Q01 (y high) rank3
     };
 
 
     std::vector<double> newX2 =
     {
-         -20.0, -220.0,   35.0,   // stays in Q10
-          60.0, -150.0,  -80.0,   // stays in Q10
-        -130.0, -170.0,   10.0,   // -> Q00 (x low)
-         130.0, -190.0,  -25.0,   // -> Q20 (x high)
-          40.0,  -70.0,   55.0,   // -> Q11 (y high)
+         -20.0, -220.0,   35.0,   // particle 5 stays in Q10    rank1
+          60.0, -150.0,  -80.0,   // particle 6 stays in Q10    rank1
+        -130.0, -170.0,   10.0,   // particle 7 -> Q00 (x low)  rank0
+         130.0, -190.0,  -25.0,   // particle 8 -> Q20 (x high) rank2
+          40.0,  -70.0,   55.0,   // particle 9 -> Q11 (y high) rank4
     };
 
 
     std::vector<double> newX3 =
     {
-         180.0, -220.0,   10.0,   // stays in Q20
-         240.0, -120.0,  -95.0,   // stays in Q20
-          80.0, -160.0,   70.0,   // -> Q10 (x low)
-         170.0,  -90.0,  -40.0,   // -> Q21 (y high)
+         180.0, -220.0,   10.0,   // particle 10 stays in Q20    rank2
+         240.0, -120.0,  -95.0,   // particle 11 stays in Q20    rank2
+          80.0, -160.0,   70.0,   // particle 12 -> Q10 (x low)  rank1
+         170.0,  -90.0,  -40.0,   // particle 13 -> Q21 (y high) rank5
     };
 
     std::vector<double> newX4 =
     {
-        -240.0,  -20.0,   50.0,   // stays in Q01
-        -160.0,   60.0,  -20.0,   // stays in Q01
-         -90.0,   30.0,   15.0,   // -> Q11 (x high)
-        -180.0, -140.0,   80.0,   // -> Q00 (y low)
-        -210.0,  140.0,  -35.0,   // -> Q02 (y high)
+        -240.0,  -20.0,   50.0,   // particle 14 stays in Q01    rank3
+        -160.0,   60.0,  -20.0,   // particle 15 stays in Q01    rank3
+         -90.0,   30.0,   15.0,   // particle 16 -> Q11 (x high) rank4
+        -180.0, -140.0,   80.0,   // particle 17 -> Q00 (y low)  rank0
+        -210.0,  140.0,  -35.0,   // particle 18 -> Q02 (y high) rank6
     };
 
     std::vector<double> newX5 =
     {
-         -40.0,  -30.0,   20.0,   // stays in Q11
-          70.0,   80.0,  -60.0,   // stays in Q11
-        -140.0,   10.0,   75.0,   // -> Q01 (x low)
-         140.0,  -20.0,  -10.0,   // -> Q21 (x high)
-          10.0, -130.0,   45.0,   // -> Q10 (y low)
-         -70.0,  160.0,   90.0,   // -> Q12 (y high)
+         -40.0,  -30.0,   20.0,   // particle 19 stays in Q11    rank4
+          70.0,   80.0,  -60.0,   // particle 20 stays in Q11    rank4
+        -140.0,   10.0,   75.0,   // particle 21 -> Q01 (x low)  rank3
+         140.0,  -20.0,  -10.0,   // particle 22 -> Q21 (x high) rank5
+          10.0, -130.0,   45.0,   // particle 23 -> Q10 (y low)  rank1
+         -70.0,  160.0,   90.0,   // particle 24 -> Q12 (y high) rank7
     };
 
     std::vector<double> newX6 =
     {
-         160.0,  -40.0,   25.0,   // stays in Q21
-         250.0,   70.0,  -85.0,   // stays in Q21
-          60.0,   20.0,   35.0,   // -> Q11 (x low)
-         180.0, -170.0,  -15.0,   // -> Q20 (y low)
-         220.0,  150.0,   55.0,   // -> Q22 (y high)
+         160.0,  -40.0,   25.0,   // particle 25 stays in Q21    rank5
+         250.0,   70.0,  -85.0,   // particle 26 stays in Q21    rank5
+          60.0,   20.0,   35.0,   // particle 27 -> Q11 (x low)  rank4
+         180.0, -170.0,  -15.0,   // particle 28 -> Q20 (y low)  rank2
+         220.0,  150.0,   55.0,   // particle 29 -> Q22 (y high) rank8
     };
 
     std::vector<double> newX7 =
     {
-        -260.0,  180.0,   40.0,   // stays in Q02
-        -140.0,  260.0,  -70.0,   // stays in Q02
-         -80.0,  210.0,   15.0,   // -> Q12 (x high)
-        -190.0,   80.0,   95.0,   // -> Q01 (y low)
+        -260.0,  180.0,   40.0,   // particle 30 stays in Q02    rank6
+        -140.0,  260.0,  -70.0,   // particle 31 stays in Q02    rank6
+         -80.0,  210.0,   15.0,   // particle 32 -> Q12 (x high) rank7
+        -190.0,   80.0,   95.0,   // particle 33 -> Q01 (y low)  rank3
     };
 
     std::vector<double> newX8 =
     {
-         -20.0,  160.0,   35.0,   // stays in Q12
-          80.0,  220.0,  -55.0,   // stays in Q12
-        -130.0,  150.0,   60.0,   // -> Q02 (x low)
-         140.0,  180.0,  -20.0,   // -> Q22 (x high)
-          30.0,   70.0,   75.0,   // -> Q11 (y low)
+         -20.0,  160.0,   35.0,   // particle 34 stays in Q12    rank7
+          80.0,  220.0,  -55.0,   // particle 35 stays in Q12    rank7
+        -130.0,  150.0,   60.0,   // particle 36 -> Q02 (x low)  rank6
+         140.0,  180.0,  -20.0,   // particle 37 -> Q22 (x high) rank8
+          30.0,   70.0,   75.0,   // particle 38 -> Q11 (y low)  rank4
     };
 
     std::vector<double> newX9 =
     {
-         180.0,  160.0,   10.0,   // stays in Q22
-         260.0,  240.0,  -90.0,   // stays in Q22
-          90.0,  170.0,   45.0,   // -> Q12 (x low)
-         220.0,   90.0,  -35.0,   // -> Q21 (y low)
+         180.0,  160.0,   10.0,   // particle 39 stays in Q22   rank8
+         260.0,  240.0,  -90.0,   // particle 40 stays in Q22   rank8
+          90.0,  170.0,   45.0,   // particle 41 -> Q12 (x low) rank7
+         220.0,   90.0,  -35.0,   // particle 42 -> Q21 (y low) rank5
     };
 
     // expected values
 
-    // Q00
+    // Q00 rank0
     std::vector<double> expectedX1 =
     {
-        -220.0, -220.0,   40.0,
-        -150.0, -180.0,  -60.0
+        -220.0, -220.0,   40.0,   // particle 1 stays in Q00    rank0
+        -150.0, -180.0,  -60.0,   // particle 2 stays in Q00    rank0
+        -130.0, -170.0,   10.0,   // particle 7 -> Q00 (x low)  rank0
+        -180.0, -140.0,   80.0    // particle 17 -> Q00 (y low) rank0
     };
 
-    // Q10
+    // Q10 rank1
     std::vector<double> expectedX2 =
     {
-        -80.0, -210.0,   15.0,
-        -20.0, -220.0,   35.0,
-         60.0, -150.0,  -80.0,
-         80.0, -160.0,   70.0
+        -80.0, -210.0,   15.0,   // particle 3 -> Q10 (x high) rank1
+        -20.0, -220.0,   35.0,   // particle 5 stays in Q10    rank1
+         60.0, -150.0,  -80.0,   // particle 6 stays in Q10    rank1
+         80.0, -160.0,   70.0,   // particle 12 -> Q10 (x low) rank1
+         10.0, -130.0,   45.0    // particle 23 -> Q10 (y low) rank1
     };
 
-    // Q20
+    // Q20 rank2
     std::vector<double> expectedX3 =
     {
-        130.0, -190.0,  -25.0,
-        180.0, -220.0,   10.0,
-        240.0, -120.0,  -95.0
+        130.0, -190.0,  -25.0,   // particle 8 -> Q20 (x high) rank2
+        180.0, -220.0,   10.0,   // particle 10 stays in Q20   rank2
+        240.0, -120.0,  -95.0,   // particle 11 stays in Q20   rank2
+        180.0, -170.0,  -15.0    // particle 28 -> Q20 (y low) rank2
     };
 
-    // Q01
+    // Q01 rank3
     std::vector<double> expectedX4 =
     {
-        -170.0,  -80.0,   90.0,
-        -240.0,  -20.0,   50.0,
-        -160.0,   60.0,  -20.0,
-        -140.0,   10.0,   75.0
+        -170.0,  -80.0,   90.0,   // particle 4 -> Q01 (y high) rank3
+        -240.0,  -20.0,   50.0,   // particle 14 stays in Q01   rank3
+        -160.0,   60.0,  -20.0,   // particle 15 stays in Q01   rank3
+        -140.0,   10.0,   75.0,   // particle 21 -> Q01 (x low) rank3
+        -190.0,   80.0,   95.0    // particle 33 -> Q01 (y low) rank3
     };
 
-    // Q11
+    // Q11 rank4
     std::vector<double> expectedX5 =
     {
-        -90.0,   30.0,   15.0,
-        -40.0,  -30.0,   20.0,
-         70.0,   80.0,  -60.0,
-         10.0,  -70.0,   45.0,
-         60.0,   20.0,   35.0,
-         30.0,   70.0,   75.0
+         40.0,  -70.0,   55.0,   // particle 9 -> Q11 (y high)  rank4
+        -90.0,   30.0,   15.0,   // particle 16 -> Q11 (x high) rank4
+        -40.0,  -30.0,   20.0,   // particle 19 stays in Q11    rank4
+         70.0,   80.0,  -60.0,   // particle 20 stays in Q11    rank4
+         60.0,   20.0,   35.0,   // particle 27 -> Q11 (x low)  rank4
+         30.0,   70.0,   75.0    // particle 38 -> Q11 (y low)  rank4
     };
 
-    // Q21
+    // Q21 rank5
     std::vector<double> expectedX6 =
     {
-        170.0,  -90.0,  -40.0,
-        140.0,  -20.0,  -10.0,
-        160.0,  -40.0,   25.0,
-        250.0,   70.0,  -85.0,
-        220.0,   90.0,  -35.0
+        170.0,  -90.0,  -40.0,   // particle 13 -> Q21 (y high) rank5
+        140.0,  -20.0,  -10.0,   // particle 22 -> Q21 (x high) rank5
+        160.0,  -40.0,   25.0,   // particle 25 stays in Q21    rank5
+        250.0,   70.0,  -85.0,   // particle 26 stays in Q21    rank5
+        220.0,   90.0,  -35.0    // particle 42 -> Q21 (y low)  rank5
     };
 
-    // Q02
+    // Q02 rank6
     std::vector<double> expectedX7 =
     {
-        -210.0, 140.0,  -35.0,
-        -260.0, 180.0,   40.0,
-        -140.0, 260.0,  -70.0,
-        -130.0, 150.0,   60.0
+        -210.0,  140.0,  -35.0,   // particle 18 -> Q02 (y high) rank6
+        -260.0,  180.0,   40.0,   // particle 30 stays in Q02    rank6
+        -140.0,  260.0,  -70.0,   // particle 31 stays in Q02    rank6
+        -130.0,  150.0,   60.0,   // particle 36 -> Q02 (x low)  rank6
     };
 
-    // Q12
+    // Q12 rank7
     std::vector<double> expectedX8 =
     {
-        -80.0, 210.0,   15.0,
-        -20.0, 160.0,   35.0,
-         80.0, 220.0,  -55.0,
-         90.0, 170.0,   45.0
+        -70.0,  160.0,   90.0,   // particle 24 -> Q12 (y high) rank7
+        -80.0,  210.0,   15.0,   // particle 32 -> Q12 (x high) rank7
+        -20.0,  160.0,   35.0,   // particle 34 stays in Q12    rank7
+         80.0,  220.0,  -55.0,   // particle 35 stays in Q12    rank7
+         90.0,  170.0,   45.0    // particle 41 -> Q12 (x low) rank7
     };
 
-    // Q22
+    // Q22 rank8
     std::vector<double> expectedX9 =
-    {
-        220.0, 150.0,   55.0,
-        140.0, 180.0,  -20.0,
-        180.0, 160.0,   10.0,
-        260.0, 240.0,  -90.0
+    { 
+        220.0,  150.0,   55.0,   // particle 29 -> Q22 (y high) rank8
+        140.0,  180.0,  -20.0,   // particle 37 -> Q22 (x high) rank8
+        180.0,  160.0,   10.0,   // particle 39 stays in Q22   rank8
+        260.0,  240.0,  -90.0,   // particle 40 stays in Q22   rank8
     };
 
 
@@ -3053,19 +3062,29 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
 
 
     std::vector<std::vector<double>> expectedXsVec = {
-        expectedX1, expectedX2, expectedX3, expectedX4
+        expectedX1, expectedX2, expectedX3, expectedX4,
+        expectedX5, expectedX6, expectedX7, expectedX8,
+        expectedX9
     };
     std::vector<std::vector<double>> expectedVsVec = {
-        expectedV1, expectedV2, expectedV3, expectedV4
+        expectedV1, expectedV2, expectedV3, expectedV4,
+        expectedV5, expectedV6, expectedV7, expectedV8,
+        expectedV9
     };
     std::vector<std::vector<double>> expectedFsVec = {
-        expectedF1, expectedF2, expectedF3, expectedF4
+        expectedF1, expectedF2, expectedF3, expectedF4,
+        expectedF5, expectedF6, expectedF7, expectedF8,
+        expectedF9
     };
     std::vector<std::vector<double>> expectedRsVec = {
-        expectedR1, expectedR2, expectedR3, expectedR4
+        expectedR1, expectedR2, expectedR3, expectedR4,
+        expectedR5, expectedR6, expectedR7, expectedR8,
+        expectedR9
     };
     std::vector<std::vector<double>> expectedMsVec = {
-        expectedM1, expectedM2, expectedM3, expectedM4
+        expectedM1, expectedM2, expectedM3, expectedM4,
+        expectedM5, expectedM6, expectedM7, expectedM8,
+        expectedM9
     };
 
 
@@ -3082,13 +3101,15 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
     for (int i = 0; i < nranks; i++)
         ids.push_back(i);
 
+
+
     // Engine vector
     std::vector<std::unique_ptr<Engine>> engineArray;
 
     // creating engine_ptrs
     for (int i = 0; i < nranks; i++) {
         auto engine_ptr = build_engine_set_particles(
-            ids[0], ranks, newXVec[i], newVVec[i], newFVec[i], newRVec[i], newMVec[i]);
+            ids[i], ranks, newXVec[i], newVVec[i], newFVec[i], newRVec[i], newMVec[i]);
         engineArray.push_back(std::move(engine_ptr));
     }
 
@@ -3100,12 +3121,11 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
         communicatorArray.push_back(communicatorRef.get());
    }
 
-    std::vector<std::array<int, 6>> exchangeDestArray(9, std::array<int, 6>{});
+    std::vector<std::array<int, 6>> exchangeDestArray(nranks, std::array<int, 6>{});
 
 
 
     std::vector<double>* messagesArray[9];
-
 
     // number of destinations
     int nDestsTotal = 0;
@@ -3129,11 +3149,11 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
         numberOfAttempts++;
 
         for (int i = 0; i < nranks; i++) {
-
             exchangeDestArray[i] = communicatorArray[i]->returnExchangeDests();
-            std::cout << "Dall " << i << std::endl; 
+   
             // an array of vector<double> is returned for each communicatoriRef
             messagesArray[i] = communicatorArray[i]->sendExchangeParticles();
+
         }
 
         // getting the nDests values
@@ -3159,9 +3179,7 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
     } while (nDestsTotal > 0 && numberOfAttempts < maxAttempts);
 
 
-
-
-    // the rank 1
+    // ranks
     for (int i = 0; i < nranks; i++) {
         int id = i;
         Engine* engine = engineArray[id].get();

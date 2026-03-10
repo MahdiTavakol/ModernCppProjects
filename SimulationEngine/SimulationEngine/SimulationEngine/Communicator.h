@@ -28,6 +28,10 @@ public:
 	std::vector<double>* sendExchangeParticles();
 	// receving the exchanged particle data
 	void recvExchangeParticles(std::vector<double>& messages);
+	// getting min max
+	void getMinMax(std::array<double, 3>& min_, std::array<double, 3>& max_) {
+		min_ = myMin; max_ = myMax;
+	}
 
 	
 protected:
