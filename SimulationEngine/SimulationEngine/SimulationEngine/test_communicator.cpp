@@ -3194,6 +3194,7 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
     }
 }
 
+//TEST_CASE("Testing the movement of particles between processors without skin (3X3X3)", "[.][ignored for now]")
 TEST_CASE("Testing the movement of particles between processors without skin (3X3X3)")
 {
     std::cout << "Testing the movement of particles between processors without skin (3X3X3)" << std::endl;
@@ -3251,6 +3252,11 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
           60.0,   20.0,   35.0,   // particle 19 -> (y low)  rank13
           18.0,  -17.0,  -15.0,   // particle 20 -> (y low)  rank13
     };
+    
+    // rank17
+    std::vector<double> newX18 = {
+        -30.0, 95.0, 45.0 // rank 13
+    };
 
     // rank22
     std::vector<double> newX23 =
@@ -3266,8 +3272,8 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
     // rank4
     std::vector<double> expectedX5 =
     {
-         -80.0,  21.0,    15.0,   // particle 23 -> (z low) rank13
-         -19.0,  80.0,    95.0,   // particle 24 -> (z low) rank13
+         -20.0,  -70.0, -235.0,   // particle 1 stays in rank4
+          60.0,  -30.0, -180.0,   // particle 2 stays in rank4
     };
 
     // rank10
@@ -3299,7 +3305,8 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
          60.0,  20.0,  35.0,  // particle 19 -> (y low)  rank13
          18.0, -17.0, -15.0,  // particle 20 -> (y low)  rank13
         -80.0,  21.0,  15.0,  // particle 23 -> (z low) rank13
-        -19.0,  80.0,  95.0   // particle 24 -> (z low) rank13
+        -19.0,  80.0,  95.0,   // particle 24 -> (z low) rank13
+        -30.0,  95.0,  45.0  
     };
 
     // rank14
@@ -3315,6 +3322,8 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
          -40.0,  160.0,   25.0,   // particle 17 stays in rank17
           70.0,  250.0,  -85.0,   // particle 18 stays in rank17
     };
+
+    std::vector<double> expectedX18 = {};
 
     // rank22
     std::vector<double> expectedX23 =
@@ -3336,6 +3345,8 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
     std::vector<double> newM15(newX15.size() / 3, 0.0), newR15(newX15.size() / 3, 0.0);
     std::vector<double> newV17(newX17.size(), 0.0), newF17(newX17.size(), 0.0);
     std::vector<double> newM17(newX17.size() / 3, 0.0), newR17(newX17.size() / 3, 0.0);
+    std::vector<double> newV18(newX18.size(), 0.0), newF18(newX18.size(), 0.0);
+    std::vector<double> newM18(newX18.size() / 3, 0.0), newR18(newX18.size() / 3, 0.0);
     std::vector<double> newV23(newX23.size(), 0.0), newF23(newX23.size(), 0.0);
     std::vector<double> newM23(newX23.size() / 3, 0.0), newR23(newX23.size() / 3, 0.0);
 
@@ -3351,6 +3362,8 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
     std::vector<double> expectedM15(newX15.size() / 3, 0.0), expectedR15(newX15.size() / 3, 0.0);
     std::vector<double> expectedV17(newX17.size(), 0.0), expectedF17(newX17.size(), 0.0);
     std::vector<double> expectedM17(newX17.size() / 3, 0.0), expectedR17(newX17.size() / 3, 0.0);
+    std::vector<double> expectedV18(newX18.size(), 0.0), expectedF18(newX18.size(), 0.0);
+    std::vector<double> expectedM18(newX18.size() / 3, 0.0), expectedR18(newX18.size() / 3, 0.0);
     std::vector<double> expectedV23(newX23.size(), 0.0), expectedF23(newX23.size(), 0.0);
     std::vector<double> expectedM23(newX23.size() / 3, 0.0), expectedR23(newX23.size() / 3, 0.0);
 
@@ -3360,7 +3373,7 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
         {}, {}, {}, {}, newX5,
         {}, {}, {}, {}, {},
         newX11, {}, newX13, newX14, newX15, 
-        {}, newX17, {}, {}, {},
+        {}, newX17, newX18, {}, {},
         {}, {}, newX23, {}, {},
         {}, {}
     };
@@ -3369,7 +3382,7 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
         {}, {}, {}, {}, newV5,
         {}, {}, {}, {}, {},
         newV11, {}, newV13, newV14, newV15,
-        {}, newV17, {}, {}, {},
+        {}, newV17, newV18, {}, {},
         {}, {}, newV23, {}, {},
         {}, {}
     };
@@ -3378,7 +3391,7 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
         {}, {}, {}, {}, newF5,
         {}, {}, {}, {}, {},
         newF11, {}, newF13, newF14, newF15,
-        {}, newF17, {}, {}, {},
+        {}, newF17, newF18, {}, {},
         {}, {}, newF23, {}, {},
         {}, {}
     };
@@ -3387,7 +3400,7 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
         {}, {}, {}, {}, newR5,
         {}, {}, {}, {}, {},
         newR11, {}, newR13, newR14, newR15,
-        {}, newR17, {}, {}, {},
+        {}, newR17, newR18, {}, {},
         {}, {}, newR23, {}, {},
         {}, {}
     };
@@ -3396,7 +3409,7 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
         {}, {}, {}, {}, newM5,
         {}, {}, {}, {}, {},
         newM11, {}, newM13, newM14, newM15,
-        {}, newM17, {}, {}, {},
+        {}, newM17, newM18, {}, {},
         {}, {}, newM23, {}, {},
         {}, {}
     };
@@ -3407,7 +3420,7 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
         {}, {}, {}, {}, expectedX5,
         {}, {}, {}, {}, {},
         expectedX11, {}, expectedX13, expectedX14, expectedX15,
-        {}, expectedX17, {}, {}, {},
+        {}, expectedX17, expectedX18, {}, {},
         {}, {}, expectedX23, {}, {},
         {}, {}
     };
@@ -3417,7 +3430,7 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
         {}, {}, {}, {}, expectedV5,
         {}, {}, {}, {}, {},
         expectedV11, {}, expectedV13, expectedV14, expectedV15,
-        {}, expectedV17, {}, {}, {},
+        {}, expectedV17, expectedV18, {}, {},
         {}, {}, expectedV23, {}, {},
         {}, {}
     };
@@ -3426,7 +3439,7 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
         {}, {}, {}, {}, expectedF5,
         {}, {}, {}, {}, {},
         expectedF11, {}, expectedF13, expectedF14, expectedF15,
-        {}, expectedF17, {}, {}, {},
+        {}, expectedF17, expectedF18, {}, {},
         {}, {}, expectedF23, {}, {},
         {}, {}
     };
@@ -3435,7 +3448,7 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
         {}, {}, {}, {}, expectedR5,
         {}, {}, {}, {}, {},
         expectedR11, {}, expectedR13, expectedR14, expectedR15,
-        {}, expectedR17, {}, {}, {},
+        {}, expectedR17, expectedR18, {}, {},
         {}, {}, expectedR23, {}, {},
         {}, {}
     };
@@ -3444,7 +3457,7 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
         {}, {}, {}, {}, expectedM5,
         {}, {}, {}, {}, {},
         expectedM11, {}, expectedM13, expectedM14, expectedM15,
-        {}, expectedM17, {}, {}, {},
+        {}, expectedM17, expectedM18, {}, {},
         {}, {}, expectedM23, {}, {},
         {}, {}
     };

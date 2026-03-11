@@ -73,6 +73,4 @@ TEST_CASE("Testing the damper")
 	// Checking the results
 	for (int i = 0; i < 3 * nlocal; i++)
 		REQUIRE_THAT(Fs[i], Catch::Matchers::WithinAbs(expectedFs[i], 1e-6));
-
-
 }
