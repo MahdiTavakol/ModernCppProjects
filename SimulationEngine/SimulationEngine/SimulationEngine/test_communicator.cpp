@@ -3194,3 +3194,365 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
     }
 }
 
+TEST_CASE("Testing the movement of particles between processors without skin (3X3X3)")
+{
+    std::cout << "Testing the movement of particles between processors without skin (3X3X3)" << std::endl;
+    std::cout << std::string(80, '=') << std::endl;
+
+
+
+    // rank4
+    std::vector<double> newX5 =
+    {
+         -20.0,  -70.0, -235.0,   // particle 1 stays in rank4
+          60.0,  -30.0, -180.0,   // particle 2 stays in rank4
+          70.0,  -60.0,  -90.0,   // particle 3 ->  (z high) rank13
+          40.0,  -70.0,   55.0,   // particle 4 ->  (z high) rank13
+    };
+
+    // rank10
+    std::vector<double> newX11 =
+    {
+         -40.0,  -240.0,   50.0,   // particle 9  stays in rank10
+          60.0,  -160.0,  -20.0,   // particle 10 stays in rank10
+         -75.0,   -40.0,   80.0,   // particle 11 -> (y high) rank13
+          90.0,    60.0,  -35.0,   // particle 12 -> (y high) rank13
+    };
+
+    // rank12
+    std::vector<double> newX13 =
+    {
+        -280.0,  -20.0,   10.0,   // particle 5 stays in rank12
+        -140.0,   80.0,  -95.0,   // particle 6 stays in rank12
+          80.0,  -60.0,   70.0,   // particle 7 -> (x high)  rank13
+         -70.0,  -90.0,  -40.0,   // particle 8 -> (x high) rank13
+    };
+
+    // rank13
+    std::vector<double> newX14 = {
+        -65.0, -85.0, 95.0,  // rank13
+        -12.0, -66.0, -79.0  // rank13
+    };
+
+    // rank14
+    std::vector<double> newX15 =
+    {
+         230.0,  -30.0,   20.0,   // particle 13 stays in rank14
+         270.0,   80.0,  -60.0,   // particle 14 stays in rank14
+          10.0,  -30.0,   45.0,   // particle 15 -> (x low)  rank13
+         -70.0,   60.0,   90.0,   // particle 16 -> (x low)  rank13
+    };
+
+    // rank16
+    std::vector<double> newX17 =
+    {
+         -40.0,  160.0,   25.0,   // particle 17 stays in rank17
+          70.0,  250.0,  -85.0,   // particle 18 stays in rank17
+          60.0,   20.0,   35.0,   // particle 19 -> (y low)  rank13
+          18.0,  -17.0,  -15.0,   // particle 20 -> (y low)  rank13
+    };
+
+    // rank22
+    std::vector<double> newX23 =
+    {
+        -26.0,   80.0,   140.0,   // particle 21 stays in rank22
+        -14.0,   60.0,   170.0,   // particle 22 stays in rank22
+         -80.0,  21.0,    15.0,   // particle 23 -> (z low) rank13
+         -19.0,  80.0,    95.0,   // particle 24 -> (z low) rank13
+    };
+
+    // expected values
+
+    // rank4
+    std::vector<double> expectedX5 =
+    {
+         -80.0,  21.0,    15.0,   // particle 23 -> (z low) rank13
+         -19.0,  80.0,    95.0,   // particle 24 -> (z low) rank13
+    };
+
+    // rank10
+    std::vector<double> expectedX11 =
+    {
+         -40.0,  -240.0,   50.0,   // particle 9  stays in rank10
+          60.0,  -160.0,  -20.0,   // particle 10 stays in rank10
+    };
+
+    // rank12
+    std::vector<double> expectedX13 =
+    {
+        -280.0,  -20.0,   10.0,   // particle 5 stays in rank12
+        -140.0,   80.0,  -95.0,   // particle 6 stays in rank12
+    };
+
+    // rank13
+    std::vector<double> expectedX14 = {
+        -65.0, -85.0,  95.0,  // rank13
+        -12.0, -66.0, -79.0,  // rank13
+         70.0, -60.0, -90.0,  // particle 3 ->  (z high) rank13
+         40.0, -70.0,  55.0,  // particle 4 ->  (z high) rank13
+        -75.0, -40.0,  80.0,  // particle 11 -> (y high) rank13
+         90.0,  60.0, -35.0,  // particle 12 -> (y high) rank13
+         80.0, -60.0,  70.0,  // particle 7 -> (x high)  rank13
+        -70.0, -90.0, -40.0,  // particle 8 -> (x high) rank13
+         10.0, -30.0,  45.0,  // particle 15 -> (x low)  rank13
+        -70.0,  60.0,  90.0,  // particle 16 -> (x low)  rank13
+         60.0,  20.0,  35.0,  // particle 19 -> (y low)  rank13
+         18.0, -17.0, -15.0,  // particle 20 -> (y low)  rank13
+        -80.0,  21.0,  15.0,  // particle 23 -> (z low) rank13
+        -19.0,  80.0,  95.0   // particle 24 -> (z low) rank13
+    };
+
+    // rank14
+    std::vector<double> expectedX15 =
+    {
+         230.0,  -30.0,   20.0,   // particle 13 stays in rank14
+         270.0,   80.0,  -60.0,   // particle 14 stays in rank14
+    };
+
+    // rank16
+    std::vector<double> expectedX17 =
+    {
+         -40.0,  160.0,   25.0,   // particle 17 stays in rank17
+          70.0,  250.0,  -85.0,   // particle 18 stays in rank17
+    };
+
+    // rank22
+    std::vector<double> expectedX23 =
+    {
+        -26.0,   80.0,   140.0,   // particle 21 stays in rank22
+        -14.0,   60.0,   170.0,   // particle 22 stays in rank22
+    };
+
+
+    std::vector<double> newV5(newX5.size(), 0.0), newF5(newX5.size(), 0.0);
+    std::vector<double> newM5(newX5.size() / 3, 0.0), newR5(newX5.size() / 3, 0.0);
+    std::vector<double> newV11(newX11.size(), 0.0), newF11(newX11.size(), 0.0);
+    std::vector<double> newM11(newX11.size() / 3, 0.0), newR11(newX11.size() / 3, 0.0);
+    std::vector<double> newV13(newX13.size(), 0.0), newF13(newX13.size(), 0.0);
+    std::vector<double> newM13(newX13.size() / 3, 0.0), newR13(newX13.size() / 3, 0.0);
+    std::vector<double> newV14(newX14.size(), 0.0), newF14(newX14.size(), 0.0);
+    std::vector<double> newM14(newX14.size() / 3, 0.0), newR14(newX14.size() / 3, 0.0);
+    std::vector<double> newV15(newX15.size(), 0.0), newF15(newX15.size(), 0.0);
+    std::vector<double> newM15(newX15.size() / 3, 0.0), newR15(newX15.size() / 3, 0.0);
+    std::vector<double> newV17(newX17.size(), 0.0), newF17(newX17.size(), 0.0);
+    std::vector<double> newM17(newX17.size() / 3, 0.0), newR17(newX17.size() / 3, 0.0);
+    std::vector<double> newV23(newX23.size(), 0.0), newF23(newX23.size(), 0.0);
+    std::vector<double> newM23(newX23.size() / 3, 0.0), newR23(newX23.size() / 3, 0.0);
+
+    std::vector<double> expectedV5(newX5.size(), 0.0), expectedF5(newX5.size(), 0.0);
+    std::vector<double> expectedM5(newX5.size()/3, 0.0), expectedR5(newX5.size()/3, 0.0);
+    std::vector<double> expectedV11(newX11.size(), 0.0), expectedF11(newX11.size(), 0.0);
+    std::vector<double> expectedM11(newX11.size() / 3, 0.0), expectedR11(newX11.size() / 3, 0.0);
+    std::vector<double> expectedV13(newX13.size(), 0.0), expectedF13(newX13.size(), 0.0);
+    std::vector<double> expectedM13(newX13.size() / 3, 0.0), expectedR13(newX13.size() / 3, 0.0);
+    std::vector<double> expectedV14(newX14.size(), 0.0), expectedF14(newX14.size(), 0.0);
+    std::vector<double> expectedM14(newX14.size() / 3, 0.0), expectedR14(newX13.size() / 3, 0.0);
+    std::vector<double> expectedV15(newX15.size(), 0.0), expectedF15(newX15.size(), 0.0);
+    std::vector<double> expectedM15(newX15.size() / 3, 0.0), expectedR15(newX15.size() / 3, 0.0);
+    std::vector<double> expectedV17(newX17.size(), 0.0), expectedF17(newX17.size(), 0.0);
+    std::vector<double> expectedM17(newX17.size() / 3, 0.0), expectedR17(newX17.size() / 3, 0.0);
+    std::vector<double> expectedV23(newX23.size(), 0.0), expectedF23(newX23.size(), 0.0);
+    std::vector<double> expectedM23(newX23.size() / 3, 0.0), expectedR23(newX23.size() / 3, 0.0);
+
+
+    std::vector<std::vector<double>> newXVec =
+    {
+        {}, {}, {}, {}, newX5,
+        {}, {}, {}, {}, {},
+        newX11, {}, newX13, newX14, newX15, 
+        {}, newX17, {}, {}, {},
+        {}, {}, newX23, {}, {},
+        {}, {}
+    };
+    std::vector<std::vector<double>> newVVec =
+    {
+        {}, {}, {}, {}, newV5,
+        {}, {}, {}, {}, {},
+        newV11, {}, newV13, newV14, newV15,
+        {}, newV17, {}, {}, {},
+        {}, {}, newV23, {}, {},
+        {}, {}
+    };
+    std::vector<std::vector<double>> newFVec =
+    {
+        {}, {}, {}, {}, newF5,
+        {}, {}, {}, {}, {},
+        newF11, {}, newF13, newF14, newF15,
+        {}, newF17, {}, {}, {},
+        {}, {}, newF23, {}, {},
+        {}, {}
+    };
+    std::vector<std::vector<double>> newRVec =
+    {
+        {}, {}, {}, {}, newR5,
+        {}, {}, {}, {}, {},
+        newR11, {}, newR13, newR14, newR15,
+        {}, newR17, {}, {}, {},
+        {}, {}, newR23, {}, {},
+        {}, {}
+    };
+    std::vector<std::vector<double>> newMVec =
+    {
+        {}, {}, {}, {}, newM5,
+        {}, {}, {}, {}, {},
+        newM11, {}, newM13, newM14, newM15,
+        {}, newM17, {}, {}, {},
+        {}, {}, newM23, {}, {},
+        {}, {}
+    };
+
+
+    std::vector<std::vector<double>> expectedXVec =
+    {
+        {}, {}, {}, {}, expectedX5,
+        {}, {}, {}, {}, {},
+        expectedX11, {}, expectedX13, expectedX14, expectedX15,
+        {}, expectedX17, {}, {}, {},
+        {}, {}, expectedX23, {}, {},
+        {}, {}
+    };
+
+    std::vector<std::vector<double>> expectedVVec =
+    {
+        {}, {}, {}, {}, expectedV5,
+        {}, {}, {}, {}, {},
+        expectedV11, {}, expectedV13, expectedV14, expectedV15,
+        {}, expectedV17, {}, {}, {},
+        {}, {}, expectedV23, {}, {},
+        {}, {}
+    };
+    std::vector<std::vector<double>> expectedFVec =
+    {
+        {}, {}, {}, {}, expectedF5,
+        {}, {}, {}, {}, {},
+        expectedF11, {}, expectedF13, expectedF14, expectedF15,
+        {}, expectedF17, {}, {}, {},
+        {}, {}, expectedF23, {}, {},
+        {}, {}
+    };
+    std::vector<std::vector<double>> expectedRVec =
+    {
+        {}, {}, {}, {}, expectedR5,
+        {}, {}, {}, {}, {},
+        expectedR11, {}, expectedR13, expectedR14, expectedR15,
+        {}, expectedR17, {}, {}, {},
+        {}, {}, expectedR23, {}, {},
+        {}, {}
+    };
+    std::vector<std::vector<double>> expectedMVec =
+    {
+        {}, {}, {}, {}, expectedM5,
+        {}, {}, {}, {}, {},
+        expectedM11, {}, expectedM13, expectedM14, expectedM15,
+        {}, expectedM17, {}, {}, {},
+        {}, {}, expectedM23, {}, {},
+        {}, {}
+    };
+
+
+
+
+    // running configuration
+    std::array<int, 3> ranks = { 3,3,3 };
+    // 
+    int nranks = ranks[0]*ranks[1]*ranks[2];
+    // ids 
+    std::vector<int> ids;
+    ids.reserve(nranks);
+    // 
+    for (int i = 0; i < nranks; i++)
+        ids.push_back(i);
+
+
+
+    // Engine vector
+    std::vector<std::unique_ptr<Engine>> engineArray;
+
+    // creating engine_ptrs
+    for (int i = 0; i < nranks; i++) {
+        auto engine_ptr = build_engine_set_particles(
+            ids[i], ranks, newXVec[i], newVVec[i], newFVec[i], newRVec[i], newMVec[i]);
+        engineArray.push_back(std::move(engine_ptr));
+    }
+
+
+    std::vector<Communicator*> communicatorArray;
+
+    for (auto& engine_ptr : engineArray) {
+        auto& communicatorRef = engine_ptr->getCommunicator();
+        communicatorArray.push_back(communicatorRef.get());
+    }
+
+    std::vector<std::array<int, 6>> exchangeDestArray(nranks, std::array<int, 6>{});
+
+
+
+    std::vector<double>* messagesArray[27];
+
+    // number of destinations
+    int nDestsTotal = 0;
+
+    int numberOfAttempts = 0;
+
+
+    constexpr int maxAttempts = 4;
+    // repeating the particle reassginement until there is no
+    // outside particles in each communicator
+    // The reason for repeating it is that it is a rare possibility 
+    // that x, y, and z values of a particle are all out of the
+    // rank dimensions. In this case at first attempt the particle is 
+    // moved in the rank which is neighboring the current rank 
+    // in the x dimension. The second time in the y dimension
+    // and finally in the z dimension... This way there is a need
+    // for knowing 6 neighboring ranks in contrast to the general 
+    // case of 26 neighboring ranks!
+    do {
+        nDestsTotal = 0;
+        numberOfAttempts++;
+
+        for (int i = 0; i < nranks; i++) {
+            exchangeDestArray[i] = communicatorArray[i]->returnExchangeDests();
+
+            // an array of vector<double> is returned for each communicatoriRef
+            messagesArray[i] = communicatorArray[i]->sendExchangeParticles();
+
+        }
+
+        // getting the nDests values
+        for (int i = 0; i < nranks; i++)
+            nDestsTotal += communicatorArray[i]->getNDests();
+
+
+        // ranks
+        for (int i = 0; i < nranks; i++) {
+            // directions xlo, xhi, ylo, yhi, zlo, zhi
+            for (int j = 0; j < 6; j++) {
+                // ref is very important
+                // since the recvExchangeParticles
+                // after setting the new particle 
+                // needs to reset the message
+                auto& message = messagesArray[i][j];
+                if (exchangeDestArray[i][j] < 0)
+                    continue;
+                communicatorArray[exchangeDestArray[i][j]]->recvExchangeParticles(message);
+            }
+        }
+
+    } while (nDestsTotal > 0 && numberOfAttempts < maxAttempts);
+
+
+    // ranks
+    for (int i = 0; i < nranks; i++) {
+        int id = i;
+        Engine* engine = engineArray[id].get();
+        checking_communicator(
+            id, engine,
+            expectedXVec,
+            expectedVVec,
+            expectedFVec,
+            expectedRVec,
+            expectedMVec
+        );
+    }
+}
+
