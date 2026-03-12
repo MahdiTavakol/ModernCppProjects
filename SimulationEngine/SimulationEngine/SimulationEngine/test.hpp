@@ -33,97 +33,6 @@ using std::make_unique, std::unique_ptr;
 * 
 */
 
-/*class Array3DMatcher : public Catch::Matchers::MatcherGenericBase
-{
-	double tol;
-	int nData;
-	typedef struct
-	{
-		double x;
-		double y;
-		double z;
-	}
-	dataStruct;
-	std::vector<dataStruct> expected;
-	double expectedSize;
-
-	mutable std::vector<int> badIndexes;
-
-public:
-	Array3DMatcher(double* expected_, int nData_, double tol_) :
-		tol{ tol_ }, nData{ nData_ }, expectedSize{0.0}
-	{
-		for (int i = 0; i < nData; i++)
-		{
-			dataStruct datai = { expected_[3 * i],expected_[3 * i + 1] ,expected_[3 * i + 2] };
-			expected.push_back(datai);
-			expectedSize += datai.x * datai.x + datai.y * datai.y + datai.z * datai.z;
-		}
-		expectedSize = std::sqrt(expectedSize);
-
-		std::sort(expected.begin(), expected.end(),
-			[](const dataStruct& a, const dataStruct& b) {
-				return a.x < b.x;
-			});
-	}
-
-	bool match(double* value_) const
-	{
-		double diff = 0.0;
-		std::vector<dataStruct> value;
-		dataStruct datai;
-		for (int i = 0; i < nData; i++) {
-			datai.x = value_[3 * i];
-			datai.y = value_[3 * i + 1];
-			datai.z = value_[3 * i + 2];
-			value.push_back(datai);
-		}
-		std::sort(value.begin(), value.end(),
-			[](const dataStruct& a, const dataStruct& b) {
-				return a.x < b.x;
-			});
-
-		for (int i = 0; i < nData; i++) {
-			double diffxi = value[i].x - expected[i].x;
-			double diffyi = value[i].y - expected[i].y;
-			double diffzi = value[i].z - expected[i].z;
-
-			double diffi = diffxi*diffxi + diffyi * diffyi + diffzi * diffzi;
-			if (std::sqrt(diffi) > tol * expectedSize / nData) {
-				badIndexes.push_back(i);
-				/*std::cout <<
-					i << "," << value[i].x 
-					  << "," << value[i].y 
-					  << "," << value[i].z
-					  << "," << expected[i].x
-					  << "," << expected[i].y 
-					  << "," << expected[i].z 
-					  << std::endl;
-					  *//*
-			}
-
-			diff += diffi;
-		}
-		diff = std::sqrt(diff);
-
-		return diff <= tol * expectedSize;
-	}
-
-	std::string describe() const override
-	{
-		std::string message = "Comparing two 3D arrays with the tolerance of " + std::to_string(tol);
-		
-		if (!badIndexes.empty()) {
-			message += "\nMismatching indexes:";
-			for (const auto& index : badIndexes)
-				message += "\n" + std::to_string(index);
-		}
-		return message;
-	}
-
-};
-*/
-
 
 class Array3DMatcher : public Catch::Matchers::MatcherGenericBase
 {
@@ -158,11 +67,15 @@ public:
 
 		std::sort(expected.begin(), expected.begin() + nLocal,
 			[](const dataStruct& a, const dataStruct& b) {
-				return a.x < b.x;
+				if (std::abs(a.x - b.x) >= 1e-6) return a.x < b.x;
+				if (std::abs(a.y - b.y) >= 1e-6) return a.y < b.y;
+				return a.z < b.z;
 			});
 		std::sort(expected.begin() + nLocal, expected.end(),
 			[](const dataStruct& a, const dataStruct& b) {
-				return a.x < b.x;
+				if (std::abs(a.x - b.x) >= 1e-6) return a.x < b.x;
+				if (std::abs(a.y - b.y) >= 1e-6) return a.y < b.y;
+				return a.z < b.z;
 			});
 	}
 	Array3DMatcher(double* expected_, int nLocal_, double tol_) :
@@ -179,11 +92,15 @@ public:
 		}
 		std::sort(valueVector.begin(), valueVector.begin() + nLocal,
 			[](const dataStruct& a, const dataStruct& b) {
-				return a.x < b.x;
+				if (std::abs(a.x - b.x) >= 1e-6) return a.x < b.x;
+				if (std::abs(a.y - b.y) >= 1e-6) return a.y < b.y;
+				return a.z < b.z;
 			});
 		std::sort(valueVector.begin() + nLocal, valueVector.end(),
 			[](const dataStruct& a, const dataStruct& b) {
-				return a.x < b.x;
+				if (std::abs(a.x - b.x) >= 1e-6) return a.x < b.x;
+				if (std::abs(a.y - b.y) >= 1e-6) return a.y < b.y;
+				return a.z < b.z;
 			});
 
 
@@ -231,6 +148,8 @@ public:
 	}
 
 };
+
+/* Non default matcher for r and m vectors */
 
 class Array1DMatcher : public Catch::Matchers::MatcherGenericBase
 {
