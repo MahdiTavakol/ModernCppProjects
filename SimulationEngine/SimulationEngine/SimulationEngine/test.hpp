@@ -33,7 +33,7 @@ using std::make_unique, std::unique_ptr;
 * 
 */
 
-class Array3DMatcher : public Catch::Matchers::MatcherGenericBase
+/*class Array3DMatcher : public Catch::Matchers::MatcherGenericBase
 {
 	double tol;
 	int nData;
@@ -99,7 +99,7 @@ public:
 					  << "," << expected[i].y 
 					  << "," << expected[i].z 
 					  << std::endl;
-					  */
+					  *//*
 			}
 
 			diff += diffi;
@@ -122,41 +122,156 @@ public:
 	}
 
 };
+*/
+
+
+class Array3DMatcher : public Catch::Matchers::MatcherGenericBase
+{
+	double tol;
+	int nLocal, nGhost;
+	typedef struct
+	{
+		double x;
+		double y;
+		double z;
+	}
+	dataStruct;
+	std::vector<dataStruct> expected;
+	double expectedSize;
+
+	mutable std::vector<int> badIndexes;
+
+
+
+public:
+	Array3DMatcher(double* expected_, int nLocal_, int nGhost_, double tol_) :
+		tol{ tol_ }, nLocal{ nLocal_ }, nGhost{ nGhost_ }, expectedSize{ 0.0 }
+	{
+		for (int i = 0; i < nLocal + nGhost; i++)
+		{
+			dataStruct datai = { expected_[3 * i],expected_[3 * i + 1] ,expected_[3 * i + 2] };
+			expected.push_back(datai);
+			expectedSize += datai.x * datai.x + datai.y * datai.y + datai.z * datai.z;
+		}
+
+		expectedSize = std::sqrt(expectedSize);
+
+		std::sort(expected.begin(), expected.begin() + nLocal,
+			[](const dataStruct& a, const dataStruct& b) {
+				return a.x < b.x;
+			});
+		std::sort(expected.begin() + nLocal, expected.end(),
+			[](const dataStruct& a, const dataStruct& b) {
+				return a.x < b.x;
+			});
+	}
+	Array3DMatcher(double* expected_, int nLocal_, double tol_) :
+		Array3DMatcher{expected_,nLocal_,0,tol_}
+	{}
+
+	bool match(double* value_) const
+	{
+		std::vector<dataStruct> valueVector;
+
+		for (int i = 0; i < nLocal + nGhost; i++) {
+			dataStruct datai = { value_[3 * i],value_[3 * i + 1],value_[3 * i + 2] };
+			valueVector.push_back(datai);
+		}
+		std::sort(valueVector.begin(), valueVector.begin() + nLocal,
+			[](const dataStruct& a, const dataStruct& b) {
+				return a.x < b.x;
+			});
+		std::sort(valueVector.begin() + nLocal, valueVector.end(),
+			[](const dataStruct& a, const dataStruct& b) {
+				return a.x < b.x;
+			});
+
+
+		double diff = 0.0;
+
+		for (int i = 0; i < nLocal + nGhost; i++) {
+			double diffxi = valueVector[i].x - expected[i].x;
+			double diffyi = valueVector[i].y - expected[i].y;
+			double diffzi = valueVector[i].z - expected[i].z;
+
+			double diffi = diffxi * diffxi + diffyi * diffyi + diffzi * diffzi;
+
+
+			if (std::sqrt(diffi) > tol * expectedSize/static_cast<double>(nLocal + nGhost)) {
+				badIndexes.push_back(i);
+				/*std::cout <<
+					i << "," << value[i].x
+					  << "," << value[i].y
+					  << "," << value[i].z
+					  << "," << expected[i].x
+					  << "," << expected[i].y
+					  << "," << expected[i].z
+					  << std::endl;
+					  */
+			}
+			diff += diffi;
+
+		}
+		diff = std::sqrt(diff);
+
+		return diff <= tol * expectedSize;
+		
+	}
+
+	std::string describe() const override
+	{
+		std::string message = "Comparing two 3D arrays with the tolerance of " + std::to_string(tol);
+
+		if (!badIndexes.empty()) {
+			message += "\nMismatching indexes:";
+			for (const auto& index : badIndexes)
+				message += "\n" + std::to_string(index);
+		}
+		return message;
+	}
+
+};
 
 class Array1DMatcher : public Catch::Matchers::MatcherGenericBase
 {
 	double tol;
-	int nData;
+	int nLocal, nGhost;
 	std::vector<double> expected;
 	double expectedSize;
 
 
 public:
-	Array1DMatcher(double* expected_, int nData_, double tol_) :
-		tol{ tol_ }, nData{ nData_ }
+	Array1DMatcher(double* expected_, int nLocal_, int nGhost_, double tol_) :
+		tol{ tol_ }, nLocal{ nLocal_ }, nGhost{nGhost_}
 	{
 		expectedSize = 0.0;
-		for (int i = 0; i < nData; i++)
+		for (int i = 0; i < nLocal + nGhost; i++)
 		{
 			expected.push_back(expected_[i]);
 			expectedSize += std::abs(expected_[i]);
 		}
 
-		std::sort(expected.begin(), expected.end());
+		std::sort(expected.begin(), expected.begin()+nLocal);
+		std::sort(expected.begin() + nLocal, expected.end());
 	}
+
+	Array1DMatcher(double* expected_, int nLocal_, double tol_):
+		Array1DMatcher{expected_,nLocal_,0,tol_}
+	{}
 
 	bool match(double* value_) const
 	{
 		double diff = 0.0;
-		std::vector<double> value;
+		std::vector<double> valueVector;
 
-		for (int i = 0; i < nData; i++) {
-			value.push_back(value_[i]);
+		for (int i = 0; i < nLocal + nGhost; i++) {
+			valueVector.push_back(value_[i]);
 		}
-		std::sort(value.begin(), value.end());
+		std::sort(valueVector.begin(), valueVector.begin() + nLocal);
+		std::sort(valueVector.begin()+ nLocal, valueVector.end());
 
-		for (int i = 0; i < nData; i++) {
-			diff += std::abs(value[i] - expected[i]);
+		for (int i = 0; i < nLocal + nGhost; i++) {
+			diff += std::abs(valueVector[i] - expected[i]);
 		}
 
 		return diff <= tol * expectedSize;

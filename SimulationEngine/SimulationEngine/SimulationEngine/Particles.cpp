@@ -124,24 +124,28 @@ void Particles::addParticle(std::array<double, 3> newX_,
 	r.push_back(newR_);
 	// increasing the nlocal
 	nlocal++;
-	// checking the nmax 
-
-	/*if (nlocal >= nmax) {
-		nmax *= 2;
-		x.reserve(3 * nmax);
-		v.reserve(3 * nmax);
-		f.reserve(3 * nmax);
-		m.reserve(nmax);
-		r.reserve(nmax);
-	}*/
 }
 
 void Particles::removeParticle(const int& id_) {
-	int last = nlocal - 1;
- 	copyParticle(last, id_);
+	int lastGhost = nlocal + nghosts - 1;
+	int lastLocal = nlocal - 1;
+	// if it is a local atom
+	if (id_ < nlocal) {
+		// copying the last particle to the id_ location
+		copyParticle(lastLocal, id_);
+		// copying the last ghost into the last particle location
+		copyParticle(lastGhost, lastLocal);
+		// decreasing the nlocal
+		nlocal--;
+	}
+	else if (id_ < nlocal + nghosts) {
+		// copying the last ghost into the id_ location
+		copyParticle(lastGhost, id_);
+		// reducing the nghosts
+		nghosts--;
+	}
 	// removing the last particle
 	pop_back();
-	int nmax_new, nlocal_new;
 }
 
 void Particles::getParticle(const int& id_,
@@ -209,7 +213,6 @@ void Particles::pop_back()
 	}
 	r.pop_back();
 	m.pop_back();
-	nlocal--;
 }
 
 void Particles::setNmax(const int& nmax_) {

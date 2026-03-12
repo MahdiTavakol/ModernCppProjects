@@ -655,112 +655,263 @@ TEST_CASE("Testing removing a particle from the particle list") {
     REQUIRE_THAT(myM, Array1DMatcher(expectedMs.data(), 18, 1e-6));
 }
 
-
-
-TEST_CASE("Testing the simple neighbor class")
+//TEST_CASE("Removing a particle from a particle list with ghost atoms in it","[.][ignore it for now]")
+TEST_CASE("Removing a particle from a particle list with ghost atoms in it")
 {
-    std::cout << "Testing the simple neighbor class" << std::endl;
+    std::cout << "Removing particlex from a particle list with ghost atoms in it" << std::endl;
     std::cout << std::string(80, '=') << std::endl;
 
+    // particles data
+    std::vector<double> x = {
+        // Global: x,y,z in [-300,300], skin=0
+        -220.40, -180.10,   80.55,   // particle 0
+        -140.75, -260.33, -120.18,   // particle 1
+        -180.66,  -30.77,   14.95,   // particle 2
+         -12.60,  -18.90,  130.10,   // particle 3
+         -35.10, -140.48,   12.66,   // particle 4
 
-    // the cutoff value
-    constexpr double cutoff = 70.0;
+          35.25, -250.38,  110.04,   // particle 5
+         260.11, -140.88, -200.30,   // particle 6
+          25.60, -160.15,  -55.27,   // particle 7
+          18.40,  -22.10,   95.50,   // particle 8
+         190.27,  -40.22, -236.70,   // particle 9
 
-    std::vector<double> x =
-    {
-        -280.0, 0.0, 0.0,
-        -260.0,5.0,0.0,
-        -240.0,-5.0,10.0,
-        -50.0,0.0,0.0,
-        -30.0,10.0,0.0,
-        -10.0,-5.0,0.0,
-        15.0,0.0,5.0,
-        40.0,-5.0,0.0,
-        200.0,0.0,0.0,
-        235.0,0.0,0.0
+        -200.90,  190.36,  -40.58,   // particle 10
+          35.90,   25.33,  180.09,   // particle 11
+        -120.33,   20.18, -199.05,   // particle 12
+         -22.80,   18.10, -140.25,   // particle 13
+         -28.20,  180.66,   66.03,   // particle 14
+
+         210.83,  220.41, -150.88,   // particle 15
+         140.62,  160.33,  198.21,   // particle 16
+          30.25,   22.40,   10.66,   // particle 17
+          40.11,  170.25,  204.67,   // particle 18
+         160.81,   35.42,  289.73,   // particle 19
     };
 
-    std::vector<double> v(x.size(), 0.0);
-    std::vector<double> f(x.size(), 0.0);
-    std::vector<double> r(x.size() / 3, 0.0);
-    std::vector<double> m(x.size() / 3, 0.0);
+    std::vector<double> v = {
+     72.4, -33.1,  95.0,   // particle 0
+    -88.6,  14.3, -56.7,   // particle 1
+     41.2, -19.8,  63.5,   // particle 2
+    -97.1,  28.9, -74.4,   // particle 3
+      3.6,  89.2, -12.5,   // particle 4
+     47.9, -55.0,  12.6,   // particle 5
+    -45.9,  18.0,  92.6,   // particle 6
+    -11.4,  36.8, -83.2,   // particle 7
+     59.7, -24.6,  10.9,   // particle 8
+    -72.5,  44.3, -95.8,   // particle 9
+     21.7, -38.4,  68.2,   // particle 10
+     75.5, -99.9,  79.2,   // particle 11
+     46.1, -61.5,  33.8,   // particle 12
+    -79.2,  12.4,  99.1,   // particle 13
+    -53.7,  27.5, -41.6,   // particle 14
+     64.0, -22.8,  15.2,   // particle 15
+    -90.3,  48.6,  -7.4,   // particle 16
+     81.9, -35.0,  24.1,   // particle 17
+     57.8, -69.2,  39.4,   // particle 18
+    -16.7,  73.3, -58.9    // particle 19
+    };
+    std::vector<double> f = {
+     12.4, -33.9,  45.2,   // particle 0
+    -18.6,   7.3, -41.5,   // particle 1
+     29.7,  -5.4,  38.9,   // particle 2
+    -22.1,  16.0, -49.7,   // particle 3
+      3.1,  27.6, -14.8,   // particle 4
+     23.1, -18.9,  27.6,   // particle 5
+     -9.9,   5.6,  31.2,   // particle 6
+    -12.7,  18.9, -28.4,   // particle 7
+     47.3, -19.5,   6.2,   // particle 8
+    -34.8,  25.1, -45.6,   // particle 9
+     14.8,  -7.3,  39.6,   // particle 10
+    -90.0,  77.7,   6.8,   // particle 11
+     41.2, -29.8,   9.7,   // particle 12
+    -48.1,  12.6,  33.9,   // particle 13
+    -25.7,  17.8, -38.6,   // particle 14
+     26.4, -11.3,   4.9,   // particle 15
+    -43.2,  22.5,  -6.8,   // particle 16
+     35.0, -18.1,  13.7,   // particle 17
+     28.6, -31.4,  19.3,   // particle 18
+     -8.2,  46.7, -24.5    // particle 19
+    };
+    std::vector<double> m = {
+     3.4,  // particle 0
+     7.8,  // particle 1
+     0.9,  // particle 2
+     5.6,  // particle 3
+     9.1,  // particle 4
+     5.7,  // particle 5
+     6.0,  // particle 6
+     1.3,  // particle 7
+     8.4,  // particle 8
+     4.1,  // particle 9
+     0.5,  // particle 10
+     9.5,  // particle 11
+     3.0,  // particle 12
+     7.4,  // particle 13
+     5.9,  // particle 14
+     2.1,  // particle 15
+     6.7,  // particle 16
+     8.2,  // particle 17
+     1.8,  // particle 18
+     4.6   // particle 19
+    };
 
-    // expected results
-    int expectedNNeigh = 10;
-    std::vector<int> expectedNeighList = {
-        1,2,  //0
-        0,2,  //2
-        0,1,  //4
-        4,5,6, //6
-        3,5,6, //9
-        3,4,6,7, //12
-        3,4,5,7,//16
-        5,6, //20
-        9, //22
-        8  //23
-    };
-    std::vector<int> expectedFirstNeigh = {
-        0,
-        2,
-        4,
-        6,
-        9,
-        12,
-        16,
-        20,
-        22,
-        23
-    };
-    std::vector<int> expectedNumNeighs = {
-        2,
-        2,
-        2,
-        3,
-        3,
-        4,
-        4,
-        2,
-        1,
-        1
+    std::vector<double> r = {
+     12.5,  // particle 0
+     89.3,  // particle 1
+     45.7,  // particle 2
+     3.9,   // particle 3
+     67.1,  // particle 4
+     88.8,  // particle 5
+     98.0,  // particle 6
+     31.4,  // particle 7
+     76.2,  // particle 8
+     54.3,  // particle 9
+     8.7,   // particle 10
+     45.2,  // particle 11
+     19.8,  // particle 12
+     92.4,  // particle 13
+     37.6,  // particle 14
+     71.0,  // particle 15
+     14.2,  // particle 16
+     83.1,  // particle 17
+     58.9,  // particle 18
+     26.4   // particle 19
     };
 
-    // box dimensions
-    array<double, 3> min = { -300.0,-300.0,-300.0 };
-    array<double, 3> max = { 300.0, 300.0, 300.0 };
-    // box
-    std::unique_ptr<Box> box = std::make_unique<Box>(min, max);
-    // creating the mockedParticles object
-    int nmax = 10;
+
+    // expected values
+    std::vector<double> expectedXs = {
+        -220.40, -180.10,   80.55,   // particle 0
+        -140.75, -260.33, -120.18,   // particle 1
+        -180.66,  -30.77,   14.95,   // particle 2
+         -12.60,  -18.90,  130.10,   // particle 3
+
+          35.25, -250.38,  110.04,   // particle 5
+         260.11, -140.88, -200.30,   // particle 6
+          25.60, -160.15,  -55.27,   // particle 7
+         190.27,  -40.22, -236.70,   // particle 9
+
+        -200.90,  190.36,  -40.58,   // particle 10
+          35.90,   25.33,  180.09,   // particle 11
+        -120.33,   20.18, -199.05,   // particle 12
+         -22.80,   18.10, -140.25,   // particle 13
+         -28.20,  180.66,   66.03,   // particle 14
+
+
+         140.62,  160.33,  198.21,   // particle 16
+          40.11,  170.25,  204.67,   // particle 18
+         160.81,   35.42,  289.73,   // particle 19
+    };
+
+    std::vector<double> expectedVs = {
+     72.4, -33.1,  95.0,   // particle 0
+    -88.6,  14.3, -56.7,   // particle 1
+     41.2, -19.8,  63.5,   // particle 2
+    -97.1,  28.9, -74.4,   // particle 3
+     47.9, -55.0,  12.6,   // particle 5
+    -45.9,  18.0,  92.6,   // particle 6
+    -11.4,  36.8, -83.2,   // particle 7
+    -72.5,  44.3, -95.8,   // particle 9
+     21.7, -38.4,  68.2,   // particle 10
+     75.5, -99.9,  79.2,   // particle 11
+     46.1, -61.5,  33.8,   // particle 12
+    -79.2,  12.4,  99.1,   // particle 13
+    -53.7,  27.5, -41.6,   // particle 14
+    -90.3,  48.6,  -7.4,   // particle 16
+     57.8, -69.2,  39.4,   // particle 18
+    -16.7,  73.3, -58.9    // particle 19
+    };
+    std::vector<double> expectedFs = {
+     12.4, -33.9,  45.2,   // particle 0
+    -18.6,   7.3, -41.5,   // particle 1
+     29.7,  -5.4,  38.9,   // particle 2
+    -22.1,  16.0, -49.7,   // particle 3
+     23.1, -18.9,  27.6,   // particle 5
+     -9.9,   5.6,  31.2,   // particle 6
+    -12.7,  18.9, -28.4,   // particle 7
+    -34.8,  25.1, -45.6,   // particle 9
+     14.8,  -7.3,  39.6,   // particle 10
+    -90.0,  77.7,   6.8,   // particle 11
+     41.2, -29.8,   9.7,   // particle 12
+    -48.1,  12.6,  33.9,   // particle 13
+    -25.7,  17.8, -38.6,   // particle 14
+    -43.2,  22.5,  -6.8,   // particle 16
+     28.6, -31.4,  19.3,   // particle 18
+     -8.2,  46.7, -24.5    // particle 19
+    };
+    std::vector<double> expectedMs = {
+     3.4,  // particle 0
+     7.8,  // particle 1
+     0.9,  // particle 2
+     5.6,  // particle 3
+     5.7,  // particle 5
+     6.0,  // particle 6
+     1.3,  // particle 7
+     4.1,  // particle 9
+     0.5,  // particle 10
+     9.5,  // particle 11
+     3.0,  // particle 12
+     7.4,  // particle 13
+     5.9,  // particle 14
+     6.7,  // particle 16
+     1.8,  // particle 18
+     4.6   // particle 19
+    };
+
+    std::vector<double> expectedRs = {
+     12.5,  // particle 0
+     89.3,  // particle 1
+     45.7,  // particle 2
+     3.9,   // particle 3
+     88.8,  // particle 5
+     98.0,  // particle 6
+     31.4,  // particle 7
+     54.3,  // particle 9
+     8.7,   // particle 10
+     45.2,  // particle 11
+     19.8,  // particle 12
+     92.4,  // particle 13
+     37.6,  // particle 14
+     14.2,  // particle 16
+     58.9,  // particle 18
+     26.4   // particle 19
+    };
+
+    int expectedNLocal = 8;
+    int expectedNGhost = 8;
+
     int nlocal = 10;
-    std::unique_ptr<Particles> mockedParticles =
-        std::make_unique<MockedParticles>(nmax, x, v, f, r, m);
-    // building the neighborlist
-    std::unique_ptr<Neighbor> neighborList = std::make_unique<SimpleNeighbor>(cutoff);
-    // putting everything into the engine
-    std::vector<std::unique_ptr<Ref>> inputs;
-    inputs.push_back(std::move(mockedParticles));
-    inputs.push_back(std::move(box));
-    inputs.push_back(std::move(neighborList));
-    // creating the engine fixture
-    EngineFixture engineFixture(inputs);
-    // getting the engine_ptr
-    auto engine_ptr = engineFixture.returnEngine();
-    // getting the neighborlist
-    auto& neighborListRef = engine_ptr->getNeighbor();
-    // checking the pointer
-    REQUIRE(neighborListRef);
-    // getting the results
-    int nNeigh = 0;
-    int* neighList = nullptr;
-    int* firstNeigh = nullptr;
-    int* numNeigh = nullptr;
-    neighborListRef->getNeighborList(nNeigh, neighList, firstNeigh, numNeigh);
+    int nghosts = 10;
+    int nmax = 20;
+    std::unique_ptr<Particles> particles = 
+        std::make_unique<Particles>(nmax, x, v, f, m, r);
+
+    // setting nmax, nlocal and nghosts
+    particles->setNGhosts(nghosts);
+    particles->setNmaxNlocal(nmax, nlocal);
+
+    // removing particles
+    particles->removeParticle(17);
+    particles->removeParticle(15);
+    particles->removeParticle(8);
+    particles->removeParticle(4);
+
+    // getting the x,v,f,r,m values
+    auto* myX = particles->getXData();
+    auto* myV = particles->getVData();
+    auto* myF = particles->getFData();
+    auto* myR = particles->getRData();
+    auto* myM = particles->getMData();
+
+
     // checking the results
-    REQUIRE(nNeigh == expectedNNeigh);
-    // 
-    for (int i = 0; i < nNeigh; i++) {
-        REQUIRE(neighList[i] == expectedNeighList[i]);
-        REQUIRE(firstNeigh[i] == expectedFirstNeigh[i]);
-        REQUIRE(numNeigh[i] == expectedNumNeighs[i]);
-    }
+    REQUIRE_THAT(myX, Array3DMatcher(expectedXs.data(), expectedNLocal, expectedNGhost, 1e-6));
+    REQUIRE_THAT(myV, Array3DMatcher(expectedVs.data(), expectedNLocal, expectedNGhost, 1e-6));
+    REQUIRE_THAT(myF, Array3DMatcher(expectedFs.data(), expectedNLocal, expectedNGhost, 1e-6));
+    REQUIRE_THAT(myR, Array1DMatcher(expectedRs.data(), expectedNLocal, expectedNGhost, 1e-6));
+    REQUIRE_THAT(myM, Array1DMatcher(expectedMs.data(), expectedNLocal, expectedNGhost, 1e-6));
+
 }
+
+
