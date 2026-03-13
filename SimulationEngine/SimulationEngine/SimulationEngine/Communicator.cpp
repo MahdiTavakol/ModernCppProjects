@@ -48,8 +48,7 @@ Communicator::Communicator(const int& myId_, const std::array<int, 3>& sizeArray
 
 Communicator::~Communicator()
 {
-	if (allocatedBufferSize > 0)
-		delete[] sendBuffer;
+
 }
 
 void Communicator::injectDependencies(Engine& engine_)
@@ -125,17 +124,17 @@ void Communicator::init()
 	int zhi = myId + sizeArray[0] * sizeArray[1];
 	forward_partner[2][1] = myIdZ < sizeArray[2]-1 ? zhi : -1;
 	// xlo partner 
-	reverse_partner[0][0] = myIdX - 1;
+	reverse_partner[0][0] = forward_partner[0][0];
 	// xhi partner
-	reverse_partner[0][1] = myIdX + 1;
+	reverse_partner[0][1] = forward_partner[0][1];
 	// ylo partner
-	reverse_partner[1][0] = myIdY - sizeArray[1];
+	reverse_partner[1][0] = forward_partner[1][0];
 	// yhi partner
-	reverse_partner[1][1] = myIdY + sizeArray[1];
+	reverse_partner[1][1] = forward_partner[1][1];
 	// zlo partner
-	reverse_partner[2][0] = myIdZ - sizeArray[0] * sizeArray[1];
+	reverse_partner[2][0] = forward_partner[2][0];
 	// zhi partner
-	reverse_partner[2][1] = myIdZ + sizeArray[0] * sizeArray[1];
+	reverse_partner[2][1] = forward_partner[2][1];
 	// xlo partner
 	neighbor_ranks[0][0] = forward_partner[0][0];
 	// xhi partner
@@ -151,42 +150,50 @@ void Communicator::init()
 
  }
 
-void Communicator::forward_particle(
-	const std::array<int, 3>& dir_,
-	void*& trandata_)
+void Communicator::sendGhosts(const int& partnerRank_,
+	                                void*& trandata_)
 {
 	std::vector<int>* vecRef = &interXLo;
 	
-	if (dir_ == std::array<int, 3>{-1, 0, 0}) {
+	auto iter = std::find(&forward_partner[0][0], &forward_partner[0][0] + 6, partnerRank_);
+	int distance = std::distance(&forward_partner[0][0], iter);
+
+	switch (distance) {
+	case 0:
+		// xlo
 		vecRef = &interXLo;
-	}
-	else if (dir_ == std::array<int, 3>{1, 0, 0}) {
+		break;
+	case 1:
+		// xhi
 		vecRef = &interXHi;
-	}
-	else if (dir_ == std::array<int, 3>{0, -1, 0}) {
+		break;
+	case 2:
+		// ylo
 		vecRef = &interYLo;
-	}
-	else if (dir_ == std::array<int, 3>{0, 1, 0}) {
+		break;
+	case 3:
+		// yhi
 		vecRef = &interYHi;
-	}
-	else if (dir_ == std::array<int, 3>{0, 0, -1}) {
+		break;
+	case 4:
+		// zlo
 		vecRef = &interZLo;
-	}
-	else if (dir_ == std::array<int, 3>{0, 0, 1}) {
+		break;
+	case 5:
+		// zhi
 		vecRef = &interZHi;
+		break;
+	default:
+		throw std::invalid_argument("Wrong partner id!");
 	}
-	else
-		throw std::invalid_argument("Wrong direction!");
+
 
 
 	int nParticles = (*vecRef).size();
 	int nData = 1 + (3 * 3 + 2)*nParticles; // X, V, F (3) and M, R
 
-	if (allocatedBufferSize != nData) {
-		sendBuffer = new double[nData];
-		nData = allocatedBufferSize;
-	}
 
+	double* sendBuffer = new double[nData];
 
 	int indx = 0;
 	
@@ -220,7 +227,8 @@ void Communicator::forward_particle(
 	trandata_ = (void *)sendBuffer;
 }
 
-void Communicator::updateGhosts(const std::array<int, 3>& dir_, void* trandata_)
+void Communicator::recvGhosts(const int& partnerRank_,
+	                                void*& trandata_)
 {
 	std::vector<int>* vecRef;
 
@@ -228,26 +236,32 @@ void Communicator::updateGhosts(const std::array<int, 3>& dir_, void* trandata_)
 	if (trandata_ == nullptr)
 		throw std::invalid_argument("The buffer memory has not been initialized yet!");
 
-	if (dir_ == std::array<int, 3>{-1, 0, 0}) {
+	auto iter = std::find(&reverse_partner[0][0], &reverse_partner[0][0] + 6, partnerRank_);
+	int distance = std::distance(&reverse_partner[0][0], iter);
+
+	switch (distance) {
+	case 0:
 		vecRef = &ghostsXLo;
-	}
-	else if (dir_ == std::array<int, 3>{1, 0, 0}) {
+		break;
+	case 1:
 		vecRef = &ghostsXHi;
-	}
-	else if (dir_ == std::array<int, 3>{0, -1, 0}) {
+		break;
+	case 2:
 		vecRef = &ghostsYLo;
-	}
-	else if (dir_ == std::array<int, 3>{0, 1, 0}) {
+		break;
+	case 3:
 		vecRef = &ghostsYHi;
-	}
-	else if (dir_ == std::array<int, 3>{0, 0, -1}) {
+		break;
+	case 4:
 		vecRef = &ghostsZLo;
-	}
-	else if (dir_ == std::array<int, 3>{0, 0, 1}) {
+		break;
+	case 5:
 		vecRef = &ghostsZHi;
+		break;
+	default:
+		throw std::invalid_argument("Wrong partner id!");
 	}
-	else
-		throw std::invalid_argument("Wrong direction!");
+
 
 	// checking the transfered data size
 	double* recvBuffer = static_cast<double*>(trandata_);
@@ -273,6 +287,9 @@ void Communicator::updateGhosts(const std::array<int, 3>& dir_, void* trandata_)
 		particles->M(id) = recvBuffer[indx++];
 		particles->R(id) = recvBuffer[indx++];
 	}
+
+	// cleaning up the buffer
+	delete[] recvBuffer;
 
 }
 
@@ -311,40 +328,40 @@ void Communicator::resetParticles()
 		double z = particles->X(i, 2);
 		bool insideOwned =
 			(x >= myMin[0] && x < myMax[0] &&
-				y >= myMin[1] && y < myMax[1] &&
-				z >= myMin[2] && z < myMax[2]);
+			 y >= myMin[1] && y < myMax[1] &&
+			 z >= myMin[2] && z < myMax[2]);
 
 		// its own ghosts
 		bool insideExtended1 =
 			(x >= xMinGhost && x < xMaxGhost &&
-				y >= myMin[1] && y < myMax[1] &&
-				z >= myMin[2] && z < myMax[2]);
+			 y >= myMin[1] && y < myMax[1] &&
+			 z >= myMin[2] && z < myMax[2]);
 
 		bool insideExtended2 =
 			(x >= myMin[0] && x < myMax[0] &&
-				y >= yMinGhost && y < yMaxGhost &&
-				z >= myMin[2] && z < myMax[2]);
+			 y >= yMinGhost && y < yMaxGhost &&
+			 z >= myMin[2] && z < myMax[2]);
 
 		bool insideExtended3 =
 			(x >= myMin[0] && x < myMax[0] &&
-				y >= myMin[1] && y < myMax[1] &&
-				z >= zMinGhost && z < zMinGhost);
+			 y >= myMin[1] && y < myMax[1] &&
+			 z >= zMinGhost && z < zMinGhost);
 
 		// its own atoms acting as ghosts for neighboring ranks
 		bool insideInter1 =
 			(x >= xMinInter && x < xMaxInter &&
-				y >= myMin[1] && y < myMax[1] &&
-				z >= myMin[2] && z < myMax[2]);
+			 y >= myMin[1] && y < myMax[1] &&
+			 z >= myMin[2] && z < myMax[2]);
 
 		bool insideInter2 =
 			(x >= myMin[0] && x < myMax[0] &&
-				y >= yMinInter && y < yMaxInter &&
-				z >= myMin[2] && z < myMax[2]);
+			 y >= yMinInter && y < yMaxInter &&
+			 z >= myMin[2] && z < myMax[2]);
 
 		bool insideInter3 =
 			(x >= myMin[0] && x < myMax[0] &&
-				y >= myMin[1] && y < myMax[1] &&
-				z >= zMinInter && z < zMaxInter);
+			 y >= myMin[1] && y < myMax[1] &&
+			 z >= zMinInter && z < zMaxInter);
 
 
 		// inside the region 

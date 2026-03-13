@@ -15,7 +15,8 @@ auto build_engine_set_particles = [&](const int& myId_,
     std::vector<double>& v_,
     std::vector<double>& f_,
     std::vector<double>& r_,
-    std::vector<double>& m_) -> std::unique_ptr<Engine>
+    std::vector<double>& m_,
+    int nGhosts = 0) -> std::unique_ptr<Engine>
     {
         std::unique_ptr<Communicator> communicator = std::make_unique<Communicator>(myId_, ranks_);
 
@@ -64,7 +65,7 @@ auto build_engine_set_particles = [&](const int& myId_,
         // so these would be null after moving into 
         // the mockedParticles object
         std::vector<double> xCopy = x_, vCopy = v_, fCopy = f_, rCopy = r_, mCopy = m_;
-        mockedParticlesConv->resetParticles(nmax, xCopy, vCopy, fCopy, rCopy, mCopy);
+        mockedParticlesConv->resetParticles(nmax, nGhosts, xCopy, vCopy, fCopy, rCopy, mCopy);
         // returning the engine
         return engine_ptr;
     };
@@ -1712,32 +1713,40 @@ TEST_CASE("Testing the forward communication") {
     auto& communicator2Ref = engine_ptr2->getCommunicator();
     auto& communicator3Ref = engine_ptr3->getCommunicator();
     auto& communicator4Ref = engine_ptr4->getCommunicator();
-    // sending data
+    // sending ghosts
     // sending data from rank1 to rank2
-    communicator1Ref->forward_particle({ 1,0,0 }, tranDataRaw12);
+    communicator1Ref->sendGhosts(myId2, tranDataRaw12);
     // sending data from rank1 to rank3
-    communicator1Ref->forward_particle({ 0,1,0 }, tranDataRaw13);
+    communicator1Ref->sendGhosts(myId3, tranDataRaw13);
     // sending data from rank2 to rank1
-    communicator2Ref->forward_particle({ -1,0,0 }, tranDataRaw21);
+    communicator2Ref->sendGhosts(myId1, tranDataRaw21);
     // sending data from rank2 to rank4
-    communicator2Ref->forward_particle({ 0,1,0 }, tranDataRaw24);
+    communicator2Ref->sendGhosts(myId4, tranDataRaw24);
     // sending data from rank3 to rank1
-    communicator3Ref->forward_particle({ 0,-1,0 }, tranDataRaw31);
+    communicator3Ref->sendGhosts(myId1, tranDataRaw31);
     // sending data from rank3 to rank4
-    communicator3Ref->forward_particle({ 1,0,0 }, tranDataRaw34);
+    communicator3Ref->sendGhosts(myId4, tranDataRaw34);
     // sending data from rank4 to rank3
-    communicator4Ref->forward_particle({ -1,0,0 }, tranDataRaw43);
+    communicator4Ref->sendGhosts(myId3, tranDataRaw43);
     // sending data from rank4 to rank2
-    communicator4Ref->forward_particle({ 0,-1,0 }, tranDataRaw42);
-    // updating ghosts
-    communicator1Ref->updateGhosts({ 1,0,0 }, tranDataRaw21);
-    communicator1Ref->updateGhosts({ 0,1,0 }, tranDataRaw31);
-    communicator2Ref->updateGhosts({ -1,0,0 }, tranDataRaw12);
-    communicator2Ref->updateGhosts({ 0,1,0 }, tranDataRaw42);
-    communicator3Ref->updateGhosts({ 1,0,0 }, tranDataRaw43);
-    communicator3Ref->updateGhosts({ 0,-1,0 }, tranDataRaw13);
-    communicator4Ref->updateGhosts({ -1,0,0 }, tranDataRaw34);
-    communicator4Ref->updateGhosts({ 0,-1,0 }, tranDataRaw24);
+    communicator4Ref->sendGhosts(myId2, tranDataRaw42);
+    // receiving ghost
+    // receiving data from rank2 to rank1
+    communicator1Ref->recvGhosts(myId2, tranDataRaw21);
+    // receiving data from rank3 to rank1
+    communicator1Ref->recvGhosts(myId3, tranDataRaw31);
+    // receiving data from rank1 to rank2
+    communicator2Ref->recvGhosts(myId1, tranDataRaw12);
+    // receiving data from rank4 to rank2
+    communicator2Ref->recvGhosts(myId4, tranDataRaw42);
+    // receiving data from rank4 to rank3
+    communicator3Ref->recvGhosts(myId4, tranDataRaw43);
+    // receiving data from rank1 to rank3
+    communicator3Ref->recvGhosts(myId1, tranDataRaw13);
+    // receiving data from rank3 to rank4
+    communicator4Ref->recvGhosts(myId3, tranDataRaw34);
+    // receiving data from rank2 to rank4
+    communicator4Ref->recvGhosts(myId2, tranDataRaw24);
 
     // data checker struct
     struct {
@@ -3574,8 +3583,9 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
     std::cout << "Testing the movement of particles for the case with the skin value of 50" << std::endl;
     std::cout << std::string(80, '=') << std::endl;
 
+    double skin = 50.0;
 
-    // moving particles
+    //  x values
     std::vector<double> newX1 =
     {
         -220.40, -180.10,   80.55,   // particle 0  owned by Q00 (-- interior) region 1
@@ -3583,6 +3593,65 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
         -180.66,   30.77,   14.95,   // particle 2  owned by Q00 (-+ interior) region 3
           12.60,  -18.90,  130.10,   // particle 3  owned by Q00 (+- interior) region 2
           35.10, -140.48,   12.66,   // particle 4  owned by Q00 (+- interior) region 2
+    };
+
+    std::vector<double> newX2 =
+    {
+         180.62, -210.44,   60.91,   // particle 5  owned by Q10 (+- interior) region 2
+         260.11, -140.88, -200.30,   // particle 6  owned by Q10 (+- interior) region 2
+         -25.60, -160.15,  -55.27,   // particle 7  owned by Q10 (-- interior) region 1
+         -18.40,  +22.10,   95.50,   // particle 8  owned by Q10 (-+ interior) region 3
+         190.27,  -40.22, -236.70,   // particle 9  owned by Q10 (+- interior) region 2
+    };
+
+    std::vector<double> newX3 =
+    {
+        -200.90,  190.36,  -40.58,   // particle 10 owned by Q01 (-+ interior) region 3
+        -270.22,  120.74,  210.46,   // particle 11 owned by Q01 (-+ interior) region 3
+        -120.33,   20.18, -199.05,   // particle 12 owned by Q01 (-+ interior) region 3
+          22.80,   18.10, -140.25,   // particle 13 owned by Q01 (++ interior) region 4
+         -28.20,  180.66,   66.03,   // particle 14 owned by Q01 (-+ interior) region 3
+    };
+
+    std::vector<double> newX4 =
+    {
+         210.83,  220.41, -150.88,   // particle 15 owned by Q01 (++ interior) region 4
+         140.62,  160.33,  198.21,   // particle 16 owned by Q01 (++ interior) region 4
+         -30.25,  -22.40,   10.66,   // particle 17 owned by Q01 (-- interior) region 1
+         -40.11,  170.25,  204.67,   // particle 18 owned by Q01 (-+ interior) region 3
+         160.81,  -35.42,  289.73,   // particle 19 owned by Q01 (+- interior) region 2
+    };
+
+    // expected x values
+    std::vector<double> expectedX1 = {
+        -220.40, -180.10,   80.55,   // particle 0  owned by Q00 (-- interior) region 1
+        -140.75, -260.33, -120.18,   // particle 1  owned by Q00 (-- interior) region 1
+         -25.60, -160.15,  -55.27,   // particle 7  owned by Q10 (-- interior) region 1 ghost for region 2
+         -30.25,  -22.40,   10.66    // particle 17 owned by Q01 (-- interior) region 1 ghost for regions 2, 3, 4
+    };
+
+    std::vector<double> expectedX2 = {
+         180.62, -210.44,   60.91,   // particle 5  owned by Q10 (+- interior) region 2
+         260.11, -140.88, -200.30,   // particle 6  owned by Q10 (+- interior) region 2
+         190.27,  -40.22, -236.70,   // particle 9  owned by Q10 (+- interior) region 2 ghost for region 4
+          12.60,  -18.90,  130.10,   // particle 3  owned by Q00 (+- interior) region 2 ghost for regions 1, 3, 4
+          35.10, -140.48,   12.66    // particle 4  owned by Q00 (+- interior) region 2 ghost for region 1
+    };
+
+    std::vector<double> expectedX3 = {
+        -200.90,  190.36,  -40.58,   // particle 10 owned by Q01 (-+ interior) region 3
+        -270.22,  120.74,  210.46,   // particle 11 owned by Q01 (-+ interior) region 3
+        -120.33,   20.18, -199.05,   // particle 12 owned by Q01 (-+ interior) region 3
+         -28.20,  180.66,   66.03,   // particle 14 owned by Q01 (-+ interior) region 3
+        -180.66,   30.77,   14.95,   // particle 2  owned by Q00 (-+ interior) region 3
+         -18.40,  +22.10,   95.50,   // particle 8  owned by Q10 (-+ interior) region 3
+         -40.11,  170.25,  204.67    // particle 18 owned by Q01 (-+ interior) region 3
+    };
+
+    std::vector<double> expectedX4 = {
+         210.83,  220.41, -150.88,   // particle 15 owned by Q01 (++ interior) region 4
+         140.62,  160.33,  198.21,   // particle 16 owned by Q01 (++ interior) region 4
+          22.80,   18.10, -140.25,   // particle 13 owned by Q01 (++ interior) region 4
     };
 
     std::vector<double> newV1 =
@@ -3621,14 +3690,7 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
         9.1,  // particle 4 region 2
     };
 
-    std::vector<double> newX2 =
-    {
-         180.62, -210.44,   60.91,   // particle 5  owned by Q10 (+- interior) region 2
-         260.11, -140.88, -200.30,   // particle 6  owned by Q10 (+- interior) region 2
-         -25.60, -160.15,  -55.27,   // particle 7  owned by Q10 (-- interior) region 1
-         -18.40,  +22.10,   95.50,   // particle 8  owned by Q10 (-+ interior) region 3
-         190.27,  -40.22, -236.70,   // particle 9  owned by Q10 (+- interior) region 2
-    };
+
 
     std::vector<double> newV2 =
     {
@@ -3666,14 +3728,6 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
      54.3,  // particle 9 region 2
     };
 
-    std::vector<double> newX3 =
-    {
-        -200.90,  190.36,  -40.58,   // particle 10 owned by Q01 (-+ interior) region 3
-        -270.22,  120.74,  210.46,   // particle 11 owned by Q01 (-+ interior) region 3
-        -120.33,   20.18, -199.05,   // particle 12 owned by Q01 (-+ interior) region 3
-          22.80,   18.10, -140.25,   // particle 13 owned by Q01 (++ interior) region 4
-         -28.20,  180.66,   66.03,   // particle 14 owned by Q01 (-+ interior) region 3
-    };
 
     std::vector<double> newV3 =
     {
@@ -3711,14 +3765,7 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
      37.6,  // particle 14 region 3
     };
 
-    std::vector<double> newX4 =
-    {
-         210.83,  220.41, -150.88,   // particle 15 owned by Q01 (++ interior) region 4
-         140.62,  160.33,  198.21,   // particle 16 owned by Q01 (++ interior) region 4
-         -30.25,  -22.40,   10.66,   // particle 17 owned by Q01 (-- interior) region 1
-         -40.11,  170.25,  204.67,   // particle 18 owned by Q01 (-+ interior) region 3
-         160.81,  -35.42,  289.73,   // particle 19 owned by Q01 (+- interior) region 2
-    };
+
 
     std::vector<double> newV4 =
     {
@@ -3755,6 +3802,7 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
      58.9,  // particle 18 region 3
      26.4   // particle 19 region 2
     };
+
 
 
 }

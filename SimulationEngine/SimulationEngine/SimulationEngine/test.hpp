@@ -374,8 +374,20 @@ public:
 		std::vector<double>& m_
 	)
 	{
+		resetParticles(nmax_, 0, x_, v_, f_, r_, m_);
+	}
+	void resetParticles(
+		int nmax_,
+		int nghost_,
+		std::vector<double>& x_,
+		std::vector<double>& v_,
+		std::vector<double>& f_,
+		std::vector<double>& r_,
+		std::vector<double>& m_
+	)
+	{
 		nmax = nmax_;
-		nlocal = x_.size() / 3;
+		nlocal = x_.size() / 3 - nghost_;
 		x = std::move(x_);
 		v = std::move(v_);
 		f = std::move(f_);

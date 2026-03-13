@@ -15,9 +15,10 @@ public:
 	void injectDependencies(Engine& engine_) override;
 	void init();
 
-	void forward_particle(const std::array<int,3>& dir_,
+	void sendGhosts(const int& partnerRank_,
 		                  void*& trandata_);
-	void updateGhosts(const std::array<int,3>& dir_, void* trandata_);
+	void recvGhosts(const int& partnerRank_,
+		                  void*& trandata_);
 
 	// getting the nDests used to see if there is no more data exchange
 	int getNDests();
@@ -67,12 +68,6 @@ protected:
 
 
 
-	// last buffer and its size
-	// buffer belongs to the sender
-	// so we do not need to keep a track of the 
-	// allocated recev buffer size
-	double* sendBuffer = nullptr;
-	int allocatedBufferSize = 0;
 
 
 	// the information for exchanging particles between ranks
