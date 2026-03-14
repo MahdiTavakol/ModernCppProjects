@@ -295,54 +295,27 @@ TEST_CASE("Testing the communication class") {
 
     // the communicator configuration
     std::array<int, 3> nranks = { 2,2,1 };
-    // first rank
-    int id = 0;
-    build_engine_check_communicator(
-        id, nranks,
-        x, v, f, r, m,
-        expectedXsVec,
-        expectedVsVec,
-        expectedFsVec,
-        expectedRsVec,
-        expectedMsVec);
-    // the second rank
-    id = 1;
-    build_engine_check_communicator(
-        id, nranks,
-        x, v, f, r, m,
-        expectedXsVec,
-        expectedVsVec,
-        expectedFsVec,
-        expectedRsVec,
-        expectedMsVec);
-    // the third rank
-    id = 2;
-    build_engine_check_communicator(
-        id, nranks,
-        x, v, f, r, m,
-        expectedXsVec,
-        expectedVsVec,
-        expectedFsVec,
-        expectedRsVec,
-        expectedMsVec);
-    // the fourth rank
-    id = 3;
-    build_engine_check_communicator(
-        id, nranks,
-        x, v, f, r, m,
-        expectedXsVec,
-        expectedVsVec,
-        expectedFsVec,
-        expectedRsVec,
-        expectedMsVec);
+
+    for (int i = 0; i < 4; i++) {
+        int id = i;
+        build_engine_check_communicator(
+            id, nranks,
+            x, v, f, r, m,
+            expectedXsVec,
+            expectedVsVec,
+            expectedFsVec,
+            expectedRsVec,
+            expectedMsVec);
+    }
+
 }
 
 /// <summary>
 /// A text with the skin value of 50
 /// </summary>
 
-TEST_CASE("Testing updating the ghost atoms in the particles class") {
-    std::cout << "Testing updating the ghost atoms in the particles class" << std::endl;
+TEST_CASE("Testing updating the ghost particles in the particles class") {
+    std::cout << "Testing updating the ghost particles in the particles class" << std::endl;
     std::cout << std::string(80, '=') << std::endl;
 
     // Particles
@@ -777,9 +750,508 @@ TEST_CASE("Testing updating the ghost atoms in the particles class") {
 }
 
 
+TEST_CASE("Testing the message for sending an out of range particle from a rank")
+{
+    std::cout << "Testing the message for sending an out of range particle from a rank" << std::endl;
+    std::cout << std::string(80, '=') << std::endl;
 
-TEST_CASE("Testing the forward communication","[.][Ignored for now .. Needs global particle id]") {
-    std::cout << "Testing the forward communication" << std::endl;
+    // Particles
+    std::vector<double> x1 = {
+        -220.40, -180.10,   80.55,   // particle 0  owned by Q00 (-- interior) region 1
+        -140.75, -260.33, -120.18,   // particle 1  owned by Q00 (-- interior) region 1
+        -180.66,   30.77,   14.95,   // particle 2  owned by Q00 (-+ interior) region 3
+        -280.66,  130.77,  214.95,   // particle 3  owned by Q00 (-+ interior) region 3
+          12.60,  -18.90,  130.10,   // particle 4  owned by Q00 (+- interior) region 2
+          35.10, -140.48,   12.66,   // particle 5  owned by Q00 (+- interior) region 2
+    };
+
+    std::vector<double> v1 = {
+        72.4, -33.1,  95.0,   // particle 0
+       -88.6,  14.3, -56.7,   // particle 1
+        41.2, -19.8,  63.5,   // particle 2
+        51.2, -19.8, 163.5,   // particle 3
+       -97.1,  28.9, -74.4,   // particle 4
+         3.6,  89.2, -12.5,   // particle 5
+    };
+
+    std::vector<double> f1 = {
+       12.4, -33.9,  45.2,   // particle 0
+      -18.6,   7.3, -41.5,   // particle 1
+       29.7,  -5.4,  38.9,   // particle 2
+       39.7, -15.4,  18.9,   // particle 3
+      -22.1,  16.0, -49.7,   // particle 4
+        3.1,  27.6, -14.8,   // particle 5
+    };
+
+    std::vector<double> m1 =
+    {
+        3.4,  // particle 0
+        7.8,  // particle 1
+        0.9,  // particle 2
+        3.0,  // particle 3
+        5.6,  // particle 4
+        9.1,  // particle 5
+    };
+
+    std::vector<double> r1 =
+    {
+        42.7,  // particle 0
+        18.3,  // particle 1
+        73.9,  // particle 2
+        23.9,  // particle 3
+        56.4,  // particle 4
+        91.2   // particle 5
+    };
+
+
+
+    // expected message
+    // size
+    int expectedMessagesSize[6] = {
+        1,
+        23,
+        1,
+        23,
+        1,
+        1
+    };
+    // contents
+    std::vector<double> expectedMessages[6] = {
+        {0.0}, // to xlo --> no xlo
+        {2.0,
+          12.6, -18.9,130.10,   // x
+         -97.1,  28.9, -74.4,   // v
+         -22.1,  16.0, -49.7,   // f
+           5.6,                 // m
+          56.4,                 // r
+          35.1,-140.48, 12.66,  // x
+           3.6,   89.2, -12.5,  // v
+            3.1,  27.6, -14.8,  // f
+            9.1,                // m
+            91.2                // r
+        }, //  to xhi --> to the region 2
+        {0.0}, // to ylo --> no ylo
+        {2.0,
+         -180.66,30.77, 14.95, // x
+          41.2, -19.8,  63.5,  // v
+          29.7,  -5.4,  38.9,  // f
+          0.9,                 // m
+          73.9,                // r
+        -280.66,  130.77, 214.95,
+           51.2,   -19.8, 163.5,
+           39.7,   -15.4,  18.9,
+           3.0,
+           23.9
+          }, // to yhi  --> to the region 3
+        {0.0},  // to zlo
+        {0.0},  // to zhi
+    };
+
+    std::vector<double> expectedX1 = {
+        -220.40, -180.10,   80.55,   // particle 0  owned by Q00 (-- interior) region 1
+        -140.75, -260.33, -120.18,   // particle 1  owned by Q00 (-- interior) region 1
+    };
+
+    std::vector<double> expectedV1 = {
+        72.4, -33.1,  95.0,   // particle 0
+       -88.6,  14.3, -56.7,   // particle 1
+    };
+
+    std::vector<double> expectedF1 = {
+       12.4, -33.9,  45.2,   // particle 0
+      -18.6,   7.3, -41.5,   // particle 1
+    };
+
+    std::vector<double> expectedM1 = {
+        3.4,  // particle 0
+        7.8,  // particle 1
+    };
+
+    std::vector<double> expectedR1 = {
+        42.7,  // particle 0
+        18.3,  // particle 1
+    };
+
+    // expected destinations
+    std::array<double, 6> expectedDests = { -1,1,-1,2,-1,-1 };
+
+
+
+    int myId = 0;
+    std::array<int, 3> ranks = { 2,2,1 };
+
+    // creating the engine_ptr
+    std::vector<double> x0 = {}, v0 = {}, f0 = {}, m0 = {}, r0 = {};
+    auto engine_ptr = build_engine_set_particles(myId, ranks, x0, v0, f0, r0, m0);
+
+    /* After the engine_ptr is created in the engineFixture
+     * the init function is called form every Ref object
+     * in the engine one of them is the particles which
+     * removes out of range particles.
+     * So we need to return a reference to particles
+     * from the engine and then reset particles coordinates here
+     */
+     // returning the particles
+    auto& particlesRef = engine_ptr->getParticlesForUpdate();
+    // cehcking the pointer
+    REQUIRE(particlesRef);
+    // convering it to the mockedParticles since I need 
+    // the reset_particles  function
+    MockedParticles* mockedParticlesConv = dynamic_cast<MockedParticles*>(particlesRef.get());
+    // checking the conversion
+    if (mockedParticlesConv == nullptr)
+        throw std::invalid_argument("Wrong type in the engine_ptr!");
+    // resetting particle coordinates
+    // copying the x, v, f, r, m values since we 
+    // move the inputs to the particles by reference
+    // so these would be null after moving into 
+    // the mockedParticles object
+    std::vector<double> x1Copy = x1, v1Copy = v1, f1Copy = f1, r1Copy = r1, m1Copy = m1;
+    std::vector<int> idCopy;
+    idCopy.resize(x1.size() / 3);
+    std::iota(idCopy.begin(), idCopy.end(), 0);
+    int nmax = static_cast<int>(x1Copy.size()) / 3;
+    mockedParticlesConv->resetParticles(nmax, idCopy, x1Copy, v1Copy, f1Copy, r1Copy, m1Copy);
+
+
+    // returning the communicatorRef from the engine_ptr
+    auto& communicator1Ref = engine_ptr->getCommunicator();
+    // checking the communicator 
+    REQUIRE(communicator1Ref);
+    // returning the exchange message
+    std::vector<double>* messages1 = communicator1Ref->sendExchangeParticles();
+
+    // getting x,v,f,m and r values
+    auto* myX = particlesRef->getXData();
+    auto* myV = particlesRef->getVData();
+    auto* myF = particlesRef->getFData();
+    auto* myR = particlesRef->getRData();
+    auto* myM = particlesRef->getMData();
+
+    /*
+     * checking the message
+     */
+    REQUIRE(messages1);
+    // checking its size
+    for (int i = 0; i < 6; i++) {
+        REQUIRE(messages1[i].size() == expectedMessagesSize[i]);
+    }
+    // checking its contents
+    for (int i = 0; i < 6; i++) {
+        for (int j = 0; j < messages1[i].size(); j++)
+            REQUIRE_THAT(messages1[i][j], Catch::Matchers::WithinAbs(expectedMessages[i][j], 1e-6));
+    }
+    // checking message destinations
+    auto exchangeDests = communicator1Ref->returnExchangeDests();
+    REQUIRE(exchangeDests == exchangeDests);
+
+
+    /*
+     * checking if the moved particle has deleted correctly
+     */
+
+     // checking the returned pointers
+    REQUIRE(myX);
+    REQUIRE(myV);
+    REQUIRE(myF);
+    REQUIRE(myR);
+    REQUIRE(myM);
+    // checking the contents
+    REQUIRE_THAT(myX, Array3DMatcher(expectedX1.data(), 2, 1e-6));
+    REQUIRE_THAT(myV, Array3DMatcher(expectedV1.data(), 2, 1e-6));
+    REQUIRE_THAT(myF, Array3DMatcher(expectedF1.data(), 2, 1e-6));
+    REQUIRE_THAT(myR, Array1DMatcher(expectedR1.data(), 2, 1e-6));
+    REQUIRE_THAT(myM, Array1DMatcher(expectedM1.data(), 2, 1e-6));
+
+}
+
+TEST_CASE("Testing receiving the particles from another processor")
+{
+    // the rank2 
+    std::vector<double> x2 =
+    {
+         180.62, -210.44,   60.91,   // particle 5  owned by Q10 (+- interior) region 2
+         260.11, -140.88, -200.30,   // particle 6  owned by Q10 (+- interior) region 2
+         190.27,  -40.22, -236.70,   // particle 9  owned by Q10 (+- interior) region 2
+    };
+
+    std::vector<double> v2 =
+    {
+        54.7, -66.3,  77.1,   // particle 5
+       -45.9,  18.0,  92.6,   // particle 6
+       -72.5,  44.3, -95.8,   // particle 9
+    };
+
+    std::vector<double> f2 =
+    {
+        44.5, -36.7,  21.4,   // particle 5
+        -9.9,   5.6,  31.2,   // particle 6
+       -34.8,  25.1, -45.6,   // particle 9
+    };
+
+    std::vector<double> m2 =
+    {
+        2.7,  // particle 5
+        6.0,  // particle 6
+        4.1,  // particle 9
+    };
+
+    std::vector<double> r2 =
+    {
+        2.7,  // particle 5
+        6.0,  // particle 6
+        4.1,  // particle 9
+    };
+
+    std::vector<double> x3 =
+    {
+        -200.90,  190.36,  -40.58,   // particle 10 owned by Q01 (-+ interior) region 3
+        -270.22,  120.74,  210.46,   // particle 11 owned by Q01 (-+ interior) region 3
+        -120.33,   20.18, -199.05,   // particle 12 owned by Q01 (-+ interior) region 3
+         -28.20,  180.66,   66.03,   // particle 14 owned by Q01 (-+ interior) region 3
+    };
+
+    std::vector<double> v3 =
+    {
+        21.7, -38.4,  68.2,   // particle 10
+       -14.9,  87.6, -29.3,   // particle 11
+        46.1, -61.5,  33.8,   // particle 12
+       -53.7,  27.5, -41.6,   // particle 14
+    };
+
+    std::vector<double> f3 =
+    {
+        14.8,  -7.3,  39.6,   // particle 10
+       -21.9,  30.4, -16.5,   // particle 11
+        41.2, -29.8,   9.7,   // particle 12
+       -25.7,  17.8, -38.6,   // particle 14
+    };
+
+    std::vector<double> m3 =
+    {
+        0.5,  // particle 10
+        9.8,  // particle 11
+        3.0,  // particle 12
+        5.9,  // particle 14
+    };
+
+    std::vector<double> r3 =
+    {
+        0.5,  // particle 10
+        9.8,  // particle 11
+        3.0,  // particle 12
+        5.9,  // particle 14
+    };
+
+
+    // expected results
+    std::vector<double> expectedX2 = {
+         180.62, -210.44,   60.91,   // particle 5  owned by Q10 (+- interior) region 2
+         260.11, -140.88, -200.30,   // particle 6  owned by Q10 (+- interior) region 2
+         190.27,  -40.22, -236.70,   // particle 9  owned by Q10 (+- interior) region 2
+
+           12.6,  -18.90,  130.10,
+           35.1, -140.48,   12.66
+    };
+
+    std::vector<double> expectedV2 = {
+        54.7, -66.3,  77.1,   // particle 5
+       -45.9,  18.0,  92.6,   // particle 6
+       -72.5,  44.3, -95.8,   // particle 9
+
+
+         -97.1,  28.9, -74.4,
+           3.6,   89.2, -12.5
+    };
+
+    std::vector<double> expectedF2 = {
+        44.5, -36.7,  21.4,   // particle 5
+        -9.9,   5.6,  31.2,   // particle 6
+       -34.8,  25.1, -45.6,   // particle 9
+
+
+         -22.1,  16.0, -49.7,
+           3.1,  27.6, -14.8
+    };
+
+    std::vector<double> expectedM2 = {
+        2.7,  // particle 5
+        6.0,  // particle 6
+        4.1,  // particle 9
+
+        5.6,
+        9.1
+    };
+
+    std::vector<double> expectedR2 = {
+        2.7,  // particle 5
+        6.0,  // particle 6
+        4.1,  // particle 9
+
+
+        56.4,
+        91.2
+    };
+
+    std::vector<double> expectedX3 =
+    {
+        -200.90,  190.36,  -40.58,   // particle 10 owned by Q01 (-+ interior) region 3
+        -270.22,  120.74,  210.46,   // particle 11 owned by Q01 (-+ interior) region 3
+        -120.33,   20.18, -199.05,   // particle 12 owned by Q01 (-+ interior) region 3
+         -28.20,  180.66,   66.03,   // particle 14 owned by Q01 (-+ interior) region 3
+
+        -180.66,   30.77,   14.95
+    };
+
+    std::vector<double> expectedV3 =
+    {
+        21.7, -38.4,  68.2,   // particle 10
+       -14.9,  87.6, -29.3,   // particle 11
+        46.1, -61.5,  33.8,   // particle 12
+       -53.7,  27.5, -41.6,   // particle 14
+
+        41.2, -19.8,  63.5
+    };
+
+    std::vector<double> expectedF3 =
+    {
+        14.8,  -7.3,  39.6,   // particle 10
+       -21.9,  30.4, -16.5,   // particle 11
+        41.2, -29.8,   9.7,   // particle 12
+       -25.7,  17.8, -38.6,   // particle 14
+
+        29.7,  -5.4,  38.9
+    };
+
+    std::vector<double> expectedM3 =
+    {
+        0.5,  // particle 10
+        9.8,  // particle 11
+        3.0,  // particle 12
+        5.9,  // particle 14
+
+        0.9
+    };
+
+    std::vector<double> expectedR3 =
+    {
+        0.5,  // particle 10
+        9.8,  // particle 11
+        3.0,  // particle 12
+        5.9,  // particle 14
+
+        73.9
+    };
+
+
+    // messages
+    // contents
+    std::vector<double> messages[6] = {
+        {0.0}, // to xlo --> no xlo
+        {2.0,
+          12.6, -18.9,130.10,   // x
+         -97.1,  28.9, -74.4,   // v
+         -22.1,  16.0, -49.7,   // f
+           5.6,                 // m
+          56.4,                 // r
+          35.1,-140.48, 12.66,  // x
+           3.6,   89.2, -12.5,  // v
+            3.1,  27.6, -14.8,  // f
+            9.1,                // m
+            91.2                // r
+        }, //  to xhi --> to the region 2
+        {0.0}, // to ylo --> no ylo
+        {1.0,
+         -180.66,30.77, 14.95, // x
+          41.2, -19.8,  63.5,  // v
+          29.7,  -5.4,  38.9,  // f
+          0.9,                 // m
+          73.9                 // r
+          }, // to yhi  --> to the region 3
+        {0.0},  // to zlo
+        {0.0},  // to zhi
+    };
+
+
+    std::array<int, 3> nranks = { 2,2,1 };
+    // engine for the rank2
+    int id2 = 1;
+    int nmax2 = static_cast<int>(x2.size()) / 3;
+    auto engine_ptr2 = build_engine_set_particles(id2, nranks, x2, v2, f2, r2, m2);
+    // engine for the rank3
+    int id3 = 2;
+    int nmax3 = static_cast<int>(x3.size()) / 3;
+    auto engine_ptr3 = build_engine_set_particles(id3, nranks, x3, v3, f3, r3, m3);
+
+    // communicator for the engine2
+    auto& communicator2Ref = engine_ptr2->getCommunicator();
+    // communicator for the engine3
+    auto& communicator3Ref = engine_ptr3->getCommunicator();
+    // checking the pointers
+    REQUIRE(communicator2Ref);
+    REQUIRE(communicator3Ref);
+
+    // receiving the messages
+    communicator2Ref->recvExchangeParticles(messages[1]);
+    // receiving the messages
+    communicator3Ref->recvExchangeParticles(messages[3]);
+    // the message has to be empty after recvExchangeParticles
+    // as the transfer is completed afterwards
+    REQUIRE(messages[1].size() == 1);
+    REQUIRE(messages[3].size() == 1);
+    REQUIRE_THAT(messages[1][0], Catch::Matchers::WithinAbs(0.0, 1e-6));
+    REQUIRE_THAT(messages[3][0], Catch::Matchers::WithinAbs(0.0, 1e-6));
+
+    // getting particles
+    auto& particles2Ref = engine_ptr2->getParticlesForUpdate();
+    auto& particles3Ref = engine_ptr3->getParticlesForUpdate();
+    // checking the pointers
+    REQUIRE(particles2Ref);
+    REQUIRE(particles3Ref);
+    // getting x, v, f, m , r values from the engine_ptr2
+    auto* myX2 = particles2Ref->getXData();
+    auto* myV2 = particles2Ref->getVData();
+    auto* myF2 = particles2Ref->getFData();
+    auto* myR2 = particles2Ref->getRData();
+    auto* myM2 = particles2Ref->getMData();
+    // checking the pointers
+    REQUIRE(myX2);
+    REQUIRE(myV2);
+    REQUIRE(myF2);
+    REQUIRE(myR2);
+    REQUIRE(myM2);
+    // getting x, v, f, m, r values from the engine_ptr3
+    auto* myX3 = particles3Ref->getXData();
+    auto* myV3 = particles3Ref->getVData();
+    auto* myF3 = particles3Ref->getFData();
+    auto* myR3 = particles3Ref->getRData();
+    auto* myM3 = particles3Ref->getMData();
+    // checking the pointers
+    REQUIRE(myX3);
+    REQUIRE(myV3);
+    REQUIRE(myF3);
+    REQUIRE(myR3);
+    REQUIRE(myM3);
+
+
+
+    // checking the results
+    // the rank2
+    REQUIRE_THAT(myX2, Array3DMatcher(expectedX2.data(), 5, 1e-6));
+    REQUIRE_THAT(myV2, Array3DMatcher(expectedV2.data(), 5, 1e-6));
+    REQUIRE_THAT(myF2, Array3DMatcher(expectedF2.data(), 5, 1e-6));
+    REQUIRE_THAT(myR2, Array1DMatcher(expectedR2.data(), 5, 1e-6));
+    REQUIRE_THAT(myM2, Array1DMatcher(expectedM2.data(), 5, 1e-6));
+    // the rank3
+    REQUIRE_THAT(myX3, Array3DMatcher(expectedX3.data(), 5, 1e-6));
+    REQUIRE_THAT(myV3, Array3DMatcher(expectedV3.data(), 5, 1e-6));
+    REQUIRE_THAT(myF3, Array3DMatcher(expectedF3.data(), 5, 1e-6));
+    REQUIRE_THAT(myR3, Array1DMatcher(expectedR3.data(), 5, 1e-6));
+    REQUIRE_THAT(myM3, Array1DMatcher(expectedM3.data(), 5, 1e-6));
+}
+
+TEST_CASE("Test sending and recieving ghost particles","[.][Ignored for now .. Needs global particle id]") {
+    std::cout << "Test sending and receiving ghost particles" << std::endl;
     std::cout << std::string(80, '=') << std::endl;
 
     // data 
@@ -1583,502 +2055,3 @@ TEST_CASE("Testing the destination ranks for each rank")
     }
 }
 
-TEST_CASE("Testing the message for sending an out of range particle from a rank")
-{
-    std::cout << "Testing the message for sending an out of range particle from a rank" << std::endl;
-    std::cout << std::string(80, '=') << std::endl;
-
-    // Particles
-    std::vector<double> x1 = {
-        -220.40, -180.10,   80.55,   // particle 0  owned by Q00 (-- interior) region 1
-        -140.75, -260.33, -120.18,   // particle 1  owned by Q00 (-- interior) region 1
-        -180.66,   30.77,   14.95,   // particle 2  owned by Q00 (-+ interior) region 3
-        -280.66,  130.77,  214.95,   // particle 3  owned by Q00 (-+ interior) region 3
-          12.60,  -18.90,  130.10,   // particle 4  owned by Q00 (+- interior) region 2
-          35.10, -140.48,   12.66,   // particle 5  owned by Q00 (+- interior) region 2
-    };
-
-    std::vector<double> v1 = {
-        72.4, -33.1,  95.0,   // particle 0
-       -88.6,  14.3, -56.7,   // particle 1
-        41.2, -19.8,  63.5,   // particle 2
-        51.2, -19.8, 163.5,   // particle 3
-       -97.1,  28.9, -74.4,   // particle 4
-         3.6,  89.2, -12.5,   // particle 5
-    };
-
-    std::vector<double> f1 = {
-       12.4, -33.9,  45.2,   // particle 0
-      -18.6,   7.3, -41.5,   // particle 1
-       29.7,  -5.4,  38.9,   // particle 2
-       39.7, -15.4,  18.9,   // particle 3
-      -22.1,  16.0, -49.7,   // particle 4
-        3.1,  27.6, -14.8,   // particle 5
-    };
-
-    std::vector<double> m1 =
-    {
-        3.4,  // particle 0
-        7.8,  // particle 1
-        0.9,  // particle 2
-        3.0,  // particle 3
-        5.6,  // particle 4
-        9.1,  // particle 5
-    };
-
-    std::vector<double> r1 =
-    {
-        42.7,  // particle 0
-        18.3,  // particle 1
-        73.9,  // particle 2
-        23.9,  // particle 3
-        56.4,  // particle 4
-        91.2   // particle 5
-    };
-
-
-
-    // expected message
-    // size
-    int expectedMessagesSize[6] = {
-        1,
-        23,
-        1,
-        23,
-        1,
-        1
-    };
-    // contents
-    std::vector<double> expectedMessages[6] = {
-        {0.0}, // to xlo --> no xlo
-        {2.0,
-          12.6, -18.9,130.10,   // x
-         -97.1,  28.9, -74.4,   // v
-         -22.1,  16.0, -49.7,   // f
-           5.6,                 // m
-          56.4,                 // r
-          35.1,-140.48, 12.66,  // x
-           3.6,   89.2, -12.5,  // v
-            3.1,  27.6, -14.8,  // f
-            9.1,                // m
-            91.2                // r
-        }, //  to xhi --> to the region 2
-        {0.0}, // to ylo --> no ylo
-        {2.0,
-         -180.66,30.77, 14.95, // x
-          41.2, -19.8,  63.5,  // v
-          29.7,  -5.4,  38.9,  // f
-          0.9,                 // m
-          73.9,                // r
-        -280.66,  130.77, 214.95,
-           51.2,   -19.8, 163.5,
-           39.7,   -15.4,  18.9,
-           3.0,
-           23.9
-          }, // to yhi  --> to the region 3
-        {0.0},  // to zlo
-        {0.0},  // to zhi
-    };
-
-    std::vector<double> expectedX1 = {
-        -220.40, -180.10,   80.55,   // particle 0  owned by Q00 (-- interior) region 1
-        -140.75, -260.33, -120.18,   // particle 1  owned by Q00 (-- interior) region 1
-    };
-
-    std::vector<double> expectedV1 = {
-        72.4, -33.1,  95.0,   // particle 0
-       -88.6,  14.3, -56.7,   // particle 1
-    };
-
-    std::vector<double> expectedF1 = {
-       12.4, -33.9,  45.2,   // particle 0
-      -18.6,   7.3, -41.5,   // particle 1
-    };
-
-    std::vector<double> expectedM1 = {
-        3.4,  // particle 0
-        7.8,  // particle 1
-    };
-
-    std::vector<double> expectedR1 = {
-        42.7,  // particle 0
-        18.3,  // particle 1
-    };
-
-    // expected destinations
-    std::array<double, 6> expectedDests = { -1,1,-1,2,-1,-1 };
-
-
-
-    int myId = 0;
-    std::array<int, 3> ranks = { 2,2,1 };
-
-    // creating the engine_ptr
-    std::vector<double> x0 = {}, v0 = {}, f0 = {}, m0 = {}, r0 = {};
-    auto engine_ptr = build_engine_set_particles(myId, ranks, x0, v0, f0, r0, m0);
-
-    /* After the engine_ptr is created in the engineFixture
-     * the init function is called form every Ref object
-     * in the engine one of them is the particles which
-     * removes out of range particles.
-     * So we need to return a reference to particles
-     * from the engine and then reset particles coordinates here
-     */
-     // returning the particles
-    auto& particlesRef = engine_ptr->getParticlesForUpdate();
-    // cehcking the pointer
-    REQUIRE(particlesRef);
-    // convering it to the mockedParticles since I need 
-    // the reset_particles  function
-    MockedParticles* mockedParticlesConv = dynamic_cast<MockedParticles*>(particlesRef.get());
-    // checking the conversion
-    if (mockedParticlesConv == nullptr)
-        throw std::invalid_argument("Wrong type in the engine_ptr!");
-    // resetting particle coordinates
-    // copying the x, v, f, r, m values since we 
-    // move the inputs to the particles by reference
-    // so these would be null after moving into 
-    // the mockedParticles object
-    std::vector<double> x1Copy = x1, v1Copy = v1, f1Copy = f1, r1Copy = r1, m1Copy = m1;
-    std::vector<int> idCopy;
-    idCopy.resize(x1.size() / 3);
-    std::iota(idCopy.begin(), idCopy.end(), 0);
-    int nmax = static_cast<int>(x1Copy.size()) / 3;
-    mockedParticlesConv->resetParticles(nmax, idCopy, x1Copy, v1Copy, f1Copy, r1Copy, m1Copy);
-
-
-    // returning the communicatorRef from the engine_ptr
-    auto& communicator1Ref = engine_ptr->getCommunicator();
-    // checking the communicator 
-    REQUIRE(communicator1Ref);
-    // returning the exchange message
-    std::vector<double>* messages1 = communicator1Ref->sendExchangeParticles();
-
-    // getting x,v,f,m and r values
-    auto* myX = particlesRef->getXData();
-    auto* myV = particlesRef->getVData();
-    auto* myF = particlesRef->getFData();
-    auto* myR = particlesRef->getRData();
-    auto* myM = particlesRef->getMData();
-
-    /*
-     * checking the message
-     */
-    REQUIRE(messages1);
-    // checking its size
-    for (int i = 0; i < 6; i++) {
-        REQUIRE(messages1[i].size() == expectedMessagesSize[i]);
-    }
-    // checking its contents
-    for (int i = 0; i < 6; i++) {
-        for (int j = 0; j < messages1[i].size(); j++)
-            REQUIRE_THAT(messages1[i][j], Catch::Matchers::WithinAbs(expectedMessages[i][j], 1e-6));
-    }
-    // checking message destinations
-    auto exchangeDests = communicator1Ref->returnExchangeDests();
-    REQUIRE(exchangeDests == exchangeDests);
-
-
-    /*
-     * checking if the moved particle has deleted correctly
-     */
-
-     // checking the returned pointers
-    REQUIRE(myX);
-    REQUIRE(myV);
-    REQUIRE(myF);
-    REQUIRE(myR);
-    REQUIRE(myM);
-    // checking the contents
-    REQUIRE_THAT(myX, Array3DMatcher(expectedX1.data(), 2, 1e-6));
-    REQUIRE_THAT(myV, Array3DMatcher(expectedV1.data(), 2, 1e-6));
-    REQUIRE_THAT(myF, Array3DMatcher(expectedF1.data(), 2, 1e-6));
-    REQUIRE_THAT(myR, Array1DMatcher(expectedR1.data(), 2, 1e-6));
-    REQUIRE_THAT(myM, Array1DMatcher(expectedM1.data(), 2, 1e-6));
-
-}
-
-TEST_CASE("Testing receiving the particles from another processor")
-{
-    // the rank2 
-    std::vector<double> x2 =
-    {
-         180.62, -210.44,   60.91,   // particle 5  owned by Q10 (+- interior) region 2
-         260.11, -140.88, -200.30,   // particle 6  owned by Q10 (+- interior) region 2
-         190.27,  -40.22, -236.70,   // particle 9  owned by Q10 (+- interior) region 2
-    };
-
-    std::vector<double> v2 =
-    {
-        54.7, -66.3,  77.1,   // particle 5
-       -45.9,  18.0,  92.6,   // particle 6
-       -72.5,  44.3, -95.8,   // particle 9
-    };
-
-    std::vector<double> f2 =
-    {
-        44.5, -36.7,  21.4,   // particle 5
-        -9.9,   5.6,  31.2,   // particle 6
-       -34.8,  25.1, -45.6,   // particle 9
-    };
-
-    std::vector<double> m2 =
-    {
-        2.7,  // particle 5
-        6.0,  // particle 6
-        4.1,  // particle 9
-    };
-
-    std::vector<double> r2 =
-    {
-        2.7,  // particle 5
-        6.0,  // particle 6
-        4.1,  // particle 9
-    };
-
-    std::vector<double> x3 =
-    {
-        -200.90,  190.36,  -40.58,   // particle 10 owned by Q01 (-+ interior) region 3
-        -270.22,  120.74,  210.46,   // particle 11 owned by Q01 (-+ interior) region 3
-        -120.33,   20.18, -199.05,   // particle 12 owned by Q01 (-+ interior) region 3
-         -28.20,  180.66,   66.03,   // particle 14 owned by Q01 (-+ interior) region 3
-    };
-
-    std::vector<double> v3 =
-    {
-        21.7, -38.4,  68.2,   // particle 10
-       -14.9,  87.6, -29.3,   // particle 11
-        46.1, -61.5,  33.8,   // particle 12
-       -53.7,  27.5, -41.6,   // particle 14
-    };
-
-    std::vector<double> f3 =
-    {
-        14.8,  -7.3,  39.6,   // particle 10
-       -21.9,  30.4, -16.5,   // particle 11
-        41.2, -29.8,   9.7,   // particle 12
-       -25.7,  17.8, -38.6,   // particle 14
-    };
-
-    std::vector<double> m3 =
-    {
-        0.5,  // particle 10
-        9.8,  // particle 11
-        3.0,  // particle 12
-        5.9,  // particle 14
-    };
-
-    std::vector<double> r3 =
-    {
-        0.5,  // particle 10
-        9.8,  // particle 11
-        3.0,  // particle 12
-        5.9,  // particle 14
-    };
-
-
-    // expected results
-    std::vector<double> expectedX2 = {
-         180.62, -210.44,   60.91,   // particle 5  owned by Q10 (+- interior) region 2
-         260.11, -140.88, -200.30,   // particle 6  owned by Q10 (+- interior) region 2
-         190.27,  -40.22, -236.70,   // particle 9  owned by Q10 (+- interior) region 2
-
-           12.6,  -18.90,  130.10,
-           35.1, -140.48,   12.66
-    };
-
-    std::vector<double> expectedV2 = {
-        54.7, -66.3,  77.1,   // particle 5
-       -45.9,  18.0,  92.6,   // particle 6
-       -72.5,  44.3, -95.8,   // particle 9
-
-
-         -97.1,  28.9, -74.4,
-           3.6,   89.2, -12.5
-    };
-
-    std::vector<double> expectedF2 = {
-        44.5, -36.7,  21.4,   // particle 5
-        -9.9,   5.6,  31.2,   // particle 6
-       -34.8,  25.1, -45.6,   // particle 9
-
-
-         -22.1,  16.0, -49.7,
-           3.1,  27.6, -14.8
-    };
-
-    std::vector<double> expectedM2 = {
-        2.7,  // particle 5
-        6.0,  // particle 6
-        4.1,  // particle 9
-
-        5.6,
-        9.1
-    };
-
-    std::vector<double> expectedR2 = {
-        2.7,  // particle 5
-        6.0,  // particle 6
-        4.1,  // particle 9
-
-
-        56.4,
-        91.2
-    };
-
-    std::vector<double> expectedX3 =
-    {
-        -200.90,  190.36,  -40.58,   // particle 10 owned by Q01 (-+ interior) region 3
-        -270.22,  120.74,  210.46,   // particle 11 owned by Q01 (-+ interior) region 3
-        -120.33,   20.18, -199.05,   // particle 12 owned by Q01 (-+ interior) region 3
-         -28.20,  180.66,   66.03,   // particle 14 owned by Q01 (-+ interior) region 3
-
-        -180.66,   30.77,   14.95
-    };
-
-    std::vector<double> expectedV3 =
-    {
-        21.7, -38.4,  68.2,   // particle 10
-       -14.9,  87.6, -29.3,   // particle 11
-        46.1, -61.5,  33.8,   // particle 12
-       -53.7,  27.5, -41.6,   // particle 14
-
-        41.2, -19.8,  63.5
-    };
-
-    std::vector<double> expectedF3 =
-    {
-        14.8,  -7.3,  39.6,   // particle 10
-       -21.9,  30.4, -16.5,   // particle 11
-        41.2, -29.8,   9.7,   // particle 12
-       -25.7,  17.8, -38.6,   // particle 14
-
-        29.7,  -5.4,  38.9
-    };
-
-    std::vector<double> expectedM3 =
-    {
-        0.5,  // particle 10
-        9.8,  // particle 11
-        3.0,  // particle 12
-        5.9,  // particle 14
-
-        0.9
-    };
-
-    std::vector<double> expectedR3 =
-    {
-        0.5,  // particle 10
-        9.8,  // particle 11
-        3.0,  // particle 12
-        5.9,  // particle 14
-
-        73.9
-    };
-
-
-    // messages
-    // contents
-    std::vector<double> messages[6] = {
-        {0.0}, // to xlo --> no xlo
-        {2.0,
-          12.6, -18.9,130.10,   // x
-         -97.1,  28.9, -74.4,   // v
-         -22.1,  16.0, -49.7,   // f
-           5.6,                 // m
-          56.4,                 // r
-          35.1,-140.48, 12.66,  // x
-           3.6,   89.2, -12.5,  // v
-            3.1,  27.6, -14.8,  // f
-            9.1,                // m
-            91.2                // r
-        }, //  to xhi --> to the region 2
-        {0.0}, // to ylo --> no ylo
-        {1.0,
-         -180.66,30.77, 14.95, // x
-          41.2, -19.8,  63.5,  // v
-          29.7,  -5.4,  38.9,  // f
-          0.9,                 // m
-          73.9                 // r
-          }, // to yhi  --> to the region 3
-        {0.0},  // to zlo
-        {0.0},  // to zhi
-    };
-
-
-    std::array<int, 3> nranks = { 2,2,1 };
-    // engine for the rank2
-    int id2 = 1;
-    int nmax2 = static_cast<int>(x2.size()) / 3;
-    auto engine_ptr2 = build_engine_set_particles(id2, nranks, x2, v2, f2, r2, m2);
-    // engine for the rank3
-    int id3 = 2;
-    int nmax3 = static_cast<int>(x3.size()) / 3;
-    auto engine_ptr3 = build_engine_set_particles(id3, nranks, x3, v3, f3, r3, m3);
-
-    // communicator for the engine2
-    auto& communicator2Ref = engine_ptr2->getCommunicator();
-    // communicator for the engine3
-    auto& communicator3Ref = engine_ptr3->getCommunicator();
-    // checking the pointers
-    REQUIRE(communicator2Ref);
-    REQUIRE(communicator3Ref);
-
-    // receiving the messages
-    communicator2Ref->recvExchangeParticles(messages[1]);
-    // receiving the messages
-    communicator3Ref->recvExchangeParticles(messages[3]);
-    // the message has to be empty after recvExchangeParticles
-    // as the transfer is completed afterwards
-    REQUIRE(messages[1].size() == 1);
-    REQUIRE(messages[3].size() == 1);
-    REQUIRE_THAT(messages[1][0], Catch::Matchers::WithinAbs(0.0, 1e-6));
-    REQUIRE_THAT(messages[3][0], Catch::Matchers::WithinAbs(0.0, 1e-6));
-
-    // getting particles
-    auto& particles2Ref = engine_ptr2->getParticlesForUpdate();
-    auto& particles3Ref = engine_ptr3->getParticlesForUpdate();
-    // checking the pointers
-    REQUIRE(particles2Ref);
-    REQUIRE(particles3Ref);
-    // getting x, v, f, m , r values from the engine_ptr2
-    auto* myX2 = particles2Ref->getXData();
-    auto* myV2 = particles2Ref->getVData();
-    auto* myF2 = particles2Ref->getFData();
-    auto* myR2 = particles2Ref->getRData();
-    auto* myM2 = particles2Ref->getMData();
-    // checking the pointers
-    REQUIRE(myX2);
-    REQUIRE(myV2);
-    REQUIRE(myF2);
-    REQUIRE(myR2);
-    REQUIRE(myM2);
-    // getting x, v, f, m, r values from the engine_ptr3
-    auto* myX3 = particles3Ref->getXData();
-    auto* myV3 = particles3Ref->getVData();
-    auto* myF3 = particles3Ref->getFData();
-    auto* myR3 = particles3Ref->getRData();
-    auto* myM3 = particles3Ref->getMData();
-    // checking the pointers
-    REQUIRE(myX3);
-    REQUIRE(myV3);
-    REQUIRE(myF3);
-    REQUIRE(myR3);
-    REQUIRE(myM3);
-
-
-
-    // checking the results
-    // the rank2
-    REQUIRE_THAT(myX2, Array3DMatcher(expectedX2.data(), 5, 1e-6));
-    REQUIRE_THAT(myV2, Array3DMatcher(expectedV2.data(), 5, 1e-6));
-    REQUIRE_THAT(myF2, Array3DMatcher(expectedF2.data(), 5, 1e-6));
-    REQUIRE_THAT(myR2, Array1DMatcher(expectedR2.data(), 5, 1e-6));
-    REQUIRE_THAT(myM2, Array1DMatcher(expectedM2.data(), 5, 1e-6));
-    // the rank3
-    REQUIRE_THAT(myX3, Array3DMatcher(expectedX3.data(), 5, 1e-6));
-    REQUIRE_THAT(myV3, Array3DMatcher(expectedV3.data(), 5, 1e-6));
-    REQUIRE_THAT(myF3, Array3DMatcher(expectedF3.data(), 5, 1e-6));
-    REQUIRE_THAT(myR3, Array1DMatcher(expectedR3.data(), 5, 1e-6));
-    REQUIRE_THAT(myM3, Array1DMatcher(expectedM3.data(), 5, 1e-6));
-}
