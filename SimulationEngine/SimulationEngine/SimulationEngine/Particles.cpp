@@ -2,6 +2,9 @@
 #include "Engine.h"
 #include "Error.h"
 
+// the header for the iota function
+#include <numeric>
+
 Particles::Particles() :
 	Ref{"Particles-1" },
 	nlocal{ 0 },
@@ -21,6 +24,7 @@ Particles::Particles(int nmax_) :
 	nlocal{0},
 	nmax{ nmax_ }
 {
+	id.reserve(nmax);
 	x.reserve(3 * nmax);
 	v.reserve(3 * nmax);
 	f.reserve(3 * nmax);
@@ -67,6 +71,8 @@ Particles::Particles(
 		nlocal != nlocalM ||
 		nlocal != nlocalR)
 		throw std::invalid_argument("Wrong data size");
+
+	resetIds();
 }
 
 
@@ -77,6 +83,7 @@ Particles& Particles::operator=(const Particles& rhs_) {
 	nlocal = rhs_.nlocal;
 	nghosts = rhs_.nghosts;
 	nmax = rhs_.nmax;
+	id = rhs_.id;
 	x = rhs_.x;
 	v = rhs_.v;
 	f = rhs_.f;
@@ -93,6 +100,7 @@ Particles& Particles::operator=(Particles&& rhs_) {
 	nlocal = rhs_.nlocal;
 	nghosts = rhs_.nghosts;
 	nmax = rhs_.nmax;
+	id = std::move(rhs_.id);
 	x = std::move(rhs_.x);
 	v = std::move(rhs_.v);
 	f = std::move(rhs_.f);
@@ -100,6 +108,12 @@ Particles& Particles::operator=(Particles&& rhs_) {
 	r = std::move(rhs_.r);
 
 	return *this;
+}
+
+void Particles::resetIds()
+{
+	id.resize(nlocal);
+	std::iota(id.begin(), id.end(), 0);
 }
 
 
@@ -110,6 +124,8 @@ void Particles::addParticle(std::array<double, 3> newX_,
 	double newR_)
 {
  	//check the boundary conditions
+	// new id
+	id.push_back(nlocal);
 	// new positions
 	x.push_back(newX_[0]);
 	x.push_back(newX_[1]);
@@ -130,12 +146,27 @@ void Particles::addParticle(std::array<double, 3> newX_,
 	nlocal++;
 }
 
-void Particles::removeParticle(const int& id_) {
+void Particles::removeParticle(const int& gid_) {
+	int ilocal = global2local(gid_);
+	// searching for a global id
+	// among various particles objects
+	// should be the communicator job.
+	// The communicator should decide
+	// if any of the particles objects
+	// have that id_ in it or not
+	if (gid_ == -1)
+		return;
+	
+	removeParticleLocalId(ilocal);
+}
+
+void Particles::removeParticleLocalId(const int& id_)
+{
 	int lastGhost = nlocal + nghosts - 1;
 	int lastLocal = nlocal - 1;
 	// if it is a local atom
 	if (id_ < nlocal) {
-		// copying the last particle to the id_ location
+		// copying the last particle to the particle with id value of id_
 		copyParticle(lastLocal, id_);
 		// copying the last ghost into the last particle location
 		copyParticle(lastGhost, lastLocal);
@@ -148,6 +179,8 @@ void Particles::removeParticle(const int& id_) {
 		// reducing the nghosts
 		nghosts--;
 	}
+	else
+		throw std::invalid_argument("The particle was not found");
 	// removing the last particle
 	pop_back();
 }
@@ -194,6 +227,7 @@ void Particles::copyParticle(Particles* other_,
 
 void Particles::copyParticle(const int& src_, const int& tgt_)
 {
+	Id(tgt_) = Id(src_);
 	X(tgt_, 0) = X(src_, 0);
 	X(tgt_, 1) = X(src_, 1);
 	X(tgt_, 2) = X(src_, 2);
@@ -257,4 +291,15 @@ void Particles::getAtomVec(const int& i,
 	fi = std::array<double, 3>
 	{ f[3 * i], f[3 * i + 1], f[3 * i + 2] };
 	mi = m[i];
+}
+
+int Particles::global2local(const int& gid_)
+{
+	// finding the gid_ in the id vector
+	auto iter = std::find(id.begin(), id.end(), gid_);
+	// checking if it presents
+	if (iter == id.end())
+		return -1;
+	int dist = std::distance(id.begin(), iter);
+	return dist;
 }

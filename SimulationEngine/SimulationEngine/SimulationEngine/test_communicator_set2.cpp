@@ -2,7 +2,6 @@
 #include "test_communicator_helpers.hpp"
 
 
-
 //TEST_CASE("Testing the movement of particles between processors without skin" ,"[.][ignore for now]")
 TEST_CASE("Testing the movement of particles between processors without skin (2X2X1)")
 {
@@ -11,6 +10,9 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
 
 
     // moving particles
+    std::vector<int> newId1 = {
+        0,1,2,3,4
+    };
     std::vector<double> newX1 =
     {
         -220.40, -180.10,   80.55,   // particle 0  owned by Q00 (-- interior) region 1
@@ -56,6 +58,9 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
         9.1,  // particle 4 region 2
     };
 
+    std::vector<int> newId2 = {
+        5,6,7,8,9
+    };
     std::vector<double> newX2 =
     {
          180.62, -210.44,   60.91,   // particle 5  owned by Q10 (+- interior) region 2
@@ -101,6 +106,9 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
      54.3,  // particle 9 region 2
     };
 
+    std::vector<int> newId3 = {
+        10,11,12,13,14
+    };
     std::vector<double> newX3 =
     {
         -200.90,  190.36,  -40.58,   // particle 10 owned by Q01 (-+ interior) region 3
@@ -146,6 +154,9 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
      37.6,  // particle 14 region 3
     };
 
+    std::vector<int> newId4 = {
+        15,16,17,18,19
+    };
     std::vector<double> newX4 =
     {
          210.83,  220.41, -150.88,   // particle 15 owned by Q01 (++ interior) region 4
@@ -193,6 +204,9 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
 
     // expected values for each core
     // core 1
+    std::vector<int> expectedIds1 = {
+        0,1,7,17
+    };
     std::vector<double> expectedXs1 = {
         -220.40, -180.10,   80.55,   // particle 0  owned by Q00 (-- interior) region 1
         -140.75, -260.33, -120.18,   // particle 1  owned by Q00 (-- interior) region 1
@@ -226,6 +240,9 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
     };
 
     // core 2
+    std::vector<int> expectedIds2 = {
+        3,4,5,6,9,19
+    };
     std::vector<double> expectedXs2 = {
           12.60,  -18.90,  130.10,   // particle 3  owned by Q00 (+- interior) region 2
           35.10, -140.48,   12.66,   // particle 4  owned by Q00 (+- interior) region 2
@@ -269,6 +286,9 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
     };
 
     // core 3
+    std::vector<int> expectedIds3 = {
+        2,8,10,11,12,14,18
+    };
     std::vector<double> expectedXs3 = {
         -180.66,   30.77,   14.95,   // particle 2  owned by Q00 (-+ interior) region 3
          -18.40,   22.10,   95.50,   // particle 8  owned by Q10 (-+ interior) region 3
@@ -320,6 +340,9 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
     };
 
     // core 4
+    std::vector<int> expectedIds4 = {
+        13,15,16
+    };
     std::vector<double> expectedXs4 = {
         22.80,   18.10,  -140.25,   // particle 13 owned by Q01 (++ interior) region 4 
         210.83,  220.41, -150.88,   // particle 15 owned by Q01 (++ interior) region 4
@@ -350,6 +373,9 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
      14.2,  // particle 16
     };
 
+    std::vector<std::vector<int>> expectedIdsVec = {
+        expectedIds1, expectedIds2, expectedIds3, expectedIds3
+    };
     std::vector<std::vector<double>> expectedXsVec = {
         expectedXs1, expectedXs2, expectedXs3, expectedXs4
     };
@@ -366,7 +392,9 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
         expectedMs1, expectedMs2, expectedMs3, expectedMs4
     };
 
-
+    std::vector<std::vector<int>> newIdVec = {
+        newId1, newId2, newId3, newId4
+    };
     std::vector<std::vector<double>> newXVec =
     {
         newX1, newX2, newX3, newX4
@@ -403,7 +431,7 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
     for (int i = 0; i < nranks; i++)
     {
         auto engine_ptr =
-            build_engine_set_particles(ids[i], ranks, newXVec[i], newVVec[i], newFVec[i], newRVec[i], newMVec[i]);
+            build_engine_set_particles(ids[i], ranks, newIdVec[i], newXVec[i], newVVec[i], newFVec[i], newRVec[i], newMVec[i]);
         engineArray.push_back(std::move(engine_ptr));
     }
 
@@ -423,7 +451,6 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
 
     int numberOfAttempts = 0;
 
-
     constexpr int maxAttempts = 4;
     // repeating the particle reassginement until there is no
     // outside particles in each communicator
@@ -442,6 +469,7 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
         for (int i = 0; i < 4; i++) {
             exchangeDestArray[i] = communicatorArray[i]->returnExchangeDests();
             // an array of vector<double> is returned for each communicatoriRef
+            // bugging ===>>> it is a possible bug
             messagesArray[i] = communicatorArray[i]->sendExchangeParticles();
         }
 
@@ -460,6 +488,8 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
                 auto& message = messagesArray[i][j];
                 if (exchangeDestArray[i][j] < 0)
                     continue;
+
+                
                 communicatorArray[exchangeDestArray[i][j]]->recvExchangeParticles(message);
             }
         }
@@ -1232,8 +1262,8 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
     }
 }
 
-TEST_CASE("Testing setting the interior particles") {
-    std::cout << "Testing setting the interior particles" << std::endl;
+TEST_CASE("Testing the sendGhost function to transfer the interior particles") {
+    std::cout << "Testing the sendGhost function to transfer the interior particles" << std::endl;
     std::cout << std::string(80, '=') << std::endl;
 
     double skin = 50.0;
@@ -1543,6 +1573,13 @@ TEST_CASE("Testing setting the interior particles") {
         int indx = output_indxs[i];
         delete[] transData[indx];
     }
+}
+
+TEST_CASE("Testing the recvGhost function to receive the ghost particles")
+{
+    std::cout << "Testing the recvGhost function to receive the ghost particles" << std::endl;
+    std::cout << std::string(80, '=') << std::endl;
+
 }
 
 

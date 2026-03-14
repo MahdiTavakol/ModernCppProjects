@@ -267,6 +267,7 @@ void Communicator::recvGhosts(const int& partnerRank_,
 	double* recvBuffer = static_cast<double*>(trandata_);
 	int nData = static_cast<int>(recvBuffer[0]);
 
+
 	if (nData != (*vecRef).size()) {
 		throw std::invalid_argument("Wrong data size");
 	}
@@ -356,8 +357,8 @@ void Communicator::resetParticles()
 
 		// if it belongs here
 		bool Owned = xOwned && yOwned && zOwned;
-		// if it belongs to the ghost region of this rank
-		bool Ghosted = xExtended && yExtended && zExtended;
+		// if it belongs to the extended region
+		bool Extended = xExtended && yExtended && zExtended;
 
 		// its own atoms not acting as ghosts for neighboring ranks
 		bool insideInterX =
@@ -394,19 +395,19 @@ void Communicator::resetParticles()
 			if (xExtended && yOwned && zOwned) {
 				if (x < myMin[0])
 					ghostsXLo.push_back(nghosts++);
-				else if (x > myMin[1])
+				else if (x > myMax[0])
 					ghostsXHi.push_back(nghosts++);
 			}
 			else if (xExtended && yExtended && zOwned) {
 				if (y < myMin[1])
 					ghostsYLo.push_back(nghosts++);
-				else if (y < myMin[1])
+				else if (y > myMax[1])
 					ghostsYHi.push_back(nghosts++);
 			}
 			else if (xExtended && yExtended && zExtended) {
 				if (z < myMin[2])
 					ghostsZLo.push_back(nghosts++);
-				else if (z > myMin[2])
+				else if (z > myMax[2])
 					ghostsZHi.push_back(nghosts++);
 			}
 		}
@@ -514,7 +515,8 @@ std::vector<double>* Communicator::sendExchangeParticles()
 	std::sort(ids2beRemoved.begin(), ids2beRemoved.end(), [&](double a, double b) {return a > b; });
 	// removing ids
 	for (auto& id : ids2beRemoved)
-		particles->removeParticle(id);
+		particles->removeParticleLocalId(id);
+
 
 	xRef = particles->xRef();
 	nsize = static_cast<int>(xRef.size()) / 3;

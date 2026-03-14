@@ -1,11 +1,26 @@
 #include "test_communicator_helpers.hpp"
 
+std::unique_ptr<Engine> build_engine_set_particles(const int& myId_,
+    std::array<int, 3> ranks_,
+    std::vector<double>& x_,
+    std::vector<double>& v_,
+    std::vector<double>& f_,
+    std::vector<double>& r_,
+    std::vector<double>& m_,
+    int nGhosts) {
+    int nsize = static_cast<int>(x_.size()) / 3;
+    std::vector<int> id_;
+    id_.resize(nsize);
+    std::iota(id_.begin(), id_.end(), 0);
+    return build_engine_set_particles(myId_, ranks_, id_, x_, v_, f_, r_, m_, nGhosts);
+}
 
 // a specific modification of the enginefixture
 // which creates the engine first and add out of rank
 // particles next ...
 std::unique_ptr<Engine> build_engine_set_particles(const int& myId_,
     std::array<int, 3> ranks_,
+    std::vector<int>& id_,
     std::vector<double>& x_,
     std::vector<double>& v_,
     std::vector<double>& f_,
@@ -59,8 +74,9 @@ std::unique_ptr<Engine> build_engine_set_particles(const int& myId_,
         // move the inputs to the particles by reference
         // so these would be null after moving into 
         // the mockedParticles object
+        std::vector<int> idCopy = id_;
         std::vector<double> xCopy = x_, vCopy = v_, fCopy = f_, rCopy = r_, mCopy = m_;
-        mockedParticlesConv->resetParticles(nmax, nGhosts, xCopy, vCopy, fCopy, rCopy, mCopy);
+        mockedParticlesConv->resetParticles(nmax, nGhosts,idCopy, xCopy, vCopy, fCopy, rCopy, mCopy);
         // returning the engine
         return engine_ptr;
     };

@@ -1,12 +1,21 @@
 #pragma once
 #include "test.hpp"
+#include <numeric>
 
-
+std::unique_ptr<Engine> build_engine_set_particles(const int& myId_,
+    std::array<int, 3> ranks_,
+    std::vector<double>& x_,
+    std::vector<double>& v_,
+    std::vector<double>& f_,
+    std::vector<double>& r_,
+    std::vector<double>& m_,
+    int nGhosts = 0);
 // a specific modification of the enginefixture
 // which creates the engine first and add out of rank
 // particles next ...
 std::unique_ptr<Engine> build_engine_set_particles(const int& myId_,
     std::array<int, 3> ranks_,
+    std::vector<int>& id_,
     std::vector<double>& x_,
     std::vector<double>& v_,
     std::vector<double>& f_,

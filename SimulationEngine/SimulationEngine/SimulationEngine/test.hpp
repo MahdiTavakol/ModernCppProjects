@@ -180,6 +180,7 @@ public:
 		Array1DMatcher{expected_,nLocal_,0,tol_}
 	{}
 
+
 	bool match(double* value_) const
 	{
 		double diff = 0.0;
@@ -205,6 +206,58 @@ public:
 
 };
 
+class Array1DMatcherInt : public Catch::Matchers::MatcherGenericBase
+{
+	int nLocal, nGhost;
+	std::vector<int> expectedVec;
+	mutable vector<int> badIndexes;
+public:
+	Array1DMatcherInt(int* expected_, int nLocal_, int nGhost_ = 0) :
+		nLocal{ nLocal_ }, nGhost{ nGhost_ }
+	{
+		for (int i = 0; i < nLocal + nGhost; i++)
+			expectedVec.push_back(expected_[i]);
+
+		std::sort(expectedVec.begin(), expectedVec.begin() + nLocal);
+		std::sort(expectedVec.begin() + nLocal, expectedVec.end());
+
+	}
+
+	bool match(int* value_) const
+	{
+		int misMatchNum = 0;
+		// I do not want to change the original values order
+		std::vector<int> valueVec;
+		for (int i = 0; i < nLocal + nGhost; i++)
+			valueVec.push_back(value_[i]);
+
+		std::sort(valueVec.begin(), valueVec.begin() + nLocal);
+		std::sort(valueVec.begin() + nLocal, valueVec.end());
+
+		for (int i = 0; i < nLocal + nGhost; i++)
+		{
+			if (valueVec[i] != expectedVec[i])
+			{
+				misMatchNum++;
+				badIndexes.push_back(i);
+			}
+		}
+
+		return (misMatchNum == 0);
+	}
+
+	std::string describe() const override
+	{
+		std::string message = "Comparing two 1D int arrays";
+
+		if (!badIndexes.empty()) {
+			message += "\nMismatching indexes:";
+			for (const auto& index : badIndexes)
+				message += "\n" + std::to_string(index);
+		}
+		return message;
+	}
+};
 
 /*
  * Mocked types
@@ -366,9 +419,11 @@ public:
 		f = std::move(f_);
 		r = std::move(r_);
 		m = std::move(m_);
+		resetIds();
 	}
 	void resetParticles(
 		int nmax_,
+		std::vector<int>& id_,
 		std::vector<double>& x_,
 		std::vector<double>& v_,
 		std::vector<double>& f_,
@@ -376,11 +431,12 @@ public:
 		std::vector<double>& m_
 	)
 	{
-		resetParticles(nmax_, 0, x_, v_, f_, r_, m_);
+		resetParticles(nmax_, 0,id_, x_, v_, f_, r_, m_);
 	}
 	void resetParticles(
 		int nmax_,
 		int nghost_,
+		std::vector<int>& id_,
 		std::vector<double>& x_,
 		std::vector<double>& v_,
 		std::vector<double>& f_,
@@ -390,6 +446,7 @@ public:
 	{
 		nmax = nmax_;
 		nlocal = x_.size() / 3 - nghost_;
+		id = std::move(id_);
 		x = std::move(x_);
 		v = std::move(v_);
 		f = std::move(f_);

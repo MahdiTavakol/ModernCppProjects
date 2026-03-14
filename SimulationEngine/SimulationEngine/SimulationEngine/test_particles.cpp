@@ -128,6 +128,12 @@ TEST_CASE("Creating particles from the x, v, f, r and m lists")
     int nlocal = 20;
 
     // expected results
+    std::vector<int> expectedIds = {
+        0,  1, 2, 3, 4,
+        5,  6, 7, 8, 9,
+        10,11,12,13,14,
+        15,16,17,18,19
+    };
     std::vector<double> expectedXs = {
         // Global: x,y,z in [-300,300], skin=0
         -220.40, -180.10,   80.55,   // particle 0  owned by Q00 (-- interior)
@@ -254,12 +260,14 @@ TEST_CASE("Creating particles from the x, v, f, r and m lists")
 
 
     // getting the x, v, f, r, m values
+    auto* myIds = particles->getIdData();
     auto* myXs = particles->getXData();
     auto* myVs = particles->getVData();
     auto* myFs = particles->getFData();
     auto* myRs = particles->getRData();
     auto* myMs = particles->getMData();
     // checking the results
+    REQUIRE_THAT(myIds, Array1DMatcherInt(expectedIds.data(), 20));
     REQUIRE_THAT(myXs, Array3DMatcher(expectedXs.data(), 20, 1e-6));
     REQUIRE_THAT(myVs, Array3DMatcher(expectedVs.data(), 20, 1e-6));
     REQUIRE_THAT(myFs, Array3DMatcher(expectedFs.data(), 20, 1e-6));
@@ -278,6 +286,14 @@ TEST_CASE("Adding particle to the particle list")
     int nlocal = 20;
 
     // expected results
+    std::vector<int> expectedIds = {
+         0, 1, 2, 3, 4,
+         5, 6, 7, 8, 9,
+        10,11,12,13,14,
+        15,16,17,18,19,
+        20,21,22,23
+    };
+
     std::vector<double> expectedXs = {
         // Global: x,y,z in [-300,300], skin=0
         -220.40, -180.10,   80.55,   // particle 0  owned by Q00 (-- interior)
@@ -488,12 +504,14 @@ TEST_CASE("Adding particle to the particle list")
     // checking the results
 
     // getting the x, v, f, r, m values
+    int* myIds = particles->getIdData();
     auto* myXs = particles->getXData();
     auto* myVs = particles->getVData();
     auto* myFs = particles->getFData();
     auto* myMs = particles->getMData();
     auto* myRs = particles->getRData();
 
+    REQUIRE_THAT(myIds, Array1DMatcherInt(expectedIds.data(), 24));
     REQUIRE_THAT(myXs, Array3DMatcher(expectedXs.data(), 24, 1e-6));
     REQUIRE_THAT(myVs, Array3DMatcher(expectedVs.data(), 24, 1e-6));
     REQUIRE_THAT(myFs, Array3DMatcher(expectedFs.data(), 24, 1e-6));
@@ -510,6 +528,12 @@ TEST_CASE("Testing removing a particle from the particle list") {
 
 
     // expected results
+    std::vector<int> expectedIds = {
+         0, 1, 2, 3, 4,
+         6, 7, 8, 9,10,
+        12,13,14,15,16,
+        17,18,19
+    };
     std::vector<double> expectedXs = {
         // Global: x,y,z in [-300,300], skin=0
         -220.40, -180.10,   80.55,   // particle 0  owned by Q00 (-- interior)
@@ -642,12 +666,14 @@ TEST_CASE("Testing removing a particle from the particle list") {
     particles->removeParticle(5);
 
     // getting the x, v, f, r, m values
+    auto* myId = particles->getIdData();
     auto* myX = particles->getXData();
     auto* myV = particles->getVData();
     auto* myF = particles->getFData();
     auto* myR = particles->getRData();
     auto* myM = particles->getMData();
 
+    REQUIRE_THAT(myId, Array1DMatcherInt(expectedIds.data(), 18));
     REQUIRE_THAT(myX, Array3DMatcher(expectedXs.data(), 18, 1e-6));
     REQUIRE_THAT(myV, Array3DMatcher(expectedVs.data(), 18, 1e-6));
     REQUIRE_THAT(myF, Array3DMatcher(expectedFs.data(), 18, 1e-6));
@@ -655,7 +681,7 @@ TEST_CASE("Testing removing a particle from the particle list") {
     REQUIRE_THAT(myM, Array1DMatcher(expectedMs.data(), 18, 1e-6));
 }
 
-//TEST_CASE("Removing a particle from a particle list with ghost atoms in it","[.][ignore it for now]")
+
 TEST_CASE("Removing a particle from a particle list with ghost atoms in it")
 {
     std::cout << "Removing particlex from a particle list with ghost atoms in it" << std::endl;

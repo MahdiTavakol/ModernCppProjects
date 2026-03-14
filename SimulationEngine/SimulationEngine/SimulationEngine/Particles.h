@@ -22,19 +22,24 @@ public:
 		std::vector<double>& rs_);
 	Particles& operator=(const Particles& rhs_);
 	Particles& operator=(Particles&& rhs_);
+	// resetting the global ids of particles
+	void resetIds();
 	void addParticle(std::array<double, 3> newX_,
 		std::array<double, 3> newV_ = { 0.0,0.0,0.0 },
 		std::array<double, 3> newF_ = { 0.0,0.0,0.0 },
 		double newM_ = 10.0, 
 		double newR_ = 0.0);
-	void removeParticle(const int& id_);
+	void removeParticle(const int& gid_);
+	void removeParticleLocalId(const int& id_);
 	void getParticle(const int& id_,
 		std::array<double, 3>& newX_,
 		std::array<double, 3>& newV_,
 		std::array<double, 3>& newF_,
 		double& newM_,
 		double& newR_);
+
 	void copyParticle(Particles* other_, const int& id_);
+	// src_ and tgt_ are local ids
 	void copyParticle(const int& src_, const int& tgt_);
 	void pop_back();
 	void setNmax(const int& nmax_);
@@ -48,13 +53,22 @@ public:
 		std::array<double, 3>& vi,
 		std::array<double, 3>& fi,
 		double& mi);
+	// global to local id conversion
+	// the global id is saved in the id vector
+	// while the local id is the order of the particle
+	// in each vector
+	int global2local(const int& gid_);
 	// used int* const on purpose to avoid the 
 	// memory managed by vector to be destructed or changed
+	int*   const getIdData() { return id.data(); }
 	double* const getXData() { return x.data(); }
 	double* const getVData() { return v.data(); }
 	double* const getFData() { return f.data(); }
 	double* const getMData() { return m.data(); }
 	double* const getRData() { return r.data(); }
+	inline int& Id(const int& i) {
+		return id[i];
+	}
 	inline double& X(const int& i, const int& j) {
 		return x[3 * i + j];
 	}
@@ -78,6 +92,7 @@ protected:
 	int nlocal;
 	int nghosts;
 	int nmax;
+	std::vector<int> id;
 	std::vector<double> x;
 	std::vector<double> v;
 	std::vector<double> f;
