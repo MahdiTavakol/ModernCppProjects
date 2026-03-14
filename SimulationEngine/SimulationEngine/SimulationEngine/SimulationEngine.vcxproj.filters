@@ -111,10 +111,16 @@
     <ClCompile Include="Communicator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="test_communicator.cpp">
+    <ClCompile Include="test_communicator_set2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="test_particles.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test_communicator_set1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test_communicator_helpers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -184,6 +190,9 @@
     </ClInclude>
     <ClInclude Include="Communicator.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test_communicator_helpers.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

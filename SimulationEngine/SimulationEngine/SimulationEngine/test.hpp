@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Particles.h"
 #include "Communicator.h"
 #include "Engine.h"
@@ -608,5 +610,7 @@ private:
 	std::unique_ptr<Integrator> integrator;
 	std::vector<double> x, v, f, r, m;
 };
+
+
 
 
