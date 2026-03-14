@@ -189,7 +189,7 @@ void Communicator::sendGhosts(const int& partnerRank_,
 
 
 
-	int nParticles = (*vecRef).size();
+	int nParticles = vecRef->size();
 	int nData = 1 + (3 * 3 + 2)*nParticles; // X, V, F (3) and M, R
 
 
@@ -302,6 +302,19 @@ void Communicator::resetParticles()
 	nlocal = 0;
 	nghosts = 0;
 
+	interXLo.clear();
+	interXHi.clear();
+	interYLo.clear();
+	interYHi.clear();
+	interZLo.clear();
+	interZHi.clear();
+	ghostsXLo.clear();
+	ghostsXHi.clear();
+	ghostsYLo.clear();
+	ghostsYHi.clear();
+	ghostsZLo.clear();
+	ghostsZHi.clear();
+
 
 	double xMinGhost = myMin[0] - skin;
 	double xMaxGhost = myMax[0] + skin;
@@ -326,82 +339,75 @@ void Communicator::resetParticles()
 		double x = particles->X(i, 0);
 		double y = particles->X(i, 1);
 		double z = particles->X(i, 2);
-		bool insideOwned =
-			(x >= myMin[0] && x < myMax[0] &&
-			 y >= myMin[1] && y < myMax[1] &&
-			 z >= myMin[2] && z < myMax[2]);
 
-		// its own ghosts
-		bool insideExtended1 =
-			(x >= xMinGhost && x < xMaxGhost &&
-			 y >= myMin[1] && y < myMax[1] &&
-			 z >= myMin[2] && z < myMax[2]);
+		// ranges
+		// extended region (ghost region boundaries)
+		bool xExtended = (x >= xMinGhost) && (x < xMaxGhost);
+		bool yExtended = (y >= yMinGhost) && (y < yMaxGhost);
+		bool zExtended = (z >= zMinGhost) && (z < zMaxGhost);
+		// owned region.. local region of this rank
+		bool xOwned = (x >= myMin[0] && x < myMax[0]);
+		bool yOwned = (y >= myMin[1] && y < myMax[1]);
+		bool zOwned = (z >= myMin[2] && z < myMax[2]);
+		// interior region .. not a ghost region for neighboring ranks
+		bool xInter = (x >= xMinInter && x < xMaxInter);
+		bool yInter = (y >= yMinInter && y < yMaxInter);
+		bool zInter = (z >= zMinInter && z < zMaxInter);
 
-		bool insideExtended2 =
-			(x >= myMin[0] && x < myMax[0] &&
-			 y >= yMinGhost && y < yMaxGhost &&
-			 z >= myMin[2] && z < myMax[2]);
+		// if it belongs here
+		bool Owned = xOwned && yOwned && zOwned;
+		// if it belongs to the ghost region of this rank
+		bool Ghosted = xExtended && yExtended && zExtended;
 
-		bool insideExtended3 =
-			(x >= myMin[0] && x < myMax[0] &&
-			 y >= myMin[1] && y < myMax[1] &&
-			 z >= zMinGhost && z < zMinGhost);
+		// its own atoms not acting as ghosts for neighboring ranks
+		bool insideInterX =
+			xInter && yOwned && zOwned;
 
-		// its own atoms acting as ghosts for neighboring ranks
-		bool insideInter1 =
-			(x >= xMinInter && x < xMaxInter &&
-			 y >= myMin[1] && y < myMax[1] &&
-			 z >= myMin[2] && z < myMax[2]);
+		bool insideInterY =
+			xOwned && yInter && zOwned;
 
-		bool insideInter2 =
-			(x >= myMin[0] && x < myMax[0] &&
-			 y >= yMinInter && y < yMaxInter &&
-			 z >= myMin[2] && z < myMax[2]);
-
-		bool insideInter3 =
-			(x >= myMin[0] && x < myMax[0] &&
-			 y >= myMin[1] && y < myMax[1] &&
-			 z >= zMinInter && z < zMaxInter);
+		bool insideInterZ =
+			xOwned && yOwned && zInter;
 
 
 		// inside the region 
-		if (insideOwned) {
+		if (Owned) {
 			nlocal++;
 			newParticles->copyParticle(particles, i);
 			// checking the interior atoms
-			if (!insideInter1 && x <= xMinInter)
+			if (!insideInterX && x <= xMinInter)
 				interXLo.push_back(nlocal - 1);
-			else if (!insideInter1 && x > xMaxInter)
+			else if (!insideInterX && x > xMaxInter)
 				interXHi.push_back(nlocal - 1);
-			if (!insideInter2 && y <= yMinInter)
+			if (!insideInterY && y <= yMinInter)
 				interYLo.push_back(nlocal - 1);
-			else if (!insideInter2 && y > yMaxInter)
+			else if (!insideInterY && y > yMaxInter)
 				interYHi.push_back(nlocal - 1);
-			if (!insideInter3 && z <= zMinInter)
+			if (!insideInterZ && z <= zMinInter)
 				interZLo.push_back(nlocal - 1);
-			else if (!insideInter3 && z > zMaxInter)
+			else if (!insideInterZ && z > zMaxInter)
 				interZHi.push_back(nlocal - 1);
 		}
 		// in the ghost region
-		else if (insideExtended1 || insideExtended2 || insideExtended3) {
+		else if (xExtended && yExtended && zExtended) {
 			ghostIds.push_back(i);
-			if (insideExtended1 && x < myMin[0]) {
-				ghostsXLo.push_back(nghosts++);
+			if (xExtended && yOwned && zOwned) {
+				if (x < myMin[0])
+					ghostsXLo.push_back(nghosts++);
+				else if (x > myMin[1])
+					ghostsXHi.push_back(nghosts++);
 			}
-			else if (insideExtended1 && x > myMax[0]) {
-				ghostsXHi.push_back(nghosts++);
+			else if (xExtended && yExtended && zOwned) {
+				if (y < myMin[1])
+					ghostsYLo.push_back(nghosts++);
+				else if (y < myMin[1])
+					ghostsYHi.push_back(nghosts++);
 			}
-			else if (insideExtended2 && y < myMin[1]) {
-				ghostsYLo.push_back(nghosts++);
-			}
-			else if (insideExtended2 && y > myMax[1]) {
-				ghostsYHi.push_back(nghosts++);
-			}
-			else if (insideExtended3 && z < myMin[2]) {
-				ghostsZLo.push_back(nghosts++);
-			}
-			else if (insideExtended3 && z > myMax[2]) {
-				ghostsZHi.push_back(nghosts++);
+			else if (xExtended && yExtended && zExtended) {
+				if (z < myMin[2])
+					ghostsZLo.push_back(nghosts++);
+				else if (z > myMin[2])
+					ghostsZHi.push_back(nghosts++);
 			}
 		}
 		// outside ghost region

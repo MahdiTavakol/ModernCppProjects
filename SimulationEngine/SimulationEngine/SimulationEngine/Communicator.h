@@ -14,7 +14,7 @@ public:
 	virtual ~Communicator();
 	void injectDependencies(Engine& engine_) override;
 	void init();
-
+	void setInteriorParticles() {}
 	void sendGhosts(const int& partnerRank_,
 		                  void*& trandata_);
 	void recvGhosts(const int& partnerRank_,

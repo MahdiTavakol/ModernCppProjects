@@ -2,6 +2,7 @@
 #include "test_communicator_helpers.hpp"
 
 
+
 //TEST_CASE("Testing the movement of particles between processors without skin" ,"[.][ignore for now]")
 TEST_CASE("Testing the movement of particles between processors without skin (2X2X1)")
 {
@@ -1231,7 +1232,321 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
     }
 }
 
-TEST_CASE("Testing the movement of particles for the case with the skin value of 50")
+TEST_CASE("Testing setting the interior particles") {
+    std::cout << "Testing setting the interior particles" << std::endl;
+    std::cout << std::string(80, '=') << std::endl;
+
+    double skin = 50.0;
+
+    // x values
+    // everthing here belongs to the rank3
+    // so no need for ghost transfer.. just
+    // wanted to check the interior particles (ghosts for other ranks) detection 
+    std::vector<double> newX3 = {
+        -200.90,  190.36,  -40.58,   // particle 10 owned by Q01 (-+ interior) region 3 ghost for region 7
+        -270.22,  120.74, -210.46,   // particle 11 owned by Q01 (-+ interior) region 3
+        -120.33,   20.18, -199.05,   // particle 12 owned by Q01 (-+ interior) region 3 ghost for region 1
+         -28.20,  180.66,  -66.03,   // particle 14 owned by Q01 (-+ interior) region 3 ghost for region 4
+        -180.66,   30.77,  -74.95,   // particle 2  owned by Q00 (-+ interior) region 3 ghost for region 1
+         -18.40,  +22.10,  -95.50,   // particle 8  owned by Q10 (-+ interior) region 3 ghost for regions 1, 2, 4
+         -40.11,  170.25, -204.67,   // particle 18 owned by Q01 (-+ interior) region 3 ghost for region 4
+        -128.20,  130.66,  -46.03,   // particle 19 owneb by Q01 (-+ interior) region 3 ghost for region 7
+         -28.20,  150.66,  -36.03,   // particle 20 owneb by Q01 (-+ interior) region 3 ghost for regions 4, 7, 8
+        -150.33,   20.18,  -25.05,   // particle 21 owned by Q01 (-+ interior) region 3 ghost for regions 1, 5, 7
+         -18.15,   30.89,  -12.09,   // particle 22 owned by Q01 (-+ interior) region 3 ghost for regions 1, 2, 4, 5, 6, 7, 8
+        -190.99,   27.46, -150.00    // particle 23 owned by Q01 (-+ interior) region 3 ghost for region 1
+    };
+    // v values 
+    std::vector<double> newV3 = {
+        21.7, -38.4,  68.2,   // particle 10
+       -14.9,  87.6, -29.3,   // particle 11
+        46.1, -61.5,  33.8,   // particle 12
+       -53.7,  27.5, -41.6,   // particle 14
+        41.2, -19.8,  63.5,   // particle 2
+        59.7, -24.6,  10.9,   // particle 8
+        57.8, -69.2,  39.4,   // particle 18
+         4.5,  64.3,  12.9,   // particle 19
+        31.5, -75.3,  25.6,   // particle 20
+       -72.4,  18.7, -54.9,   // particle 21
+        66.2,  -8.1,  47.3,   // particle 22
+        21.7, -38.4,  68.2    // particle 23
+    };
+    // f values
+    std::vector<double> newF3 = {
+        14.8,  -7.3,  39.6,   // particle 10
+       -21.9,  30.4, -16.5,   // particle 11
+        41.2, -29.8,   9.7,   // particle 12
+       -25.7,  17.8, -38.6,   // particle 14
+        29.7,  -5.4,  38.9,   // particle 2
+        47.3, -19.5,   6.2,   // particle 8
+        28.6, -31.4,  19.3,   // particle 18
+        29.7, -24.6,  10.9,   // particle 19
+        17.8, -39.2,  19.4,   // particle 20
+         4.5,  24.3,  12.9,   // particle 21
+        21.5, -35.3,  15.6,   // particle 22
+        21.7, -38.4,  18.2,   // particle 23
+    };
+    // r values
+    std::vector<double> newR3 = {
+      8.7,  // particle 10 region 3
+     63.5,  // particle 11 region 3
+     19.8,  // particle 12 region 3
+     37.6,  // particle 14 region 3
+     45.7,  // particle 2  region 3
+     76.2,  // particle 8  region 3
+     58.9,  // particle 18 region 3
+     57.8,  // particle 19 region 3 
+     14.9,  // particle 20 region 3 
+     69.1,  // particle 21 region 3
+     22.6,  // particle 22 region 3
+     12.5   // particle 23 region 3
+    };
+    // m values
+    std::vector<double> newM3 = {
+        0.5,  // particle 10 region 3
+        9.8,  // particle 11 region 3
+        3.0,  // particle 12 region 3
+        5.9,  // particle 14 region 3
+        0.9,  // particle 2  region 3
+        8.4,  // particle 8  region 3
+        1.8,  // particle 18 region 3
+        7.2,  // particle 19 region 3
+       18.6,  // particle 20 region 3
+        3.1,  // particle 21 region 3
+       10.8,  // particle 22 region 3
+        8.5   // particle 23 region 3
+    };
+
+
+    // expected results
+    // rank4
+    int expectednParticles1 = 5;
+    // rank1
+    int expectednParticles2 = 6;
+    // rank7
+    int expectednParticles5 = 5;
+    // rank 4
+    // since the order of particles is not known in advance we
+    // need to check X, V, ... separately
+    std::vector<double> expectedX1 = {
+         -28.20,  180.66,  -66.03,   // particle 14 owned by Q01 (-+ interior) region 3 ghost for region 4
+         -18.40,  +22.10,  -95.50,   // particle 8  owned by Q10 (-+ interior) region 3 ghost for region 4
+         -40.11,  170.25, -204.67,   // particle 18 owned by Q01 (-+ interior) region 3 ghost for region 4
+         -28.20,  150.66,  -36.03,   // particle 20 owneb by Q01 (-+ interior) region 3 ghost for region 4
+         -18.15,   30.89,  -12.09    // particle 22 owned by Q01 (-+ interior) region 3 ghost for region 4
+    };
+    std::vector<double> expectedX2 = {
+        -120.33,   20.18, -199.05,   // particle 12 owned by Q01 (-+ interior) region 3 ghost for region 1
+        -180.66,   30.77,  -74.95,   // particle 2  owned by Q00 (-+ interior) region 3 ghost for region 1
+         -18.40,  +22.10,  -95.50,   // particle 8  owned by Q10 (-+ interior) region 3 ghost for region 1
+        -150.33,   20.18,  -25.05,   // particle 21 owned by Q01 (-+ interior) region 3 ghost for region 1
+         -18.15,   30.89,  -12.09,   // particle 22 owned by Q01 (-+ interior) region 3 ghost for region 1
+        -190.99,   27.46, -150.00    // particle 23 owned by Q01 (-+ interior) region 3 ghost for region 1
+    };
+    std::vector<double> expectedX5 = {
+        -200.90,  190.36,  -40.58,   // particle 10 owned by Q01 (-+ interior) region 3 ghost for region 7
+        -128.20,  130.66,  -46.03,   // particle 19 owneb by Q01 (-+ interior) region 3 ghost for region 7
+         -28.20,  150.66,  -36.03,   // particle 20 owneb by Q01 (-+ interior) region 3 ghost for region 7
+        -150.33,   20.18,  -25.05,   // particle 21 owned by Q01 (-+ interior) region 3 ghost for region 7
+         -18.15,   30.89,  -12.09    // particle 22 owned by Q01 (-+ interior) region 3 ghost for region 7
+    };
+    std::vector<double> expectedV1 = {
+       -53.7,  27.5, -41.6,   // particle 14
+        59.7, -24.6,  10.9,   // particle 8
+        57.8, -69.2,  39.4,   // particle 18
+        31.5, -75.3,  25.6,   // particle 20
+        66.2,  -8.1,  47.3    // particle 22
+    };
+    std::vector<double> expectedV2 = {
+        46.1, -61.5,  33.8,   // particle 12
+        41.2, -19.8,  63.5,   // particle 2
+        59.7, -24.6,  10.9,   // particle 8
+       -72.4,  18.7, -54.9,   // particle 21
+        66.2,  -8.1,  47.3,   // particle 22
+        21.7, -38.4,  68.2    // particle 23
+    };
+    std::vector<double> expectedV5 = {
+        21.7, -38.4,  68.2,   // particle 10
+         4.5,  64.3,  12.9,   // particle 19
+        31.5, -75.3,  25.6,   // particle 20
+       -72.4,  18.7, -54.9,   // particle 21
+        66.2,  -8.1,  47.3    // particle 22
+    };
+    std::vector<double> expectedF1 = {
+       -25.7,  17.8, -38.6,   // particle 14
+        47.3, -19.5,   6.2,   // particle 8
+        28.6, -31.4,  19.3,   // particle 18
+        17.8, -39.2,  19.4,   // particle 20
+        21.5, -35.3,  15.6,   // particle 22
+    };
+    std::vector<double> expectedF2 = {
+        41.2, -29.8,   9.7,   // particle 12
+        29.7,  -5.4,  38.9,   // particle 2
+        47.3, -19.5,   6.2,   // particle 8
+         4.5,  24.3,  12.9,   // particle 21
+        21.5, -35.3,  15.6,   // particle 22
+        21.7, -38.4,  18.2,   // particle 23
+    };
+    std::vector<double> expectedF5 = {
+        14.8,  -7.3,  39.6,   // particle 10
+        29.7, -24.6,  10.9,   // particle 19
+        17.8, -39.2,  19.4,   // particle 20
+         4.5,  24.3,  12.9,   // particle 21
+        21.5, -35.3,  15.6,   // particle 22
+    };
+    std::vector<double> expectedR1 = {
+        37.6,  // particle 14 region 3
+        76.2,  // particle 8  region 3
+        58.9,  // particle 18 region 3
+        14.9,  // particle 20 region 3 
+        22.6,  // particle 22 region 3
+    };
+    std::vector<double> expectedR2 = {
+        19.8,  // particle 12 region 3
+        45.7,  // particle 2  region 3
+        76.2,  // particle 8  region 3
+        69.1,  // particle 21 region 3
+        22.6,  // particle 22 region 3
+        12.5   // particle 23 region 3
+    };
+    std::vector<double> expectedR5 = {
+         8.7,  // particle 10 region 3
+        57.8,  // particle 19 region 3 
+        14.9,  // particle 20 region 3 
+        69.1,  // particle 21 region 3
+        22.6,  // particle 22 region 3 
+    };
+    std::vector<double> expectedM1 = {
+        5.9,  // particle 14 region 3
+        8.4,  // particle 8  region 3
+        1.8,  // particle 18 region 3
+       18.6,  // particle 20 region 3
+       10.8,  // particle 22 region 3
+    };
+    std::vector<double> expectedM2 = {
+        3.0,  // particle 12 region 3
+        0.9,  // particle 2  region 3
+        8.4,  // particle 8  region 3
+        3.1,  // particle 21 region 3
+       10.8,  // particle 22 region 3
+        8.5   // particle 23 region 3
+    };
+    std::vector<double> expectedM5 = {
+        0.5,  // particle 10 region 3
+        7.2,  // particle 19 region 3
+       18.6,  // particle 20 region 3
+        3.1,  // particle 21 region 3
+       10.8,  // particle 22 region 3
+    };
+
+
+    std::vector<int> expectednParticlesVec =
+    {
+        expectednParticles1, expectednParticles2, expectednParticles5
+    };
+    std::vector<std::vector<double>> expectedXVec =
+    {
+        expectedX1, expectedX2, expectedX5
+    };
+    std::vector<std::vector<double>> expectedVVec =
+    {
+        expectedV1, expectedV2, expectedV5
+    };
+    std::vector<std::vector<double>> expectedFVec =
+    {
+        expectedF1, expectedF2, expectedF5
+    };
+    std::vector<std::vector<double>> expectedRVec =
+    {
+        expectedR1, expectedR2, expectedR5
+    };
+    std::vector<std::vector<double>> expectedMVec =
+    {
+        expectedM1, expectedM2, expectedM5
+    };
+
+
+
+    // sending data
+    std::array<int, 3> ranks = { 2,2,2 };
+    int id = 2;
+    // building the engine
+    // since every particle is the local particle
+    // it is fine to first set the particles
+    // prior to building the engine
+    auto engine_ptr =
+        set_particles_build_engine(id, ranks, newX3, newV3, newF3, newR3, newM3,skin);
+    // getting the communicator pointer
+    auto* communicator_ptr = engine_ptr->getCommunicator().get();
+
+    // sending the interior particles
+    void* transData[6];
+    // sending to the rank4
+    // xhi
+    communicator_ptr->sendGhosts(3, transData[1]);
+    // sending to the rank1
+    // ylo
+    communicator_ptr->sendGhosts(0, transData[2]);
+    // sending to the rank7
+    // zhi
+    communicator_ptr->sendGhosts(6, transData[5]);
+
+    // checking the message
+    // at first attempt the message is just send to the immediate neighboring ranks
+    // 1, 4, 7
+    // It is the job of those neighbors to resend the ghost particles
+    // to non-immediate neighboring ranks of 2,5,6,8
+    // The non-immediate case is tested in the next test
+    // That situation is more like a regression test
+    int output_indxs[] = { 1,2,5 };
+
+
+    std::vector<double> X, V, F, R, M;
+    for (int i = 0; i < 3; i++) {
+        double* transDatai = static_cast<double*>(transData[output_indxs[i]]);
+        int nParticles = static_cast<int>(transDatai[0]);
+        // checking the number of particles
+        REQUIRE(nParticles == expectednParticlesVec[i]);
+        // outputs 
+        X.clear(); V.clear(); F.clear(); R.clear(); M.clear();
+        X.reserve(3 * nParticles); V.reserve(3 * nParticles); F.reserve(3 * nParticles);
+        R.reserve(nParticles); M.reserve(nParticles);
+
+        int dataLoc = 1;
+        for (int j = 0; j < nParticles; j++) {
+            X.push_back(transDatai[dataLoc++]);
+            X.push_back(transDatai[dataLoc++]);
+            X.push_back(transDatai[dataLoc++]);
+            V.push_back(transDatai[dataLoc++]);
+            V.push_back(transDatai[dataLoc++]);
+            V.push_back(transDatai[dataLoc++]);
+            F.push_back(transDatai[dataLoc++]);
+            F.push_back(transDatai[dataLoc++]);
+            F.push_back(transDatai[dataLoc++]);
+            M.push_back(transDatai[dataLoc++]);
+            R.push_back(transDatai[dataLoc++]);
+        }
+
+
+        // checking the results
+        REQUIRE_THAT(X.data(), Array3DMatcher(expectedXVec[i].data(), nParticles, 1e-6));
+        REQUIRE_THAT(V.data(), Array3DMatcher(expectedVVec[i].data(), nParticles, 1e-6));
+        REQUIRE_THAT(F.data(), Array3DMatcher(expectedFVec[i].data(), nParticles, 1e-6));
+        REQUIRE_THAT(R.data(), Array1DMatcher(expectedRVec[i].data(), nParticles, 1e-6));
+        REQUIRE_THAT(M.data(), Array1DMatcher(expectedMVec[i].data(), nParticles, 1e-6));
+    }
+
+    // clearing the datavector
+     // it is the job of the ghostRecv function 
+     // but in this test we do not call it
+    for (int i = 0; i < 3; i++) {
+        int indx = output_indxs[i];
+        delete[] transData[indx];
+    }
+}
+
+
+TEST_CASE("Testing the movement of particles for the case with the skin value of 50","[.][Ignored it for now]")
 {
     std::cout << "Testing the movement of particles for the case with the skin value of 50" << std::endl;
     std::cout << std::string(80, '=') << std::endl;
@@ -1750,7 +2065,7 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
     {
         expectedF1, expectedF2, expectedF3, expectedF4
     };
-    std::vector<std::vector<double>> expectedXRec =
+    std::vector<std::vector<double>> expectedRVec =
     {
         expectedR1, expectedR2, expectedR3, expectedR4
     };
@@ -1759,7 +2074,116 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
         expectedM1, expectedM2, expectedM3, expectedM4
     };
 
-    // building 
+    // running configuration
+    std::array<int, 3> ranks = { 2,2,1 };
+    //
+    int nranks = ranks[0] * ranks[1] * ranks[2];
+    // ids 
+    std::vector<int> ids;
+    for (int i = 0; i < nranks; i++)
+        ids.push_back(i);
+
+    std::vector<unique_ptr<Engine>> engineArray;
+
+    for (int i = 0; i < nranks; i++)
+    {
+        auto engine_ptr =
+            build_engine_set_particles(ids[i], ranks, newXVec[i], newVVec[i], newFVec[i], newRVec[i], newMVec[i]);
+        engineArray.push_back(std::move(engine_ptr));
+    }
+
+    std::vector<Communicator*> communicatorArray;
+
+    for (int i = 0; i < nranks; i++) {
+        communicatorArray.push_back(engineArray[i]->getCommunicator().get());
+    }
+
+    std::vector<std::array<int, 6>> exchangeDestArray(nranks, std::array<int, 6>{});
+
+    // each std::vector<double>* for one rank
+    // each std::vector<double>* has six
+    // std::vector<double> vectors
+    // So three dimensions
+    // NRanks X 6 (directions) X number of moved particles
+    std::vector<double>* messagesArray[4];
+
+
+    // number of destinations
+    int nDestsTotal = 0;
+
+    int numberOfAttempts = 0;
+
+
+    constexpr int maxAttempts = 4;
+
+    // setting the interior particles (ghosts for neighboring particles)
+    for (auto& communicator : communicatorArray)
+    {
+        communicator->setInteriorParticles();
+    }
+
+    // sending the interior particles as ghosts
+    for (auto& communicator : communicatorArray) {
+        //communicator->sendGhosts()
+    }
+
+
+    // repeating the particle reassginement until there is no
+    // outside particles in each communicator
+    // The reason for repeating it is that it is a rare possibility 
+    // that x, y, and z values of a particle are all out of the
+    // rank dimensions. In this case at first attempt the particle is 
+    // moved in the rank which is neighboring the current rank 
+    // in the x dimension. The second time in the y dimension
+    // and finally in the z dimension... This way there is a need
+    // for knowing 6 neighboring ranks in contrast to the general 
+    // case of 26 neighboring ranks!
+    do {
+        nDestsTotal = 0;
+        numberOfAttempts++;
+
+        for (int i = 0; i < 4; i++) {
+            exchangeDestArray[i] = communicatorArray[i]->returnExchangeDests();
+            // an array of vector<double> is returned for each communicatoriRef
+            messagesArray[i] = communicatorArray[i]->sendExchangeParticles();
+        }
+
+        // getting the nDests values
+        for (int i = 0; i < 4; i++)
+            nDestsTotal += communicatorArray[i]->getNDests();
+
+        // ranks
+        for (int i = 0; i < 4; i++) {
+            // directions xlo, xhi, ylo, yhi, zlo, zhi
+            for (int j = 0; j < 6; j++) {
+                // ref is very important
+                // since the recvExchangeParticles
+                // after setting the new particle 
+                // needs to reset the message
+                auto& message = messagesArray[i][j];
+                if (exchangeDestArray[i][j] < 0)
+                    continue;
+                communicatorArray[exchangeDestArray[i][j]]->recvExchangeParticles(message);
+            }
+        }
+
+    } while (nDestsTotal > 0 && numberOfAttempts < maxAttempts);
+
+
+
+
+    for (int i = 0; i < nranks; i++) {
+        int id = ids[i];
+        Engine* engine_ptr = engineArray[i].get();
+        checking_communicator(
+            id, engine_ptr,
+            expectedXVec,
+            expectedVVec,
+            expectedFVec,
+            expectedRVec,
+            expectedMVec
+        );
+    }
 
 }
 

@@ -82,6 +82,8 @@ Particles& Particles::operator=(const Particles& rhs_) {
 	f = rhs_.f;
 	m = rhs_.m;
 	r = rhs_.r;
+
+	return *this;
 }
 
 Particles& Particles::operator=(Particles&& rhs_) {
@@ -96,6 +98,8 @@ Particles& Particles::operator=(Particles&& rhs_) {
 	f = std::move(rhs_.f);
 	m = std::move(rhs_.m);
 	r = std::move(rhs_.r);
+
+	return *this;
 }
 
 

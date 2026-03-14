@@ -1,7 +1,6 @@
 #include "catch_amalgamated.hpp"
 #include "test_communicator_helpers.hpp"
 
-
 /// <summary>
 /// The default value of the skin parameter
 /// </summary>
