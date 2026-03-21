@@ -1,5 +1,6 @@
-#include <memory>
-#include <string>
+#include <iostream>
+#include <fstream>
+
 #include <mpi.h>
 
 #include "Shared/rtweekend.h"
@@ -44,4 +45,3 @@ int main(int argc, char** argv)
 
 	return 0;
 }
-

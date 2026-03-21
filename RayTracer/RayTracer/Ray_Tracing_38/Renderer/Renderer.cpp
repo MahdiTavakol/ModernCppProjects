@@ -18,7 +18,7 @@ renderer::renderer(int argc, char** argv, int _mode, std::string _filename)
 
 	in = std::make_unique<input>(argc, argv, mode);
 	world_factory = std::make_unique<scene_factory>(mode,para);
-	writer = std::make_unique<writer>(filename);
+	writer = std::make_unique<write>(filename);
 }
 
 renderer::renderer(int argc, char** argv, int _mode, std::string _filename,

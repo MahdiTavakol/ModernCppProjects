@@ -7,11 +7,11 @@
 
 #include "../Data/color_array.h"
 
-class writer {
+class write {
 public:
-	writer(std::string _file_name, color_array* _colors, int _image_width, int _image_height);
-	writer(std::string _file_name);
-	~writer();
+	write(std::string _file_name, color_array* _colors, int _image_width, int _image_height);
+	write(std::string _file_name);
+	~write();
 	void write_file();
 	void reset(color_array* _colors, const int _image_width, const int _image_height);
 	void open_new_file(std::string _file_name);
