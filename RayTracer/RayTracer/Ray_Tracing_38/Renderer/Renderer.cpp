@@ -37,13 +37,15 @@ void renderer::setup()
 {
 	// building the hittable_list
 	world_factory->create();
-	world = world_factory->return_world();
+ 	world = world_factory->return_world();
 
 	// building the camera object
 	cam = std::make_unique<camera_parallel>(in,para);
+	
 
 	// the default camera location
 	camera_location = point3(26, 3, 6);
+
 
 	// cases with extra setups
 	switch (mode)
@@ -56,9 +58,11 @@ void renderer::setup()
 			break;
 	}
 
+
+
+
 	// setting the parallel up according to the camera settings
 	para->initialize(cam, world);
-
 
 	cam->move_camera(camera_location);
 }

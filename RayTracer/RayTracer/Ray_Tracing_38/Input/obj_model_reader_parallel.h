@@ -25,8 +25,7 @@ public:
 		parallel* para_);
 
 protected:
-
-	void add_item() override;
+	void set_range(int& low_, int& hi_) override;
 
 private:
 	parallel* para;

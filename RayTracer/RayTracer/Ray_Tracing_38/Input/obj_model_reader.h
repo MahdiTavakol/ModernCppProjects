@@ -5,6 +5,7 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
+#include <unordered_map>
 
 #include "../Types/color.h"
 #include "../Materials/material.h"
@@ -41,11 +42,12 @@ protected:
 	int v_num = 0, vt_num = 0, vn_num = 0;
 	int polygon_num = 0, triangle_num = 0;
 	// names
-	std::vector<std::string> mat_names;
+	// unordered_map is better in performance
+	std::vector<std::string> obj_mat_names;
 	// face indexes
 	std::vector<face_indx> face_indexes;
 	// materials
-	std::vector<std::unique_ptr<material>> materials;
+	std::unordered_map<std::string, std::unique_ptr<material>> materials_map;
 
 	// 
 	bool silent = false;
@@ -53,7 +55,8 @@ protected:
 	// helper functions
 	void read_obj_file();
 	void read_mtl_file();
-	virtual void add_item();
+	virtual void set_range(int& _low, int& _hi);
+	virtual void add_item(const int& _low, const int& _hi);
 	static std::ifstream open_file(std::string file_name_);
 };
 

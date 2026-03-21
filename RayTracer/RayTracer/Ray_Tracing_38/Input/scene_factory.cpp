@@ -347,7 +347,6 @@ void scene_factory::setup_3d_obj()
 		std::make_unique<obj_model_reader>(obj_file_name);
 	model_reader->read();
 	world = model_reader->return_world();
-
 	auto bvh = std::make_unique<bvh_node>(std::move(world));
 	world = std::make_unique<hittable_list>(std::move(bvh));
 }

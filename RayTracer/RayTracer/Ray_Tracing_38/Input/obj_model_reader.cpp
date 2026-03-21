@@ -25,11 +25,13 @@ void obj_model_reader::read()
 		std::cout << "Started reading the mtl file " << std::endl;
 	}
 	read_mtl_file();
+	int low, hi;
+	set_range(low, hi);
 	if (!silent) {
 		std::cout << "Finished reading the mtl file " << std::endl;
 		std::cout << "Started adding the items " << std::endl;
 	}
-	add_item();
+	add_item(low,hi);
 }
 
 void obj_model_reader::read_obj_file()
@@ -95,8 +97,12 @@ void obj_model_reader::read_obj_file()
 			if (!dummy_str.compare("usemtl"))
 			{
 				iss >> dummy_str;
-				mat_names.push_back(dummy_str);
-				current_mat_indx++;
+				auto iter = std::find(obj_mat_names.begin(), obj_mat_names.end(), dummy_str);
+				current_mat_indx = std::distance(obj_mat_names.begin(), iter);
+				if (iter == obj_mat_names.end())
+				{
+					obj_mat_names.push_back(dummy_str);
+				}
 			}
 			if (!dummy_str.compare("s"))
 			{
@@ -118,6 +124,10 @@ void obj_model_reader::read_obj_file()
 					std::getline(issr, dummy_str, delimiter);
 					vn_indx = std::stoi(dummy_str);
 
+					if (v_indx > 669)
+						std::cout << "Abigain " << line << std::endl;
+
+
 					face.v_indx.push_back(v_indx);
 					face.vt_indx.push_back(vt_indx);
 					face.vn_indx.push_back(vn_indx);
@@ -125,20 +135,27 @@ void obj_model_reader::read_obj_file()
 					num_edges++;
 				}
 
+				bool isTriangle = false;
+				bool isPolygon = false;
+
 				switch (num_edges)
 				{
 				case 3:
 					num_triangles++;
+					isTriangle = true;
 					break;
 				case 4:
 					num_polygons++;
+					isPolygon = true;
 					break;
 					/*default:
 						std::cerr << "Error in reading the object file " << line << " , " <<  num_edges << std::endl;*/
 				}
-				face.num_edges = num_edges;
-				face.mat_indx = current_mat_indx;
-				face_indexes.push_back(face);
+				if (isTriangle || isPolygon) {
+					face.num_edges = num_edges;
+					face.mat_indx = current_mat_indx;
+					face_indexes.push_back(face);
+				}
 			}
 			if (iss >> point3)
 			{
@@ -186,6 +203,7 @@ void obj_model_reader::read_mtl_file()
 	color Ka, Kd, Ks, Tf;
 	std::string dummy_str;
 	int material_counter = 0;
+	std::string material_name;
 	while (std::getline(mtl_file, line))
 	{
 		if (line.length() >= 3)
@@ -201,10 +219,11 @@ void obj_model_reader::read_mtl_file()
 				if (material_counter)
 				{
 					auto material_i = std::make_unique<general>(Kd, Ns, d, Tr, Tf, Ks);
-					materials.push_back(std::move(material_i));
+					materials_map[material_name] = std::move(material_i);
 				}
 				iss >> dummy_str;
 				std::cout << "Reading the material " << dummy_str << std::endl;
+				material_name = dummy_str;
 				material_counter++;
 			}
 			else if (dummy_str == "Ns")
@@ -255,58 +274,68 @@ void obj_model_reader::read_mtl_file()
 
 	// Since we add to the materials vector whenever we read a newmtl line the last material would not be added otherwise.
 	auto material_i = std::make_unique<general>(Kd, Ns, d, Tr, Tf, Ks);
-	materials.push_back(std::move(material_i));
+	materials_map[material_name] = std::move(material_i);
 	mtl_file.close();
 }
 
-void obj_model_reader::add_item()
+void obj_model_reader::set_range(int& _low, int& _hi) {
+	_low = 0;
+	_hi = face_indexes.size();
+}
+
+void obj_model_reader::add_item(const int& _low, const int& _hi)
 {
 	int counter = 0;
-	std::cout << "FUck tom and bonnie" << std::endl;
 	std::cout << face_indexes.size() << std::endl;
 
-	for (auto & face : face_indexes)
+	int hi = _hi;
+	if (hi >= face_indexes.size())
+		hi = static_cast<int>(face_indexes.size());
+	
+	for (int i = _low; i < hi; i++)
 	{
-		std::cout << "item " << counter << std::endl;
+		std::cout << "item " << counter << " out of " << face_indexes.size() << std::endl;
 		std::vector<point3> vs_i;
 		std::vector<point3> vts_i;
 		std::vector<point3> vns_i;
 
+		auto& face = face_indexes[i];
+
 		counter++;
-		std::cout << "Adding the face " << counter << std::endl;
+		//std::cout << "Adding the face " << counter << std::endl;
 		std::unique_ptr<material> mat;
 		int num_edges = face.num_edges;
 
 		for (int j = 0; j < num_edges; j++)
 		{
-			if (j >= face.vt_indx.size()) {
+			if (j >= face.v_indx.size() || j >= face.vt_indx.size() || j >= face.vn_indx.size()) {
 				std::cerr << "1-Out of bonds access " << std::endl;
 				continue;
 			}
-			if (face.vt_indx[j] - 1 < 0 || face.vt_indx[j] - 1 >= this->vs.size()) {
-				std::cerr << "2-Out of bonds access" << std::endl;
+			if (face.v_indx[j] - 1 < 0 || face.v_indx[j] - 1 >= this->vs.size()) {
+				std::cerr << "2-Out of bonds access " << face.vt_indx[j] << "," << vs.size() << std::endl;
 				continue;
 			}
-			if (face.vt_indx[j] - 1 >= this->vts.size()) {
+			if (face.vt_indx[j] - 1 < 0 || face.vt_indx[j] - 1 >= this->vts.size()) {
 				std::cerr << "3-Out of bonds access"   << std::endl;
 				continue;
 			}
-			if (face.vt_indx[j] - 1 >= this->vns.size()) {
+			if (face.vn_indx[j] - 1 < 0 || face.vn_indx[j] - 1 >= this->vns.size()) {
 				std::cout << "4-Out of bonds access" << std::endl;
 				std::cout << face.vt_indx[j] << ">=" << this->vns.size() << std::endl;
 				continue;
 			}
-
-			point3 v_j = this->vs[face.vt_indx[j] - 1]; // 1 based indexing in the obj file
+			point3 v_j = this->vs[face.v_indx[j] - 1]; // 1 based indexing in the obj file
 			point3 vt_j = this->vts[face.vt_indx[j] - 1];
-			point3 vn_j = this->vns[face.vt_indx[j] - 1];
+			point3 vn_j = this->vns[face.vn_indx[j] - 1];
 			vs_i.push_back(v_j);
 			vts_i.push_back(vt_j);
 			vns_i.push_back(vn_j);
 		}
-
-		// calling the copy c'tor of the material here
-		general* material_indx = dynamic_cast<general*>(materials[face.mat_indx].get());
+		// mapping from obj material into the mtl file material
+		// we ourselves set the mat_indx to it is zero based!
+		std::string material_name = obj_mat_names[face.mat_indx];
+		general* material_indx = dynamic_cast<general*>(materials_map[material_name].get());
 		mat = std::make_unique<general>(*material_indx);
 
 		switch (num_edges)
@@ -319,6 +348,8 @@ void obj_model_reader::add_item()
 			break;
 		}
 	}
+
+	std::cout << "finished " << std::endl;
 }
 
 std::unique_ptr<hittable_list> obj_model_reader::return_world()
