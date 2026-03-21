@@ -154,30 +154,43 @@ make
 
 ## ✅ 7. BVH Ray Tracer (Phase 7)
 
-**Goal:** Build a modular ray tracing engine with scene factories, polymorphic geometry/material systems, BVH acceleration, OBJ mesh loading, and parallel rendering paths.
+**Goal:** Build a modular ray tracing engine organized around dedicated rendering, scene, geometry, material, input, output, and parallel-processing components, with BVH acceleration, OBJ loading, and animated / distributed render paths.
 
-### 🧩 Concepts Practiced:
+### 🧩 Concepts Practiced
 
-* Object-oriented design with polymorphic `hittable`, `material`, `texture`, and camera abstractions
-* `std::unique_ptr` ownership and move semantics across scene construction and BVH assembly
-* Recursive BVH construction and hierarchical spatial acceleration
-* Scene factory / scenario setup design
-* Separation of rendering, scene setup, input, parallelism, and output responsibilities
-* Mesh and OBJ/MTL loading pipelines
-* Parallel and distributed rendering structure (`MPI`, parallel camera / renderer variants)
+- Object-oriented design using polymorphic `hittable`, `material`, renderer, scene, and camera abstractions
+- `std::unique_ptr` ownership and move semantics across renderer setup, scene construction, and world assembly
+- Recursive BVH construction for spatial acceleration
+- Scene composition through a dedicated `scene_factory`
+- Separation of concerns across `Renderer`, `Input`, `Geometry`, `Materials`, `Output`, `Algorithms`, `Data`, `Types`, and `Shared`
+- OBJ mesh loading and scene import workflows
+- Parallel and distributed rendering structure using `MPI`, parallel camera components, and parallel renderer support
+- Support for animated rendering paths through a dedicated animation renderer
 
-### 🎯 Features:
+### 🎯 Features
 
-* Multiple built-in scenes, including random spheres, Cornell box, lights, smoke, quads, and OBJ-based scenes
-* BVH-based acceleration structure for faster ray-object intersection
-* Support for spheres, quads, circles, triangles, meshes, and volumetric media
-* Material system with Lambertian, metal, dielectric, light-emitting, and texture-based surfaces
-* Texture support including checker, Perlin noise, and image textures
-* Scene construction through a dedicated `scene_factory`
-* OBJ/MTL model import for rendering external geometry
-* Parallel rendering architecture with MPI-oriented and parallel camera / world components
-* Output pipeline for writing rendered images to file
-* Animated scene support through a dedicated renderer / scenario path
+- Multiple built-in scenes, including random spheres, checker scenes, Earth / Perlin spheres, quads, Cornell box, smoke, and OBJ-driven scenes
+- BVH acceleration for faster ray-object intersection tests
+- Support for geometric primitives and scene objects such as spheres, quads, planes, triangles, meshes, and volumetric media
+- Material system supporting Lambertian, metal, dielectric, emissive, and texture-driven surfaces
+- Texture support including checker textures, Perlin noise, and image-based textures
+- Scene setup through `scene_factory` and related input modules
+- OBJ / model loading pipeline for external geometry
+- Parallel rendering architecture with MPI-based coordination and parallel camera / renderer components
+- Output pipeline for writing rendered results to files
+- Animated scene support through `renderer_animation`
+
+### 🗂️ Project Design
+
+- `Renderer`: top-level rendering orchestration, including standard and animation renderers
+- `Input`: scene factory, scene selection, and OBJ/model loading
+- `Geometry`: hittables, primitives, spatial bounds, textures/media-related geometry support
+- `Materials`: surface shading and material models
+- `Algorithms`: BVH, camera variants, parallel strategies, and rendering-support algorithms
+- `Types`: foundational math / rendering types such as `vec3`, `ray`, and `color`
+- `Data`: render buffers and shared render data containers
+- `Output`: file-writing and image output logic
+- `Shared`: project-wide shared utilities and constants
 
 ---
 
