@@ -64,19 +64,36 @@ void obj_model_reader::read_obj_file()
 			{
 				if (iss >> dummy_int >> dummy_str)
 				{
-					if (dummy_str == "vertices")
+					if (dummy_str == "vertices") {
 						file_vs_num = dummy_int;
-					if (dummy_str == "vertex")
+						check_data(file_vs_num, v_num, "vertices");
+						v_num = 0;
+					}
+					if (dummy_str == "vertex") {
 						file_vns_num = dummy_int;
-					if (dummy_str == "texture")
+						check_data(file_vns_num, vn_num, "vertex");
+						vn_num = 0;
+					}
+					if (dummy_str == "texture") {
 						file_vts_num = dummy_int;
+						check_data(file_vts_num, vt_num, "texture");
+						vt_num = 0;
+					}
+						
 					if (dummy_str == "polygons")
 					{
 						file_polygon_num = dummy_int;
+						check_data(file_polygon_num, num_polygons, "polygons");
+						num_polygons = 0;
 						if (iss >> dummy_str >> dummy_int >> dummy_str)
 						{
 							if (dummy_str == "triangles")
 								file_triangle_num = dummy_int;
+							{
+								file_triangle_num = dummy_int;
+								check_data(file_triangle_num, num_triangles, "polygons");
+								num_triangles= 0;
+							}
 						}
 					}
 				}
@@ -124,8 +141,6 @@ void obj_model_reader::read_obj_file()
 					std::getline(issr, dummy_str, delimiter);
 					vn_indx = std::stoi(dummy_str);
 
-					if (v_indx > 669)
-						std::cout << "Abigain " << line << std::endl;
 
 
 					face.v_indx.push_back(v_indx);
@@ -177,17 +192,6 @@ void obj_model_reader::read_obj_file()
 			}
 		}
 	}
-
-	if (v_num != file_vs_num)
-	std::cout << "Inconsistency in the number of read vs with those in the obj file  " << v_num << "," << file_vs_num << std::endl;
-	if (vt_num != file_vts_num)
-	std::cout << "Inconsistency in the number of read vts with those in the obj file  " << vt_num << "," << file_vts_num << std::endl;
-	if (vn_num != file_vns_num)
-	std::cout << "Inconsistency in the number of read vns with those in the obj file  " << vn_num << "," << file_vns_num << std::endl;
-	if (num_polygons != file_polygon_num)
-	std::cout << "Inconsistency in the number of read polygons with those in the obj file  " << num_polygons << "," << file_polygon_num << std::endl;
-	if (num_triangles != file_triangle_num)
-	std::cout << "Inconsistency in the number of read triangles with those in the obj file  " << num_triangles << "," << file_triangle_num << std::endl;
 
 	obj_file.close();
 }
@@ -286,7 +290,6 @@ void obj_model_reader::set_range(int& _low, int& _hi) {
 void obj_model_reader::add_item(const int& _low, const int& _hi)
 {
 	int counter = 0;
-	std::cout << face_indexes.size() << std::endl;
 
 	int hi = _hi;
 	if (hi >= face_indexes.size())
@@ -294,7 +297,8 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 	
 	for (int i = _low; i < hi; i++)
 	{
-		std::cout << "item " << counter << " out of " << face_indexes.size() << std::endl;
+		if (counter % 100 == 0)
+			std::cout << "item " << counter << " out of " << face_indexes.size() << std::endl;
 		std::vector<point3> vs_i;
 		std::vector<point3> vts_i;
 		std::vector<point3> vns_i;
@@ -309,19 +313,19 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 		for (int j = 0; j < num_edges; j++)
 		{
 			if (j >= face.v_indx.size() || j >= face.vt_indx.size() || j >= face.vn_indx.size()) {
-				std::cerr << "1-Out of bonds access " << std::endl;
+				std::cerr << "Out of bonds access for edges" << std::endl;
 				continue;
 			}
 			if (face.v_indx[j] - 1 < 0 || face.v_indx[j] - 1 >= this->vs.size()) {
-				std::cerr << "2-Out of bonds access " << face.vt_indx[j] << "," << vs.size() << std::endl;
+				std::cerr << "Out of bonds access for v" << face.vt_indx[j] << "," << vs.size() << std::endl;
 				continue;
 			}
 			if (face.vt_indx[j] - 1 < 0 || face.vt_indx[j] - 1 >= this->vts.size()) {
-				std::cerr << "3-Out of bonds access"   << std::endl;
+				std::cerr << "Out of bonds access for vt"   << std::endl;
 				continue;
 			}
 			if (face.vn_indx[j] - 1 < 0 || face.vn_indx[j] - 1 >= this->vns.size()) {
-				std::cout << "4-Out of bonds access" << std::endl;
+				std::cout << "Out of bonds access for vn" << std::endl;
 				std::cout << face.vt_indx[j] << ">=" << this->vns.size() << std::endl;
 				continue;
 			}
@@ -359,7 +363,6 @@ std::unique_ptr<hittable_list> obj_model_reader::return_world()
 
 std::ifstream obj_model_reader::open_file(std::string file_name_)
 {
-	std::cout << file_name_ << std::endl;
 	std::ifstream file(file_name_);
 	if (!file.is_open())
 		std::cout << "The file " << std::endl
@@ -367,6 +370,15 @@ std::ifstream obj_model_reader::open_file(std::string file_name_)
 		<< "does not exists in the path " << std::endl
 		<< std::filesystem::current_path() << std::endl;
 	return file;
+}
+
+void obj_model_reader::check_data(const int& num_file_, const int& num_read_, const std::string& title)
+{
+	if (num_file_ != num_read_)
+		std::cout << "Inconsistency in the number of " << title 
+		<< " read vs with those in the obj file  "
+		<< num_file_ << "," << num_read_ << std::endl;
+
 }
 
 

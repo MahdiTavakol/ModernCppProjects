@@ -58,6 +58,9 @@ protected:
 	virtual void set_range(int& _low, int& _hi);
 	virtual void add_item(const int& _low, const int& _hi);
 	static std::ifstream open_file(std::string file_name_);
+
+	// checking data
+	static void check_data(const int& num_file_, const int& num_read_, const std::string& title);
 };
 
 
