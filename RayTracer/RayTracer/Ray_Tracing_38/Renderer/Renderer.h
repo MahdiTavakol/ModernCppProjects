@@ -59,7 +59,7 @@ protected:
 	std::unique_ptr<parallel> para;
 	std::unique_ptr<input> in;
 	std::unique_ptr<hittable_list> world;
-	std::unique_ptr<write> writer;
+	std::unique_ptr<class write> writer;
 	point3 camera_location;
 
 	// since it is owned by the parallel object
