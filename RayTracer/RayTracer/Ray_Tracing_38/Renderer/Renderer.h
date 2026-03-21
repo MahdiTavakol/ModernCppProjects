@@ -40,7 +40,7 @@ public:
 	renderer(int argc, char** argv, int _mode, std::string _filename);
 	renderer(int argc, char** argv, int _mode, std::string _filename,
 		     std::string obj_file_);
-	~renderer();
+	virtual ~renderer();
 	virtual void setup();
 	void add(std::unique_ptr<hittable>& object);
 	virtual void render();
@@ -58,7 +58,7 @@ protected:
 	std::unique_ptr<parallel> para;
 	std::unique_ptr<input> in;
 	std::unique_ptr<hittable_list> world;
-	std::unique_ptr<write> writer;
+	std::unique_ptr<class writer> writer;
 	point3 camera_location;
 
 	// since it is owned by the parallel object
