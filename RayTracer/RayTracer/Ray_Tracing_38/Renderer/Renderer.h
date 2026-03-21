@@ -1,5 +1,6 @@
 #ifndef RENDERER_H
 #define RENDERER_H
+#include <memory>
 
 #include "../Shared/rtweekend.h"
 
