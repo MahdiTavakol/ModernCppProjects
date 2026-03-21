@@ -1,0 +1,157 @@
+#include "catch_amalgamated.hpp"
+#include "test.hpp"
+
+
+TEST_CASE("Testing various error and warning messages")
+{
+	std::cout << "Testing various error and warning messages" << std::endl;
+	std::cout << std::string(80, '=') << std::endl;
+	// Error streams
+	std::ostringstream errorStream1, errorStream2, errorStream3;
+	std::vector<std::reference_wrapper<std::ostream>> errorStreams = {
+		std::ref(errorStream1),
+		std::ref(errorStream2),
+		std::ref(errorStream3)
+	};
+	auto error = make_unique<Error>(errorStreams);
+	// invoking the error function with different messages
+	std::cout << "Using single error and warning messages:" << std::endl;
+	error->one("Error message 1");
+	error->warning("Warning message 1");
+	error->one("Error message 2");
+	error->warning("Warning message 2");
+	error->one("Error message 3");
+	error->warning("Warning message 3");
+	// checking the outputs
+	std::cout << "The ostringstreams contain:" << std::endl;
+	auto& errorStreamsRef = error->getStreams();
+	for (auto& stream : errorStreamsRef) {
+		if (auto ostringstreamPtr = dynamic_cast<std::ostringstream*>(&(stream.get()))) {
+			std::cout << ostringstreamPtr->str() << std::endl;
+		}
+		else
+			std::cout << "Error: Stream is not an ostringstream" << std::endl;
+	}
+
+	std::vector<std::reference_wrapper<std::ostream>> newErrorStreams = {
+		std::ref(std::cout)
+	};
+	error->setStreams(newErrorStreams);
+	std::cout << "Chaining the warning messages:" << std::endl;
+	(*error) << "Chained warning message 1" << std::endl
+		<< "Chained warning message 2" << std::endl
+		<< "Chained warning message 3" << std::endl;
+	SUCCEED("Error and warning messages were successfully written to the provided ostringstreams");
+}
+
+TEST_CASE("Setting the error")
+{
+	std::cout << "Setting the error object" << std::endl;
+	std::cout << std::string(80, '=') << std::endl;
+	// mocked box with an function to get the Error*
+	std::unique_ptr<Box> box = std::make_unique<MockedBox>();
+	// empty particles
+	std::unique_ptr<Particles> particles = std::make_unique<MockedParticles>();
+	// Error streams
+	std::ostringstream stream1, stream2;
+	std::vector<std::reference_wrapper<std::ostream>> errorStreams1 = {
+		std::ref(stream1),
+		std::ref(stream2)
+	};
+	// Error objects
+	std::unique_ptr<Error> error1 = std::make_unique<Error>(errorStreams1);
+	// objects list
+	std::vector<std::unique_ptr<Ref>> inputs;
+	// adding objects
+	inputs.push_back(std::move(box));
+	inputs.push_back(std::move(particles));
+	inputs.push_back(std::move(error1));
+	// Testing fixture
+	EngineFixture engineFixture(inputs);
+	// The engine pointer
+	auto engine_ptr = engineFixture.returnEngine();;
+	// returning the box and particles object
+	auto& boxRef1 = engine_ptr->getBox();
+	auto& particlesRef1 = engine_ptr->getParticles();
+	// checking those references
+	REQUIRE(boxRef1);
+	REQUIRE(particlesRef1);
+	// converting them
+	auto mockedBoxPtr1 = dynamic_cast<MockedBox*>(boxRef1.get());
+	auto mockedParticlesPtr1 = dynamic_cast<MockedParticles*>(particlesRef1.get());
+	// checking the conversion
+	REQUIRE(mockedBoxPtr1);
+	REQUIRE(mockedParticlesPtr1);
+	// getting the error refs
+	Error* boxError1 = mockedBoxPtr1->getError();
+	Error* particlesError1 = mockedParticlesPtr1->getError();
+	// checking the streams
+	auto& particlesStreams1 = particlesError1->getStreams();;
+	auto& boxStreams1 = boxError1->getStreams();
+	// testing the streams sizes
+	REQUIRE(boxStreams1.size() == 2);
+	REQUIRE(particlesStreams1.size() == 2);
+	for (int i = 0; i < 2; i++) {
+		REQUIRE(&boxStreams1[i].get() == &particlesStreams1[i].get());
+	}
+}
+
+TEST_CASE("Resetting the error")
+{
+	std::cout << "Resetting the error object" << std::endl;
+	std::cout << std::string(80, '=') << std::endl;
+	// mocked box with an function to get the Error*
+	std::unique_ptr<Box> box = std::make_unique<MockedBox>();
+	// Error streams
+	std::ostringstream stream1, stream2, stream3;
+	std::vector<std::reference_wrapper<std::ostream>> errorStreams1 = {
+		std::ref(stream1),
+		std::ref(stream2)
+	};
+	std::vector<std::reference_wrapper<std::ostream>> errorStreams2 = {
+		std::ref(stream3)
+	};
+	// Error objects
+	std::unique_ptr<Error> error1 = std::make_unique<Error>(errorStreams1);
+	std::unique_ptr<Error> error2 = std::make_unique<Error>(errorStreams2);
+	// objects list
+	std::vector<std::unique_ptr<Ref>> inputs;
+	// adding objects
+	inputs.push_back(std::move(box));
+	inputs.push_back(std::move(error1));
+	// the engine fixture
+	EngineFixture engineFixture(inputs);
+	// returning the engine_ptr
+	auto engine_ptr = engineFixture.returnEngine();
+	// returning the box  object
+	auto& boxRef1 = engine_ptr->getBox();
+	// checking those references
+	REQUIRE(boxRef1);
+	// converting them
+	auto mockedBoxPtr1 = dynamic_cast<MockedBox*>(boxRef1.get());
+	// checking the conversion
+	REQUIRE(mockedBoxPtr1);
+	// getting the error refs
+	Error* boxError1 = mockedBoxPtr1->getError();
+	// checking the streams
+	auto& boxStreams1 = boxError1->getStreams();
+	// testing the streams sizes
+	REQUIRE(boxStreams1.size() == 2);
+
+	// resetting the error stream
+	engine_ptr->resetError(std::move(error2));
+	// returning the box  object
+	auto& boxRef2 = engine_ptr->getBox();
+	// checking those references
+	REQUIRE(boxRef2);
+	// converting them
+	auto mockedBoxPtr2 = dynamic_cast<MockedBox*>(boxRef2.get());
+	// checking the conversion
+	REQUIRE(mockedBoxPtr2);
+	// getting the error refs
+	Error* boxError2 = mockedBoxPtr2->getError();
+	// checking the streams
+	auto& boxStreams2 = boxError2->getStreams();
+	// testing the streams sizes
+	REQUIRE(boxStreams2.size() == 1);
+}

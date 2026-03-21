@@ -1,0 +1,30 @@
+#pragma once
+
+#include "mandelbrot.h"
+#include "strategies.h"
+#include <memory>
+
+
+namespace Mandelbrot_NS {
+
+	class mandelbrot_omp : public mandelbrot {
+	public:
+		mandelbrot_omp(/* allocation config */ const allocation_mode& _alloc_mode, const allocation_major& _alloc_major,
+			           /* space config */ const bounds& _bnds,
+			           /* resolution */ std::array<int, 2> _res,
+			           /* thread configuration*/ const thread_config& thread_cfg,
+			           /* mesh type */ const Mesh_type& mesh_type_,
+			           /* file name */ const std::string& _file_name = "Mandelbrot.dat",
+			           /* number of iterations*/ const int& num_iterations_=10000,
+		               /* gamma */ const double& gamma = 1.0,
+			           /* is it burning ship*/ const bool& burning_ = false);
+
+
+		void calculate(const double& scale_) override;
+
+	private:
+		std::unique_ptr<omp_strategy> run_strategy;
+
+	};
+
+}

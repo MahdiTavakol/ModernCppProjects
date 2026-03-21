@@ -1,0 +1,141 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Numerical">
+      <UniqueIdentifier>{61964b74-3b05-4c0e-98b3-017ee9c5835d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Algorithm">
+      <UniqueIdentifier>{63456fb9-5e04-4f64-a06e-06da496cb1a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Plotting">
+      <UniqueIdentifier>{04959456-e0ea-43f1-b083-3e734da5e199}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Runner">
+      <UniqueIdentifier>{7cf4d729-d784-4dc5-8d0a-bbef51852f22}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Array">
+      <UniqueIdentifier>{64c05de7-5186-4f21-a00f-e136bd285f46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Test">
+      <UniqueIdentifier>{63fe076d-d62e-49e2-b006-e7aeba50f2d0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="definitions.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Numerical\complex.h">
+      <Filter>Source Files\Numerical</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\mandelbrot.h">
+      <Filter>Source Files\Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Array\array.h">
+      <Filter>Source Files\Array</Filter>
+    </ClInclude>
+    <ClInclude Include="Array\array_allocator.h">
+      <Filter>Source Files\Array</Filter>
+    </ClInclude>
+    <ClInclude Include="Array\array_c.h">
+      <Filter>Source Files\Array</Filter>
+    </ClInclude>
+    <ClInclude Include="Array\array_cpp.h">
+      <Filter>Source Files\Array</Filter>
+    </ClInclude>
+    <ClInclude Include="Array\array_mdspan.h">
+      <Filter>Source Files\Array</Filter>
+    </ClInclude>
+    <ClInclude Include="Array\array_modern.h">
+      <Filter>Source Files\Array</Filter>
+    </ClInclude>
+    <ClInclude Include="Runner\run_mandelbrot.h">
+      <Filter>Source Files\Runner</Filter>
+    </ClInclude>
+    <ClInclude Include="Runner\run_mandelbrot_animation.h">
+      <Filter>Source Files\Runner</Filter>
+    </ClInclude>
+    <ClInclude Include="Runner\run_mandelbrot_timing.h">
+      <Filter>Source Files\Runner</Filter>
+    </ClInclude>
+    <ClInclude Include="Runner\run_mandelbrot_factory.h">
+      <Filter>Source Files\Runner</Filter>
+    </ClInclude>
+    <ClInclude Include="Runner\run_mandelbrot_single.h">
+      <Filter>Source Files\Runner</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\mandelbrot_omp.h">
+      <Filter>Source Files\Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\strategies.h">
+      <Filter>Source Files\Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithm\formula.h">
+      <Filter>Source Files\Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Test\catch_amalgamated.hpp">
+      <Filter>Source Files\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="Test\test.h">
+      <Filter>Source Files\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="Test\unittest_algorithm.h">
+      <Filter>Source Files\Test</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\mandelbrot.cpp">
+      <Filter>Source Files\Algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="Array\array.cpp">
+      <Filter>Source Files\Array</Filter>
+    </ClCompile>
+    <ClCompile Include="Runner\run_mandelbrot_animation.cpp">
+      <Filter>Source Files\Runner</Filter>
+    </ClCompile>
+    <ClCompile Include="Runner\run_mandelbrot_timing.cpp">
+      <Filter>Source Files\Runner</Filter>
+    </ClCompile>
+    <ClCompile Include="Runner\run_mandelbrot_factory.cpp">
+      <Filter>Source Files\Runner</Filter>
+    </ClCompile>
+    <ClCompile Include="Runner\run_mandelbrot.cpp">
+      <Filter>Source Files\Runner</Filter>
+    </ClCompile>
+    <ClCompile Include="Runner\run_mandelbrot_single.cpp">
+      <Filter>Source Files\Runner</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\mandelbrot_omp.cpp">
+      <Filter>Source Files\Algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithm\strategies.cpp">
+      <Filter>Source Files\Algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="cmd_args.h">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Test\test.cpp">
+      <Filter>Source Files\Test</Filter>
+    </ClCompile>
+    <ClCompile Include="Test\catch_amalgamated.cpp">
+      <Filter>Source Files\Test</Filter>
+    </ClCompile>
+    <ClCompile Include="Test\unittest_algorithm.cpp">
+      <Filter>Source Files\Test</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

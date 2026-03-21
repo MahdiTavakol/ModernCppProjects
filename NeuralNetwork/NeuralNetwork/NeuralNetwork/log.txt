@@ -1,0 +1,5 @@
+Initializing the program
+Creating the Neural Network
+Opening the data/train.csv
+Opening the data/test.csv
+Getting the the file dimensions

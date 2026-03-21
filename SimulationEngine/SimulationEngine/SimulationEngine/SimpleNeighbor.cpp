@@ -1,0 +1,43 @@
+#include "SimpleNeighbor.h"
+#include "Particles.h"
+
+SimpleNeighbor::SimpleNeighbor(std::vector<std::string> args_) :
+	Neighbor{ args_ }
+{}
+
+SimpleNeighbor::SimpleNeighbor(double neighbor_cutoff_) :
+	Neighbor{neighbor_cutoff_ }
+{}
+
+void SimpleNeighbor::init() {
+	this->update();
+}
+
+void SimpleNeighbor::update() {
+	int nmax, nlocal;
+	particles->getNmaxNlocal(nmax, nlocal);
+	auto x = particles->getXData();
+	nNeigh = nlocal;
+	neighList.resize(nlocal * nlocal);
+	firstNeigh.reserve(nlocal);
+	numNeigh.reserve(nlocal);
+	int neighIndex = 0;
+	for (int i = 0; i < nlocal; i++) {
+		firstNeigh.push_back(neighIndex);
+		for (int j = 0; j < nlocal; j++) {
+			if (i == j) continue;
+			double r = distance(x, i, j);
+			if (r <= neighbor_cutoff) {
+					neighList[neighIndex++] = j;
+			}
+		}
+		numNeigh.push_back(neighIndex - firstNeigh[i]);
+	}
+}
+
+double SimpleNeighbor::distance(const double* const x, const int& i, const int& j) {
+	double r2 = (x[3 * i] - x[3 * j]) * (x[3 * i] - x[3 * j]) +
+		(x[3 * i + 1] - x[3 * j + 1]) * (x[3 * i + 1] - x[3 * j + 1]) +
+		(x[3 * i + 2] - x[3 * j + 2]) * (x[3 * i + 2] - x[3 * j + 2]);
+	return std::sqrt(r2);
+}

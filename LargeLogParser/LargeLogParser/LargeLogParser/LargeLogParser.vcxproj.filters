@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Test_NS">
+      <UniqueIdentifier>{d935abab-e5c2-4692-9172-24d07421a402}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Data_NS">
+      <UniqueIdentifier>{cc45006a-8df7-42ab-a5cd-71b5a42c2df2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Parser_NS">
+      <UniqueIdentifier>{aad4a09f-84a3-466b-98a6-50573c3d529f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Test_NS\catch_amalgamated.hpp">
+      <Filter>Source Files\Test_NS</Filter>
+    </ClInclude>
+    <ClInclude Include="Test_NS\CreateLargeLogs.h">
+      <Filter>Source Files\Test_NS</Filter>
+    </ClInclude>
+    <ClInclude Include="Test_NS\fileWriter.h">
+      <Filter>Source Files\Test_NS</Filter>
+    </ClInclude>
+    <ClInclude Include="Test_NS\test.hpp">
+      <Filter>Source Files\Test_NS</Filter>
+    </ClInclude>
+    <ClInclude Include="Data_NS\DataStructure.h">
+      <Filter>Source Files\Data_NS</Filter>
+    </ClInclude>
+    <ClInclude Include="Parser_NS\LogParser.h">
+      <Filter>Source Files\Parser_NS</Filter>
+    </ClInclude>
+    <ClInclude Include="Parser_NS\LogParserCreater.h">
+      <Filter>Source Files\Parser_NS</Filter>
+    </ClInclude>
+    <ClInclude Include="Parser_NS\LogParserFuture.h">
+      <Filter>Source Files\Parser_NS</Filter>
+    </ClInclude>
+    <ClInclude Include="Parser_NS\LogParserThreads.h">
+      <Filter>Source Files\Parser_NS</Filter>
+    </ClInclude>
+    <ClInclude Include="Parser_NS\LogParserCreaterConc.h">
+      <Filter>Source Files\Parser_NS</Filter>
+    </ClInclude>
+    <ClInclude Include="Parser_NS\LogParserCreaterLazy.h">
+      <Filter>Source Files\Parser_NS</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Test_NS\catch_amalgamated.cpp">
+      <Filter>Source Files\Test_NS</Filter>
+    </ClCompile>
+    <ClCompile Include="Test_NS\CreateLargeLogs.cpp">
+      <Filter>Source Files\Test_NS</Filter>
+    </ClCompile>
+    <ClCompile Include="Test_NS\test.cpp">
+      <Filter>Source Files\Test_NS</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Data_NS\DataStructure.cpp">
+      <Filter>Source Files\Data_NS</Filter>
+    </ClCompile>
+    <ClCompile Include="Parser_NS\LogParser.cpp">
+      <Filter>Source Files\Parser_NS</Filter>
+    </ClCompile>
+    <ClCompile Include="Parser_NS\LogParserFuture.cpp">
+      <Filter>Source Files\Parser_NS</Filter>
+    </ClCompile>
+    <ClCompile Include="Parser_NS\LogParserThreads.cpp">
+      <Filter>Source Files\Parser_NS</Filter>
+    </ClCompile>
+    <ClCompile Include="Parser_NS\LogParserCreaterConc.cpp">
+      <Filter>Source Files\Parser_NS</Filter>
+    </ClCompile>
+    <ClCompile Include="Parser_NS\LogParserCreaterLazy.cpp">
+      <Filter>Source Files\Parser_NS</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

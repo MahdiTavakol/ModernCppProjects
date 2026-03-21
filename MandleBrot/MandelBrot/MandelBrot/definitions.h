@@ -1,0 +1,22 @@
+#ifndef DEFINITIONS_H
+#define DEFINITIONS_H
+
+#define FLERR __FILE__, __LINE__
+#define ERR __LINE__
+
+
+#include <vector>
+#include <string>
+
+class thread_config {
+public:
+	int threads_x = 1; 
+	int threads_y = 1;
+	
+	thread_config(int _x = 1, int _y = 1) : threads_x{ _x }, threads_y{ _y } {}
+	};
+
+enum class Mesh_type { SERIAL, INNER_LOOP, OUTER_LOOP };
+
+
+#endif
