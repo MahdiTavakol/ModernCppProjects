@@ -15,15 +15,27 @@
 class camera_parallel : public camera
 {
 public:
-    camera_parallel(std::unique_ptr<input>& _in, std::unique_ptr<parallel>& para);
+    camera_parallel(std::unique_ptr<input>& _in, std::unique_ptr<parallel>& _para);
     camera_parallel(const int _width_min, const int _width_max, const int _height_min, const int _height_max);
     camera_parallel();
     void render(const hittable& world) override;
     void set_range(const int& _width_min, const int& _width_max, const int& _height_min, const int& _height_max) override;
+    color_array* return_color_array_ptr() override;
+
+
+protected:
+    void initialize_storage() override;
 
 private:
+    void gather();
+    std::unique_ptr<color_array> c_array_all;
     int height_min, height_max, width_min, width_max;
+    int width_per_node, height_per_node;
+
+    MPI_Comm* world;
     int rank, size;
+    std::array<int, 2> size_config;
+    std::array<int, 2> rank_config;
 };
 
 #endif

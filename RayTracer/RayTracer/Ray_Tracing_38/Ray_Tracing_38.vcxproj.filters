@@ -75,12 +75,6 @@
     <ClCompile Include="Algorithms\parallel.cpp">
       <Filter>Source Files\Algorithm</Filter>
     </ClCompile>
-    <ClCompile Include="Algorithms\parallel_camera.cpp">
-      <Filter>Source Files\Algorithm</Filter>
-    </ClCompile>
-    <ClCompile Include="Algorithms\parallel_derived.cpp">
-      <Filter>Source Files\Algorithm</Filter>
-    </ClCompile>
     <ClCompile Include="Algorithms\path.cpp">
       <Filter>Source Files\Algorithm</Filter>
     </ClCompile>
@@ -183,12 +177,6 @@
       <Filter>Source Files\Algorithm</Filter>
     </ClInclude>
     <ClInclude Include="Algorithms\parallel.h">
-      <Filter>Source Files\Algorithm</Filter>
-    </ClInclude>
-    <ClInclude Include="Algorithms\parallel_camera.h">
-      <Filter>Source Files\Algorithm</Filter>
-    </ClInclude>
-    <ClInclude Include="Algorithms\parallel_derived.h">
       <Filter>Source Files\Algorithm</Filter>
     </ClInclude>
     <ClInclude Include="Algorithms\path.h">

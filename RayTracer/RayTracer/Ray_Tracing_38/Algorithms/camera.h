@@ -13,7 +13,7 @@
 #include "../Types/ray.h"
 #include "../Types/vec3.h"
 
-class color_array;
+
 class input;
 
 
@@ -52,10 +52,11 @@ public:
 		// so that the setup in the parallel class can have generic input of camera* type
 	}
 
-	color_array* return_color_array_ptr()
+	virtual color_array* return_color_array_ptr()
 	{
-		return &c_array;
+		return c_array.get();
 	}
+
 
 protected:
 
@@ -87,7 +88,7 @@ protected:
 	vec3 defocus_disk_v;
 
 	// the rendered color_array
-	color_array c_array;
+	std::unique_ptr<color_array> c_array;
 
 	// the rest of functions
 	ray get_ray(int i, int j) const;
@@ -95,6 +96,7 @@ protected:
 	point3 defocus_disk_sample() const;
 	color ray_color(const ray& r, int depth, const hittable& world) const;
 	void initialize();
+	virtual void initialize_storage() = 0;
 };
 
 

@@ -15,7 +15,7 @@ void camera_derived::render(const hittable& world) {
 				pixel_color += ray_color(r, max_depth, world);
 			}
 			pixel_color = pixel_samples_scale * pixel_color;
-			color_data** c_data = c_array.return_array();
+			color_data** c_data = c_array->return_array();
 			c_data[i][j].r = pixel_color.x();
 			c_data[i][j].g = pixel_color.y();
 			c_data[i][j].b = pixel_color.z();
@@ -23,4 +23,9 @@ void camera_derived::render(const hittable& world) {
 	}
 
 	std::clog << "\rDone                          ";
+}
+
+void camera_derived::initialize_storage()
+{
+	c_array = std::make_unique<color_array>(image_width, image_height);
 }

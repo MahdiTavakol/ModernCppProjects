@@ -7,6 +7,7 @@ color_array::color_array(const int& _width, const int& _height, color_data** _co
     for (int i = 0; i < width; i++)
         for (int j = 0; j < height; j++)
             this->array[i][j] = _color_data[i][j];
+
 }
 
 color_array::color_array(const int& _width, const int& _height, color_data* _color_data) :
@@ -34,7 +35,8 @@ color_array::color_array(const color_array& c_a)
 
 }
 
-color_array::color_array(const int& _width, const int& _height) : width(_width), height(_height)
+color_array::color_array(const int& _width, const int& _height) :
+    width(_width), height(_height)
 {
     allocate();
 }

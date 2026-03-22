@@ -4,18 +4,7 @@
 renderer::renderer(int argc, char** argv, int _mode, std::string _filename)
 	: mode(_mode), filename(_filename)
 {
-
-	switch (mode)
-	{
-	case OBJ_MODEL_PARALLEL:
-		// object reader is parallel so the para object should be of derived type
-		para = std::make_unique<parallel_derived>();
-		break;
-	default:
-		para = std::make_unique<parallel_camera>();
-		break;
-	}
-
+	para = std::make_unique<parallel>();
 	in = std::make_unique<input>(argc, argv, mode);
 	world_factory = std::make_unique<scene_factory>(mode,para);
 	writer = std::make_unique<class write>(filename);
@@ -59,11 +48,6 @@ void renderer::setup()
 	}
 
 
-
-
-	// setting the parallel up according to the camera settings
-	para->initialize(cam, world);
-
 	cam->move_camera(camera_location);
 }
 
@@ -78,16 +62,15 @@ void renderer::render()
 	cam->render(*world);
 }
 
-void renderer::gather()
+void renderer::update_c_array()
 {
-	para->gather(cam);
-	c_array = para->return_color_array_ptr();
+	c_array = cam->return_color_array_ptr();
 }
 
 void renderer::write_file()
 {
+	update_c_array();
 	int image_width, image_height;
-
 	cam->return_image_size(image_width, image_height);
 	writer->reset(c_array, image_width, image_height);
 

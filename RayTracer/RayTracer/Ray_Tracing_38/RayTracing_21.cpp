@@ -37,10 +37,7 @@ int main(int argc, char** argv)
 	//std::unique_ptr<renderer> render = std::make_unique<renderer_animation>(argc,argv,mode,filename);
 
 	render->setup();
-
-
 	render->render();
-
 	MPI_Finalize();
 
 	return 0;

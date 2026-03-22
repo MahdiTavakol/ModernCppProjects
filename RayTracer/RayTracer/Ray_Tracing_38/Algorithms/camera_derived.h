@@ -15,9 +15,11 @@ class camera_derived : public camera
 
 public:
 
-    camera_derived(std::unique_ptr<input>& _in)
+    camera_derived(std::unique_ptr<input>& _in):
+		camera{}
 	{
 		_in->setup_camera(this);
+		initialize_storage();
 	}
 
 	void render(const hittable& world) override;
@@ -25,6 +27,9 @@ public:
 	void move_camera(point3 _lookfrom) override {
 		this->lookfrom = _lookfrom;
 	}
+
+protected:
+	void initialize_storage() override;
 
 };
 

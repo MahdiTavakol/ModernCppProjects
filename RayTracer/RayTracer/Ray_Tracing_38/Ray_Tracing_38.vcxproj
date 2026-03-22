@@ -145,8 +145,6 @@
     <ClCompile Include="Algorithms\hittable_list_parallel.cpp" />
     <ClCompile Include="Algorithms\hit_record.cpp" />
     <ClCompile Include="Algorithms\parallel.cpp" />
-    <ClCompile Include="Algorithms\parallel_camera.cpp" />
-    <ClCompile Include="Algorithms\parallel_derived.cpp" />
     <ClCompile Include="Algorithms\path.cpp" />
     <ClCompile Include="Algorithms\rtw_stb_image.cpp" />
     <ClCompile Include="Algorithms\sphere_list.cpp" />
@@ -182,8 +180,6 @@
     <ClInclude Include="Algorithms\hittable_list_parallel_optimized.h" />
     <ClInclude Include="Algorithms\hit_record.h" />
     <ClInclude Include="Algorithms\parallel.h" />
-    <ClInclude Include="Algorithms\parallel_camera.h" />
-    <ClInclude Include="Algorithms\parallel_derived.h" />
     <ClInclude Include="Algorithms\path.h" />
     <ClInclude Include="Algorithms\rtw_stb_image.h" />
     <ClInclude Include="Algorithms\sphere_list.h" />

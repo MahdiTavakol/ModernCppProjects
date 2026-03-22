@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <mpi.h>
+#include <array>
 #include "camera.h"
 #include "hittable_list.h"
 #include "hittable_list_parallel.h"
@@ -16,20 +17,23 @@ class parallel
 {
 public:
     parallel();
+    parallel(std::array<int, 2> rank_config_);
     virtual ~parallel();
-    virtual void initialize(std::unique_ptr<camera>& cam_, std::unique_ptr<hittable_list>& world_);
-    virtual void gather(std::unique_ptr<camera>& cam)
-    {}
-    virtual color_array* return_color_array_ptr();
     int return_rank() const;
     int return_size() const;
+    std::array<int, 2> return_rank_config() const;
+    std::array<int, 2> return_size_config() const;
     void barrier() const;
+    MPI_Comm* return_comm()
+    {
+        return &MPI_world;
+    }
 
 protected:
     int size, rank;
+    std::array<int, 2> rank_config;
+    std::array<int, 2> size_config;
     MPI_Comm MPI_world;
-
-    color_array* c_array;
 };
 
 #endif
