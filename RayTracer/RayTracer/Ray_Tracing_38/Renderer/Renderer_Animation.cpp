@@ -57,7 +57,6 @@ void renderer_animation::render()
 
 		message(rank, "Gathering data from nodes for frame " + std::to_string(i));
 
-		gather();
 
 		if (rank == 0)
 		message(rank, "Opening the file for the frame" + std::to_string(i));

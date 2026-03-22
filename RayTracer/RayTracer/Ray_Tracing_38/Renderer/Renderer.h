@@ -22,8 +22,6 @@
 #include "../Materials/material.h"
 #include "../Algorithms/path.h"
 #include "../Algorithms/parallel.h"
-#include "../Algorithms/parallel_camera.h"
-#include "../Algorithms/parallel_derived.h"
 #include "../Geometry/quad.h"
 #include "../Types/ray.h"
 #include "../Algorithms/rtw_stb_image.h"

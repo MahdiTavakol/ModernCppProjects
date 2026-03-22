@@ -1,7 +1,8 @@
 #include "parallel.h"
 
-parallel::parallel()
+parallel::parallel(int argc, char** argv)
 {
+    MPI_Init(&argc, &argv);
     // MPI variables
     MPI_world = MPI_COMM_WORLD;
     MPI_Comm_rank(MPI_world, &rank);
@@ -28,6 +29,7 @@ parallel::parallel(std::array<int, 2> rank_config_) :
 
 parallel::~parallel()
 {
+    MPI_Finalize();
 }
 
 

@@ -4,7 +4,7 @@
 renderer::renderer(int argc, char** argv, int _mode, std::string _filename)
 	: mode(_mode), filename(_filename)
 {
-	para = std::make_unique<parallel>();
+	para = std::make_unique<parallel>(argc,argv);
 	in = std::make_unique<input>(argc, argv, mode);
 	world_factory = std::make_unique<scene_factory>(mode,para);
 	writer = std::make_unique<class write>(filename);
@@ -69,8 +69,8 @@ void renderer::update_c_array()
 
 void renderer::write_file()
 {
-	update_c_array();
 	int image_width, image_height;
+	update_c_array();
 	cam->return_image_size(image_width, image_height);
 	writer->reset(c_array, image_width, image_height);
 

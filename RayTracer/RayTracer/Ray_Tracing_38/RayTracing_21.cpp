@@ -10,9 +10,6 @@
 
 int main(int argc, char** argv)
 {
-	// MPI
-	MPI_Init(&argc, &argv);
-
 	int mode;
 	std::string obj_file = "../models/56-chair/Chair.obj";
 	std::string filename;
@@ -38,7 +35,6 @@ int main(int argc, char** argv)
 
 	render->setup();
 	render->render();
-	MPI_Finalize();
 
 	return 0;
 }

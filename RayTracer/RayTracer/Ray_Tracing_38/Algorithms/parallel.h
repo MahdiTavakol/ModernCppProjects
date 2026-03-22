@@ -16,7 +16,7 @@
 class parallel
 {
 public:
-    parallel();
+    parallel(int argc, char** argv);
     parallel(std::array<int, 2> rank_config_);
     virtual ~parallel();
     int return_rank() const;
