@@ -27,8 +27,6 @@ add_executable(Ray_Tracing_38
     Algorithms/hittable_list_parallel.cpp
     Algorithms/hit_record.cpp
     Algorithms/parallel.cpp
-    Algorithms/parallel_camera.cpp
-    Algorithms/parallel_derived.cpp
     Algorithms/path.cpp
     Algorithms/rtw_stb_image.cpp
     Algorithms/sphere_list.cpp
