@@ -10,6 +10,7 @@
 #include "../Types/color.h"
 #include "../Materials/material.h"
 #include "../Algorithms/hittable_list.h"
+#include "../Algorithms/parallel.h"
 #include "../Types/vec3.h"
 #include "../Geometry/triangle_mesh.h"
 #include "../Geometry/mesh.h"
@@ -26,12 +27,14 @@ struct face_indx
 class obj_model_reader {
 public:
 	obj_model_reader() {}
-	obj_model_reader(std::string _obj_file_name);
-	obj_model_reader(std::string _obj_file_name, std::string _mtl_file_name);
+	obj_model_reader(std::string _obj_file_name, parallel* _para);
+	obj_model_reader(std::string _obj_file_name, std::string _mtl_file_name, parallel* _para);
 	virtual void read();
 	std::unique_ptr<hittable_list> return_world();
 
 protected:
+	// the parallel object
+	parallel* para;
 	// the object container
 	std::unique_ptr<hittable_list> world;
 	// file names

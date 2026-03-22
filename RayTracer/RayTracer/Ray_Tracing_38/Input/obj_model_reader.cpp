@@ -1,18 +1,33 @@
 #include "obj_model_reader.h"
 #include <filesystem>
 
-obj_model_reader::obj_model_reader(std::string _obj_file_name) :
+obj_model_reader::obj_model_reader(std::string _obj_file_name,
+	parallel* _para) :
+	para{_para},
 	obj_file_name(_obj_file_name), 
 	v_num(0), vt_num(0), vn_num(0),
 	world{std::make_unique<hittable_list>()}
-{}
+{
+	std::array<int, 2> rank_config =  para->return_rank_config();
+	if (rank_config[0] == 0 && rank_config[1] == 0)
+		silent = false;
+	silent = true;
+}
 
-obj_model_reader::obj_model_reader(std::string _obj_file_name, std::string _mtl_file_name):
+obj_model_reader::obj_model_reader(std::string _obj_file_name,
+	std::string _mtl_file_name,
+	parallel* _para):
+	para{ _para},
 	obj_file_name{_obj_file_name},
 	mtl_file_name{_mtl_file_name},
 	v_num{ 0 }, vt_num{ 0 }, vn_num{ 0 },
 	world{ std::make_unique<hittable_list>() }
-{ }
+{
+	std::array<int, 2> rank_config = para->return_rank_config();
+	if (rank_config[0] == 0 && rank_config[1] == 0)
+		silent = false;
+	silent = true;
+}
 
 
 void obj_model_reader::read()
@@ -32,6 +47,8 @@ void obj_model_reader::read()
 		std::cout << "Started adding the items " << std::endl;
 	}
 	add_item(low,hi);
+	if (!silent)
+		std::cout << "Finished adding items to the hittable_list" << std::endl;
 }
 
 void obj_model_reader::read_obj_file()
@@ -352,8 +369,6 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 			break;
 		}
 	}
-
-	std::cout << "finished " << std::endl;
 }
 
 std::unique_ptr<hittable_list> obj_model_reader::return_world()

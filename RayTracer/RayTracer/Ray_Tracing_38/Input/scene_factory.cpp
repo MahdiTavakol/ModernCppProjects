@@ -342,7 +342,7 @@ void scene_factory::setup_cornell_smoke()
 void scene_factory::setup_3d_obj()
 {
 	std::unique_ptr<obj_model_reader> model_reader =
-		std::make_unique<obj_model_reader>(obj_file_name);
+		std::make_unique<obj_model_reader>(obj_file_name, para);
 	model_reader->read();
 	world = model_reader->return_world();
 	auto bvh = std::make_unique<bvh_node>(std::move(world));
