@@ -28,6 +28,8 @@ camera_parallel::camera_parallel(
         width_min, width_max, width_per_node);
     set_range_per_node(image_height, rank_config[1], size_config[1],
         height_min, height_max, height_per_node);
+
+    std::cout << "Ali Daei" << std::endl;
     
     set_range(width_min, width_max, height_min, height_max);
 

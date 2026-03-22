@@ -345,10 +345,10 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 		switch (num_edges)
 		{
 		case 3:
-			world->add(std::make_unique<triangle_mesh>(vs, vts, vns, std::move(mat)));
+			world->add(std::make_unique<triangle_mesh>(vs_i, vts_i, vns_i, std::move(mat)));
 			break;
 		case 4:
-			world->add(std::make_unique<mesh>(vs, vts, vns, std::move(mat)));
+			world->add(std::make_unique<mesh>(vs_i, vts_i, vns_i, std::move(mat)));
 			break;
 		}
 	}

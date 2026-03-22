@@ -7,12 +7,13 @@ parallel::parallel(int argc, char** argv)
     MPI_world = MPI_COMM_WORLD;
     MPI_Comm_rank(MPI_world, &rank);
     MPI_Comm_size(MPI_world, &size);
-    rank_config = { size,1 };
+    rank_config = { rank, 0};
+    size_config = { size, 1};
 }
 
 
-parallel::parallel(std::array<int, 2> rank_config_) :
-    rank_config{ rank_config_ }
+parallel::parallel(std::array<int, 2> rank_config_, std::array<int, 2> size_config_) :
+    rank_config{ rank_config_ }, size_config{size_config_}
 {
     MPI_world = MPI_COMM_WORLD;
     MPI_Comm_rank(MPI_world, &rank);

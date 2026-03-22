@@ -113,11 +113,11 @@ bool mesh::hit(const ray& _r, interval _ray_t, hit_record& _rec) const
 		auto normal = interpolate(triangle, normals, intersection);
 		auto texture = interpolate(triangle, textures, intersection);
 
-		_rec.t = t1;
+		_rec.t = t2;
 		_rec.p = intersection;
-		_rec.u = texture[1];
-		_rec.v = texture[2];
-		_rec.w = texture[3];
+		_rec.u = texture[0];
+		_rec.v = texture[1];
+		_rec.w = texture[2];
 		_rec.mat = mat.get();
 		_rec.set_face_normal(_r, normal);
 	}
@@ -129,9 +129,9 @@ bool mesh::hit(const ray& _r, interval _ray_t, hit_record& _rec) const
 bool mesh::is_interior(double _a, double _b, hit_record& _rec) const {
 	
 	if (_a > 0 && _b > 0 && _a + _b < 1)
-		return false;
+		return true;
 
-	return true;
+	return false;
 }
 
 vec3 mesh::interpolate(const std::vector<point3>& _triangle, const std::vector<point3>& _normals, const vec3& _point)
