@@ -100,6 +100,9 @@ input::input(int argc, char** argv, int mode):
 	this->lookat = point3(0, 0, 0);
 	this->vup = point3(0, 1, 0);
 
+	lookfrom = vec3(7200, 5180, 7690);
+	lookat = vec3(-800, 180, -310);
+
 
 	this->defocus_angle = 0.6;
 	this->defocus_angle = 0;
