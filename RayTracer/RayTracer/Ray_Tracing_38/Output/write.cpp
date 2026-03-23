@@ -9,15 +9,14 @@ write::write(std::string _file_name, color_array* _colors, int _image_width, int
 	// if string is empty which is the case
 	// for the constructor of the render_animation
 	// do not open any new files
-	if (!file_name.empty())
-		file = std::make_unique<std::ofstream>(file_name);
+	file = std::make_unique<std::ofstream>(file_name);
 }
 
 write::write(std::string _file_name) : write(_file_name, nullptr, 0, 0) {}
 	
 write::~write()
 {
-	if (file->is_open())
+	if (file && file->is_open())
 	{
 		file->close();
 	}
