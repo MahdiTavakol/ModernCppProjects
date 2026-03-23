@@ -43,8 +43,8 @@ public:
 	virtual void setup();
 	void add(std::unique_ptr<hittable>& object);
 	virtual void render();
-	void update_c_array();
 	void write_file();
+	void update_c_array();
 	
 	
 

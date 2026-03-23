@@ -63,10 +63,6 @@ void renderer::render()
 	cam->render(*world);
 }
 
-void renderer::update_c_array()
-{
-	c_array = cam->return_color_array_ptr();
-}
 
 void renderer::write_file()
 {
@@ -82,6 +78,10 @@ void renderer::write_file()
 	if (rank == 0) writer->write_file();
 }
 
+void renderer::update_c_array()
+{
+	c_array = cam->return_color_array_ptr();
+}
 
 
 

@@ -35,6 +35,7 @@ int main(int argc, char** argv)
 
 	rendererObj->setup();
 	rendererObj->render();
+	rendererObj->write_file();
 
 	return 0;
 }
