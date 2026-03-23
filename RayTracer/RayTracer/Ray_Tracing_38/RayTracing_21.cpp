@@ -30,11 +30,11 @@ int main(int argc, char** argv)
 	//mode = RANDOM_SPHERES_ANIMATED;
 
 
-	std::unique_ptr<renderer> render = std::make_unique<renderer>(argc, argv, mode, filename, obj_file);
+	std::unique_ptr<renderer> rendererObj = std::make_unique<renderer>(argc, argv, mode, filename, obj_file);
 	//std::unique_ptr<renderer> render = std::make_unique<renderer_animation>(argc,argv,mode,filename);
 
-	render->setup();
-	render->render();
+	rendererObj->setup();
+	rendererObj->render();
 
 	return 0;
 }

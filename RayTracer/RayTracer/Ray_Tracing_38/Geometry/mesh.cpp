@@ -14,12 +14,25 @@ mesh::mesh(const std::vector<point3>& _vs,
 
 void mesh::initialize()
 {
-	auto n1 = cross(vs[1] - vs[0], vs[2] - vs[0]);
-	auto n2 = cross(vs[1] - vs[3], vs[2] - vs[3]);
-	unit_n1 = unit_vector(n1);
-	unit_n2 = unit_vector(n2);
+	//breaking the mesh to two triangles across the 0-2 direction
+	auto n1a = cross(vs[1] - vs[0], vs[2] - vs[0]);
+	auto n2a = cross(vs[2] - vs[0], vs[3] - vs[0]);
+	vec3 unit_n1a = unit_vector(n1a);
+	vec3 unit_n2a = unit_vector(n2a);
+	auto dot_a = dot(unit_n1a, unit_n2a);
+	//breaking the mesh to two triangles across the 0-3 direction
+	auto n1b = cross(vs[2] - vs[0], vs[3] - vs[0]);
+	auto n2b = cross(vs[3] - vs[0], vs[1] - vs[0]);
+	vec3 unit_n1b = unit_vector(n1b);
+	vec3 unit_n2b = unit_vector(n2b);
+	auto dot_b = dot(unit_n1b, unit_n2b);
+	// comparing them
+	auto n1 = dot_a > dot_b ? n1a : n1b;
+	auto n2 = dot_a > dot_b ? n2a : n2b;
+	unit_n1 = dot_a > dot_b ? unit_n1a : unit_n1b;
+	unit_n2 = dot_a > dot_b ? unit_n2a : unit_n2b;
 	Q1 = vs[0];
-	Q2 = vs[3];
+	Q2 = vs[0];
 	D1 = dot(unit_n1, Q1);
 	D2 = dot(unit_n2, Q2);
 	w1 = n1 / dot(n1, n1);
@@ -30,19 +43,9 @@ void mesh::initialize()
 
 void mesh::set_bounding_box()
 {
-	auto bbox_diagonal1 = aabb(vs[0], vs[1]);
-	auto bbox_diagonal2 = aabb(vs[0], vs[2]);
-	auto bbox_diagonal3 = aabb(vs[0], vs[3]);
-	auto bbox_diagonal4 = aabb(vs[1], vs[2]);
-	auto bbox_diagonal5 = aabb(vs[1], vs[3]);
-	auto bbox_diagonal6 = aabb(vs[2], vs[3]);
-
-	auto bbox_diagonal = aabb(bbox_diagonal1, bbox_diagonal2);
-	bbox_diagonal = aabb(bbox_diagonal, bbox_diagonal3);
-	bbox_diagonal = aabb(bbox_diagonal, bbox_diagonal4);
-	bbox_diagonal = aabb(bbox_diagonal, bbox_diagonal5);
-	bbox_diagonal = aabb(bbox_diagonal, bbox_diagonal6);
-	bbox = bbox_diagonal;
+	auto bbox_1 = aabb(vs[0], vs[1]);
+	auto bbox_2 = aabb(vs[2], vs[3]);
+	bbox = aabb(bbox_1, bbox_2);
 }
 
 bool mesh::hit(const ray& _r, interval _ray_t, hit_record& _rec) const
