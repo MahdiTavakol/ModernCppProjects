@@ -8,7 +8,7 @@
 
 
 input::input(int argc, char** argv, int mode):
-	image_width(1920), samples_per_pixel(150), max_depth(50),
+	image_width(120), samples_per_pixel(150), max_depth(50),
 	vfov(20), 
 	width_ratio(16.0), height_ratio(9.0), 
 	fps(1), num_seconds(1), input_logger(false)
