@@ -7,19 +7,21 @@
 #include "input.h"
 
 
-input::input(int argc, char** argv, int mode):
+input::input(int argc, char** argv, int mode, std::vector<std::reference_wrapper<std::ostream>> strmVec_):
 	image_width(150), samples_per_pixel(150), max_depth(50),
 	vfov(20), 
 	width_ratio(16.0), height_ratio(9.0), 
-	fps(1), num_seconds(1), input_logger(false)
+	fps(1), num_seconds(1), input_logger(false),
+	outStreams{strmVec_}
 {
 	default_params(mode);
 	parse_argv(argv, argc);
 
 
 	int rank;
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	if (rank == 0) input_logger = true;
+	//MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	//if (rank == 0) 
+	input_logger = true;
 	if (input_logger) logger_function(argc, argv);
 
 }
@@ -52,37 +54,28 @@ input::input(int argc, char** argv, int _image_width, int _samples_per_pixel,
 
 void input::logger_function(int argc, char** argv)
 {
-	logfile.open("RayTracingInput.log", std::ios::out);
+ 	logfile.open("RayTracingInput.log", std::ios::out);
 	if (!logfile.is_open())
 		std::cerr << "Cannot open the RayTracing.log file for logging" << std::endl;
-	else
+
+	for (auto& strm_ref : outStreams)
 	{
-		logfile << "The input: " << std::endl;
-		for (int i = 0; i < argc; i++)
-			logfile << argv[i] << " ";
-		logfile << std::endl << "The parsed values: " << std::endl;
-
-		logfile << argv[0] << std::endl;
-		logfile << "image_width = " << this->image_width << std::endl;
-		logfile << "samples_per_pixel = " << this->samples_per_pixel << std::endl;
-		logfile << "max_depth = " << this->max_depth << std::endl;
-		logfile << "vfov = " << this->vfov << std::endl;
-		logfile << "aspect_ratio = " << this->width_ratio << "/" << this->height_ratio << std::endl;
-		logfile << "fps = " << this->fps << std::endl;
-		logfile << "num_seconds = " << this->num_seconds << std::endl;
+		auto& strm = strm_ref.get();
+		strm << "The input: ";
+		for (int i = 0; i < argc; i++) {
+			if (i % 5 == 0)
+				strm << "\n";
+			strm << argv[i] << " ";
+		}
+		strm << std::endl << std::endl;
+		strm << "image_width = " << image_width << std::endl;
+		strm << "samples_per_pixel = " << samples_per_pixel << std::endl;
+		strm << "max_depth = " << max_depth << std::endl;
+		strm << "vfov = " << vfov << std::endl;
+		strm << "aspect_ratio = " << width_ratio << "/" << height_ratio << std::endl;
+		strm << "fps = " << fps << std::endl;
+		strm << "num_seconds = " << num_seconds << std::endl;
 	}
-	logfile.close();
-
-	std::cout << std::endl;
-	std::cout << "Start making frames using with the following properties:" << std::endl;
-	std::cout << "image_width = " << this->image_width << std::endl;
-	std::cout << "samples_per_pixel = " << this->samples_per_pixel << std::endl;
-	std::cout << "max_depth = " << this->max_depth << std::endl;
-	std::cout << "vfov = " << this->vfov << std::endl;
-	std::cout << "aspect_ratio = " << this->width_ratio << "/" << this->height_ratio << std::endl;
-	std::cout << "fps = " << this->fps << std::endl;
-	std::cout << "num_seconds = " << this->num_seconds << std::endl;
-	std::cout << std::endl;
 }
 
 void input::setup_camera(camera* cam) const
@@ -163,7 +156,7 @@ void input::default_params(const int mode_)
 
 		this->defocus_angle = 0;
 	}
-	else if (mode == TWO_LIGHTS || mode == SIMPLE_LIGHT)
+	else if (mode_ == TWO_LIGHTS || mode_ == SIMPLE_LIGHT)
 	{
 		this->lookfrom = point3(26, 3, 6);
 		this->lookat = point3(0, 1, 0);
@@ -171,7 +164,7 @@ void input::default_params(const int mode_)
 		this->vfov = 20;
 		this->background = color(0, 0, 0);
 	}
-	else if (mode == CORNELL_BOX || mode == TWO_BOXES || mode == TWO_BOXES_ROTATED)
+	else if (mode_ == CORNELL_BOX || mode_ == TWO_BOXES || mode_ == TWO_BOXES_ROTATED)
 	{
 		this->lookfrom = point3(278, 278, -800);
 		this->lookat = point3(278, 278, 0);
@@ -182,7 +175,7 @@ void input::default_params(const int mode_)
 		this->width_ratio = 1.0;
 		this->height_ratio = 1.0;
 	}
-	else if (mode == CORNELL_SMOKE)
+	else if (mode_ == CORNELL_SMOKE)
 	{
 		this->width_ratio = 1.0;
 		this->height_ratio = 1.0;
@@ -194,7 +187,7 @@ void input::default_params(const int mode_)
 		this->vup = vec3(0, 1, 0);
 		this->defocus_angle = 0;
 	}
-	else if (mode == RANDOM_SPHERES_ANIMATED)
+	else if (mode_ == RANDOM_SPHERES_ANIMATED)
 	{
 		this->fps = 60;
 		this->num_seconds = 10;

@@ -10,7 +10,13 @@
 class input
 {
 public:
-	input(int argc, char** argv, int mode);
+	input(int argc, char** argv, int mode,
+		std::vector<std::reference_wrapper<std::ostream>> strmVec_ =
+		{ 
+			std::vector<std::reference_wrapper<std::ostream>>{
+				std::ref(std::cout)
+			} 
+		});
 	input(int argc, char** argv, int _image_width, int _samples_per_pixel,
 		int _max_depth, int _vfov, double _width_ratio, double _height_ratio);
 
@@ -99,7 +105,8 @@ protected:
 	int num_seconds;
 
 	bool input_logger;
-	std::fstream logfile;
+	std::ofstream logfile;
+	std::vector<std::reference_wrapper<std::ostream>> outStreams;
 	void logger_function(int argc, char** argv);
 
 	// default parameters
@@ -108,7 +115,7 @@ protected:
 	void parse_argv(char** argv, int argc);
 	// parsing parameters
 	template<typename T>
-	void parse_input(char** argv, int argc, int iarg, T& param)
+	void parse_input(char** argv, int argc, int& iarg, T& param)
 	{
 		if (iarg + 1 < argc)
 		{
@@ -124,7 +131,7 @@ protected:
 
 
 	template<typename T>
-	void parse_input(char** argv, int argc, int iarg, T& param1, T& param2)
+	void parse_input(char** argv, int argc, int& iarg, T& param1, T& param2)
 	{
 		if (iarg + 2 < argc)
 		{
