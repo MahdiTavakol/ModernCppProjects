@@ -217,6 +217,7 @@ void obj_model_reader::read_mtl_file()
 {
 	std::string line;
 	mtl_file_name = "../models/56-chair/" + mtl_file_name;
+	mtl_file_name = "../models/simple/four_meshes.mtl";
 	std::ifstream mtl_file = open_file(mtl_file_name);
 	std::stringstream iss;
 
@@ -330,19 +331,19 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 		for (int j = 0; j < num_edges; j++)
 		{
 			if (j >= face.v_indx.size() || j >= face.vt_indx.size() || j >= face.vn_indx.size()) {
-				std::cerr << "Out of bonds access for edges" << std::endl;
+				std::cerr << "Out of bounds access for edges" << std::endl;
 				continue;
 			}
 			if (face.v_indx[j] - 1 < 0 || face.v_indx[j] - 1 >= this->vs.size()) {
-				std::cerr << "Out of bonds access for v" << face.vt_indx[j] << "," << vs.size() << std::endl;
+				std::cerr << "Out of bounds access for v " << face.vt_indx[j] << "," << vs.size() << std::endl;
 				continue;
 			}
 			if (face.vt_indx[j] - 1 < 0 || face.vt_indx[j] - 1 >= this->vts.size()) {
-				std::cerr << "Out of bonds access for vt"   << std::endl;
+				std::cerr << "Out of bounds access for vt " << face.vt_indx[j] << "," << vts.size() << std::endl;
 				continue;
 			}
 			if (face.vn_indx[j] - 1 < 0 || face.vn_indx[j] - 1 >= this->vns.size()) {
-				std::cout << "Out of bonds access for vn" << std::endl;
+				std::cout << "Out of bounds access for vn " << face.vn_indx[j] << "," << vns.size() << std::endl;
 				std::cout << face.vt_indx[j] << ">=" << this->vns.size() << std::endl;
 				continue;
 			}

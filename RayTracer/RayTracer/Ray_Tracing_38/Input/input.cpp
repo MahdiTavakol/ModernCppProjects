@@ -8,170 +8,19 @@
 
 
 input::input(int argc, char** argv, int mode):
-	image_width(1920), samples_per_pixel(150), max_depth(50),
+	image_width(150), samples_per_pixel(150), max_depth(50),
 	vfov(20), 
 	width_ratio(16.0), height_ratio(9.0), 
 	fps(1), num_seconds(1), input_logger(false)
 {
-	int iarg = 1;
-	while (iarg < argc)
-	{
-		if (!strcmp(argv[iarg], "-image_width") || !strcmp(argv[iarg], "--w"))
-		{
-			if (iarg + 1 < argc)
-			{
-				int _int = convert_char<int>(argv[iarg + 1]);
-				this->image_width = _int;
-				iarg += 2;
-			}
-			else
-			{
-				std::cerr << "Invalid input arguments" << std::endl;
-			}
-		}
-		if (!strcmp(argv[iarg], "-samples_per_pixel") || !strcmp(argv[iarg], "--s"))
-		{
-			if (iarg + 1 < argc)
-			{
-				int _int = convert_char<int>(argv[iarg + 1]);
-				this->samples_per_pixel = _int;
-				iarg += 2;
-			}
-			else
-			{
-
-				std::cerr << "Invalid input arguments" << std::endl;
-			}
-		}
-		if (!strcmp(argv[iarg], "-max_depth") || !strcmp(argv[iarg], "--d"))
-		{
-			if (iarg + 1 < argc)
-			{
-				int _int = convert_char<int>(argv[iarg + 1]);
-				this->max_depth = _int;
-				iarg += 2;
-			}
-			else
-			{
-				std::cerr << "Invalid input arguments" << std::endl;
-			}
-		}
-		if (!strcmp(argv[iarg], "-vfov") || !strcmp(argv[iarg], "--v"))
-		{
-			if (iarg + 1 >= argc)
-				std::cerr << "Invalid input arguments" << std::endl;
-			int _int = convert_char<int>(argv[iarg + 1]);
-			this->vfov = _int;
-			iarg += 2;
-		}
-		if (!strcmp(argv[iarg], "-aspect_ratio") || !strcmp(argv[iarg], "--a"))
-		{
-			if (iarg + 2 >= argc)
-				std::cerr << "Invalid input arguments" << std::endl;
-			double _double = convert_char<double>(argv[iarg + 1]);
-			this->width_ratio = _double;
-			_double = convert_char<double>(argv[iarg + 2]);
-			this->height_ratio = _double;
-			iarg += 3;
-		}
-		if (!strcmp(argv[iarg], "-fps") || !strcmp(argv[iarg], "--f"))
-		{
-			if (iarg + 1 >= argc)
-				std::cerr << "Invalid input arguments" << std::endl;
-			int _int = convert_char<int>(argv[iarg + 1]);
-			this->fps = _int;
-			iarg += 2;
-		}
-		if (!strcmp(argv[iarg], "-num_seconds") || !strcmp(argv[iarg], "--t"))
-		{
-			if (iarg + 1 >= argc)
-				std::cerr << "Invalid input arguments" << std::endl;
-			int _int = convert_char<int>(argv[iarg + 1]);
-			this->num_seconds = _int;
-			iarg += 2;
-		}
-		else
-		{
-			std::cerr << "Unknown command line argument " << argv[iarg] << std::endl;
-		}
-	}
-
-	this->lookfrom = point3(13, 2, 3);
-	this->lookat = point3(0, 0, 0);
-	this->vup = point3(0, 1, 0);
-
-	lookfrom = vec3(16200, 15180, 7690);
-	lookat = vec3(-800, 180, -310);
-
-
-	this->defocus_angle = 0.6;
-	this->defocus_angle = 0;
-	this->focus_dist = 10.0;
-	this->background = color(0, 0, 0);
-	
-
-	if (mode == QUADS)
-	{
-		this->image_width = 1080;
-		this->samples_per_pixel = 100;
-		this->max_depth = 50;
-
-		this->width_ratio = 1.0;
-		this->height_ratio = 1.0;
-
-		this->vfov = 80;
-		this->lookfrom = point3(0, 0, 9);
-		this->lookat = point3(0, 0, 0);
-		this->vup = vec3(0, 1, 0);
-
-		this->defocus_angle = 0;
-	}
-	else if (mode == TWO_LIGHTS || mode == SIMPLE_LIGHT)
-	{
-		this->lookfrom = point3(26, 3, 6);
-		this->lookat = point3(0, 1, 0);
-		this->defocus_angle = 0;
-		this->vfov = 20;
-		this->background = color(0, 0, 0);
-	}
-	else if (mode == CORNELL_BOX || mode == TWO_BOXES || mode == TWO_BOXES_ROTATED)
-	{
-		this->lookfrom = point3(278, 278, -800);
-		this->lookat = point3(278, 278, 0);
-		this->vfov = 40;
-		this->vup = vec3(0, 1, 0);
-		this->defocus_angle = 0;
-		this->background = color(0, 0, 0);
-		this->width_ratio = 1.0;
-		this->height_ratio = 1.0;
-	}
-	else if (mode == CORNELL_SMOKE)
-	{
-		this->width_ratio = 1.0;
-		this->height_ratio = 1.0;
-		this->background = color(0, 0, 0);
-
-		this->vfov = 40;
-		this->lookfrom = point3(278, 278, -800);
-		this->lookat = point3(278, 278, 0);
-		this->vup = vec3(0, 1, 0);
-		this->defocus_angle = 0;
-	}
-	else if (mode == RANDOM_SPHERES_ANIMATED)
-	{
-		this->fps = 60;
-		this->num_seconds = 10;
-		this->background = color(0.7, 0.8, 1.00);
-		// The rest of the thing
-	}
-	else this->background = color(0.7, 0.8, 1.00);
-	
+	default_params(mode);
+	parse_argv(argv, argc);
 
 
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	if (rank == 0) input_logger = true;
-	if (input_logger) input_logger_function(argc, argv);
+	if (input_logger) logger_function(argc, argv);
 
 }
 
@@ -197,11 +46,11 @@ input::input(int argc, char** argv, int _image_width, int _samples_per_pixel,
 	int rank;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	if (rank == 0) input_logger = true;
-	if (input_logger) input_logger_function(argc, argv);
+	if (input_logger) logger_function(argc, argv);
 }
 
 
-void input::input_logger_function(int argc, char** argv)
+void input::logger_function(int argc, char** argv)
 {
 	logfile.open("RayTracingInput.log", std::ios::out);
 	if (!logfile.is_open())
@@ -274,4 +123,123 @@ T input::convert_char(char* _chr)
 	}
 
 	return _t;
+}
+
+
+void input::default_params(const int mode_)
+{
+	this->lookfrom = point3(13, 2, 3);
+	this->lookat = point3(0, 0, 0);
+	this->vup = point3(0, 1, 0);
+
+	lookfrom = vec3(16200, 15180, 7690);
+	lookat = vec3(-800, 180, -310);
+
+	lookfrom = point3(3, 3, 5);
+	lookat = point3(0, 0, 0);
+	vup = vec3(0, 1, 0);
+	vfov = 45;
+
+
+	this->defocus_angle = 0.6;
+	this->defocus_angle = 0;
+	this->focus_dist = 10.0;
+	this->background = color(0, 0, 0);
+
+
+	if (mode_ == QUADS)
+	{
+		this->image_width = 1080;
+		this->samples_per_pixel = 100;
+		this->max_depth = 50;
+
+		this->width_ratio = 1.0;
+		this->height_ratio = 1.0;
+
+		this->vfov = 80;
+		this->lookfrom = point3(0, 0, 9);
+		this->lookat = point3(0, 0, 0);
+		this->vup = vec3(0, 1, 0);
+
+		this->defocus_angle = 0;
+	}
+	else if (mode == TWO_LIGHTS || mode == SIMPLE_LIGHT)
+	{
+		this->lookfrom = point3(26, 3, 6);
+		this->lookat = point3(0, 1, 0);
+		this->defocus_angle = 0;
+		this->vfov = 20;
+		this->background = color(0, 0, 0);
+	}
+	else if (mode == CORNELL_BOX || mode == TWO_BOXES || mode == TWO_BOXES_ROTATED)
+	{
+		this->lookfrom = point3(278, 278, -800);
+		this->lookat = point3(278, 278, 0);
+		this->vfov = 40;
+		this->vup = vec3(0, 1, 0);
+		this->defocus_angle = 0;
+		this->background = color(0, 0, 0);
+		this->width_ratio = 1.0;
+		this->height_ratio = 1.0;
+	}
+	else if (mode == CORNELL_SMOKE)
+	{
+		this->width_ratio = 1.0;
+		this->height_ratio = 1.0;
+		this->background = color(0, 0, 0);
+
+		this->vfov = 40;
+		this->lookfrom = point3(278, 278, -800);
+		this->lookat = point3(278, 278, 0);
+		this->vup = vec3(0, 1, 0);
+		this->defocus_angle = 0;
+	}
+	else if (mode == RANDOM_SPHERES_ANIMATED)
+	{
+		this->fps = 60;
+		this->num_seconds = 10;
+		this->background = color(0.7, 0.8, 1.00);
+		// The rest of the thing
+	}
+	else this->background = color(0.7, 0.8, 1.00);
+}
+
+void input::parse_argv(char** argv, int argc)
+{
+	int iarg = 1;
+	while (iarg < argc)
+	{
+		if (!strcmp(argv[iarg], "-image_width") || !strcmp(argv[iarg], "--w"))
+		{
+			parse_input(argv, argc, iarg, image_width);
+		}
+		if (!strcmp(argv[iarg], "-samples_per_pixel") || !strcmp(argv[iarg], "--s"))
+		{
+			parse_input(argv, argc, iarg, samples_per_pixel);
+		}
+		if (!strcmp(argv[iarg], "-max_depth") || !strcmp(argv[iarg], "--d"))
+		{
+			parse_input(argv, argc, iarg, max_depth);
+		}
+		if (!strcmp(argv[iarg], "-vfov") || !strcmp(argv[iarg], "--v"))
+		{
+			parse_input(argv, argc, iarg, vfov);
+		}
+		if (!strcmp(argv[iarg], "-aspect_ratio") || !strcmp(argv[iarg], "--a"))
+		{
+			parse_input(argv, argc, iarg, width_ratio, height_ratio);
+		}
+		if (!strcmp(argv[iarg], "-fps") || !strcmp(argv[iarg], "--f"))
+		{
+			parse_input(argv, argc, iarg, fps);
+		}
+		if (!strcmp(argv[iarg], "-num_seconds") || !strcmp(argv[iarg], "--t"))
+		{
+			parse_input(argv, argc, iarg, num_seconds);
+		}
+		else
+		{
+			std::cerr << "Unknown command line argument " << argv[iarg] << std::endl;
+		}
+	}
 }

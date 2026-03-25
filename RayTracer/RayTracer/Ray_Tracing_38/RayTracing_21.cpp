@@ -12,6 +12,7 @@ int main(int argc, char** argv)
 {
 	int mode;
 	std::string obj_file = "../models/56-chair/Chair.obj";
+	obj_file = "../models/Simple/four_meshes.obj";
 	std::string filename = "test.ppm";
 	//mode = RANDOM_SPHERES;
 	//mode = CHECKER_BOARDS;
