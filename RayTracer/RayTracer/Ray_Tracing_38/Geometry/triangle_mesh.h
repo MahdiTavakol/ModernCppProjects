@@ -14,6 +14,11 @@ public:
 	aabb bounding_box() const override { return bbox; }
 	bool hit(const ray& _r, interval _ray_t, hit_record& _rec) const override;
 	virtual bool is_interior(double _a, double _b, hit_record& _rec) const override;
+	void return_params(
+		std::vector<point3>& vs_,
+		std::vector<point3>& vts_, 
+		std::vector<point3>& vns_, 
+		material* mat_);
 
 protected:
 	std::vector<point3> vs;

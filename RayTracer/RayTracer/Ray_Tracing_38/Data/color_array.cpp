@@ -98,9 +98,27 @@ color_data**& color_array::return_array()
     return this->array;
 }
 
+
+bool color_array::equal(color_array* rhs_, const double& tol_)
+{
+    if (width != rhs_->width || height != rhs_->height)
+        return false;
+
+    for (int i = 0; i < width; i++)
+        for (int j = 0; j < height; j++)
+            if (compare_color_data(array[i][j], rhs_->array[i][j],tol_) == false)
+                return false;
+    return true;
+}
+
 size_t color_array::return_color_data_size()
 {
     return width * height * sizeof(color_data);
+}
+
+void color_array::return_size(int& width_, int& height_)
+{
+    width_ = width; height_ = height;
 }
 
 void color_array::allocate()

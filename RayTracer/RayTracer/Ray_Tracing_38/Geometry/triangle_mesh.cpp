@@ -78,10 +78,19 @@ bool triangle_mesh::hit(const ray& _r, interval _ray_t, hit_record& _rec) const
 	return true;
 }
 
+void triangle_mesh::return_params(
+	std::vector<point3>& vs_,
+	std::vector<point3>& vts_,
+	std::vector<point3>& vns_,
+	material* mat_)
+{
+	vs_ = vs; vts_ = vts; vns_ = vns; mat_ = mat.get();
+}
+
 bool triangle_mesh::is_interior(double _a, double _b, hit_record& _rec) const {
 
 	if (_a > 0 && _b > 0 && _a + _b < 1)
-		return false;
+		return true;
 
-	return true;
+	return false;
 }

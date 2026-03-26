@@ -5,6 +5,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <algorithm>
+#include <compare>
 
 #include "../Shared/rtweekend.h"
 
@@ -87,6 +88,69 @@ inline vec3 cross(const vec3& u, const vec3& v) {
 inline vec3 unit_vector(const vec3& v) {
     return v / v.length();
 }
+
+inline bool equal(const vec3& a_, const vec3& b_, double tol_) noexcept
+{
+    return (
+        std::abs(a_.x() - b_.x()) <= tol_ &&
+        std::abs(a_.y() - b_.y()) <= tol_ &&
+        std::abs(a_.z() - b_.z()) <= tol_
+        );
+}
+
+inline std::strong_ordering compare_x(vec3& a, vec3& b) noexcept
+{
+    if (std::abs(a.x() - b.x()) <= 1e-6)
+        return std::strong_ordering::equivalent;
+    else if (a.x() < b.x())
+        return std::strong_ordering::less;
+    else if (a.x() > b.x())
+        return std::strong_ordering::greater;
+}
+
+inline std::strong_ordering compare_y(vec3& a, vec3& b) noexcept
+{
+    if (std::abs(a.y() - b.y()) <= 1e-6)
+        return std::strong_ordering::equivalent;
+    else if (a.y() < b.y())
+        return std::strong_ordering::less;
+    else if (a.y() > b.y())
+        return std::strong_ordering::greater;
+}
+
+inline std::strong_ordering compare_z(vec3& a, vec3& b) noexcept
+{
+    if (std::abs(a.z() - b.z()) <= 1e-6)
+        return std::strong_ordering::equivalent;
+    else if (a.z() < b.z())
+        return std::strong_ordering::less;
+    else if (a.z() > b.z())
+        return std::strong_ordering::greater;
+}
+
+inline std::strong_ordering operator<=>(vec3& a, vec3& b) noexcept
+{
+    // comparing x values
+    std::strong_ordering x_compared = compare_x(a, b);
+    if (x_compared != std::strong_ordering::equivalent)
+        return x_compared;
+
+    // comparing y values
+    std::strong_ordering y_compared = compare_y(a, b);
+    if (y_compared != std::strong_ordering::equivalent)
+        return y_compared;
+
+
+    // comparing z values
+    std::strong_ordering z_compared = compare_z(a, b);
+    if (z_compared != std::strong_ordering::equivalent)
+        return z_compared;
+
+
+
+    return std::strong_ordering::equivalent;
+}
+
 
 /*inline static std::istream& operator>>(std::istream& cin, vec3& point)
 {

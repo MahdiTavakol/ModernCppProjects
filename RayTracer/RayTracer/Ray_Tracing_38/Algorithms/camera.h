@@ -94,7 +94,7 @@ protected:
 	ray get_ray(int i, int j) const;
 	vec3 sample_square() const;
 	point3 defocus_disk_sample() const;
-	color ray_color(const ray& r, int depth, const hittable& world) const;
+	virtual color ray_color(const ray& r, int depth, const hittable& world) const;
 	void initialize();
 	virtual void initialize_storage() = 0;
 };
