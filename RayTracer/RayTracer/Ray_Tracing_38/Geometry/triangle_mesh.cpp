@@ -94,3 +94,24 @@ bool triangle_mesh::is_interior(double _a, double _b, hit_record& _rec) const {
 
 	return false;
 }
+
+bool triangle_mesh::compare(hittable* rhs_, const double& tol) const
+{
+	// checking the rhs type
+	triangle_mesh* rhsConv = dynamic_cast<triangle_mesh*>(rhs_);
+	// it is not of triangle mesh type
+	if (!rhsConv)
+		return false;
+
+	// comparing the geometry
+	for (int i = 0; i < 3; i++)
+	{
+		if (vs[i] != rhsConv->vs[i])
+			return false;
+		if (vts[i] != rhsConv->vts[i])
+			return false;
+		if (vns[i] != rhsConv->vns[i])
+			return false;
+	}
+	return true;
+}

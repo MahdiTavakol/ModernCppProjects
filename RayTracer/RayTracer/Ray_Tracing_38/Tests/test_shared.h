@@ -1,5 +1,6 @@
 #pragma once
 
+#include "catch_amalgamated.hpp"
 #include "../Input/input.h"
 #include "../Geometry/triangle_mesh.h"
 
@@ -42,29 +43,7 @@ private:
 
 };
 
-class vec3Matcher : public Catch::Matchers::MatcherGenericBase {
-public:
-	vec3Matcher(const vec3& expected_, double tol_) :
-		tol{ tol_ },
-		expectedRef{ std::ref(expected_) }
-	{
-	}
 
-	bool match(const vec3& value_) const
-	{
-		return equal(expectedRef.get(), value_, tol);
-	}
-
-	std::string describe() const override
-	{
-		std::string message = "Comparing two vec3 with the tolerance of " + std::to_string(tol);
-		return message;
-	}
-
-private:
-	double tol;
-	std::reference_wrapper<const vec3> expectedRef;
-};
 
 
 class fake_camera : public camera
@@ -138,6 +117,30 @@ public:
 	}
 };
 
+class vec3Matcher : public Catch::Matchers::MatcherGenericBase {
+public:
+	vec3Matcher(const vec3& expected_, double tol_) :
+		tol{ tol_ },
+		expectedRef{ std::ref(expected_) }
+	{
+	}
+
+	bool match(const vec3& value_) const
+	{
+		return equal(expectedRef.get(), value_, tol);
+	}
+
+	std::string describe() const override
+	{
+		std::string message = "Comparing two vec3 with the tolerance of " + std::to_string(tol);
+		return message;
+	}
+
+private:
+	double tol;
+	std::reference_wrapper<const vec3> expectedRef;
+};
+
 class colorArrayMatcher : public Catch::Matchers::MatcherGenericBase {
 public:
 	colorArrayMatcher(
@@ -176,4 +179,35 @@ private:
 	double tol;
 	color_array* expected;
 	std::vector<std::array<int, 2>> ignoredCoors;
+};
+
+class worldMatcher : public Catch::Matchers::MatcherGenericBase {
+public:
+	worldMatcher(hittable_list* expected_, double tol_):
+		expected{expected_}, tol{tol_}
+	{ }
+	
+	bool match(hittable_list* value_) const
+	{
+		int size = value_->size();
+		int expectedsize = expected->size();
+
+		if (size != expectedsize)
+			return false;
+
+		for (int i = 0; i < size; i++)
+		{
+			hittable* object1 = (*value_)[i];
+			hittable* object2 = (*expected)[i];
+
+			if (object1->compare(object2, tol))
+				return false;
+
+		}
+		return true;
+	}
+
+protected:
+	hittable_list* expected;
+	double tol;
 };

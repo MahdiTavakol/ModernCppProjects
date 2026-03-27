@@ -1,6 +1,6 @@
 #include "catch_amalgamated.hpp"
-
 #include "test_shared.h"
+#include "../Geometry/triangle_mesh.h"
 
 TEST_CASE("Testing rendering of a triangle_mesh object")
 {

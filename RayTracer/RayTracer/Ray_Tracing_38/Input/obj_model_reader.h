@@ -26,9 +26,12 @@ struct face_indx
 
 class obj_model_reader {
 public:
-	obj_model_reader() {}
+	obj_model_reader(){}
 	obj_model_reader(std::string _obj_file_name, parallel* _para);
 	obj_model_reader(std::string _obj_file_name, std::string _mtl_file_name, parallel* _para);
+	obj_model_reader(std::unique_ptr<std::istream> _obj_file_ptr,
+		             std::unique_ptr<std::istream> _mtl_file_ptr,
+		             parallel* para);
 	virtual void read();
 	std::unique_ptr<hittable_list> return_world();
 
@@ -55,13 +58,18 @@ protected:
 	// 
 	bool silent = false;
 
+	// input streams
+	std::unique_ptr<std::istream> obj_file_ptr;
+	std::unique_ptr<std::istream> mtl_file_ptr;
 	// helper functions
 	void read_obj_file();
 	void read_mtl_file();
 	virtual void set_range(int& _low, int& _hi);
 	virtual void add_item(const int& _low, const int& _hi);
-	static std::ifstream open_file(std::string file_name_);
+	static std::unique_ptr<std::istream> open_file(std::string file_name_);
 
+	// setting the silent status
+	void set_silent_status();
 	// checking data
 	static void check_data(const int& num_file_, const int& num_read_, const std::string& title);
 };

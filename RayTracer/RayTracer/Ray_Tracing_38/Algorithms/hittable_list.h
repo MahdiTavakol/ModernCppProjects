@@ -22,6 +22,12 @@ public:
 
 	void clear() { objects.clear(); }
 
+	size_t size() { return objects.size(); }
+
+	hittable* operator[](const int& i) {
+		return objects[i].get();
+	}
+
 	virtual void add(std::unique_ptr<hittable> object);
 
 	bool hit(const ray& r, interval ray_t, hit_record& rec) const override;
@@ -31,6 +37,7 @@ public:
 	virtual material* get_material() override {
 		return nullptr;
 	}
+
 
 
 protected:

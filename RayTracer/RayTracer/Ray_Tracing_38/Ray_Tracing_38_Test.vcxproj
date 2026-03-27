@@ -168,7 +168,10 @@
     <ClCompile Include="Renderer\Renderer_Animation.cpp" />
     <ClCompile Include="Tests\catch_amalgamated.cpp" />
     <ClCompile Include="Tests\Ray_Tracing_38_tests.cpp" />
+    <ClCompile Include="Tests\test_colorArrayMatcher.cpp" />
+    <ClCompile Include="Tests\test_input.cpp" />
     <ClCompile Include="Tests\test_triangles.cpp" />
+    <ClCompile Include="Tests\test_vec3.cpp" />
     <ClCompile Include="Types\color.cpp" />
     <ClCompile Include="Types\vec3.cpp" />
   </ItemGroup>

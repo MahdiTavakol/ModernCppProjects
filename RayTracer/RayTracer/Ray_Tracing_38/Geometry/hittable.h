@@ -25,6 +25,10 @@ public:
     {
         return bbox;
     }
+    virtual bool compare(hittable* rhs_, const double& tol_) const
+    {
+        return false;
+    }
     virtual material* get_material() {
         return mat.get();
     }

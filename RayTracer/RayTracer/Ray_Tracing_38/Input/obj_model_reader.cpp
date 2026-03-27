@@ -1,5 +1,6 @@
 #include "obj_model_reader.h"
 #include <filesystem>
+#include <fstream>
 
 obj_model_reader::obj_model_reader(std::string _obj_file_name,
 	parallel* _para) :
@@ -7,11 +8,16 @@ obj_model_reader::obj_model_reader(std::string _obj_file_name,
 	obj_file_name(_obj_file_name), 
 	v_num(0), vt_num(0), vn_num(0),
 	world{std::make_unique<hittable_list>()}
+
 {
-	std::array<int, 2> rank_config =  para->return_rank_config();
-	if (rank_config[0] == 0 && rank_config[1] == 0)
-		silent = false;
-	silent = true;
+	set_silent_status();
+	
+	std::istringstream iss(obj_file_name);
+	std::string file_name;
+	std::getline(iss, file_name, '.');
+	mtl_file_name = file_name + ".mtl";
+	obj_file_ptr = open_file(obj_file_name);
+	mtl_file_ptr = open_file(mtl_file_name);
 }
 
 obj_model_reader::obj_model_reader(std::string _obj_file_name,
@@ -23,10 +29,25 @@ obj_model_reader::obj_model_reader(std::string _obj_file_name,
 	v_num{ 0 }, vt_num{ 0 }, vn_num{ 0 },
 	world{ std::make_unique<hittable_list>() }
 {
-	std::array<int, 2> rank_config = para->return_rank_config();
-	if (rank_config[0] == 0 && rank_config[1] == 0)
-		silent = false;
-	silent = true;
+	set_silent_status();
+
+	obj_file_ptr = open_file(obj_file_name);
+	mtl_file_ptr = open_file(mtl_file_name);
+}
+
+obj_model_reader::obj_model_reader(
+	std::unique_ptr<std::istream> _obj_file_ptr,
+	std::unique_ptr<std::istream> _mtl_file_ptr,
+	parallel* _para):
+	para{ _para },
+	obj_file_name{},
+	mtl_file_name{},
+	v_num{ 0 }, vt_num{ 0 }, vn_num{ 0 },
+	world{ std::make_unique<hittable_list>() },
+	obj_file_ptr{ std::move(_obj_file_ptr) },
+	mtl_file_ptr{ std::move(_mtl_file_ptr) }
+{
+	set_silent_status();
 }
 
 
@@ -54,7 +75,6 @@ void obj_model_reader::read()
 void obj_model_reader::read_obj_file()
 {
 	std::string line;
-	std::ifstream obj_file = open_file(obj_file_name);
 	std::stringstream iss;
 
 	int file_vs_num = 0, file_vts_num = 0, file_vns_num = 0;
@@ -66,7 +86,7 @@ void obj_model_reader::read_obj_file()
 	int num_triangles = 0;
 	int current_mat_indx = -1;
 
-	while (std::getline(obj_file, line))
+	while (std::getline(*obj_file_ptr, line))
 	{
 		iss.clear();
 		iss.str("");
@@ -209,8 +229,6 @@ void obj_model_reader::read_obj_file()
 			}
 		}
 	}
-
-	obj_file.close();
 }
 
 void obj_model_reader::read_mtl_file()
@@ -218,7 +236,6 @@ void obj_model_reader::read_mtl_file()
 	std::string line;
 	mtl_file_name = "../models/56-chair/" + mtl_file_name;
 	mtl_file_name = "../models/simple/four_meshes.mtl";
-	std::ifstream mtl_file = open_file(mtl_file_name);
 	std::stringstream iss;
 
 	double Ns, d, Tr;
@@ -226,7 +243,7 @@ void obj_model_reader::read_mtl_file()
 	std::string dummy_str;
 	int material_counter = 0;
 	std::string material_name;
-	while (std::getline(mtl_file, line))
+	while (std::getline(*mtl_file_ptr, line))
 	{
 		if (line.length() >= 3)
 		{
@@ -297,7 +314,6 @@ void obj_model_reader::read_mtl_file()
 	// Since we add to the materials vector whenever we read a newmtl line the last material would not be added otherwise.
 	auto material_i = std::make_unique<general>(Kd, Ns, d, Tr, Tf, Ks);
 	materials_map[material_name] = std::move(material_i);
-	mtl_file.close();
 }
 
 void obj_model_reader::set_range(int& _low, int& _hi) {
@@ -377,15 +393,24 @@ std::unique_ptr<hittable_list> obj_model_reader::return_world()
 	return std::move(world);
 }
 
-std::ifstream obj_model_reader::open_file(std::string file_name_)
+std::unique_ptr<std::istream> obj_model_reader::open_file(std::string file_name_)
 {
-	std::ifstream file(file_name_);
-	if (!file.is_open())
+	auto file_ptr =
+		std::make_unique<std::ifstream>(file_name_);
+	if (!file_ptr->is_open())
 		std::cout << "The file " << std::endl
 		<< file_name_ << std::endl
 		<< "does not exists in the path " << std::endl
 		<< std::filesystem::current_path() << std::endl;
-	return file;
+	return std::move(file_ptr);
+}
+
+void obj_model_reader::set_silent_status()
+{
+	std::array<int, 2> rank_config = para->return_rank_config();
+	if (rank_config[0] == 0 && rank_config[1] == 0)
+		silent = false;
+	silent = true;
 }
 
 void obj_model_reader::check_data(const int& num_file_, const int& num_read_, const std::string& title)

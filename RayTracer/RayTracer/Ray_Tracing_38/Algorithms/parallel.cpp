@@ -9,8 +9,6 @@ parallel::parallel(int argc, char** argv)
     MPI_Comm_size(MPI_world, &size);
     rank_config = { rank, 0};
     size_config = { size, 1};
-
-    
 }
 
 

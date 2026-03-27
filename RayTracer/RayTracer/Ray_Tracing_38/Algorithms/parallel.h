@@ -19,11 +19,11 @@ public:
     parallel(int argc, char** argv);
     parallel(std::array<int, 2> rank_config_, std::array<int,2> size_config_);
     virtual ~parallel();
-    int return_rank() const;
-    int return_size() const;
-    std::array<int, 2> return_rank_config() const;
-    std::array<int, 2> return_size_config() const;
-    void barrier() const;
+    virtual int return_rank() const;
+    virtual int return_size() const;
+    virtual std::array<int, 2> return_rank_config() const;
+    virtual std::array<int, 2> return_size_config() const;
+    virtual void barrier() const;
     MPI_Comm* return_comm()
     {
         return &MPI_world;

@@ -19,6 +19,7 @@ public:
 		std::vector<point3>& vts_, 
 		std::vector<point3>& vns_, 
 		material* mat_);
+	bool compare(hittable* rhs_, const double& tol) const override;
 
 protected:
 	std::vector<point3> vs;
