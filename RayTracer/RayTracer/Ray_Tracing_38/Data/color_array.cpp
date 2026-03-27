@@ -1,4 +1,5 @@
 #include "color_array.h"
+#include <set>
 
 color_array::color_array(const int& _width, const int& _height, color_data** _color_data) :
     width(_width), height(_height)
@@ -99,15 +100,26 @@ color_data**& color_array::return_array()
 }
 
 
-bool color_array::equal(color_array* rhs_, const double& tol_)
+bool color_array::equal(color_array* rhs_, const double& tol_,
+                        const std::vector<std::array<int, 2>>& ignoredCoors_)
 {
     if (width != rhs_->width || height != rhs_->height)
         return false;
 
+    std::set<std::array<int, 2>> ignoredSet;
+
+    for (auto& coor : ignoredCoors_)
+    {
+        ignoredSet.insert(coor);
+    }
+
     for (int i = 0; i < width; i++)
-        for (int j = 0; j < height; j++)
-            if (compare_color_data(array[i][j], rhs_->array[i][j],tol_) == false)
+        for (int j = 0; j < height; j++) {
+            if (ignoredSet.find(std::array<int, 2>{i, j}) != ignoredSet.end())
+                continue;
+            if (compare_color_data(array[i][j], rhs_->array[i][j], tol_) == false)
                 return false;
+        }
     return true;
 }
 

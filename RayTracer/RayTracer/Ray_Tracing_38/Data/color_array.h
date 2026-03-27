@@ -7,6 +7,8 @@
 
 #include <stdlib.h>
 #include <iostream>
+#include <vector>
+#include <array>
 #include "../Geometry/interval.h"
 
 typedef struct { double r, g, b; } color_data;
@@ -26,7 +28,8 @@ public:
     void set_range(const int& _width, const int& _height);
     color_array& operator=(color_array second);
     color_data**& return_array();
-    bool equal(color_array* rhs_, const double& tol_);
+    bool equal(color_array* rhs_, const double& tol_, 
+               const std::vector<std::array<int,2>>& ignoredCoors_);
     size_t return_color_data_size();
     void return_size(int& width_, int& height_);
     inline static bool compare_color_data(const color_data& a_, const color_data& b_, double tol_)

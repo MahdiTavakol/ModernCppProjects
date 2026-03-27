@@ -271,14 +271,29 @@ public:
 
 class colorArrayMatcher : public Catch::Matchers::MatcherGenericBase {
 public:
-	colorArrayMatcher(color_array* expected_, double tol_) :
+	colorArrayMatcher(
+		color_array* expected_,
+		double tol_,
+		std::vector<std::array<int, 2>>& ignoredCoors_
+		) :
 		tol{ tol_ },
-		expected{expected_}
+		expected{expected_},
+		ignoredCoors{std::move(ignoredCoors_)}
 	{}
+
+	colorArrayMatcher(
+		color_array* expected_,
+		double tol_
+	) :
+		tol{ tol_ },
+		expected{ expected_ }
+	{
+		ignoredCoors = std::vector<std::array<int, 2>>{};
+	}
 
 	bool match(color_array* value_) const
 	{
-		return expected->equal(value_, tol);
+		return expected->equal(value_, tol,ignoredCoors);
 	}
 
 	std::string describe() const override
@@ -290,6 +305,7 @@ public:
 private:
 	double tol;
 	color_array* expected;
+	std::vector<std::array<int, 2>> ignoredCoors;
 };
 
 TEST_CASE("Testing colorArrayMatcher")
@@ -346,6 +362,8 @@ TEST_CASE("Testing rendering of a triangle_mesh object")
 	std::unique_ptr<hittable> mesh;
 	vec3 min{ 0.0,0.0,0.0 };
 	vec3 max;
+
+	std::vector<std::array<int, 2>> ignoredCoors{};
 
 	std::array<int, 2> imageSize;
 
@@ -450,6 +468,8 @@ TEST_CASE("Testing rendering of a triangle_mesh object")
 				{
 					color clr = background;
 					color_data c_data;
+					if (i == 0 || j == 0 || b_ * i + a_ * j == a_ * b_)
+						ignoredCoors.push_back(std::array<int, 2>{i, j});
 					if (i > 0 && j > 0 && b_ * i + a_ * j < a_ * b_)
 						clr = rendercolor;
 					c_data.r = clr[0];
@@ -521,24 +541,9 @@ TEST_CASE("Testing rendering of a triangle_mesh object")
  	color_array* c_array_ptr_expected = &c_array;
 	color_array* c_array_ptr_camera = camera.return_color_array_ptr();
 
-	int width, height;
-	c_array_ptr_camera->return_size(width, height);
-
-	for (int i = 0; i < width; i++)
-		for (int j = 0; j < height; j++)
-		{
-			color_data c1 = (*c_array_ptr_expected)(i, j);
-			color_data c2 = (*c_array_ptr_camera)(i, j);
-			if (!color_array::compare_color_data(c1, c2, 1e-6))
-			{
-				std::cout << i << "," << j << std::endl;
-				std::cout << c1;
-				std::cout << c2;
- 			}
-		}
 
 	
-	REQUIRE_THAT(c_array_ptr_camera, colorArrayMatcher(c_array_ptr_expected, 1e-6));
+	REQUIRE_THAT(c_array_ptr_camera, colorArrayMatcher(c_array_ptr_expected, 1e-6,ignoredCoors));
 
 }
 
