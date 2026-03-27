@@ -168,6 +168,7 @@
     <ClCompile Include="Renderer\Renderer_Animation.cpp" />
     <ClCompile Include="Tests\catch_amalgamated.cpp" />
     <ClCompile Include="Tests\Ray_Tracing_38_tests.cpp" />
+    <ClCompile Include="Tests\test_triangles.cpp" />
     <ClCompile Include="Types\color.cpp" />
     <ClCompile Include="Types\vec3.cpp" />
   </ItemGroup>
@@ -206,6 +207,7 @@
     <ClInclude Include="Renderer\Renderer_Animation.h" />
     <ClInclude Include="Shared\rtweekend.h" />
     <ClInclude Include="Tests\catch_amalgamated.hpp" />
+    <ClInclude Include="Tests\test_shared.h" />
     <ClInclude Include="Types\color.h" />
     <ClInclude Include="Types\point3_animated.h" />
     <ClInclude Include="Types\ray.h" />

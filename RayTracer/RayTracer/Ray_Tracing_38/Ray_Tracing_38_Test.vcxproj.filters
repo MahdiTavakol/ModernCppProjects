@@ -144,6 +144,9 @@
     <ClCompile Include="Tests\Ray_Tracing_38_tests.cpp">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
+    <ClCompile Include="Tests\test_triangles.cpp">
+      <Filter>Source Files\Tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Types\color.h">
@@ -258,6 +261,9 @@
       <Filter>Source Files\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Tests\catch_amalgamated.hpp">
+      <Filter>Source Files\Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="Tests\test_shared.h">
       <Filter>Source Files\Tests</Filter>
     </ClInclude>
   </ItemGroup>
