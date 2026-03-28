@@ -139,6 +139,7 @@ TEST_CASE("Testing the obj_model_reader class")
 	// expected results
 	std::unique_ptr<hittable> expectedObject;
 	std::unique_ptr<hittable_list> expectedWorld;
+	expectedWorld = std::make_unique<hittable_list>();
 
 
 	SECTION("Triangles")
@@ -204,29 +205,63 @@ TEST_CASE("Testing the obj_model_reader class")
 				point3{0.408, -0.408, 0.816}
 			};
 		}
-		
-		std::array<point3, 3> expectedVs;
-		std::array<point3, 3> expectedVts;
-		std::array<point3, 3> expectedVns;
 
-		for (int i = 0; i < 3; i++)
+		SECTION("Triangle-4")
 		{
-			expectedVs[i] = vs[i];
-			expectedVts[i] = vts[i];
-			expectedVns[i] = vns[i];
+			vs = std::vector<point3>{
+				point3{-1.12,  2.34,  0.56},
+				point3{ 0.98, -0.45,  1.73},
+				point3{ 1.56,  1.12, -0.89},
+				point3{-0.67, -1.58,  0.94},
+				point3{ 0.42,  0.77, -1.31},
+				point3{ 1.21, -0.93,  0.28}
+			};
+
+			vts = std::vector<point3>{
+				point3{0.21, 0.44, 0.78},
+				point3{0.83, 0.12, 0.35},
+				point3{0.59, 0.91, 0.67},
+				point3{0.14, 0.68, 0.22},
+				point3{0.72, 0.37, 0.89},
+				point3{0.48, 0.55, 0.11}
+			};
+
+			vns = std::vector<point3>{
+				point3{ 0.577,  0.577,  0.577},
+				point3{-0.707,  0.707,  0.0},
+				point3{ 0.408, -0.408,  0.816},
+				point3{ 0.0,    0.894,  0.447},
+				point3{-0.816,  0.408,  0.408},
+				point3{ 0.267, -0.535,  0.802}
+			};
+			fs = std::vector<std::vector<int>>{ 
+				{1,2,3},
+				{4,5,6}};
 		}
+		
 
-		std::unique_ptr<material> expectedMat =
-			std::make_unique<general>(Kd, Ns, d, Tr, Tf, Ks);
-		expectedObject =
-			std::make_unique<triangle_mesh>(
-				expectedVs,
-				expectedVts,
-				expectedVns,
-				std::move(expectedMat));
-
-		expectedWorld = std::make_unique<hittable_list>(std::move(expectedObject));
-
+		int offset = 0;
+		while (offset < vs.size()) {
+			std::array<point3, 3> expectedVs;
+			std::array<point3, 3> expectedVts;
+			std::array<point3, 3> expectedVns;
+			for (int i = 0; i < 3; i++)
+			{
+				expectedVs[i] = vs[i+offset];
+				expectedVts[i] = vts[i+offset];
+				expectedVns[i] = vns[i+offset];
+			}
+			offset += 3;
+			std::unique_ptr<material> expectedMat =
+				std::make_unique<general>(Kd, Ns, d, Tr, Tf, Ks);
+			expectedObject =
+				std::make_unique<triangle_mesh>(
+					expectedVs,
+					expectedVts,
+					expectedVns,
+					std::move(expectedMat));
+			expectedWorld->add(std::move(expectedObject));
+		}
 	}
 
 	SECTION("Meshes")
