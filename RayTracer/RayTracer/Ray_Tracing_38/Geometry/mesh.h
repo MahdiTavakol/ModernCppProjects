@@ -13,8 +13,9 @@ public:
 		const std::array<point3, 4>& vs,
 		const std::array<point3, 4>& vts,
 		const std::array<point3, 4>& vns,
-		std::unique_ptr<material> _mat);
-	mesh() {}
+		std::unique_ptr<material> _mat,
+		std::string type_="mesh");
+	mesh(std::unique_ptr<material> _mat, std::string type_ = "mesh");
 	virtual void initialize();
 	virtual void set_bounding_box();
 	aabb bounding_box() const override { return bbox; }

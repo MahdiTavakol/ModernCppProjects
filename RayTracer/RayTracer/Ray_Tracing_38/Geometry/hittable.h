@@ -15,9 +15,11 @@
 class hittable
 {
 public:
-    hittable() {}
-    hittable(std::unique_ptr<material> mat_):
-        mat{std::move(mat_)}
+    hittable(std::string type_):
+        type{type_}
+    {}
+    hittable(std::string type_, std::unique_ptr<material> mat_):
+        type{type_}, mat{std::move(mat_)}
     {}
     virtual ~hittable() = default;
     virtual bool hit(const ray& r, interval ray_t, hit_record& rec) const = 0;
@@ -25,16 +27,19 @@ public:
     {
         return bbox;
     }
+
+
     virtual bool compare(hittable* rhs_, const double& tol_) const
     {
         // it means that the compare has not been implemented
         std::cout << "Warning: The compare function has not been implemented for this object type yet!" << std::endl;
         return true;
     }
-    virtual material* get_material() {
-        return mat.get();
-    }
 
+    virtual material* get_material();
+    virtual bool comparator(const std::unique_ptr<hittable>& rhs_) const;
+    int typeCompare(const hittable& rhs_) const;
+    const std::string type = "";
 protected:
     std::unique_ptr<material> mat;
     aabb bbox;

@@ -26,9 +26,7 @@ public:
            std::unique_ptr<material> _mat);
 
     bool hit(const ray& r, interval ray_t, hit_record& rec) const override;
-
-
-
+    virtual bool comparator(const std::unique_ptr<hittable>& rhs_) const override;
     aabb bounding_box() const override { return bbox; }
 
 

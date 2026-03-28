@@ -6,12 +6,11 @@ triangle_mesh::triangle_mesh(
 	const std::array<point3, 3>& _vns,
 	std::unique_ptr<material> _mat)
 	:
+	mesh{std::move(_mat),"triangle_mesh"},
 	vs {_vs}, vts{ _vts }, vns{ _vns }
 {
-	mat = std::move(_mat);
+
 	initialize();
-	if (mat == nullptr)
-		std::cout << "THIS IS NULL " << std::endl;
 }
 
 void triangle_mesh::initialize()

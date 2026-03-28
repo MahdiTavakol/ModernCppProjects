@@ -2,12 +2,16 @@
 
 constant_medium::constant_medium(std::unique_ptr<hittable> _boundary, 
 	double _density, std::unique_ptr<texture>& _tex)
-	:boundary{ std::move(_boundary) }, neg_inv_density(-1 / _density),
+	:
+	hittable{"constant_medium"},
+	boundary{ std::move(_boundary) }, neg_inv_density(-1 / _density),
 	phase_function{ std::make_unique<isotropic>(_tex) }
 {}
 
 constant_medium::constant_medium(std::unique_ptr<hittable> _boundary, double _density, const color& _albedo)
-	:boundary{ std::move(_boundary) }, neg_inv_density(-1 / _density),
+	:
+	hittable{ "constant_medium" },
+	boundary{ std::move(_boundary) }, neg_inv_density(-1 / _density),
 	phase_function(std::make_unique<isotropic>(_albedo))
 {}
 

@@ -4,7 +4,9 @@ sphere::sphere(
     const point3& _center,
     double _radius,
     std::unique_ptr<material> _mat)
-    : hittable{ std::move(_mat) }, center{ _center, vec3(0, 0, 0) }, radius{ std::fmax(0, _radius) }
+    : 
+    hittable{"sphere", std::move(_mat)},
+    center{_center, vec3(0, 0, 0)}, radius{std::fmax(0, _radius)}
 {
     auto rvec = vec3(radius, radius, radius);
     bbox = aabb(_center - rvec, _center + rvec);
@@ -14,7 +16,8 @@ sphere::sphere(const point3& _center1,
                const point3& _center2,
                double _radius,
                std::unique_ptr<material> _mat)
-    : hittable{ std::move(_mat) }, 
+    : 
+    hittable{ "sphere",std::move(_mat)},
     center{ _center1, _center2 - _center1 }, radius{ std::fmax(0, _radius) }
 {
     auto rvec = vec3(radius, radius, radius);
@@ -53,7 +56,17 @@ bool sphere::hit(const ray& r, interval ray_t, hit_record& rec) const {
     return true;
 }
 
+bool sphere::comparator(const std::unique_ptr<hittable>& rhs_) const
+{
+    auto rhs_cast = dynamic_cast<sphere*>(rhs_.get());
+    if (!rhs_cast)
+        throw std::invalid_argument("Different types!");
 
+    if (radius < rhs_cast->radius)
+        return true;
+    return false;
+
+}
 
 void sphere::get_sphere_uv(const point3& p, double& u, double& v)
 {

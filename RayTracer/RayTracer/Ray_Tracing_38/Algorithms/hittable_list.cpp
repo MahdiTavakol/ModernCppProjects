@@ -1,11 +1,13 @@
 #include "hittable_list.h"
 
-hittable_list::hittable_list(std::unique_ptr<hittable> object)
+hittable_list::hittable_list(std::unique_ptr<hittable> object):
+	hittable{"hittable_list"}
 {
 	add(std::move(object));
 }
 
-hittable_list::hittable_list(std::unique_ptr<hittable>& object)
+hittable_list::hittable_list(std::unique_ptr<hittable>& object):
+	hittable{"hittable_list"}
 {
 	add(std::move(object)); 
 }

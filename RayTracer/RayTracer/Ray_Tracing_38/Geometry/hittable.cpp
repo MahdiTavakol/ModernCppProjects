@@ -1,9 +1,28 @@
 #include "hittable.h"
 
+material* hittable::get_material() {
+    return mat.get();
+}
 
+bool hittable::comparator(const std::unique_ptr<hittable>& rhs_) const
+{
+    std::cout << "This has not been implemented for " << type << std::endl;
+    return true;
+}
+
+int hittable::typeCompare(const hittable& rhs_) const
+{
+    if (type < rhs_.type)
+        return 1;
+    else if (type > rhs_.type)
+        return -1;
+    else if (type == rhs_.type)
+        return 0;
+    return 0;
+}
 
 translate::translate(std::unique_ptr<hittable> _object, const vec3& _offset)
-    :object{ std::move(_object) }, offset(_offset)
+    :hittable{object->type}, object{std::move(_object)}, offset(_offset)
 {
     bbox = object->bounding_box() + offset;
 }
@@ -21,7 +40,7 @@ bool translate::hit(const ray& _r, interval _ray_t, hit_record& _rec) const
 }
 
 rotate_y::rotate_y(std::unique_ptr<hittable> _object, double _angle) : 
-    object{ std::move(_object) }
+    hittable{ object->type }, object{ std::move(_object) }
 {
     double radians = degrees_to_radians(_angle);
     sin_theta = std::sin(radians);

@@ -43,7 +43,7 @@ TEST_CASE("Testing colorArrayMatcher")
 
 }
 
-TEST_CASE("Testing worldMatcher")
+TEST_CASE("Testing hittableListMatcher")
 {
 	std::unique_ptr<hittable_list> world1;
 	std::unique_ptr<hittable_list> world2;
@@ -74,5 +74,11 @@ TEST_CASE("Testing worldMatcher")
 	std::unique_ptr<hittable> triangle2 =
 		std::make_unique<triangle_mesh>(vs, vts, vns, std::move(mat2));
 
-	//REQUIRE_THAT(world1.get(), worldMatcher(world2.get(), 1e-6));
+	world1 = std::make_unique<hittable_list>();
+	world2 = std::make_unique<hittable_list>();
+
+	world1->add(std::move(triangle1));
+	world2->add(std::move(triangle2));
+
+	REQUIRE_THAT(world1.get(), hittableListMatcher(world2.get(), 1e-6));
 }

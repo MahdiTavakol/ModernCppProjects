@@ -7,7 +7,8 @@ bvh_node::bvh_node(std::unique_ptr<hittable_list> list) :
 	bvh_node(list->objects, 0, list->objects.size())
 {}
 
-bvh_node::bvh_node(std::vector<std::unique_ptr<hittable>>& objects, size_t start, size_t end)
+bvh_node::bvh_node(std::vector<std::unique_ptr<hittable>>& objects, size_t start, size_t end):
+	hittable{"bvh_node"}
 {
 	bbox = aabb::empty;
 

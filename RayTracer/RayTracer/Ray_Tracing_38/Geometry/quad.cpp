@@ -1,7 +1,8 @@
 #include "quad.h"
 
-quad::quad(const point3& _Q, const vec3& _u, const vec3& _v, std::unique_ptr<material> _mat)
-	: hittable{ std::move(_mat) }, 
+quad::quad(const point3& _Q, const vec3& _u, const vec3& _v, 
+	std::unique_ptr<material> _mat, std::string type_)
+	: hittable{type_, std::move(_mat)},
 	Q(_Q), u(_u), v(_v)
 {
 	auto n = cross(_u, _v);
@@ -17,6 +18,21 @@ void quad::set_bounding_box()
 	auto bbox_diagonal1 = aabb(Q, Q + u + v);
 	auto bbox_diagonal2 = aabb(Q + u, Q + v);
 	bbox = aabb(bbox_diagonal1, bbox_diagonal2);
+}
+
+bool quad::comparator(const std::unique_ptr<hittable>& rhs_) const
+{
+	auto rhs_cast = dynamic_cast<quad*>(rhs_.get());
+	if (!rhs_cast)
+		throw std::invalid_argument("Different types!");
+
+	auto cross_u_v = cross(u, v);
+	auto cross_rhs_u_v = cross(rhs_cast->u, rhs_cast->v);
+	double u_v_length = cross_u_v.length();
+	double rhs_u_v_length = cross_rhs_u_v.length();
+	if (u_v_length < rhs_u_v_length)
+		return true;
+	return false;
 }
 
 bool quad::hit(const ray& _r, interval _ray_t, hit_record& _rec) const

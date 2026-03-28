@@ -4,7 +4,7 @@
 #include "mesh.h"
 #include <array>
 
-class triangle_mesh : public mesh {
+class triangle_mesh final : public mesh {
 public:
 	triangle_mesh(const std::array<point3, 3>& _vs,
 		          const std::array<point3, 3>& _vts,

@@ -29,7 +29,7 @@ public:
 
 	virtual bool is_equal( const material& _second) const = 0;
 
-	virtual bool compare(material* _rhs, const double tol_)
+	virtual bool compare(material* _rhs, const double tol_) const
 	{
 		std::cout << "The compare function has not been implemented yet " << std::endl;
 		return true;
@@ -80,7 +80,7 @@ public:
 			(d == o->d) && (Tr == o->Tr) && (Tf == o->Tf) && (Ks == o->Ks);
 	}
 
-	bool compare(material* rhs_, const double tol_)
+	bool compare(material* rhs_, const double tol_) const override
 	{
 		general* o = dynamic_cast<general*>(rhs_);
 		if (!o) {

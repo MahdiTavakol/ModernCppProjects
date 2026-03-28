@@ -115,6 +115,16 @@ public:
 	{
 		return false;
 	}
+
+	bool compare(material* rhs_, const double tol_) const override
+	{
+		fake_material* o = dynamic_cast<fake_material*>(rhs_);
+		if (!o) {
+			std::cout << "Material type mismatch" << std::endl;
+			return true;
+		}
+		return false;
+	}
 };
 
 class vec3Matcher : public Catch::Matchers::MatcherGenericBase {
@@ -185,10 +195,16 @@ class hittableListMatcher : public Catch::Matchers::MatcherGenericBase {
 public:
 	hittableListMatcher(hittable_list* expected_, double tol_):
 		expected{expected_}, tol{tol_}
-	{ }
+	{
+		if (expected_ == nullptr)
+			throw std::runtime_error("The expected in the hittableListMatcher is nullptr!");
+	}
 	
 	bool match(hittable_list* value_) const
 	{
+		if (value_ == nullptr)
+			throw std::runtime_error("The value in the hittableListMatcher is nullptr!");
+
 		int size = value_->size();
 		int expectedsize = expected->size();
 
