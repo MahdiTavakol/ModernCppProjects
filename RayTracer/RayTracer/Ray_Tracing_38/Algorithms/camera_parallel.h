@@ -15,6 +15,7 @@
 class camera_parallel : public camera
 {
 public:
+
     camera_parallel(
         std::unique_ptr<input>& _in,
         std::unique_ptr<parallel>& _para
