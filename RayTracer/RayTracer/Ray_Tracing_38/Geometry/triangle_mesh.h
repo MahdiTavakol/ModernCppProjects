@@ -2,12 +2,13 @@
 #define TRIANGLE_MESH_H
 
 #include "mesh.h"
+#include <array>
 
 class triangle_mesh : public mesh {
 public:
-	triangle_mesh(const std::vector<point3>& _vs, 
-		          const std::vector<point3>& _vts, 
-		          const std::vector<point3>& _vns, 
+	triangle_mesh(const std::array<point3, 3>& _vs,
+		          const std::array<point3, 3>& _vts,
+		          const std::array<point3, 3>& _vns,
 		          std::unique_ptr<material> _mat);
 	virtual void initialize() override;
 	virtual void set_bounding_box() override;
@@ -15,16 +16,16 @@ public:
 	bool hit(const ray& _r, interval _ray_t, hit_record& _rec) const override;
 	virtual bool is_interior(double _a, double _b, hit_record& _rec) const override;
 	void return_params(
-		std::vector<point3>& vs_,
-		std::vector<point3>& vts_, 
-		std::vector<point3>& vns_, 
+		std::array<point3, 3>& vs_,
+		std::array<point3, 3>& vts_,
+		std::array<point3, 3>& vns_,
 		material* mat_);
 	bool compare(hittable* rhs_, const double& tol) const override;
 
 protected:
-	std::vector<point3> vs;
-	std::vector<point3> vts;
-	std::vector<point3> vns;
+	std::array<point3, 3> vs;
+	std::array<point3, 3> vts;
+	std::array<point3, 3> vns;
 
 	int num_edges;
 

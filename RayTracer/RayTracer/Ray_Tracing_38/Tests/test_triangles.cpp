@@ -5,9 +5,9 @@
 TEST_CASE("Testing rendering of a triangle_mesh object")
 {
 	int num_points;
-	std::vector<point3> vs;
-	std::vector<point3> vns(3, point3(0.0, 0.0, 1.0));
-	std::vector<point3> vts = vs;
+	std::array<point3,3> vs;
+	std::array<point3, 3> vns = { point3(0.0, 0.0, 1.0),point3(0.0, 0.0, 1.0),point3(0.0, 0.0, 1.0) };
+	std::array<point3,3> vts = vs;
 
 	std::unique_ptr<material> mat =
 		std::make_unique<fake_material>();
@@ -31,9 +31,9 @@ TEST_CASE("Testing rendering of a triangle_mesh object")
 			double num_points_double = static_cast<double>(num_points);
 			vs =
 			{
-				{num_points_double,0.0,0.0},
-				{0.0,0.0,0.0},
-				{0.0,num_points_double,0.0}
+				point3{num_points_double,0.0,0.0},
+				point3{0.0,0.0,0.0},
+				point3{0.0,num_points_double,0.0}
 			};
 			vts = vs;
 			max = vec3{ num_points_double,num_points_double,num_points_double };
@@ -66,9 +66,9 @@ TEST_CASE("Testing rendering of a triangle_mesh object")
 
 			vs =
 			{
-				{a_double,0.0,0.0},
-				{0.0,0.0,0.0},
-				{0.0,b_double,0.0}
+				point3{a_double,0.0,0.0},
+				point3{0.0,0.0,0.0},
+				point3{0.0,b_double,0.0}
 			};
 			vts = vs;
 			max = vec3{ c_double,d_double,10.0 };
@@ -104,9 +104,9 @@ TEST_CASE("Testing rendering of a triangle_mesh object")
 
 			vs =
 			{
-				{a_double,0.0,e_double},
-				{0.0,0.0,f_double},
-				{0.0,b_double,0.0}
+				point3{a_double,0.0,e_double},
+				point3{0.0,0.0,f_double},
+				point3{0.0,b_double,0.0}
 			};
 			vts = vs;
 			max = vec3{ c_double,d_double,10.0 };

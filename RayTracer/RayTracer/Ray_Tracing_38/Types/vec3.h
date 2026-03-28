@@ -15,6 +15,12 @@ public:
 
     vec3() : e{ 0, 0, 0 } {}
     vec3(double _e0, double _e1, double _e2) : e{ _e0, _e1, _e2 } {}
+    vec3(const vec3& rhs_):
+        e{rhs_[0],rhs_[1],rhs_[2]}{}
+    vec3& operator=(const vec3& rhs_) {
+        e[0] = rhs_[0]; e[1] = rhs_[1]; e[2] = rhs_[2];
+        return *this;
+    }
 
     double x() const { return e[0]; }
     double y() const { return e[1]; }

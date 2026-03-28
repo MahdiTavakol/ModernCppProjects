@@ -332,9 +332,11 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 	{
 		if (counter % 100 == 0 && !silent)
 			std::cout << "item " << counter << " out of " << face_indexes.size() << std::endl;
-		std::vector<point3> vs_i;
-		std::vector<point3> vts_i;
-		std::vector<point3> vns_i;
+		std::array<point3, 4> vs_i, vts_i, vns_i;
+		std::array<point3, 3> vs_d, vts_d, vns_d;
+		vs_d = std::array<point3, 3>{ point3{0.0,0.0,0.0} };
+		vts_d = vs_d;
+		vns_d = vs_d;
 
 		auto& face = face_indexes[i];
 
@@ -365,9 +367,9 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 			point3 v_j = this->vs[face.v_indx[j] - 1]; // 1 based indexing in the obj file
 			point3 vt_j = this->vts[face.vt_indx[j] - 1];
 			point3 vn_j = this->vns[face.vn_indx[j] - 1];
-			vs_i.push_back(v_j);
-			vts_i.push_back(vt_j);
-			vns_i.push_back(vn_j);
+			vs_i[j] = v_j;
+			vts_i[j] = vt_j;
+			vns_i[j] = vn_j;
 		}
 		// mapping from obj material into the mtl file material
 		// we ourselves set the mat_indx to it is zero based!
@@ -378,7 +380,10 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 		switch (num_edges)
 		{
 		case 3:
-			world->add(std::make_unique<triangle_mesh>(vs_i, vts_i, vns_i, std::move(mat)));
+			std::copy_n(vs_i.data(), 3, vs_d.data());
+			std::copy_n(vts_i.data(), 3, vts_d.data());
+			std::copy_n(vns_i.data(), 3, vns_d.data());
+			world->add(std::make_unique<triangle_mesh>(vs_d, vts_d, vns_d, std::move(mat)));
 			break;
 		case 4:
 			world->add(std::make_unique<mesh>(vs_i, vts_i, vns_i, std::move(mat)));

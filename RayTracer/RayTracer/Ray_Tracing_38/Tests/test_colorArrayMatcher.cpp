@@ -49,20 +49,20 @@ TEST_CASE("Testing worldMatcher")
 	std::unique_ptr<hittable_list> world2;
 	std::unique_ptr<material> mat1, mat2;
 
-	std::vector<point3> vs = {
-		{1.0,0.0,0.0},
-		{0.0,1.0,0.0},
-		{0.0,0.0,1.0}
+	std::array<point3,3> vs = {
+		point3{1.0,0.0,0.0},
+		point3{0.0,1.0,0.0},
+		point3{0.0,0.0,1.0}
 	};
-	std::vector<point3> vts = {
-		{0.0,0.0,1.0},
-		{1.0,0.0,0.0},
-		{0.0,1.0,0.0}
+	std::array<point3,3> vts = {
+		point3{0.0,0.0,1.0},
+		point3{1.0,0.0,0.0},
+		point3{0.0,1.0,0.0}
 	};
-	std::vector<point3> vns = {
-		{0.0,0.0,1.0},
-		{2.0,0.0,1.0},
-		{1.0,3.0,2.0}
+	std::array<point3,3> vns = {
+		point3{0.0,0.0,1.0},
+		point3{2.0,0.0,1.0},
+		point3{1.0,3.0,2.0}
 	};
 
 	mat1 = std::make_unique<fake_material>();

@@ -1,15 +1,18 @@
 #ifndef MESH_H
 #define MESH_H
 
+#include <array>
+
 #include "hittable.h"
 #include "../Algorithms/hittable_list.h"
 #include "quad.h"
 
 class mesh : public hittable {
 public:
-	mesh(const std::vector<point3>& vs, 
-		const std::vector<point3>& vts,
-		const std::vector<point3>& vns,
+	mesh(
+		const std::array<point3, 4>& vs,
+		const std::array<point3, 4>& vts,
+		const std::array<point3, 4>& vns,
 		std::unique_ptr<material> _mat);
 	mesh() {}
 	virtual void initialize();
@@ -17,11 +20,12 @@ public:
 	aabb bounding_box() const override { return bbox; }
 	bool hit(const ray& _r, interval _ray_t, hit_record& _rec) const override;
 	virtual bool is_interior(double _a, double _b, hit_record& _rec) const;
+	bool compare(hittable* rhs_, const double& tol) const override;
 
 protected:
-	std::vector<point3> vs;
-	std::vector<point3> vts;
-	std::vector<point3> vns;
+	std::array<point3, 4> vs;
+	std::array<point3, 4> vts;
+	std::array<point3, 4> vns;
 	
 
 	int num_edges = 0;

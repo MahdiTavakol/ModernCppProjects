@@ -1,13 +1,13 @@
 #include "mesh.h"
 
-mesh::mesh(const std::vector<point3>& _vs, 
-	       const std::vector<point3>& _vts, 
-	       const std::vector<point3>& _vns,
+mesh::mesh(const std::array<point3, 4>& _vs,
+	       const std::array<point3, 4>& _vts,
+	       const std::array<point3, 4>& _vns,
 	       std::unique_ptr<material> _mat)
 	: hittable{std::move(_mat)},
 	  vs{ _vs }, vts{ _vts }, 
 	  vns{ _vns },
-	  num_edges{ static_cast<int>(_vs.size()) }
+	  num_edges{ 4 }
 {
 	initialize();
 }
@@ -151,4 +151,40 @@ vec3 mesh::interpolate(const std::vector<point3>& _triangle, const std::vector<p
 	auto Aabc = 0.5 * dot(AB, AC);
 
 	return ((Apbc / Aabc) * _normals[0] + (Apac / Aabc) * _normals[1] + (Apab / Aabc) * _normals[2]);
+}
+
+bool mesh::compare(hittable* rhs_, const double& tol) const
+{
+	// checking the rhs type
+	mesh* rhsConv = dynamic_cast<mesh*>(rhs_);
+	// it is not of triangle mesh type
+	if (!rhsConv)
+	{
+		return true;
+	}
+
+	// comparing the geometry
+	for (int i = 0; i < 4; i++)
+	{
+		point3 datavsi  = vs[i]  - rhsConv->vs[i];
+		point3 datavtsi = vts[i] - rhsConv->vts[i];
+		point3 datavnsi = vns[i] - rhsConv->vns[i];
+		if (datavsi.length() >= tol)
+		{
+			std::cout << vs[i];
+			std::cout << rhsConv->vs[i];
+			return true;
+		}
+		if (datavtsi.length() >= tol) {
+			std::cout << vts[i];
+			std::cout << rhsConv->vts[i];
+			return true;
+		}
+		if (datavnsi.length() >= tol) {
+			std::cout << vns[i];
+			std::cout << rhsConv->vns[i];
+			return true;
+		}
+	}
+	return false;
 }

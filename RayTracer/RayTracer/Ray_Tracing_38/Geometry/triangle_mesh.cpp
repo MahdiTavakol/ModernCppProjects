@@ -1,9 +1,9 @@
 #include "triangle_mesh.h"
 
 triangle_mesh::triangle_mesh(
-	const std::vector<point3>& _vs,
-	const std::vector<point3>& _vts,
-	const std::vector<point3>& _vns,
+	const std::array<point3, 3>& _vs,
+	const std::array<point3, 3>& _vts,
+	const std::array<point3, 3>& _vns,
 	std::unique_ptr<material> _mat)
 	:
 	vs {_vs}, vts{ _vts }, vns{ _vns }
@@ -83,9 +83,9 @@ bool triangle_mesh::hit(const ray& _r, interval _ray_t, hit_record& _rec) const
 }
 
 void triangle_mesh::return_params(
-	std::vector<point3>& vs_,
-	std::vector<point3>& vts_,
-	std::vector<point3>& vns_,
+	std::array<point3, 3>& vs_,
+	std::array<point3, 3>& vts_,
+	std::array<point3, 3>& vns_,
 	material* mat_)
 {
 	vs_ = vs; vts_ = vts; vns_ = vns; mat_ = mat.get();
