@@ -4,12 +4,12 @@
 
 camera_parallel::camera_parallel(
     std::unique_ptr<input>& _in, std::unique_ptr<parallel>& _para):
-    camera{}
+    camera{},
+    para{_para.get()}
 {
     _in->setup_camera(this);
     rank = _para->return_rank();
     size = _para->return_size();
-    world = _para->return_comm();
     rank_config = _para->return_rank_config();
     size_config = _para->return_size_config();
 
@@ -36,15 +36,29 @@ camera_parallel::camera_parallel(
 }
 
 camera_parallel::camera_parallel(
-    const int _width_min, const int _width_max, 
-    const int _height_min, const int _height_max)
-    : width_min(_width_min), width_max(_width_max), height_min(_height_min), height_max(_height_max) {}
+    const int _width_min,
+    const int _width_max, 
+    const int _height_min, 
+    const int _height_max,
+    std::unique_ptr<parallel>& para_
+    )
+    : 
+    para{para_.get()},
+    width_min(_width_min),
+    width_max(_width_max),
+    height_min(_height_min),
+    height_max(_height_max) {}
 
-camera_parallel::camera_parallel()
-    : width_min(0), width_max(0), height_min(0), height_max(0) {}
+camera_parallel::camera_parallel(std::unique_ptr<parallel>& para_)
+    :
+    para{para_.get()},
+    width_min(0), 
+    width_max(0),
+    height_min(0), 
+    height_max(0) {}
 
 
-void camera_parallel::render(const hittable& world)
+void camera_parallel::render(const hittable& world_)
 {
     for (int j = height_min; j < height_max; j++)
     {
@@ -54,7 +68,7 @@ void camera_parallel::render(const hittable& world)
             for (int sample = 0; sample < samples_per_pixel; sample++)
             {
                 ray r = get_ray(i, j);
-                pixel_color += ray_color(r, max_depth, world);
+                pixel_color += ray_color(r, max_depth, world_);
             }
             color_data** c_data = c_array->return_array();
             pixel_color = pixel_samples_scale * pixel_color;
@@ -84,10 +98,10 @@ void camera_parallel::gather()
     color_data* colors = c_array->return_array()[0];
     color_data* colors_all = (color_data*)malloc(width_per_node * height_per_node * size * sizeof(color_data));
 
-    int num_double_data = width_per_node * height_per_node * sizeof(color_data) / sizeof(double);
+    int num_data = width_per_node * height_per_node * sizeof(color_data) / sizeof(double);
 
     // this part might be moved to the parallel class to generalize differnt gather strategies
-    MPI_Allgather(colors, num_double_data, MPI_DOUBLE, colors_all, num_double_data, MPI_DOUBLE, *world);
+    para->gather(colors, colors_all, num_data);
     // a copy of data is involved here I should work on removing this!
     c_array_all = std::make_unique<color_array>(image_width, image_height, colors_all);
     free(colors_all);

@@ -25,7 +25,6 @@ protected:
 	std::vector<point3> vs;
 	std::vector<point3> vts;
 	std::vector<point3> vns;
-	std::unique_ptr<material> mat;
 
 	int num_edges;
 

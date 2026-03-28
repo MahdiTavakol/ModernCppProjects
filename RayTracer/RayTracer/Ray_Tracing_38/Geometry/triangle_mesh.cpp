@@ -5,9 +5,13 @@ triangle_mesh::triangle_mesh(
 	const std::vector<point3>& _vts,
 	const std::vector<point3>& _vns,
 	std::unique_ptr<material> _mat)
-	: vs{ _vs }, vts{ _vts }, vns{ _vns }, mat{ std::move(_mat) }
+	:
+	vs {_vs}, vts{ _vts }, vns{ _vns }
 {
+	mat = std::move(_mat);
 	initialize();
+	if (mat == nullptr)
+		std::cout << "THIS IS NULL " << std::endl;
 }
 
 void triangle_mesh::initialize()
@@ -101,17 +105,32 @@ bool triangle_mesh::compare(hittable* rhs_, const double& tol) const
 	triangle_mesh* rhsConv = dynamic_cast<triangle_mesh*>(rhs_);
 	// it is not of triangle mesh type
 	if (!rhsConv)
-		return false;
+	{
+		return true;
+	}
 
 	// comparing the geometry
 	for (int i = 0; i < 3; i++)
 	{
-		if (vs[i] != rhsConv->vs[i])
-			return false;
-		if (vts[i] != rhsConv->vts[i])
-			return false;
-		if (vns[i] != rhsConv->vns[i])
-			return false;
+		point3 datavsi  =  vs[i] - rhsConv->vs[i];
+		point3 datavtsi = vts[i] - rhsConv->vts[i];
+		point3 datavnsi = vns[i] - rhsConv->vns[i];
+		if (datavsi.length() >= tol)
+		{
+			std::cout << vs[i];
+			std::cout << rhsConv->vs[i];
+			return true;
+		}
+		if (datavtsi.length() >= tol) {
+			std::cout << vts[i];
+			std::cout << rhsConv->vts[i];
+			return true;
+		}
+		if (datavnsi.length() >= tol) {
+			std::cout << vns[i];
+			std::cout << rhsConv->vns[i];
+			return true;
+		}
 	}
-	return true;
+	return false;
 }

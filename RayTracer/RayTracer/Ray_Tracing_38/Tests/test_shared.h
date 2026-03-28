@@ -181,9 +181,9 @@ private:
 	std::vector<std::array<int, 2>> ignoredCoors;
 };
 
-class worldMatcher : public Catch::Matchers::MatcherGenericBase {
+class hittableListMatcher : public Catch::Matchers::MatcherGenericBase {
 public:
-	worldMatcher(hittable_list* expected_, double tol_):
+	hittableListMatcher(hittable_list* expected_, double tol_):
 		expected{expected_}, tol{tol_}
 	{ }
 	
@@ -192,19 +192,42 @@ public:
 		int size = value_->size();
 		int expectedsize = expected->size();
 
-		if (size != expectedsize)
+		if (size != expectedsize) {
+			std::cout << "Hittable_list size mismatch" << std::endl;
 			return false;
+		}
 
 		for (int i = 0; i < size; i++)
 		{
-			hittable* object1 = (*value_)[i];
-			hittable* object2 = (*expected)[i];
+			hittable* objectVal = (*value_)[i];
+			hittable* objectExpected = (*expected)[i];
 
-			if (object1->compare(object2, tol))
+			material* matVal      = objectVal->get_material();
+			material* matExpected = objectExpected->get_material();
+
+			if (objectVal->compare(objectExpected, tol)) {
+				std::cout << "Object mismatch" << std::endl;
 				return false;
+			}
+
+			if (matVal == nullptr)
+				std::cout << "The original material pointer is nullptr" << std::endl;
+			if (matExpected == nullptr)
+				std::cout << "The expected material pointer is nullptr" << std::endl;
+
+			if (matVal->compare(matExpected, tol)) {
+				std::cout << "Material mismatch" << std::endl;
+				return false;
+			}
 
 		}
 		return true;
+	}
+
+	std::string describe() const override
+	{
+		std::string message = "Comparing two hittable_list with tolerance of " + std::to_string(tol);
+		return message;
 	}
 
 protected:

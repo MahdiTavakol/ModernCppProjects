@@ -16,24 +16,19 @@
 class parallel
 {
 public:
-    parallel(int argc, char** argv);
-    parallel(std::array<int, 2> rank_config_, std::array<int,2> size_config_);
-    virtual ~parallel();
+    parallel() = default;
+    virtual ~parallel() = default;
     virtual int return_rank() const;
     virtual int return_size() const;
     virtual std::array<int, 2> return_rank_config() const;
     virtual std::array<int, 2> return_size_config() const;
-    virtual void barrier() const;
-    MPI_Comm* return_comm()
-    {
-        return &MPI_world;
-    }
+    virtual void gather(color_data* one_, color_data* one_all, const int& num_data) const = 0;
+    virtual void barrier() const = 0;
 
 protected:
     int size, rank;
     std::array<int, 2> rank_config;
     std::array<int, 2> size_config;
-    MPI_Comm MPI_world;
 };
 
 #endif

@@ -47,7 +47,7 @@ obj_model_reader::obj_model_reader(
 	obj_file_ptr{ std::move(_obj_file_ptr) },
 	mtl_file_ptr{ std::move(_mtl_file_ptr) }
 {
-	set_silent_status();
+	silent = true;
 }
 
 
@@ -234,8 +234,6 @@ void obj_model_reader::read_obj_file()
 void obj_model_reader::read_mtl_file()
 {
 	std::string line;
-	mtl_file_name = "../models/56-chair/" + mtl_file_name;
-	mtl_file_name = "../models/simple/four_meshes.mtl";
 	std::stringstream iss;
 
 	double Ns, d, Tr;
@@ -261,7 +259,8 @@ void obj_model_reader::read_mtl_file()
 					materials_map[material_name] = std::move(material_i);
 				}
 				iss >> dummy_str;
-				std::cout << "Reading the material " << dummy_str << std::endl;
+				if (!silent)
+					std::cout << "Reading the material " << dummy_str << std::endl;
 				material_name = dummy_str;
 				material_counter++;
 			}
@@ -331,7 +330,7 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 	
 	for (int i = _low; i < hi; i++)
 	{
-		if (counter % 100 == 0)
+		if (counter % 100 == 0 && !silent)
 			std::cout << "item " << counter << " out of " << face_indexes.size() << std::endl;
 		std::vector<point3> vs_i;
 		std::vector<point3> vts_i;

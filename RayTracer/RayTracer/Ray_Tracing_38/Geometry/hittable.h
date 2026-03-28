@@ -27,7 +27,9 @@ public:
     }
     virtual bool compare(hittable* rhs_, const double& tol_) const
     {
-        return false;
+        // it means that the compare has not been implemented
+        std::cout << "Warning: The compare function has not been implemented for this object type yet!" << std::endl;
+        return true;
     }
     virtual material* get_material() {
         return mat.get();

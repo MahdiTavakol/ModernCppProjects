@@ -4,7 +4,7 @@
 renderer::renderer(int argc, char** argv, int _mode, std::string _filename)
 	: mode(_mode), filename(_filename)
 {
-	para = std::make_unique<parallel>(argc,argv);
+	para = std::make_unique<mpiParallel>(argc,argv);
 	in = std::make_unique<input>(argc, argv, mode);
 	world_factory = std::make_unique<scene_factory>(mode,para);
 	if (!filename.empty())

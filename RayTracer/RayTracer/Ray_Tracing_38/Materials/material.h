@@ -29,6 +29,12 @@ public:
 
 	virtual bool is_equal( const material& _second) const = 0;
 
+	virtual bool compare(material* _rhs, const double tol_)
+	{
+		std::cout << "The compare function has not been implemented yet " << std::endl;
+		return true;
+	}
+
 	bool operator==(const material& _second) {
 		return (typeid(*this) == typeid(_second)) && (is_equal(_second));
 	}
@@ -40,7 +46,8 @@ public:
 	general(const color& _albedo, const double& _shininess,
 		const double& _d, const double& _Tr, const color& _Tf, const color _Ks) :
 		albedo(_albedo), shininess(_shininess), d(_d), Tr(_Tr), Tf(_Tf), Ks(_Ks)
-	{}
+	{
+	}
 
 
 	bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered) const override
@@ -71,6 +78,33 @@ public:
 		const general* o = dynamic_cast<const general*>(&_second);
 		return o && (albedo == o->albedo) && (shininess == o->shininess) &&
 			(d == o->d) && (Tr == o->Tr) && (Tf == o->Tf) && (Ks == o->Ks);
+	}
+
+	bool compare(material* rhs_, const double tol_)
+	{
+		general* o = dynamic_cast<general*>(rhs_);
+		if (!o) {
+			std::cout << "Material type mismatch" << std::endl;
+			return true;
+		}
+		if (std::abs(shininess - o->shininess) >= tol_)
+			return true;
+		if (std::abs(d - o->d) >= tol_)
+			return true;
+		color deltaAlb = albedo - o->albedo;
+		color deltaKa = Ka - o->Ka;
+		color deltaKs = Ks - o->Ks;
+		color deltaTf = Tf - o->Tf;
+		double dAlbLength = deltaAlb.length();
+		double dKaLength = deltaKa.length();
+		double dKsLength = deltaKs.length();
+		double dTfLength = deltaTf.length();
+		if (dAlbLength >= tol_ ||
+			dKaLength  >= tol_ ||
+			dKsLength  >= tol_ ||
+			dTfLength  >= tol_)
+			return true;
+		return false;
 	}
 
 

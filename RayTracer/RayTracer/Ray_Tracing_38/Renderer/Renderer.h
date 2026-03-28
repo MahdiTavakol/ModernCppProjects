@@ -22,6 +22,7 @@
 #include "../Materials/material.h"
 #include "../Algorithms/path.h"
 #include "../Algorithms/parallel.h"
+#include "../Algorithms/mpiParallel.h"
 #include "../Geometry/quad.h"
 #include "../Types/ray.h"
 #include "../Algorithms/rtw_stb_image.h"

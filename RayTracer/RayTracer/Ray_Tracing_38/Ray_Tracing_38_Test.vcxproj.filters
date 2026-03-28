@@ -156,6 +156,9 @@
     <ClCompile Include="Tests\test_colorArrayMatcher.cpp">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
+    <ClCompile Include="Algorithms\mpiParallel.cpp">
+      <Filter>Source Files\Algorithm</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Types\color.h">
@@ -274,6 +277,9 @@
     </ClInclude>
     <ClInclude Include="Tests\test_shared.h">
       <Filter>Source Files\Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithms\mpiParallel.h">
+      <Filter>Source Files\Algorithm</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
