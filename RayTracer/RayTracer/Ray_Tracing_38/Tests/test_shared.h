@@ -3,6 +3,7 @@
 #include "catch_amalgamated.hpp"
 #include "../Input/input.h"
 #include "../Geometry/triangle_mesh.h"
+#include "../Algorithms/parallel.h"
 
 class create_input
 {
@@ -124,6 +125,39 @@ public:
 			return true;
 		}
 		return false;
+	}
+};
+
+class fake_parallel : public parallel
+{
+public:
+	fake_parallel() :
+		parallel{}
+	{
+	}
+	int return_rank() const override {
+		return 0;
+	}
+	int return_size() const override {
+		return 1;
+	}
+	std::array<int, 2> return_rank_config() const override {
+		return std::array<int, 2>{0, 0};
+	}
+	std::array<int, 2> return_size_config() const override {
+		return std::array<int, 2>{1, 1};
+	}
+
+	void gather(
+		color_data* one_,
+		color_data* one_all,
+		const int& num_data
+	) const override
+	{
+		return;
+	}
+	void barrier() const override {
+		return;
 	}
 };
 

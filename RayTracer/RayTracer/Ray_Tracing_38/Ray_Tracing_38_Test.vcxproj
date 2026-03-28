@@ -171,6 +171,7 @@
     <ClCompile Include="Tests\Ray_Tracing_38_tests.cpp" />
     <ClCompile Include="Tests\test_colorArrayMatcher.cpp" />
     <ClCompile Include="Tests\test_input.cpp" />
+    <ClCompile Include="Tests\test_obj_reader.cpp" />
     <ClCompile Include="Tests\test_triangles.cpp" />
     <ClCompile Include="Tests\test_vec3.cpp" />
     <ClCompile Include="Types\color.cpp" />
