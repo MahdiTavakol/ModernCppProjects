@@ -29,12 +29,13 @@ void renderer::setup()
 	world_factory->create();
  	world = world_factory->return_world();
 
+
 	// building the camera object
 	cam = std::make_unique<camera_parallel>(in,para);
-	
+
 
 	// the default camera location
-	camera_location = point3(26, 3, 6);
+	//camera_location = point3(26, 3, 6);
 
 
 	// cases with extra setups
@@ -49,7 +50,7 @@ void renderer::setup()
 	}
 
 
-	cam->move_camera(camera_location);
+	//cam->move_camera(camera_location);
 }
 
 

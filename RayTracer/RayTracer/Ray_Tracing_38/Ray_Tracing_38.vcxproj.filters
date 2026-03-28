@@ -138,6 +138,9 @@
     <ClCompile Include="Renderer\Renderer_Animation.cpp">
       <Filter>Source Files\Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="Algorithms\mpiParallel.cpp">
+      <Filter>Source Files\Algorithm</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Types\color.h">
@@ -250,6 +253,9 @@
     </ClInclude>
     <ClInclude Include="Renderer\Renderer_Animation.h">
       <Filter>Source Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithms\mpiParallel.h">
+      <Filter>Source Files\Algorithm</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

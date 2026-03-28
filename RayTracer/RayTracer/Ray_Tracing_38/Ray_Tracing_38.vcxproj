@@ -145,6 +145,7 @@
     <ClCompile Include="Algorithms\hittable_list.cpp" />
     <ClCompile Include="Algorithms\hittable_list_parallel.cpp" />
     <ClCompile Include="Algorithms\hit_record.cpp" />
+    <ClCompile Include="Algorithms\mpiParallel.cpp" />
     <ClCompile Include="Algorithms\parallel.cpp" />
     <ClCompile Include="Algorithms\path.cpp" />
     <ClCompile Include="Algorithms\rtw_stb_image.cpp" />
@@ -180,6 +181,7 @@
     <ClInclude Include="Algorithms\hittable_list_parallel.h" />
     <ClInclude Include="Algorithms\hittable_list_parallel_optimized.h" />
     <ClInclude Include="Algorithms\hit_record.h" />
+    <ClInclude Include="Algorithms\mpiParallel.h" />
     <ClInclude Include="Algorithms\parallel.h" />
     <ClInclude Include="Algorithms\path.h" />
     <ClInclude Include="Algorithms\rtw_stb_image.h" />

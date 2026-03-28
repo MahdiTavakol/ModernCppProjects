@@ -11,11 +11,11 @@ obj_model_reader::obj_model_reader(std::string _obj_file_name,
 
 {
 	set_silent_status();
-	
-	std::istringstream iss(obj_file_name);
+	std::string dummy = obj_file_name.substr(2);
+	std::istringstream iss(dummy);
 	std::string file_name;
 	std::getline(iss, file_name, '.');
-	mtl_file_name = file_name + ".mtl";
+	mtl_file_name = ".." + file_name + ".mtl";
 	obj_file_ptr = open_file(obj_file_name);
 	mtl_file_ptr = open_file(mtl_file_name);
 }
@@ -414,7 +414,8 @@ void obj_model_reader::set_silent_status()
 	std::array<int, 2> rank_config = para->return_rank_config();
 	if (rank_config[0] == 0 && rank_config[1] == 0)
 		silent = false;
-	silent = true;
+	else
+		silent = true;
 }
 
 void obj_model_reader::check_data(const int& num_file_, const int& num_read_, const std::string& title)

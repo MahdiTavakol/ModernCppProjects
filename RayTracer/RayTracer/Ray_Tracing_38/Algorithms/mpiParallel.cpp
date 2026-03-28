@@ -16,9 +16,7 @@ mpiParallel::mpiParallel(int argc, char** argv):
 mpiParallel::mpiParallel(
     std::array<int, 2> rank_config_,
     std::array<int, 2> size_config_) :
-    parallel{},
-    rank_config{ rank_config_ }, 
-    size_config{ size_config_ }
+    parallel{ rank_config_ , size_config_ }
 {
     MPI_world = MPI_COMM_WORLD;
     MPI_Comm_rank(MPI_world, &rank);

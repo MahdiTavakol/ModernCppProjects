@@ -15,8 +15,5 @@ public:
     }
 
 protected:
-    int size, rank;
-    std::array<int, 2> rank_config;
-    std::array<int, 2> size_config;
     MPI_Comm MPI_world;
 };

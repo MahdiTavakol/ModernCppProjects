@@ -17,6 +17,7 @@ class parallel
 {
 public:
     parallel() = default;
+	parallel(std::array<int, 2> rank_config_, std::array<int, 2> size_config_);
     virtual ~parallel() = default;
     virtual int return_rank() const;
     virtual int return_size() const;

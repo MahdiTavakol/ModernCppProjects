@@ -13,6 +13,10 @@ camera_parallel::camera_parallel(
     rank_config = _para->return_rank_config();
     size_config = _para->return_size_config();
 
+	if (size_config[0] == 0 || size_config[1] == 0)
+		throw std::invalid_argument("Size configuration for parallel rendering cannot be zero!");
+
+
     // setting up the camera
     auto set_range_per_node = [&](const int dimension,const int myRank,const int mySize,
                                   int& min,int& max, int& perNode) {
@@ -24,12 +28,14 @@ camera_parallel::camera_parallel(
            
         };
 
+
     set_range_per_node(image_width, rank_config[0], size_config[0],
         width_min, width_max, width_per_node);
     set_range_per_node(image_height, rank_config[1], size_config[1],
         height_min, height_max, height_per_node);
 
-    
+
+
     set_range(width_min, width_max, height_min, height_max);
 
     initialize_storage();
