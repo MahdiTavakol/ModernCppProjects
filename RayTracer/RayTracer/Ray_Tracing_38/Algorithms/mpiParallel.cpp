@@ -53,6 +53,7 @@ void mpiParallel::gather(int* one_, int* one_all_, const int& width_per_rank_, c
     {
         int rank_x = k % size_config[0];
         int rank_y = k / size_config[0];
+		int rank = rank_y * size_config[0] + rank_x;
         for (int i = 0; i < width_per_rank_; i++)
             for (int j = 0; j < height_per_rank_; j++)
             {
@@ -61,7 +62,8 @@ void mpiParallel::gather(int* one_, int* one_all_, const int& width_per_rank_, c
                 int global_i = offset_i + i;
 				int global_j = offset_j + j;
                 // not sure yet
-				tempArray[global_i][global_j] = one_all_[k * num_data + i * height_per_rank_ + j];
+                // one_all shoud get from rank
+				tempArray[global_i][global_j] = one_all_[rank*width_per_rank_*height_per_rank_+i*height_per_rank_+j];
             }
     }
 
