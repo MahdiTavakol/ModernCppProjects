@@ -322,17 +322,21 @@ void scene_factory::setup_cornell_smoke()
 	std::unique_ptr<hittable> box2 =
 		box(point3(0, 0, 0), point3(165, 165, 165), matVec2);
 
-	box1 = std::make_unique<rotate_y>(std::move(box1), 15);
-	box1 = std::make_unique<translate>(std::move(box1), vec3(265, 0, 295));
+
+
+	//box1 = std::make_unique<rotate_y>(std::move(box1), 15);
+	//box1 = std::make_unique<translate>(std::move(box1), vec3(265, 0, 295));
 
 
 
-	box2 = std::make_unique<rotate_y>(std::move(box2), -18);
-	box2 = std::make_unique<translate>(std::move(box2), vec3(130, 0, 65));
+	//box2 = std::make_unique<rotate_y>(std::move(box2), -18);
+	//box2 = std::make_unique<translate>(std::move(box2), vec3(130, 0, 65));
+
 
 
 	world->add(std::make_unique<constant_medium>(std::move(box1), 0.01, color(0, 0, 0)));
 	world->add(std::make_unique<constant_medium>(std::move(box2), 0.01, color(1, 1, 1)));
+
 
 	auto bvh = std::make_unique<bvh_node>(std::move(world));
 	world = std::make_unique<hittable_list>(std::move(bvh));
@@ -345,8 +349,8 @@ void scene_factory::setup_3d_obj()
 		std::make_unique<obj_model_reader>(obj_file_name, para);
 	model_reader->read();
 	world = model_reader->return_world();
-	auto bvh = std::make_unique<bvh_node>(std::move(world));
-	world = std::make_unique<hittable_list>(std::move(bvh));
+	//auto bvh = std::make_unique<bvh_node>(std::move(world));
+	//world = std::make_unique<hittable_list>(std::move(bvh));
 }
 
 void scene_factory::setup_3d_obj_parallel()

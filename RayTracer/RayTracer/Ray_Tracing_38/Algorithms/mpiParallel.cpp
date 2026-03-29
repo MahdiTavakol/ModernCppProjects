@@ -27,7 +27,7 @@ mpiParallel::mpiParallel(
     size_config[1] = static_cast<int>(size / size_config[0]);
 
     int rank_x = rank % size_config[0];
-    int rank_y = rank / size_config[1];
+    int rank_y = rank / size_config[0];
     rank_config = { rank_x, rank_y };
 }
 

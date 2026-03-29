@@ -49,6 +49,8 @@ void renderer::setup()
 			break;
 	}
 
+	//world = std::make_unique<hittable_list>();
+
 
 	//cam->move_camera(camera_location);
 }

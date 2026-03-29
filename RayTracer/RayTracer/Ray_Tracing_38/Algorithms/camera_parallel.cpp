@@ -3,9 +3,9 @@
 #include <mpi.h>
 
 camera_parallel::camera_parallel(
-    std::unique_ptr<input>& _in, std::unique_ptr<parallel>& _para):
+    std::unique_ptr<input>& _in, std::unique_ptr<parallel>& _para) :
     camera{},
-    para{_para.get()}
+    para{ _para.get() }
 {
     _in->setup_camera(this);
     rank = _para->return_rank();
@@ -13,19 +13,24 @@ camera_parallel::camera_parallel(
     rank_config = _para->return_rank_config();
     size_config = _para->return_size_config();
 
-	if (size_config[0] == 0 || size_config[1] == 0)
-		throw std::invalid_argument("Size configuration for parallel rendering cannot be zero!");
+    if (size_config[0] == 0 || size_config[1] == 0)
+        throw std::invalid_argument("Size configuration for parallel rendering cannot be zero!");
 
 
     // setting up the camera
-    auto set_range_per_node = [&](const int dimension,const int myRank,const int mySize,
-                                  int& min,int& max, int& perNode) {
-            perNode = static_cast<int>(dimension / mySize) + 1;
+    auto set_range_per_node = [&](const int dimension, const int myRank, const int mySize,
+        int& min, int& max, int& perNode) {
+			if (mySize == 1) {
+                min = 0;
+                max = dimension;
+                perNode = dimension;
+                return;
+            }
+            perNode = static_cast<int>(dimension / mySize + 1);
             min = myRank * perNode;
             max = min + perNode;
             min = min >= dimension ? dimension : min;
             max = max >= dimension ? dimension : max;
-           
         };
 
 
@@ -37,31 +42,32 @@ camera_parallel::camera_parallel(
 
 
     set_range(width_min, width_max, height_min, height_max);
-
-    initialize_storage();
+	 initialize_storage();
 }
 
 camera_parallel::camera_parallel(
     const int _width_min,
-    const int _width_max, 
-    const int _height_min, 
+    const int _width_max,
+    const int _height_min,
     const int _height_max,
     std::unique_ptr<parallel>& para_
-    )
-    : 
-    para{para_.get()},
+)
+    :
+    para{ para_.get() },
     width_min(_width_min),
     width_max(_width_max),
     height_min(_height_min),
-    height_max(_height_max) {}
+    height_max(_height_max) {
+}
 
 camera_parallel::camera_parallel(std::unique_ptr<parallel>& para_)
     :
-    para{para_.get()},
-    width_min(0), 
+    para{ para_.get() },
+    width_min(0),
     width_max(0),
-    height_min(0), 
-    height_max(0) {}
+    height_min(0),
+    height_max(0) {
+}
 
 
 void camera_parallel::render(const hittable& world_)
