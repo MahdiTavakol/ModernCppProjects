@@ -12,12 +12,12 @@ int main(int argc, char** argv)
 {
 	int mode;
 	std::string obj_file = "../models/56-chair/Chair.obj";
-	//obj_file = "../models/Simple/four_meshes.obj";
+	obj_file = "../models/Simple/four_meshes.obj";
 	std::string filename = "test.ppm";
 
 	//mode = RANDOM_SPHERES;
 	//mode = CHECKER_BOARDS;
-	mode = RANDOM_SPHERES;
+	//mode = RANDOM_SPHERES;
 	//mode = EARTH_SPHERE;
 	//mode = PERLIN_SPHERE;
 	//mode = QUADS;
@@ -27,7 +27,7 @@ int main(int argc, char** argv)
 	//mode = TWO_BOXES;
 	//mode = TWO_BOXES_ROTATED;
 	//mode = CORNELL_SMOKE;
-	//mode = OBJ_MODEL;
+	mode = OBJ_MODEL;
 	//mode = OBJ_MODEL_PARALLEL;
 	//mode = RANDOM_SPHERES_ANIMATED;
 
