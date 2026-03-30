@@ -156,9 +156,40 @@ public:
 	{
 		return;
 	}
+	void gather(color_data** one_,
+		color_data** one_all_,
+		const int& width_per_rank_,
+		const int& height_per_rank_) const override
+	{
+		return;
+	}
 	void barrier() const override {
 		return;
 	}
+};
+
+class intMatMatcher : public Catch::Matchers::MatcherGenericBase
+{
+public:
+	intMatMatcher(int** expected_, int size_x_, int size_y_) :
+		expected{ expected_ }, size_x{ size_x_ }, size_y{ size_y_ } {
+	}
+	bool match(int** value_) const
+	{
+		for (int i = 0; i < size_x; i++)
+			for (int j = 0; j < size_y; j++)
+				if (value_[i][j] != expected[i][j])
+					return false;
+		return true;
+	}
+	std::string describe() const override
+	{
+		std::string output = "A custom 2D array matcher";
+		return output;
+	}
+private:
+	int size_x, size_y;
+	int** expected;
 };
 
 class vec3Matcher : public Catch::Matchers::MatcherGenericBase {

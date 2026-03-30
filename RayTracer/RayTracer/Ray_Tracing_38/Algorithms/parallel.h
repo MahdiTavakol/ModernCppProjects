@@ -26,6 +26,10 @@ public:
     virtual void gather(int** one_, int** one_all, const int& width_per_rank_, const int& height_per_rank_) const
     {}
     virtual void gather(color_data* one_, color_data* one_all, const int& num_data) const = 0;
+    virtual void gather(color_data** one_,
+                        color_data** one_all_,
+                        const int& width_per_rank_,
+                        const int& height_per_rank_) const = 0;
     virtual void barrier() const = 0;
 
 protected:

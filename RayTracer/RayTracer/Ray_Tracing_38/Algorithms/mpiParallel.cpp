@@ -70,6 +70,48 @@ void mpiParallel::gather(int** one_, int** one_all_, const int& width_per_rank_,
 	delete[] tempArray;
 }
 
+void mpiParallel::gather(color_data** one_,
+                         color_data** one_all_,
+                         const int& width_per_rank_,
+                         const int& height_per_rank_) const
+{
+    int num_data = (width_per_rank_ * height_per_rank_)*sizeof(color_data)/sizeof(double);
+    MPI_Allgather(one_[0], num_data, MPI_DOUBLE, one_all_[0], num_data, MPI_DOUBLE, MPI_world);
+
+
+    int width = width_per_rank_ * size_config[0];
+    int height = height_per_rank_ * size_config[1];
+
+
+    color_data** tempArray;
+    color_data* temp;
+    temp = new color_data[width * height];
+    tempArray = new color_data* [width];
+    for (int i = 0; i < width; i++)
+        tempArray[i] = &temp[i * height];
+
+    for (int k = 0; k < size; k++)
+    {
+        int rank_k = k;
+        int rank_x_k = rank_k % size_config[0];
+        int rank_y_k = rank_k / size_config[0];
+        for (int i = 0; i < width_per_rank_; i++)
+            for (int j = 0; j < height_per_rank_; j++)
+            {
+                int in = rank_k * width_per_rank_ * height_per_rank_ + i * height_per_rank_ + j;
+                int out_i = rank_x_k * width_per_rank_ + i;
+                int out_j = rank_y_k * height_per_rank_ + j;
+                tempArray[out_i][out_j] = one_all_[0][in];
+            }
+    }
+
+    std::copy_n(tempArray[0], width * height, one_all_[0]);
+
+
+    delete[] tempArray[0];
+    delete[] tempArray;
+}
+
 void mpiParallel::gather(color_data* one_, color_data* one_all_, const int& num_data_) const
 {
     MPI_Allgather(one_, num_data_, MPI_DOUBLE, one_all_, num_data_, MPI_DOUBLE, MPI_world);
