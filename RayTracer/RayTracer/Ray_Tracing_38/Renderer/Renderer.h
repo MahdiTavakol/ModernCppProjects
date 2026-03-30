@@ -37,9 +37,9 @@
 class renderer
 {
 public:
-	renderer(int argc, char** argv, int _mode, std::string _filename);
+	renderer(int argc, char** argv, int _mode, std::string _filename, MPI_Comm comm_);
 	renderer(int argc, char** argv, int _mode, std::string _filename,
-		     std::string obj_file_);
+		     std::string obj_file_, MPI_Comm comm_);
 	virtual ~renderer();
 	virtual void setup();
 	void add(std::unique_ptr<hittable>& object);

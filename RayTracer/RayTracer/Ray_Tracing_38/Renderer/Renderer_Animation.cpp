@@ -2,8 +2,8 @@
 
 
 
-renderer_animation::renderer_animation(int argc, char** argv, int _mode, [[maybe_unused]] std::string _file_name) :
-	renderer{argc,argv,_mode,""}
+renderer_animation::renderer_animation(int argc, char** argv, int _mode, [[maybe_unused]] std::string _file_name, MPI_Comm comm_) :
+	renderer{argc,argv,_mode,"", comm_}
 {
 	// The default value
 	// mode = RANDOM_SPHERES_ANIMATED;
@@ -11,8 +11,8 @@ renderer_animation::renderer_animation(int argc, char** argv, int _mode, [[maybe
 }
 
 renderer_animation::renderer_animation(int argc, char** argv, int _mode, std::string _filename,
-	std::string obj_file_) :
-	renderer_animation{ argc,argv,_mode,_filename }
+	std::string obj_file_, MPI_Comm comm_) :
+	renderer_animation{ argc,argv,_mode,_filename, comm_ }
 {
 	obj_file_name = obj_file_;
 }

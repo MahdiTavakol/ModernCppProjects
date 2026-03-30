@@ -4,9 +4,9 @@
 class renderer_animation final : public renderer
 {
 public:
-	renderer_animation(int argc, char** argv, int _mode, std::string _file_name);
+	renderer_animation(int argc, char** argv, int _mode, std::string _file_name, MPI_Comm comm_);
 	renderer_animation(int argc, char** argv, int _mode, std::string _filename,
-		std::string obj_file_);
+		std::string obj_file_, MPI_Comm comm_);
 	void setup() override;
 	void render() override;
 

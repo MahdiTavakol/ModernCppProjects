@@ -50,7 +50,7 @@ TEST_CASE("Testing the gather function for 2Dimensional rank arrangement")
 	std::array<int, 2> size_config{ 3,2 };
 	int width = width_per_rank * size_config[0];
 	int height = height_per_rank * size_config[1];
-	std::unique_ptr<parallel> para = std::make_unique<mpiParallel>(size_config);
+	std::unique_ptr<parallel> para = std::make_unique<mpiParallel>(MPI_COMM_WORLD,size_config);
 
 	int** c_data;
 	std::array<int, 2> rank_config = para->return_rank_config();

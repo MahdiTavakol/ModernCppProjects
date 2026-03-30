@@ -1,10 +1,10 @@
 #include "mpiParallel.h"
 
-mpiParallel::mpiParallel(int argc, char** argv):
-    parallel{}
+mpiParallel::mpiParallel(MPI_Comm comm_):
+    parallel{},
+    MPI_world{comm_}
 {
     // MPI variables
-    MPI_world = MPI_COMM_WORLD;
     MPI_Comm_rank(MPI_world, &rank);
     MPI_Comm_size(MPI_world, &size);
     rank_config = { rank, 0 };
@@ -13,10 +13,11 @@ mpiParallel::mpiParallel(int argc, char** argv):
 
 
 mpiParallel::mpiParallel(
+    MPI_Comm comm_,
     std::array<int, 2> size_config_) :
-    parallel{size_config_ }
+    parallel{size_config_ },
+	MPI_world{ comm_ }
 {
-    MPI_world = MPI_COMM_WORLD;
     MPI_Comm_rank(MPI_world, &rank);
     MPI_Comm_size(MPI_world, &size);
     int ratio = static_cast<int>(size / (size_config[0] * size_config[1]));

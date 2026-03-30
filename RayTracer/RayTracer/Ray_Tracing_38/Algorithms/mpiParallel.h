@@ -4,8 +4,8 @@
 class mpiParallel : public parallel
 {
 public:
-    mpiParallel(int argc, char** argv);
-    mpiParallel(std::array<int, 2> size_config_);
+    explicit mpiParallel(MPI_Comm comm_);
+    explicit mpiParallel(MPI_Comm comm_,std::array<int, 2> size_config_);
     virtual ~mpiParallel() override;
     virtual void gather(int** one_, int** one_all, const int& width_per_rank_, const int& height_per_rank_) const override;
     virtual void gather(color_data* one_, color_data* one_all, const int& num_data) const override;

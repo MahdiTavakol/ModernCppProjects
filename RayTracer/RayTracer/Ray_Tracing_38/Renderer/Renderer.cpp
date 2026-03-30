@@ -1,10 +1,10 @@
 #include "Renderer.h"
 
 
-renderer::renderer(int argc, char** argv, int _mode, std::string _filename)
+renderer::renderer(int argc, char** argv, int _mode, std::string _filename, MPI_Comm comm_)
 	: mode(_mode), filename(_filename)
 {
-	para = std::make_unique<mpiParallel>(argc,argv);
+	para = std::make_unique<mpiParallel>(comm_);
 	in = std::make_unique<input>(argc, argv, mode);
 	world_factory = std::make_unique<scene_factory>(mode,para);
 	if (!filename.empty())
@@ -12,8 +12,8 @@ renderer::renderer(int argc, char** argv, int _mode, std::string _filename)
 }
 
 renderer::renderer(int argc, char** argv, int _mode, std::string _filename,
-	std::string obj_file_):
-	renderer{argc,argv,_mode,_filename}
+	std::string obj_file_, MPI_Comm comm_):
+	renderer{argc,argv,_mode,_filename, comm_}
 {
 	obj_file_name = obj_file_;
 	world_factory = std::make_unique<scene_factory>(mode, para, obj_file_name);
