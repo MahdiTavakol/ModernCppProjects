@@ -1,4 +1,4 @@
-#define CATCH_CONFIG_MAIN
+#define CATCH_CONFIG_RUNNER
 #include "catch_amalgamated.hpp"
 
 
@@ -6,6 +6,17 @@
 #include <sstream>
 
 #include "../Algorithms/mpiParallel.h"
+
+int main(int argc, char* argv[])
+{
+	MPI_Init(&argc, &argv);
+
+
+	int result = Catch::Session().run(argc, argv);
+
+
+	MPI_Finalize();
+}
 
 class intMatMatcher : public Catch::Matchers::MatcherGenericBase
 {
@@ -36,16 +47,14 @@ TEST_CASE("Testing the gather function for 2Dimensional rank arrangement")
 	int width_per_rank = 4;
 	int height_per_rank = 3;
 	// 3 ranks in the width and 2 ranks in the height
-	std::array<int, 2> rank_config{ 3,2 };
-	int width = width_per_rank * rank_config[0];
-	int height = height_per_rank * rank_config[1];
-
-
-	std::array<int, 2> size_config{ rank_config[0],rank_config[1] };
+	std::array<int, 2> size_config{ 3,2 };
+	int width = width_per_rank * size_config[0];
+	int height = height_per_rank * size_config[1];
 	std::unique_ptr<parallel> para = std::make_unique<mpiParallel>(size_config);
 
 	int** c_data;
 	std::array<int, 2> rank_config = para->return_rank_config();
+
 
 
 	auto allocate_c_data = [](const int width, const int height, int**& c_data) {
@@ -58,7 +67,7 @@ TEST_CASE("Testing the gather function for 2Dimensional rank arrangement")
 	auto deallocate_c_data = [](int**& c_data) {
 		delete[] c_data[0];
 		delete[] c_data;
-	};
+	}; 
 
 	allocate_c_data(width_per_rank, height_per_rank, c_data);
 	int rank = para->return_rank();
@@ -84,12 +93,10 @@ TEST_CASE("Testing the gather function for 2Dimensional rank arrangement")
 
 
 
-	para->gather(c_data[0], c_data_all_expected[0], width_per_rank, height_per_rank);
+	para->gather(c_data, c_data_all_expected, width_per_rank, height_per_rank);
 
 	// comparing the results
 	REQUIRE_THAT(c_data_all_expected, intMatMatcher(c_data_all_expected, width, height));
-
-
 
 
 	deallocate_c_data(c_data);
