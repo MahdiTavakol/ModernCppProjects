@@ -75,8 +75,8 @@ void mpiParallel::gather(color_data** one_,
                          const int& width_per_rank_,
                          const int& height_per_rank_) const
 {
-    int num_data = (width_per_rank_ * height_per_rank_)*sizeof(color_data)/sizeof(double);
-    MPI_Allgather(one_[0], num_data, MPI_DOUBLE, one_all_[0], num_data, MPI_DOUBLE, MPI_world);
+	int num_bytes = (width_per_rank_ * height_per_rank_) * sizeof(color_data);
+    MPI_Allgather(one_[0], num_bytes, MPI_BYTE, one_all_[0], num_bytes, MPI_BYTE, MPI_world);
 
 
     int width = width_per_rank_ * size_config[0];
