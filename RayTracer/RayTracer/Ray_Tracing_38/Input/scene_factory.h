@@ -35,5 +35,6 @@ private:
 	void setup_3d_obj();
 	void setup_3d_obj_parallel();
 	void setup_random_spheres_animated();
+	void setup_simple_2d_parallel_test();
 
 };

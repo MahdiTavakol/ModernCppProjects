@@ -194,6 +194,14 @@ void input::default_params(const int mode_)
 		this->background = color(0.7, 0.8, 1.00);
 		// The rest of the thing
 	}
+	else if (mode_ == SIMPLE_2D_PARALEL_TEST)
+	{
+		this->lookfrom = point3(0, 0, 100);
+		this->lookat = point3(0, 0, 0);
+		this->vup = vec3(0, 1, 0);
+		this->vfov = 20;
+		this->defocus_angle = 0;
+	}
 	else this->background = color(0.7, 0.8, 1.00);
 }
 

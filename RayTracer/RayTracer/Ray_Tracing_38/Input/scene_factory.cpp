@@ -86,6 +86,9 @@ void scene_factory::create()
 	case RANDOM_SPHERES_ANIMATED:
 		setup_random_spheres_animated();
 		break;
+	case SIMPLE_2D_PARALEL_TEST:
+		setup_simple_2d_parallel_test();
+		break;
 	}
 }
 
@@ -369,4 +372,49 @@ void scene_factory::setup_random_spheres_animated()
 {
 	// Creating the spheres 
 	setup_random_spheres();
+}
+
+void scene_factory::setup_simple_2d_parallel_test()
+{
+	point3 min{ -100, -100, -10 }, max{ 100, 100, 10 };
+	auto size_config = para->return_size_config();
+	auto rank_config = para->return_rank_config();
+	std::vector<std::pair<point3, point3>> rank_bounds;
+
+	point3 per_rank_dim;
+	per_rank_dim[0] = (max.x() - min.x()) / size_config[0];
+	per_rank_dim[1] = (max.y() - min.y()) / size_config[1];
+	per_rank_dim[2] = (max.z() - min.z());
+
+
+	for (int i = 0; i < size_config[0]; i++)
+	{
+		for (int j = 0; j < size_config[1]; j++)
+		{
+			point3 rank_min, rank_max;
+			rank_min = min + point3(i * per_rank_dim.x(), j * per_rank_dim.y(), 0);
+			rank_max = rank_min + point3(per_rank_dim.x(), per_rank_dim.y(), 0);
+			rank_bounds.push_back({ rank_min, rank_max });
+		}
+	}
+
+
+	int count = 0;
+	for (auto& rank_bound : rank_bounds)
+	{
+		std::vector < std::unique_ptr<material>> matVec;
+		double r = static_cast<double>((count * 70) % 256);
+		double g = static_cast<double>((count * 150) % 256);
+		double b = static_cast<double>((count * 230) % 256);
+		count++;
+		color myColor = color{ r,g,b };
+		for (int i = 0; i < 6; i++) {
+			matVec.push_back(std::make_unique<lambertian>(myColor));
+		}
+		std::unique_ptr<hittable> box1 =
+			box(point3(0, 0, 0), point3(165, 330, 165), matVec);
+		world->add(std::move(box1));
+	}
+	auto bvh = std::make_unique<bvh_node>(std::move(world));
+	world = std::make_unique<hittable_list>(std::move(bvh));
 }

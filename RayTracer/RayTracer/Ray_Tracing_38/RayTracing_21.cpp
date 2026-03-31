@@ -10,6 +10,7 @@
 
 int main(int argc, char** argv)
 {
+	MPI_Init(&argc, &argv);
 	int mode;
 	std::string obj_file = "../models/56-chair/Chair.obj";
 	obj_file = "../models/Simple/four_meshes.obj";
@@ -38,6 +39,9 @@ int main(int argc, char** argv)
 	rendererObj->setup();
 	rendererObj->render();
 	rendererObj->write_file();
+
+
+	MPI_Finalize();
 
 	return 0;
 }
