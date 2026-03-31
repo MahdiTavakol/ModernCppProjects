@@ -28,9 +28,10 @@ int main(int argc, char** argv)
 	//mode = TWO_BOXES;
 	//mode = TWO_BOXES_ROTATED;
 	//mode = CORNELL_SMOKE;
-	mode = OBJ_MODEL;
+	//mode = OBJ_MODEL;
 	//mode = OBJ_MODEL_PARALLEL;
 	//mode = RANDOM_SPHERES_ANIMATED;
+	mode = SIMPLE_2D_PARALEL_TEST;
 
 
 	std::unique_ptr<renderer> rendererObj = std::make_unique<renderer>(argc, argv, mode, filename, obj_file);

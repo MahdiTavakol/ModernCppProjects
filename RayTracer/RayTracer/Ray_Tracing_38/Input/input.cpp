@@ -196,11 +196,13 @@ void input::default_params(const int mode_)
 	}
 	else if (mode_ == SIMPLE_2D_PARALEL_TEST)
 	{
-		this->lookfrom = point3(0, 0, 100);
+		this->background = color(0.7, 0.8, 1.00);
+		this->lookfrom = point3(100, 100, 500);
 		this->lookat = point3(0, 0, 0);
 		this->vup = vec3(0, 1, 0);
 		this->vfov = 20;
 		this->defocus_angle = 0;
+		this->image_width = 1080;
 	}
 	else this->background = color(0.7, 0.8, 1.00);
 }
