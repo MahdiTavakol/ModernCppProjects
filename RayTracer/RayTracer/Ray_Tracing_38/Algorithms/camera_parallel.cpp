@@ -107,15 +107,23 @@ color_array* camera_parallel::return_color_array_ptr()
 
 void camera_parallel::gather()
 {
-    color_data* colors = c_array->return_array()[0];
-    color_data* colors_all = (color_data*)malloc(width_per_node * height_per_node * size * sizeof(color_data));
+	int extended_width = width_per_node * size_config[0];
+	int extended_height = height_per_node * size_config[1];
 
-    int num_data = width_per_node * height_per_node * sizeof(color_data) / sizeof(double);
+    color_data** colors = c_array->return_array();
+	color_data** colors_all = (color_data**)malloc(extended_width * sizeof(color_data*));
+	color_data* temp = (color_data*)malloc(extended_width * extended_height * sizeof(color_data));
+	for (int i = 0; i < extended_width; i++)
+        colors_all[i] = &temp[i * extended_height];
 
-    // this part might be moved to the parallel class to generalize differnt gather strategies
-    para->gather(colors, colors_all, num_data);
+
+    para->gather(colors, colors_all, width_per_node, height_per_node);
+
+
     // a copy of data is involved here I should work on removing this!
     c_array_all = std::make_unique<color_array>(image_width, image_height, colors_all);
+
+	free(colors_all[0]);
     free(colors_all);
     colors_all = nullptr;
     // swapping 

@@ -25,9 +25,6 @@ mpiParallel::mpiParallel(
     size_config[0] *= ratioSq;
     size_config[1] = static_cast<int>(size / size_config[0]);
 
-	if (rank == 0)
-	    std::cout << "Size config: " << size_config[0] << " x " << size_config[1] << std::endl;
-
     int rank_x = rank % size_config[0];
     int rank_y = rank / size_config[0];
     rank_config = { rank_x, rank_y };

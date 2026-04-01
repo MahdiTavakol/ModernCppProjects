@@ -93,7 +93,7 @@ TEST_CASE("Testing the gather function for 2Dimensional rank arrangement")
 	{
 		std::cout << "This test is designed for 6 ranks. Current size: " << size << std::endl;
 		std::cout << "Skipping the test." << std::endl;
-		return;
+		SKIP("6 ranks are required for this test.");
 	}
 
 
