@@ -376,7 +376,7 @@ void scene_factory::setup_random_spheres_animated()
 
 void scene_factory::setup_simple_2d_parallel_test()
 {
-	point3 min{ -70, -70, -10 }, max{70, 70, 10 };
+	point3 min{ -70, -70, -30 }, max{70, 70, 30 };
 	point3 delta{ 5,5,5 };
 	auto size_config = para->return_size_config();
 	auto rank_config = para->return_rank_config();
