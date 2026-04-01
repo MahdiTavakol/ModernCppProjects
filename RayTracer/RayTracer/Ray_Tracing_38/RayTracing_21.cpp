@@ -33,8 +33,9 @@ int main(int argc, char** argv)
 	//mode = RANDOM_SPHERES_ANIMATED;
 	mode = SIMPLE_2D_PARALEL_TEST;
 
+	std::array<int, 2> size_config{ 4, 2 };
 
-	std::unique_ptr<renderer> rendererObj = std::make_unique<renderer>(argc, argv, mode, filename, obj_file);
+	std::unique_ptr<renderer> rendererObj = std::make_unique<renderer>(argc, argv, mode, filename, obj_file, size_config);
 	//std::unique_ptr<renderer> render = std::make_unique<renderer_animation>(argc,argv,mode,filename);
 
 	rendererObj->setup();

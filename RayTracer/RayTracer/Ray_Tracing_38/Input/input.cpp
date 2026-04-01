@@ -202,7 +202,7 @@ void input::default_params(const int mode_)
 		this->vup = vec3(0, 1, 0);
 		this->vfov = 20;
 		this->defocus_angle = 0;
-		this->image_width = 1080;
+		this->image_width = 150;
 	}
 	else this->background = color(0.7, 0.8, 1.00);
 }

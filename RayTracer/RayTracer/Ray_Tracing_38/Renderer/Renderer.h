@@ -37,9 +37,11 @@
 class renderer
 {
 public:
-	renderer(int argc, char** argv, int _mode, std::string _filename, MPI_Comm comm_ = MPI_COMM_WORLD);
+	renderer(int argc, char** argv, int _mode, std::string _filename, 
+			 std::array<int, 2> size_config_, MPI_Comm comm_ = MPI_COMM_WORLD);
 	renderer(int argc, char** argv, int _mode, std::string _filename,
-		     std::string obj_file_, MPI_Comm comm_ = MPI_COMM_WORLD);
+		std::string obj_file_, std::array<int, 2> size_config_,
+			 MPI_Comm comm_ = MPI_COMM_WORLD);
 	virtual ~renderer();
 	virtual void setup();
 	void add(std::unique_ptr<hittable>& object);

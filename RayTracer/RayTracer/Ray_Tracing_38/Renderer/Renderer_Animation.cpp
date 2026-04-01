@@ -3,7 +3,7 @@
 
 
 renderer_animation::renderer_animation(int argc, char** argv, int _mode, [[maybe_unused]] std::string _file_name, MPI_Comm comm_) :
-	renderer{argc,argv,_mode,"", comm_}
+	renderer{ argc,argv,_mode,"",std::array<int,2>{1,1}, comm_ }
 {
 	// The default value
 	// mode = RANDOM_SPHERES_ANIMATED;
