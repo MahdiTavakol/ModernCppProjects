@@ -82,3 +82,37 @@ TEST_CASE("Testing hittableListMatcher")
 
 	REQUIRE_THAT(world1.get(), hittableListMatcher(world2.get(), 1e-6));
 }
+
+TEST_CASE("Point3 matcher test")
+{
+	point3 p1;
+	point3 p2;
+
+	SECTION("Default constructor")
+	{
+		p1 = point3();
+		p2 = point3();
+	}
+	SECTION("Case 1")
+	{
+		p1 = point3{ 0.0, 0.0, 0.0 };
+		p2 = point3{ 0.0, 0.0, 0.0 };
+	}
+	SECTION("Case 2")
+	{
+		p1 = point3{ 1.0, 2.0, 3.0 };
+		p2 = point3{ 1.0, 2.0, 3.0 };
+	}
+	SECTION("Case 3")
+	{
+		p1 = point3{ -1.0, -2.0, -3.0 };
+		p2 = point3{ -1.0, -2.0, -3.0 };
+	}
+	SECTION("Case 4")
+	{
+		p1 = point3{ 1e-6, 2e-6, 3e-6 };
+		p2 = point3{ 1e-6, 2e-6, 3e-6 };
+	}
+
+	REQUIRE_THAT(p1, point3Matcher(p2, 1e-6));
+}

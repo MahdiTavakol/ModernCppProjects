@@ -39,7 +39,6 @@ input::input(int argc, char** argv, int _image_width, int _samples_per_pixel,
 	this->vup = point3(0, 1, 0);
 
 
-	this->defocus_angle = 0.6;
 	this->defocus_angle = 0;
 	this->focus_dist = 10.0;
 
@@ -51,6 +50,29 @@ input::input(int argc, char** argv, int _image_width, int _samples_per_pixel,
 	if (input_logger) logger_function(argc, argv);
 }
 
+input::input(int argc, char** argv, camera_settings* cam_settings_):
+	cam_settings{cam_settings_}
+{
+	this->image_width = cam_settings->get_image_width();
+	this->samples_per_pixel = cam_settings->get_samples_per_pixel();
+	this->max_depth = cam_settings->get_max_depth();
+	this->vfov = cam_settings->get_vfov();
+	this->width_ratio = cam_settings->get_width_ratio();
+	this->height_ratio = cam_settings->get_height_ratio();
+	this->defocus_angle = cam_settings->get_defocus_angle();
+	this->focus_dist = cam_settings->get_focus_dist();
+	this->lookfrom = cam_settings->get_lookfrom();
+	this->lookat = cam_settings->get_lookat();
+	this->vup = cam_settings->get_vup();
+	this->background = cam_settings->get_background();
+	this->fps = cam_settings->get_fps();
+	this->num_seconds = cam_settings->get_num_seconds();
+
+	int rank;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	if (rank == 0) input_logger = true;
+	if (input_logger) logger_function(argc, argv);
+}
 
 void input::logger_function(int argc, char** argv)
 {
@@ -76,6 +98,69 @@ void input::logger_function(int argc, char** argv)
 		strm << "fps = " << fps << std::endl;
 		strm << "num_seconds = " << num_seconds << std::endl;
 	}
+}
+
+const int& input::get_image_width() const
+{
+	return this->image_width;
+}
+const int& input::get_samples_per_pixel() const
+{
+	return this->samples_per_pixel;
+}
+const int& input::get_max_depth() const
+{
+	return this->max_depth;
+}
+const int& input::get_vfov() const
+{
+	return this->vfov;
+}
+const double& input::get_width_ratio() const
+{
+	return width_ratio;
+}
+const double& input::get_height_ratio() const
+{
+	return height_ratio;
+}
+const double& input::get_defocus_angle() const
+{
+	return defocus_angle;
+}
+const double& input::get_focus_dist() const
+{
+	return focus_dist;
+}
+const point3& input::get_lookfrom() const
+{
+	return lookfrom;
+}
+const point3& input::get_lookat() const
+{
+	return lookat;
+}
+const point3& input::get_vup() const
+{
+	return lookat;
+}
+const color& input::get_background() const
+{
+	return background;
+}
+const int& input::get_fps() const
+{
+	return fps;
+}
+const int& input::get_num_seconds() const
+{
+	return num_seconds;
+}
+
+void input::fps_num_seconds(int& _fps, int& _num_seconds) const
+{
+	_fps = this->fps;
+	_num_seconds = this->num_seconds;
 }
 
 void input::setup_camera(camera* cam) const
@@ -139,72 +224,6 @@ void input::default_params(const int mode_)
 	this->focus_dist = 10.0;
 	this->background = color(0, 0, 0);
 
-
-	if (mode_ == QUADS)
-	{
-		this->image_width = 1080;
-		this->samples_per_pixel = 100;
-		this->max_depth = 50;
-
-		this->width_ratio = 1.0;
-		this->height_ratio = 1.0;
-
-		this->vfov = 80;
-		this->lookfrom = point3(0, 0, 9);
-		this->lookat = point3(0, 0, 0);
-		this->vup = vec3(0, 1, 0);
-
-		this->defocus_angle = 0;
-	}
-	else if (mode_ == TWO_LIGHTS || mode_ == SIMPLE_LIGHT)
-	{
-		this->lookfrom = point3(26, 3, 6);
-		this->lookat = point3(0, 1, 0);
-		this->defocus_angle = 0;
-		this->vfov = 20;
-		this->background = color(0, 0, 0);
-	}
-	else if (mode_ == CORNELL_BOX || mode_ == TWO_BOXES || mode_ == TWO_BOXES_ROTATED)
-	{
-		this->lookfrom = point3(278, 278, -800);
-		this->lookat = point3(278, 278, 0);
-		this->vfov = 40;
-		this->vup = vec3(0, 1, 0);
-		this->defocus_angle = 0;
-		this->background = color(0, 0, 0);
-		this->width_ratio = 1.0;
-		this->height_ratio = 1.0;
-	}
-	else if (mode_ == CORNELL_SMOKE)
-	{
-		this->width_ratio = 1.0;
-		this->height_ratio = 1.0;
-		this->background = color(0, 0, 0);
-
-		this->vfov = 40;
-		this->lookfrom = point3(278, 278, -800);
-		this->lookat = point3(278, 278, 0);
-		this->vup = vec3(0, 1, 0);
-		this->defocus_angle = 0;
-	}
-	else if (mode_ == RANDOM_SPHERES_ANIMATED)
-	{
-		this->fps = 60;
-		this->num_seconds = 10;
-		this->background = color(0.7, 0.8, 1.00);
-		// The rest of the thing
-	}
-	else if (mode_ == SIMPLE_2D_PARALEL_TEST)
-	{
-		this->background = color(0.7, 0.8, 1.00);
-		this->lookfrom = point3(100, 100, 500);
-		this->lookat = point3(0, 0, 0);
-		this->vup = vec3(0, 1, 0);
-		this->vfov = 20;
-		this->defocus_angle = 0;
-		this->image_width = 1080;
-	}
-	else this->background = color(0.7, 0.8, 1.00);
 }
 
 void input::parse_argv(char** argv, int argc)
@@ -214,30 +233,38 @@ void input::parse_argv(char** argv, int argc)
 	{
 		if (!strcmp(argv[iarg], "-image_width") || !strcmp(argv[iarg], "--w"))
 		{
+			int& image_width = cam_settings->get_image_width();
 			parse_input(argv, argc, iarg, image_width);
 		}
 		if (!strcmp(argv[iarg], "-samples_per_pixel") || !strcmp(argv[iarg], "--s"))
 		{
+			int& samples_per_pixel = cam_settings->get_samples_per_pixel();
 			parse_input(argv, argc, iarg, samples_per_pixel);
 		}
 		if (!strcmp(argv[iarg], "-max_depth") || !strcmp(argv[iarg], "--d"))
 		{
+			int& max_depth = cam_settings->get_max_depth();
 			parse_input(argv, argc, iarg, max_depth);
 		}
 		if (!strcmp(argv[iarg], "-vfov") || !strcmp(argv[iarg], "--v"))
 		{
+			int& vfov = cam_settings->get_vfov();
 			parse_input(argv, argc, iarg, vfov);
 		}
 		if (!strcmp(argv[iarg], "-aspect_ratio") || !strcmp(argv[iarg], "--a"))
 		{
+			double& with_ratio = cam_settings->get_width_ratio();
+			double& height_ratio = cam_settings->get_height_ratio();
 			parse_input(argv, argc, iarg, width_ratio, height_ratio);
 		}
 		if (!strcmp(argv[iarg], "-fps") || !strcmp(argv[iarg], "--f"))
 		{
+			int& fps = cam_settings->get_fps();
 			parse_input(argv, argc, iarg, fps);
 		}
 		if (!strcmp(argv[iarg], "-num_seconds") || !strcmp(argv[iarg], "--t"))
 		{
+			int& num_seconds = cam_settings->get_num_seconds();
 			parse_input(argv, argc, iarg, num_seconds);
 		}
 		else

@@ -315,3 +315,32 @@ protected:
 	hittable_list* expected;
 	double tol;
 };
+
+
+class point3Matcher : public Catch::Matchers::MatcherGenericBase {
+public:
+	point3Matcher(const point3& expected_, double tol_) :
+		tol{ tol_ },
+		expectedRef{ std::ref(expected_) }
+	{
+	}
+	bool match(const point3& value_) const
+	{
+		if (std::abs(expectedRef.get().x() - value_.x() >= tol))
+			return false;
+		else if (std::abs(expectedRef.get().y() - value_.y() >= tol))
+			return false;
+		else if (std::abs(expectedRef.get().z() - value_.z() >= tol))
+			return false;
+		return true;
+	}
+	std::string describe() const override
+	{
+		std::string message = "Comparing two point3 with the tolerance of " + std::to_string(tol);
+		return message;
+	}
+
+private:
+	std::reference_wrapper<const point3> expectedRef;
+	double tol;
+};

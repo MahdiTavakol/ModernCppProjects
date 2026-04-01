@@ -142,6 +142,7 @@
     <ClCompile Include="Algorithms\camera.cpp" />
     <ClCompile Include="Algorithms\camera_drived.cpp" />
     <ClCompile Include="Algorithms\camera_parallel.cpp" />
+    <ClCompile Include="Algorithms\camera_settings.cpp" />
     <ClCompile Include="Algorithms\hittable_list.cpp" />
     <ClCompile Include="Algorithms\hittable_list_parallel.cpp" />
     <ClCompile Include="Algorithms\hit_record.cpp" />
@@ -171,6 +172,7 @@
     <ClCompile Include="Tests\catch_amalgamated.cpp" />
     <ClCompile Include="Tests\Ray_Tracing_38_tests.cpp" />
     <ClCompile Include="Tests\test_colorArrayMatcher.cpp" />
+    <ClCompile Include="Tests\test_camera_settings.cpp" />
     <ClCompile Include="Tests\test_input.cpp" />
     <ClCompile Include="Tests\test_mpiParallel.cpp" />
     <ClCompile Include="Tests\test_obj_reader.cpp" />
@@ -184,6 +186,7 @@
     <ClInclude Include="Algorithms\camera.h" />
     <ClInclude Include="Algorithms\camera_derived.h" />
     <ClInclude Include="Algorithms\camera_parallel.h" />
+    <ClInclude Include="Algorithms\camera_settings.h" />
     <ClInclude Include="Algorithms\hittable_list.h" />
     <ClInclude Include="Algorithms\hittable_list_parallel.h" />
     <ClInclude Include="Algorithms\hittable_list_parallel_optimized.h" />

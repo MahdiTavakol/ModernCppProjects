@@ -16,9 +16,6 @@
     <Filter Include="Source Files\Types">
       <UniqueIdentifier>{4de22b48-b193-4323-bdca-bec77962402e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Algorithm">
-      <UniqueIdentifier>{0a38f8fc-336b-43d3-93b3-b5103c415712}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Data">
       <UniqueIdentifier>{80f12143-3807-4f95-ba85-04d639989e3a}</UniqueIdentifier>
     </Filter>
@@ -43,6 +40,9 @@
     <Filter Include="Source Files\Tests">
       <UniqueIdentifier>{9b4b6e02-e0c6-4b69-a71b-ca1b177198d5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Algorithms">
+      <UniqueIdentifier>{0a38f8fc-336b-43d3-93b3-b5103c415712}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Types\color.cpp">
@@ -52,37 +52,37 @@
       <Filter>Source Files\Types</Filter>
     </ClCompile>
     <ClCompile Include="Algorithms\bvh.cpp">
-      <Filter>Source Files\Algorithm</Filter>
+      <Filter>Source Files\Algorithms</Filter>
     </ClCompile>
     <ClCompile Include="Algorithms\camera.cpp">
-      <Filter>Source Files\Algorithm</Filter>
+      <Filter>Source Files\Algorithms</Filter>
     </ClCompile>
     <ClCompile Include="Algorithms\camera_drived.cpp">
-      <Filter>Source Files\Algorithm</Filter>
+      <Filter>Source Files\Algorithms</Filter>
     </ClCompile>
     <ClCompile Include="Algorithms\camera_parallel.cpp">
-      <Filter>Source Files\Algorithm</Filter>
+      <Filter>Source Files\Algorithms</Filter>
     </ClCompile>
     <ClCompile Include="Algorithms\hit_record.cpp">
-      <Filter>Source Files\Algorithm</Filter>
+      <Filter>Source Files\Algorithms</Filter>
     </ClCompile>
     <ClCompile Include="Algorithms\hittable_list.cpp">
-      <Filter>Source Files\Algorithm</Filter>
+      <Filter>Source Files\Algorithms</Filter>
     </ClCompile>
     <ClCompile Include="Algorithms\hittable_list_parallel.cpp">
-      <Filter>Source Files\Algorithm</Filter>
+      <Filter>Source Files\Algorithms</Filter>
     </ClCompile>
     <ClCompile Include="Algorithms\parallel.cpp">
-      <Filter>Source Files\Algorithm</Filter>
+      <Filter>Source Files\Algorithms</Filter>
     </ClCompile>
     <ClCompile Include="Algorithms\path.cpp">
-      <Filter>Source Files\Algorithm</Filter>
+      <Filter>Source Files\Algorithms</Filter>
     </ClCompile>
     <ClCompile Include="Algorithms\rtw_stb_image.cpp">
-      <Filter>Source Files\Algorithm</Filter>
+      <Filter>Source Files\Algorithms</Filter>
     </ClCompile>
     <ClCompile Include="Algorithms\sphere_list.cpp">
-      <Filter>Source Files\Algorithm</Filter>
+      <Filter>Source Files\Algorithms</Filter>
     </ClCompile>
     <ClCompile Include="Data\color_array.cpp">
       <Filter>Source Files\Data</Filter>
@@ -157,13 +157,19 @@
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
     <ClCompile Include="Algorithms\mpiParallel.cpp">
-      <Filter>Source Files\Algorithm</Filter>
+      <Filter>Source Files\Algorithms</Filter>
     </ClCompile>
     <ClCompile Include="Tests\test_obj_reader.cpp">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
     <ClCompile Include="Tests\test_mpiParallel.cpp">
       <Filter>Source Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\test_camera_settings.cpp">
+      <Filter>Source Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithms\camera_settings.cpp">
+      <Filter>Source Files\Algorithms</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -180,40 +186,40 @@
       <Filter>Source Files\Types</Filter>
     </ClInclude>
     <ClInclude Include="Algorithms\bvh.h">
-      <Filter>Source Files\Algorithm</Filter>
+      <Filter>Source Files\Algorithms</Filter>
     </ClInclude>
     <ClInclude Include="Algorithms\camera.h">
-      <Filter>Source Files\Algorithm</Filter>
+      <Filter>Source Files\Algorithms</Filter>
     </ClInclude>
     <ClInclude Include="Algorithms\camera_derived.h">
-      <Filter>Source Files\Algorithm</Filter>
+      <Filter>Source Files\Algorithms</Filter>
     </ClInclude>
     <ClInclude Include="Algorithms\camera_parallel.h">
-      <Filter>Source Files\Algorithm</Filter>
+      <Filter>Source Files\Algorithms</Filter>
     </ClInclude>
     <ClInclude Include="Algorithms\hit_record.h">
-      <Filter>Source Files\Algorithm</Filter>
+      <Filter>Source Files\Algorithms</Filter>
     </ClInclude>
     <ClInclude Include="Algorithms\hittable_list.h">
-      <Filter>Source Files\Algorithm</Filter>
+      <Filter>Source Files\Algorithms</Filter>
     </ClInclude>
     <ClInclude Include="Algorithms\hittable_list_parallel.h">
-      <Filter>Source Files\Algorithm</Filter>
+      <Filter>Source Files\Algorithms</Filter>
     </ClInclude>
     <ClInclude Include="Algorithms\hittable_list_parallel_optimized.h">
-      <Filter>Source Files\Algorithm</Filter>
+      <Filter>Source Files\Algorithms</Filter>
     </ClInclude>
     <ClInclude Include="Algorithms\parallel.h">
-      <Filter>Source Files\Algorithm</Filter>
+      <Filter>Source Files\Algorithms</Filter>
     </ClInclude>
     <ClInclude Include="Algorithms\path.h">
-      <Filter>Source Files\Algorithm</Filter>
+      <Filter>Source Files\Algorithms</Filter>
     </ClInclude>
     <ClInclude Include="Algorithms\rtw_stb_image.h">
-      <Filter>Source Files\Algorithm</Filter>
+      <Filter>Source Files\Algorithms</Filter>
     </ClInclude>
     <ClInclude Include="Algorithms\sphere_list.h">
-      <Filter>Source Files\Algorithm</Filter>
+      <Filter>Source Files\Algorithms</Filter>
     </ClInclude>
     <ClInclude Include="Data\color_array.h">
       <Filter>Source Files\Data</Filter>
@@ -285,7 +291,10 @@
       <Filter>Source Files\Tests</Filter>
     </ClInclude>
     <ClInclude Include="Algorithms\mpiParallel.h">
-      <Filter>Source Files\Algorithm</Filter>
+      <Filter>Source Files\Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithms\camera_settings.h">
+      <Filter>Source Files\Algorithms</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
