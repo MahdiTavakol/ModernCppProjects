@@ -84,7 +84,6 @@ TEST_CASE("Testing reading the argv with the input class")
 		expectedLog.push_back("num_seconds = 85");
 	}
 
-
 	SECTION("Test-2")
 	{
 		argv_vec.push_back("renderer");
@@ -118,6 +117,41 @@ TEST_CASE("Testing reading the argv with the input class")
 		expectedLog.push_back("aspect_ratio = 4/3");
 		expectedLog.push_back("fps = 20");
 		expectedLog.push_back("num_seconds = 15");
+	}
+
+	SECTION("Test-3")
+	{
+		argv_vec.push_back("renderer");
+		argv_vec.push_back("-image_width");
+		argv_vec.push_back("1920");
+		argv_vec.push_back("-samples_per_pixel");
+		argv_vec.push_back("256");
+		argv_vec.push_back("-max_depth");
+		argv_vec.push_back("50");
+		argv_vec.push_back("-vfov");
+		argv_vec.push_back("40");
+		argv_vec.push_back("-aspect_ratio");
+		argv_vec.push_back("16");
+		argv_vec.push_back("9");
+		argv_vec.push_back("-fps");
+		argv_vec.push_back("30");
+		argv_vec.push_back("-num_seconds");
+		argv_vec.push_back("10");
+
+
+		expectedLog.push_back("The input: ");
+		expectedLog.push_back("renderer -image_width 1920 -samples_per_pixel 256 ");
+		expectedLog.push_back("-max_depth 50 -vfov 40 -aspect_ratio ");
+		expectedLog.push_back("16 9 -fps 30 -num_seconds ");
+		expectedLog.push_back("10 ");
+		expectedLog.push_back("");
+		expectedLog.push_back("image_width = 1920");
+		expectedLog.push_back("samples_per_pixel = 256");
+		expectedLog.push_back("max_depth = 50");
+		expectedLog.push_back("vfov = 40");
+		expectedLog.push_back("aspect_ratio = 16/9");
+		expectedLog.push_back("fps = 30");
+		expectedLog.push_back("num_seconds = 10");
 	}
 
 
