@@ -22,6 +22,7 @@ public:
 	friend class parallel;
 
 	camera(std::unique_ptr<camera_settings>& cam_setting_);
+	camera() = default;
 
 
 	virtual void setup(std::unique_ptr<camera_settings>& cam_setting_);

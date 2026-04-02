@@ -6,6 +6,7 @@
 #include <variant>
 #include "../Algorithms/camera.h"
 #include "../Algorithms/camera_settings.h"
+#include "../Algorithms/parallel.h"
 
 
 class input
@@ -13,8 +14,15 @@ class input
 public:
 	input(int argc, char** argv, int _image_width, int _samples_per_pixel,
 		int _max_depth, int _vfov, double _width_ratio, double _height_ratio,
-		camera_settings* cam_settings_);
-	input(int argc, char** argv, camera_settings* cam_settings,
+		camera_settings* cam_settings_,
+		parallel* para_,
+		std::vector<std::reference_wrapper<std::ostream>> strmVec_ = {
+			std::vector<std::reference_wrapper<std::ostream>>{
+				std::ref(std::cout)
+			}
+		});
+	input(int argc, char** argv, camera_settings* cam_settings, 
+		parallel* para_,
 		std::vector<std::reference_wrapper<std::ostream>> strmVec_ = {
 			std::vector<std::reference_wrapper<std::ostream>>{
 				std::ref(std::cout)
@@ -27,11 +35,11 @@ protected:
 	template<typename T>
 	T convert_char(char* _chr);
 	camera_settings* cam_settings;
+	parallel* para;
 
 
-	bool input_logger;
-	std::ofstream logfile;
 	std::vector<std::reference_wrapper<std::ostream>> outStreams;
+	void initialize(int argc, char** argv);
 	void logger_function(int argc, char** argv);
 
 

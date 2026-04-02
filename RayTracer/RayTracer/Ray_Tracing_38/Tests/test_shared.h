@@ -5,45 +5,16 @@
 #include "../Geometry/triangle_mesh.h"
 #include "../Algorithms/parallel.h"
 
-class create_input
+
+
+class fake_camera_settings : public camera_settings
 {
 public:
-	create_input(std::vector<std::string> argv_vec_,
-		std::vector<std::reference_wrapper<std::ostream>>& outStream_)
-	{
-		argc = static_cast<int>(argv_vec_.size());
-		argv = new char* [argc];
-		for (int iarg = 0; iarg < argc; iarg++)
-		{
-			int size = static_cast<int>(argv_vec_[iarg].size());
-			argv[iarg] = new char[size + 1];
-			std::memcpy(argv[iarg], argv_vec_[iarg].c_str(), size + 1);
-		}
-
-		std::unique_ptr<input> in = std::make_unique<input>(argc, argv, 0, outStream_);
-	}
-
-	~create_input()
-	{
-		for (int iarg = 0; iarg < argc; iarg++)
-		{
-			delete[] argv[iarg];
-		}
-		delete[] argv;
-	}
-
-	std::unique_ptr<input> return_input_ptr()
-	{
-		return std::move(input_ptr);
-	}
-
-private:
-	char** argv;
-	int argc;
-	std::unique_ptr<input> input_ptr;
-
+	fake_camera_settings(color background_, 
+						 color rendercolor_) :
+		camera_settings{}
+	{}
 };
-
 
 
 
@@ -54,6 +25,7 @@ public:
 		std::array<int, 2> imageSize_,
 		color background_ = color{ 0.0,0.0,0.0 },
 		color rendercolor_ = color{ 1.0,1.0,1.0 }) :
+		camera{},
 		min{ min_ }, max{ max_ },
 		imageSize{ imageSize_ },
 		background{ background_ },

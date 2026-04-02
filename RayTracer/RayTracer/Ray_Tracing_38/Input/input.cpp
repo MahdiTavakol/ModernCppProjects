@@ -7,54 +7,41 @@
 #include "input.h"
 
 
-input::input(int argc, char** argv, int _image_width, int _samples_per_pixel,
-	int _max_depth, int _vfov, double _width_ratio, double _height_ratio,
-	camera_settings* cam_settings_)
-	: cam_settings{ cam_settings_ }, input_logger{ false }
-
+input::input(int argc, char** argv, 
+	int _image_width, int _samples_per_pixel,
+	int _max_depth, int _vfov, 
+	double _width_ratio, double _height_ratio,
+	camera_settings* cam_settings_,
+	parallel* para_,
+	std::vector<std::reference_wrapper<std::ostream>> strmVec_)
+	: 
+	cam_settings{ cam_settings_ }, 
+	para{ para_ }
 {
-	int& image_width = cam_settings->get_image_width();
-	int& samples_per_pixel = cam_settings->get_samples_per_pixel();
-	int& max_depth = cam_settings->get_max_depth();
-	int& vfov = cam_settings->get_vfov();
-	double& width_ratio = cam_settings->get_width_ratio();
-	double& height_ratio = cam_settings->get_height_ratio();
-	int& fps = cam_settings->get_fps();
-	int& num_seconds = cam_settings->get_num_seconds();
-
-	image_width = _image_width;
-	samples_per_pixel = _samples_per_pixel;
-	max_depth = _max_depth;
-	vfov = _vfov;
-	width_ratio = _width_ratio;
-	height_ratio = _height_ratio;
-	fps = 60;
-	num_seconds = 10;
-
-
-	int rank;
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	if (rank == 0) input_logger = true;
-	if (input_logger) logger_function(argc, argv);
+	initialize(argc, argv);
 }
 
 input::input(int argc, char** argv,
 	camera_settings* cam_settings_,
+	parallel* para_,
 	std::vector<std::reference_wrapper<std::ostream>> strmVec_):
-	cam_settings{cam_settings_}
+	cam_settings{cam_settings_},
+	para{ para_ },
+	outStreams{ strmVec_ }
 {
-	int rank;
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	if (rank == 0) input_logger = true;
-	if (input_logger) logger_function(argc, argv);
+	initialize(argc, argv);
+}
+
+void input::initialize(int argc, char** argv)
+{
+	parse_argv(argv, argc);
+	int rank = para->return_rank();
+	if (rank == 0)
+		logger_function(argc, argv);
 }
 
 void input::logger_function(int argc, char** argv)
 {
- 	logfile.open("RayTracingInput.log", std::ios::out);
-	if (!logfile.is_open())
-		std::cerr << "Cannot open the RayTracing.log file for logging" << std::endl;
-
 	for (auto& strm_ref : outStreams)
 	{
 		auto& strm = strm_ref.get();
@@ -82,8 +69,6 @@ void input::logger_function(int argc, char** argv)
 		strm << "num_seconds = " << num_seconds << std::endl;
 	}
 }
-
-
 
 
 template<typename T>

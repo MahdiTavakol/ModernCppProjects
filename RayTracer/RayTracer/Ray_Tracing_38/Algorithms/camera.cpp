@@ -18,7 +18,6 @@ void camera::setup(std::unique_ptr<camera_settings>& cam_setting_)
 	int& vfov_setting = cam_setting_->get_vfov();
 	double& width_ratio_setting = cam_setting_->get_width_ratio();
 	double& height_ratio_setting = cam_setting_->get_height_ratio();
-	double& defocus_angle_setting = cam_setting_->get_defocus_angle();
 	double& focus_dist_setting = cam_setting_->get_focus_dist();
 	double& defocus_angle_setting = cam_setting_->get_defocus_angle();
 	point3& lookfrom_setting = cam_setting_->get_lookfrom();

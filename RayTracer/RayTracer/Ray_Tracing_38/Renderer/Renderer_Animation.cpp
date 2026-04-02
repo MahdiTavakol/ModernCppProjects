@@ -30,7 +30,8 @@ void renderer_animation::setup()
 		double radius = 13.49;
 		double theta = 45.0;
 		// Get the fps and num_frames
-		in->fps_num_seconds(fps, num_seconds);
+		fps = cam_settings->get_fps();
+		num_seconds = cam_settings->get_num_seconds();
 		// Creating a new path variable containing the camera locations
 		pth = std::make_unique<path>(center, radius, num_seconds, fps, theta);
 		break;
@@ -76,7 +77,8 @@ void renderer_animation::render()
 void renderer_animation::open_file(const int frame_i)
 {
 	int fps, num_seconds, num_frames;
-	in->fps_num_seconds(fps, num_seconds);
+	fps = cam_settings->get_fps();
+	num_seconds = cam_settings->get_num_seconds();
 	num_frames = fps * num_seconds;
 #ifdef _WIN32
 	std::string file_name = "temp\\frame-" + std::to_string(frame_i) + ".ppm";
@@ -92,7 +94,8 @@ void renderer_animation::open_file(const int frame_i)
 int renderer_animation::return_num_frames() const
 {
 	int fps, num_seconds, num_frames;
-	in->fps_num_seconds(fps, num_seconds);
+	fps = cam_settings->get_fps();
+	num_seconds = cam_settings->get_num_seconds();
 	num_frames = fps * num_seconds;
 	return num_frames;
 }
