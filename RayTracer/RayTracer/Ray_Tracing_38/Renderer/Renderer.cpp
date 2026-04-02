@@ -5,12 +5,19 @@ renderer::renderer(int argc, char** argv, int _mode,
 				   std::string _filename, 
 	               std::array<int, 2> size_config_,
 	               MPI_Comm comm_)
-	: mode{ _mode },
-	filename{ _filename }
+	: 
+	  mode{ _mode },
+	  filename{ _filename }
 {
+	/* cam_setting sets the default parameters for the modes, 
+	 * then the input class can overwrite those parameters based on the user input
+	 */
 	cam_settings = std::make_unique<camera_settings>(mode);
+	// the parallel class in charge of the parallel communicator
 	para = std::make_unique<mpiParallel>(comm_,size_config_);
+	// changing the camera settings based on the user input
 	in = std::make_unique<input>(argc, argv, cam_settings.get());
+	// the world_factory is in charge of lazy creation of the scene.
 	world_factory = std::make_unique<scene_factory>(mode,para);
 	if (!filename.empty())
 		writer = std::make_unique<class write>(filename);
@@ -32,6 +39,7 @@ void renderer::setup()
 {
 	// building the hittable_list
 	world_factory->create();
+	// returning the hittable_list pointe from the world_factory to the renderer
  	world = world_factory->return_world();
 
 

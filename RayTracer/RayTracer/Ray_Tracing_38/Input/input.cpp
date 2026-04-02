@@ -7,22 +7,6 @@
 #include "input.h"
 
 
-input::input(int argc, char** argv, std::vector<std::reference_wrapper<std::ostream>> strmVec_):
-	input_logger(false),
-	outStreams{strmVec_}
-{
-	parse_argv(argv, argc);
-
-
-	int rank;
-	//MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	//if (rank == 0) 
-	input_logger = true;
-	if (input_logger) logger_function(argc, argv);
-
-}
-
-
 input::input(int argc, char** argv, int _image_width, int _samples_per_pixel,
 	int _max_depth, int _vfov, double _width_ratio, double _height_ratio,
 	camera_settings* cam_settings_)

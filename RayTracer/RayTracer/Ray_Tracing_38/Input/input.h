@@ -11,13 +11,6 @@
 class input
 {
 public:
-	input(int argc, char** argv, 
-		std::vector<std::reference_wrapper<std::ostream>> strmVec_ =
-		{ 
-			std::vector<std::reference_wrapper<std::ostream>>{
-				std::ref(std::cout)
-			} 
-		});
 	input(int argc, char** argv, int _image_width, int _samples_per_pixel,
 		int _max_depth, int _vfov, double _width_ratio, double _height_ratio,
 		camera_settings* cam_settings_);
