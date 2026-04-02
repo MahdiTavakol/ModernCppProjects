@@ -10,15 +10,13 @@
 
 class camera_derived : public camera
 {
-	friend class input;
 	friend class parallel;
 
 public:
 
-    camera_derived(std::unique_ptr<input>& _in):
-		camera{}
+    camera_derived(std::unique_ptr<camera_settings>& cam_setting_):
+		camera{cam_setting_}
 	{
-		_in->setup_camera(this);
 		initialize_storage();
 	}
 

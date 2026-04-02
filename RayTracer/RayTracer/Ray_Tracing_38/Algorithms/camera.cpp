@@ -4,6 +4,42 @@
 
 #include "camera.h"
 
+camera::camera(std::unique_ptr<camera_settings>& cam_setting_)
+{
+	setup(cam_setting_);
+	initialize();
+}
+
+void camera::setup(std::unique_ptr<camera_settings>& cam_setting_)
+{
+	int& image_width_setting = cam_setting_->get_image_width();
+	int& samples_per_pixel_setting = cam_setting_->get_samples_per_pixel();
+	int& max_depth_setting = cam_setting_->get_max_depth();
+	int& vfov_setting = cam_setting_->get_vfov();
+	double& width_ratio_setting = cam_setting_->get_width_ratio();
+	double& height_ratio_setting = cam_setting_->get_height_ratio();
+	double& defocus_angle_setting = cam_setting_->get_defocus_angle();
+	double& focus_dist_setting = cam_setting_->get_focus_dist();
+	double& defocus_angle_setting = cam_setting_->get_defocus_angle();
+	point3& lookfrom_setting = cam_setting_->get_lookfrom();
+	point3& lookat_setting = cam_setting_->get_lookat();
+	point3& vup_setting = cam_setting_->get_vup();
+	point3& background_setting = cam_setting_->get_background();
+
+	this->image_width = image_width_setting;
+	this->aspect_ratio =
+		static_cast<double>(width_ratio_setting) / static_cast<double>(height_ratio_setting);
+	this->samples_per_pixel = samples_per_pixel_setting;
+	this->max_depth = max_depth_setting;
+	this->vfov = vfov_setting;
+	this->defocus_angle = defocus_angle_setting;
+	this->focus_dist = focus_dist_setting;
+	this->defocus_angle = defocus_angle_setting;
+	this->lookfrom = lookfrom_setting;
+	this->lookat = lookat_setting;
+	this->vup = vup_setting;
+	this->background = background_setting;
+}
 
 void camera::initialize()
 {

@@ -12,22 +12,19 @@
 #include "../Materials/material.h"
 #include "../Types/ray.h"
 #include "../Types/vec3.h"
+#include "camera_settings.h"
 
 
-class input;
 
 
 class camera {
 public:
-	friend class input;
 	friend class parallel;
-	friend class parallel_camera;
-	friend class parallel_derived;
 
-	camera() {
-		initialize();
-	}
+	camera(std::unique_ptr<camera_settings>& cam_setting_);
 
+
+	virtual void setup(std::unique_ptr<camera_settings>& cam_setting_);
 
 	virtual void render(const hittable& world) = 0;
 

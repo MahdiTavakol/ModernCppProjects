@@ -9,6 +9,7 @@
 #include "../Geometry/aabb.h"
 #include "../Algorithms/bvh.h"
 #include "../Algorithms/camera.h"
+#include "../Algorithms/camera_settings.h"
 #include "../Input/scene_factory.h"
 #include "../Algorithms/camera_derived.h"
 #include "../Algorithms/camera_parallel.h"
@@ -56,6 +57,7 @@ protected:
 	std::string obj_file_name = "../../models/Toyota_Sequoia_2023/Toyota_Sequoia_2023_2015_obj.obj";
 	std::string filename;
 	std::unique_ptr<scene_factory> world_factory;
+	std::unique_ptr<camera_settings> cam_settings;
 	std::unique_ptr<camera> cam;
 	std::unique_ptr<parallel> para;
 	std::unique_ptr<input> in;

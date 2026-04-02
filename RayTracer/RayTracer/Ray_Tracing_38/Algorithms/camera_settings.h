@@ -11,62 +11,20 @@ public:
 	camera_settings()
 	{}
 	camera_settings(int mode_);
-	int& get_image_width()
-	{
-		return this->image_width;
-	}
-	int& get_samples_per_pixel()
-	{
-		return this->samples_per_pixel;
-	}
-	int& get_max_depth()
-	{
-		return this->max_depth;
-	}
-	int& get_vfov()
-	{
-		return this->vfov;
-	}
-	double& get_width_ratio()
-	{
-		return width_ratio;
-	}
-	double& get_height_ratio()
-	{
-		return height_ratio;
-	}
-	double& get_defocus_angle()
-	{
-		return defocus_angle;
-	}
-	double& get_focus_dist()
-	{
-		return focus_dist;
-	}
-	point3& get_lookfrom()
-	{
-		return lookfrom;
-	}
-	point3& get_lookat()
-	{
-		return lookat;
-	}
-	point3& get_vup()
-	{
-		return vup;
-	}
-	color& get_background()
-	{
-		return background;
-	}
-	int& get_fps()
-	{
-		return fps;
-	}
-	int& get_num_seconds()
-	{
-		return num_seconds;
-	}
+	int& get_image_width();
+	int& get_samples_per_pixel();
+	int& get_max_depth();
+	int& get_vfov();
+	double& get_width_ratio();
+	double& get_height_ratio();
+	double& get_defocus_angle();
+	double& get_focus_dist();
+	point3& get_lookfrom();
+	point3& get_lookat();
+	point3& get_vup();
+	color& get_background();
+	int& get_fps();
+	int& get_num_seconds();
 
 protected:
 	int mode = 0;

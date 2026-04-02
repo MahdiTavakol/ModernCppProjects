@@ -16,17 +16,10 @@ class camera_parallel : public camera
 {
 public:
     camera_parallel(
-        std::unique_ptr<input>& _in,
+		std::unique_ptr<camera_settings>& _cam_setting,
         std::unique_ptr<parallel>& _para
     );
-    camera_parallel(
-        const int _width_min,
-        const int _width_max, 
-        const int _height_min, 
-        const int _height_max,
-        std::unique_ptr<parallel>& _para
-    );
-    camera_parallel(std::unique_ptr<parallel>& _para);
+
     void render(const hittable& world) override;
     void set_range(const int& _width_min, const int& _width_max, const int& _height_min, const int& _height_max) override;
     color_array* return_color_array_ptr() override;

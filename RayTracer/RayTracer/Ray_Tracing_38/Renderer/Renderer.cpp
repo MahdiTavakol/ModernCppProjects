@@ -5,10 +5,12 @@ renderer::renderer(int argc, char** argv, int _mode,
 				   std::string _filename, 
 	               std::array<int, 2> size_config_,
 	               MPI_Comm comm_)
-	: mode(_mode), filename(_filename)
+	: mode{ _mode },
+	filename{ _filename }
 {
+	cam_settings = std::make_unique<camera_settings>(mode);
 	para = std::make_unique<mpiParallel>(comm_,size_config_);
-	in = std::make_unique<input>(argc, argv, mode);
+	in = std::make_unique<input>(argc, argv, cam_settings.get());
 	world_factory = std::make_unique<scene_factory>(mode,para);
 	if (!filename.empty())
 		writer = std::make_unique<class write>(filename);
@@ -34,26 +36,17 @@ void renderer::setup()
 
 
 	// building the camera object
-	cam = std::make_unique<camera_parallel>(in,para);
-
-
-	// the default camera location
-	//camera_location = point3(26, 3, 6);
+	cam = std::make_unique<camera_parallel>(cam_settings,para);
 
 
 	// cases with extra setups
 	switch (mode)
 	{
-		case CORNELL_BOX:
-			camera_location = point3(278, 278, -800);
-			break;
 		case OBJ_MODEL_PARALLEL:
-			cam = std::make_unique<camera_derived>(in);
+			cam = std::make_unique<camera_derived>(cam_settings);
 			break;
 	}
 
-
-	//cam->move_camera(camera_location);
 }
 
 

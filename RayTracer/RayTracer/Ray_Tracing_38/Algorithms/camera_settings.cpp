@@ -29,7 +29,7 @@ camera_settings::camera_settings(int mode_) :
 	}
 	else if (mode_ == CORNELL_BOX || mode_ == TWO_BOXES || mode_ == TWO_BOXES_ROTATED)
 	{
-		this->lookfrom = point3(278, 278, -800);
+;		this->lookfrom = point3(278, 278, -800);
 		this->lookat = point3(278, 278, 0);
 		this->vfov = 40;
 		this->vup = vec3(0, 1, 0);
@@ -67,4 +67,61 @@ camera_settings::camera_settings(int mode_) :
 		this->defocus_angle = 0;
 		this->image_width = 1080;
 	}
+}
+
+int& camera_settings::get_image_width()
+{
+	return this->image_width;
+}
+int& camera_settings::get_samples_per_pixel()
+{
+	return this->samples_per_pixel;
+}
+int& camera_settings::get_max_depth()
+{
+	return this->max_depth;
+}
+int& camera_settings::get_vfov()
+{
+	return this->vfov;
+}
+double& camera_settings::get_width_ratio()
+{
+	return width_ratio;
+}
+double& camera_settings::get_height_ratio()
+{
+	return height_ratio;
+}
+double& camera_settings::get_defocus_angle()
+{
+	return defocus_angle;
+}
+double& camera_settings::get_focus_dist()
+{
+	return focus_dist;
+}
+point3& camera_settings::get_lookfrom()
+{
+	return lookfrom;
+}
+point3& camera_settings::get_lookat()
+{
+	return lookat;
+}
+point3& camera_settings::get_vup()
+{
+	return vup;
+}
+color& camera_settings::get_background()
+{
+	return background;
+}
+int& camera_settings::get_fps()
+{
+	return fps;
+}
+int& camera_settings::get_num_seconds()
+{
+	return num_seconds;
 }

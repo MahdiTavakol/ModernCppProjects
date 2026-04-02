@@ -3,11 +3,10 @@
 #include <mpi.h>
 
 camera_parallel::camera_parallel(
-    std::unique_ptr<input>& _in, std::unique_ptr<parallel>& _para) :
-    camera{},
+    std::unique_ptr<camera_settings>& cam_setting_, std::unique_ptr<parallel>& _para) :
+    camera{cam_setting_},
     para{ _para.get() }
 {
-    _in->setup_camera(this);
     rank = _para->return_rank();
     size = _para->return_size();
     rank_config = _para->return_rank_config();
@@ -43,30 +42,6 @@ camera_parallel::camera_parallel(
 
     set_range(width_min, width_max, height_min, height_max);
 	 initialize_storage();
-}
-
-camera_parallel::camera_parallel(
-    const int _width_min,
-    const int _width_max,
-    const int _height_min,
-    const int _height_max,
-    std::unique_ptr<parallel>& para_
-)
-    :
-    para{ para_.get() },
-    width_min(_width_min),
-    width_max(_width_max),
-    height_min(_height_min),
-    height_max(_height_max) {
-}
-
-camera_parallel::camera_parallel(std::unique_ptr<parallel>& para_)
-    :
-    para{ para_.get() },
-    width_min(0),
-    width_max(0),
-    height_min(0),
-    height_max(0) {
 }
 
 
