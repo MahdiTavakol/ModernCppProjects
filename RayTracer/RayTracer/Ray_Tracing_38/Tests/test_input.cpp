@@ -84,7 +84,7 @@ TEST_CASE("Testing reading the argv with the input class")
 		expectedLog.push_back("num_seconds = 85");
 	}
 
-	/*
+
 	SECTION("Test-2")
 	{
 		argv_vec.push_back("renderer");
@@ -119,7 +119,7 @@ TEST_CASE("Testing reading the argv with the input class")
 		expectedLog.push_back("fps = 20");
 		expectedLog.push_back("num_seconds = 15");
 	}
-	*/
+
 
 
 	std::ostringstream oss;
