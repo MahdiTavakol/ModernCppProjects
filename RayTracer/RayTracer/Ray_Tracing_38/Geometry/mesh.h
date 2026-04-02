@@ -22,6 +22,7 @@ public:
 	bool hit(const ray& _r, interval _ray_t, hit_record& _rec) const override;
 	virtual bool is_interior(double _a, double _b, hit_record& _rec) const;
 	bool compare(hittable* rhs_, const double& tol) const override;
+	virtual bool comparator(const std::unique_ptr<hittable>& rhs_) const override;
 
 protected:
 	std::array<point3, 4> vs;
@@ -31,6 +32,7 @@ protected:
 
 	int num_edges = 0;
 
+	vec3 n1, n2;
 	vec3 unit_n1, unit_n2;
 	vec3 w1, w2;
 	point3 Q1, Q2;

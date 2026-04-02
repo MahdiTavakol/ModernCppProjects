@@ -16,6 +16,8 @@ class hittable_list : public hittable {
 public:
 	std::vector<std::unique_ptr<hittable>> objects;
 
+
+
 	hittable_list() : hittable{ "hittable_list" } {}
 	hittable_list(std::unique_ptr<hittable> object);
 	hittable_list(std::unique_ptr<hittable>& object);
@@ -27,6 +29,8 @@ public:
 	hittable* operator[](const int& i) {
 		return objects[i].get();
 	}
+
+	void sort();
 
 	virtual void add(std::unique_ptr<hittable> object);
 

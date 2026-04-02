@@ -20,7 +20,7 @@ renderer::renderer(int argc, char** argv, int _mode,
 	// the world_factory is in charge of lazy creation of the scene.
 	world_factory = std::make_unique<scene_factory>(mode,para);
 	if (!filename.empty())
-		writer = std::make_unique<class write>(filename);
+		writer = std::make_unique<output>(filename);
 }
 
 renderer::renderer(int argc, char** argv, int _mode, std::string _filename,
@@ -76,7 +76,7 @@ void renderer::write_file()
 	cam->return_image_size(image_width, image_height);
 
 	if (writer == nullptr)
-		writer = std::make_unique<class write>("test.ppm");
+		writer = std::make_unique<output>("test.ppm");
 	writer->reset(c_array, image_width, image_height);
 
 	int rank = para->return_rank();

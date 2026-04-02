@@ -1,4 +1,5 @@
 #include "mesh.h"
+#include <mpi.h>
 
 mesh::mesh(const std::array<point3, 4>& _vs,
 	       const std::array<point3, 4>& _vts,
@@ -31,8 +32,8 @@ void mesh::initialize()
 	vec3 unit_n2b = unit_vector(n2b);
 	auto dot_b = dot(unit_n1b, unit_n2b);
 	// comparing them
-	auto n1 = dot_a > dot_b ? n1a : n1b;
-	auto n2 = dot_a > dot_b ? n2a : n2b;
+	n1 = dot_a > dot_b ? n1a : n1b;
+	n2 = dot_a > dot_b ? n2a : n2b;
 	unit_n1 = dot_a > dot_b ? unit_n1a : unit_n1b;
 	unit_n2 = dot_a > dot_b ? unit_n2a : unit_n2b;
 	Q1 = vs[0];
@@ -167,28 +168,87 @@ bool mesh::compare(hittable* rhs_, const double& tol) const
 		return true;
 	}
 
+
+	struct edge
+	{
+		point3 v;
+		point3 vt;
+		point3 vn;
+	} edgeInfo[4] = {
+		{vs[0],vts[0],vns[0]},
+		{vs[1],vts[1],vns[1]},
+		{vs[2],vts[2],vns[2]},
+		{vs[3],vts[3],vns[3]}
+	};
+	
+	edge rhsEdgeInfo[4] =
+	{
+		{rhsConv->vs[0],rhsConv->vts[0],rhsConv->vns[0]},
+		{rhsConv->vs[1],rhsConv->vts[1],rhsConv->vns[1]},
+		{rhsConv->vs[2],rhsConv->vts[2],rhsConv->vns[2]},
+		{rhsConv->vs[3],rhsConv->vts[3],rhsConv->vns[3]}
+	};
+
+	auto sortLambda = [&](const edge& a_, const edge& b_)
+	{
+		double length_a = a_.v.length();
+		double length_b = b_.v.length();
+		if (length_a < length_b)
+			return true;
+		return false;
+	};
+
+	std::sort(edgeInfo, edgeInfo + 4, sortLambda);
+	std::sort(rhsEdgeInfo, rhsEdgeInfo + 4, sortLambda);
+
+
 	// comparing the geometry
 	for (int i = 0; i < 4; i++)
 	{
-		point3 datavsi  = vs[i]  - rhsConv->vs[i];
-		point3 datavtsi = vts[i] - rhsConv->vts[i];
-		point3 datavnsi = vns[i] - rhsConv->vns[i];
+		point3 datavsi  = edgeInfo[i].v - rhsEdgeInfo[i].v;
+		point3 datavtsi = edgeInfo[i].vt - rhsEdgeInfo[i].vt;
+		point3 datavnsi = edgeInfo[i].vn - rhsEdgeInfo[i].vn;
+		int rank = 0;
+		MPI_Comm_rank(MPI_COMM_WORLD, &rank);;
 		if (datavsi.length() >= tol)
 		{
-			std::cout << vs[i];
-			std::cout << rhsConv->vs[i];
+			if (rank == 0) {
+				std::cout << "v " << i << std::endl;
+				std::cout << edgeInfo[i].v << std::endl;
+				std::cout << rhsEdgeInfo[i].v << std::endl;
+				std::cout << std::endl;
+			}
 			return true;
 		}
 		if (datavtsi.length() >= tol) {
+			std::cout << "vt" << std::endl;
 			std::cout << vts[i];
 			std::cout << rhsConv->vts[i];
+			std::cout << std::endl;
 			return true;
 		}
 		if (datavnsi.length() >= tol) {
+			std::cout << "vn" << std::endl;
 			std::cout << vns[i];
 			std::cout << rhsConv->vns[i];
+			std::cout << std::endl;
 			return true;
 		}
 	}
+	return false;
+}
+
+bool mesh::comparator(const std::unique_ptr<hittable>& rhs_) const
+{
+	auto rhs_cast = dynamic_cast<mesh*>(rhs_.get());
+	if (!rhs_cast)
+		throw std::invalid_argument("Different types!");
+
+
+	auto area = (n1.length() + n2.length()) / 2.0;
+	auto rhs_area = (rhs_cast->n1.length() + rhs_cast->n2.length()) / 2.0;
+
+	if (area < rhs_area)
+		return true;
 	return false;
 }

@@ -167,13 +167,5 @@ TEST_CASE("Testing reading the argv with the input class")
 	create_input crt_input(argv_vec, outStream,cam_settings.get(),para.get());
 	auto in = crt_input.return_input_ptr();
 
-
-	std::string oss_string = oss.str();
-	std::stringstream iss(oss_string);
-	for (int i = 0; i < expectedLog.size(); i++)
-	{
-		std::string output;
-		std::getline(iss, output);
-		REQUIRE(expectedLog[i] == output);
-	}
+	REQUIRE_THAT(&oss, OStringStreamMatcher(&expectedLog));
 }

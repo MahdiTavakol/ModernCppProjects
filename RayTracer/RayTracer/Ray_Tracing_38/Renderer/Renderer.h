@@ -32,7 +32,7 @@
 #include "../Geometry/sphere.h"
 #include "../Geometry/texture.h"
 #include "../Types/vec3.h"
-#include "../Output/write.h"
+#include "../Output/output.h"
 
 
 class renderer
@@ -62,7 +62,7 @@ protected:
 	std::unique_ptr<parallel> para;
 	std::unique_ptr<input> in;
 	std::unique_ptr<hittable_list> world;
-	std::unique_ptr<class write> writer;
+	std::unique_ptr<output> writer;
 	point3 camera_location;
 
 	// since it is owned by the parallel object

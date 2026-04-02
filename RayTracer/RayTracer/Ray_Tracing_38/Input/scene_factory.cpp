@@ -27,7 +27,7 @@
 #include "../Geometry/sphere.h"
 #include "../Geometry/texture.h"
 #include "../Types/vec3.h"
-#include "../Output/write.h"
+#include "../Output/output.h"
 
 scene_factory::scene_factory(int mode_, std::unique_ptr<parallel>& para_) :
 	mode{ mode_ }, para{para_.get()}

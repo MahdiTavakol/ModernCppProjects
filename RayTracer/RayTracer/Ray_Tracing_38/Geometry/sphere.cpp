@@ -56,6 +56,34 @@ bool sphere::hit(const ray& r, interval ray_t, hit_record& rec) const {
     return true;
 }
 
+bool sphere::compare(hittable* rhs_, const double& tol_) const
+{
+    auto rhs_cast = dynamic_cast<sphere*>(rhs_);
+    if (!rhs_cast)
+        throw std::invalid_argument("Different types!");
+
+
+    ray dist = center - rhs_cast->center;
+    point3 distOrig = dist.origin();
+    vec3 distDir = dist.direction();
+
+
+    double distTm = dist.time();
+    double distOrigLength = distOrig.length();
+    double distDirLength = distDir.length();
+    double delta = radius - rhs_cast->radius;
+
+    if (std::abs(distTm) >= tol_)
+        return true;
+    if (std::abs(distOrigLength) >= tol_)
+        return true;
+    if (std::abs(distDirLength) >= tol_)
+        return true;
+    if (std::abs(delta) >= tol_)
+        return true;
+    return false;
+}
+
 bool sphere::comparator(const std::unique_ptr<hittable>& rhs_) const
 {
     auto rhs_cast = dynamic_cast<sphere*>(rhs_.get());

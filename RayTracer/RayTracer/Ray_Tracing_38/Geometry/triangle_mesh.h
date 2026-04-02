@@ -21,6 +21,7 @@ public:
 		std::array<point3, 3>& vns_,
 		material* mat_);
 	bool compare(hittable* rhs_, const double& tol) const override;
+	virtual bool comparator(const std::unique_ptr<hittable>& rhs_) const override;
 
 protected:
 	std::array<point3, 3> vs;
@@ -30,6 +31,7 @@ protected:
 	int num_edges;
 
 	aabb bbox;
+	vec3 n1;
 	vec3 unit_n1;
 	vec3 w1;
 	point3 Q1;

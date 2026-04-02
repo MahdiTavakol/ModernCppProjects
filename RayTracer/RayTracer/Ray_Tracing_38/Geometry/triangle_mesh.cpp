@@ -15,7 +15,7 @@ triangle_mesh::triangle_mesh(
 
 void triangle_mesh::initialize()
 {
-	auto n1 = cross(vs[1] - vs[0], vs[2] - vs[0]);
+	n1 = cross(vs[1] - vs[0], vs[2] - vs[0]);
 	unit_n1 = unit_vector(n1);
 	Q1 = vs[0];
 	D1 = dot(unit_n1, Q1);
@@ -131,5 +131,19 @@ bool triangle_mesh::compare(hittable* rhs_, const double& tol) const
 			return true;
 		}
 	}
+	return false;
+}
+
+bool triangle_mesh::comparator(const std::unique_ptr<hittable>& rhs_) const
+{
+	auto rhs_cast = dynamic_cast<triangle_mesh*>(rhs_.get());
+	if (!rhs_cast)
+		throw std::invalid_argument("Different types!");
+
+	auto area = n1.length() / 2.0;
+	auto rhs_area = rhs_cast->n1.length() / 2.0;
+
+	if (area < rhs_area)
+		return true;
 	return false;
 }

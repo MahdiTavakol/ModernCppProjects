@@ -31,6 +31,25 @@ bool hittable_list::hit(const ray& r, interval ray_t, hit_record& rec) const
 	return hit_anything;
 }
 
+void hittable_list::sort()
+{
+	auto sortingLambda = 
+		[](const std::unique_ptr<hittable>& a_, const std::unique_ptr<hittable>& b_)
+		-> bool
+	{
+		// first sort by shape type
+		if (a_->type < b_->type)
+			return true;
+		else if (a_->type > b_->type)
+			return false;
+		// then if the types are the same
+		// use the objects own comparator function.
+		return a_->comparator(b_);
+	};
+
+	std::sort(objects.begin(), objects.end(),sortingLambda);
+}
+
 void hittable_list::add(std::unique_ptr<hittable> object)
 {
 	bbox = aabb(bbox, object->bounding_box());

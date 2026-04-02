@@ -22,10 +22,16 @@ public:
 		return orig + t * dir;
 	}
 
+
 private:
 	point3 orig;
 	vec3 dir;
 	double tm{ 0.0 };
 };
+
+inline ray operator-(const ray& lhs_, const ray& rhs_)
+{
+	return ray(lhs_.origin() - rhs_.origin(), lhs_.direction() - rhs_.direction(), lhs_.time() - rhs_.time());
+}
 
 #endif

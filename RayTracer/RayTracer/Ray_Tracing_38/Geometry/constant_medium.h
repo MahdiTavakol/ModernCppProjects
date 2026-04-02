@@ -15,7 +15,6 @@ public:
 
 	bool hit(const ray& _r, interval _ray_t, hit_record& _rec) const override;
 
-	aabb bounding_box() const override { return boundary->bounding_box(); }
 
 private:
 	std::unique_ptr<hittable> boundary;
