@@ -22,6 +22,7 @@ public:
 		material* mat_);
 	bool compare(hittable* rhs_, const double& tol) const override;
 	virtual bool comparator(const std::unique_ptr<hittable>& rhs_) const override;
+	double get_area() const override;
 
 protected:
 	std::array<point3, 3> vs;

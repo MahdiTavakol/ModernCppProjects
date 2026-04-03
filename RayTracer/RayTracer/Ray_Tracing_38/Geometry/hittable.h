@@ -39,6 +39,12 @@ public:
     virtual material* get_material();
     virtual bool comparator(const std::unique_ptr<hittable>& rhs_) const;
     int typeCompare(const hittable& rhs_) const;
+    virtual double get_area() const
+    {
+        return 0;
+    }
+
+
     const std::string type = "";
 protected:
     std::unique_ptr<material> mat;

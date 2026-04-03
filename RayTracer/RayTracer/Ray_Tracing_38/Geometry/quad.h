@@ -15,6 +15,7 @@ public:
     virtual bool comparator(const std::unique_ptr<hittable>& rhs_) const override;
 	// Since virtual is not allowed with template functions I had to have two similar definitions of is_interior.
 	virtual bool is_interior(double _a, double _b, hit_record& _rec) const;
+    double get_area() const override;
 
 
 protected:

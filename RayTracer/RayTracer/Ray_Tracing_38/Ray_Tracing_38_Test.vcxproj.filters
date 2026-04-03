@@ -177,6 +177,21 @@
     <ClCompile Include="Tests\test_hittable_list.cpp">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
+    <ClCompile Include="Tests\test_logger.cpp">
+      <Filter>Source Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Output\Logger.cpp">
+      <Filter>Source Files\Output</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\test_mesh.cpp">
+      <Filter>Source Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\test_triangle_mesh.cpp">
+      <Filter>Source Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\test_quad.cpp">
+      <Filter>Source Files\Tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Types\color.h">
@@ -307,6 +322,9 @@
     </ClInclude>
     <ClInclude Include="Tests\matchers.hpp">
       <Filter>Source Files\Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="Output\Logger.h">
+      <Filter>Source Files\Output</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

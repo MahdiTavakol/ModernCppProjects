@@ -140,10 +140,16 @@ bool triangle_mesh::comparator(const std::unique_ptr<hittable>& rhs_) const
 	if (!rhs_cast)
 		throw std::invalid_argument("Different types!");
 
-	auto area = n1.length() / 2.0;
-	auto rhs_area = rhs_cast->n1.length() / 2.0;
+	auto area = this->get_area();
+	auto rhs_area = rhs_cast->get_area();
 
 	if (area < rhs_area)
 		return true;
 	return false;
+}
+
+double triangle_mesh::get_area() const
+{
+	double area = n1.length() / 2.0;
+	return area;
 }

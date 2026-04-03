@@ -23,6 +23,7 @@ public:
 	virtual bool is_interior(double _a, double _b, hit_record& _rec) const;
 	bool compare(hittable* rhs_, const double& tol) const override;
 	virtual bool comparator(const std::unique_ptr<hittable>& rhs_) const override;
+	virtual double get_area() const override;
 
 protected:
 	std::array<point3, 4> vs;

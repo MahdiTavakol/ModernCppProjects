@@ -201,6 +201,8 @@ bool mesh::compare(hittable* rhs_, const double& tol) const
 	std::sort(edgeInfo, edgeInfo + 4, sortLambda);
 	std::sort(rhsEdgeInfo, rhsEdgeInfo + 4, sortLambda);
 
+	
+
 
 	// comparing the geometry
 	for (int i = 0; i < 4; i++)
@@ -208,29 +210,27 @@ bool mesh::compare(hittable* rhs_, const double& tol) const
 		point3 datavsi  = edgeInfo[i].v - rhsEdgeInfo[i].v;
 		point3 datavtsi = edgeInfo[i].vt - rhsEdgeInfo[i].vt;
 		point3 datavnsi = edgeInfo[i].vn - rhsEdgeInfo[i].vn;
-		int rank = 0;
-		MPI_Comm_rank(MPI_COMM_WORLD, &rank);;
+
 		if (datavsi.length() >= tol)
 		{
-			if (rank == 0) {
-				std::cout << "v " << i << std::endl;
-				std::cout << edgeInfo[i].v << std::endl;
-				std::cout << rhsEdgeInfo[i].v << std::endl;
-				std::cout << std::endl;
-			}
+
+			std::cout << "v " << i << std::endl;
+			std::cout << edgeInfo[i].v << std::endl;
+			std::cout << rhsEdgeInfo[i].v << std::endl;
+			std::cout << std::endl;
 			return true;
 		}
 		if (datavtsi.length() >= tol) {
 			std::cout << "vt" << std::endl;
-			std::cout << vts[i];
-			std::cout << rhsConv->vts[i];
+			std::cout << edgeInfo[i].vt << std::endl;
+			std::cout << rhsEdgeInfo[i].vt << std::endl;
 			std::cout << std::endl;
 			return true;
 		}
 		if (datavnsi.length() >= tol) {
 			std::cout << "vn" << std::endl;
-			std::cout << vns[i];
-			std::cout << rhsConv->vns[i];
+			std::cout << edgeInfo[i].vn << std::endl;
+			std::cout << rhsEdgeInfo[i].vn << std::endl;
 			std::cout << std::endl;
 			return true;
 		}
@@ -244,11 +244,16 @@ bool mesh::comparator(const std::unique_ptr<hittable>& rhs_) const
 	if (!rhs_cast)
 		throw std::invalid_argument("Different types!");
 
-
-	auto area = (n1.length() + n2.length()) / 2.0;
-	auto rhs_area = (rhs_cast->n1.length() + rhs_cast->n2.length()) / 2.0;
+	auto area = this->get_area();
+	auto rhs_area = rhs_cast->get_area();
 
 	if (area < rhs_area)
 		return true;
 	return false;
+}
+
+double mesh::get_area() const
+{
+	double area = (n1.length() + n2.length()) / 2.0;
+	return area;
 }

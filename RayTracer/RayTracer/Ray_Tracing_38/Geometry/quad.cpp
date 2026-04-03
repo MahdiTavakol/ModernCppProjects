@@ -26,11 +26,10 @@ bool quad::comparator(const std::unique_ptr<hittable>& rhs_) const
 	if (!rhs_cast)
 		throw std::invalid_argument("Different types!");
 
-	auto cross_u_v = cross(u, v);
-	auto cross_rhs_u_v = cross(rhs_cast->u, rhs_cast->v);
-	double u_v_length = cross_u_v.length();
-	double rhs_u_v_length = cross_rhs_u_v.length();
-	if (u_v_length < rhs_u_v_length)
+	double area = this->get_area();
+	double rhs_area = rhs_cast->get_area();
+
+	if (area < rhs_area)
 		return true;
 	return false;
 }
@@ -72,5 +71,11 @@ bool quad::is_interior(double _a, double _b, hit_record& _rec) const {
 	_rec.u = _a;
 	_rec.v = _b;
 	return true;
+}
+
+double quad::get_area() const {
+	auto crs = cross(u, v);
+	double area = crs.length();
+	return area;
 }
 
