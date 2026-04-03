@@ -30,6 +30,7 @@ public:
 		return objects[i].get();
 	}
 
+	void resize(const int size);
 	void sort();
 
 	virtual void add(std::unique_ptr<hittable> object);

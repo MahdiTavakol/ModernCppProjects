@@ -103,6 +103,7 @@ public:
 		if (value_ == nullptr)
 			throw std::runtime_error("The value in the hittableListMatcher is nullptr!");
 
+
 		int size = value_->size();
 		int expectedsize = expected->size();
 

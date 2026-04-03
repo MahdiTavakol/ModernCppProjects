@@ -20,6 +20,26 @@ void quad::set_bounding_box()
 	bbox = aabb(bbox_diagonal1, bbox_diagonal2);
 }
 
+bool quad::compare(hittable* rhs_, const double& tol_) const
+{
+	quad* rhsConv = dynamic_cast<quad*>(rhs_);
+	// testing the type of the rhs
+	if (!rhsConv)
+		throw std::invalid_argument("The rhs_ is not of type quad");
+
+	auto deltaU = u - rhsConv->u;
+	auto deltaV = v - rhsConv->v;
+	// we do not care about comparing Q values
+	double distU = deltaU.length();
+	double distV = deltaV.length();
+
+	if (distU >= tol_)
+		return true;
+	if (distV >= tol_)
+		return true;
+	return false;
+}
+
 bool quad::comparator(const std::unique_ptr<hittable>& rhs_) const
 {
 	auto rhs_cast = dynamic_cast<quad*>(rhs_.get());

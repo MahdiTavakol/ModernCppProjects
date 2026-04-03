@@ -31,6 +31,11 @@ bool hittable_list::hit(const ray& r, interval ray_t, hit_record& rec) const
 	return hit_anything;
 }
 
+void hittable_list::resize(const int size_)
+{
+	objects.resize(size_);
+}
+
 void hittable_list::sort()
 {
 	auto sortingLambda = 

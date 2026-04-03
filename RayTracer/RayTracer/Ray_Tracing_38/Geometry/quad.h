@@ -12,6 +12,7 @@ public:
 	virtual void set_bounding_box();
 	aabb bounding_box() const override { return bbox; }
 	bool hit(const ray& _r, interval _ray_t, hit_record& _rec) const override;
+    bool compare(hittable* rhs_, const double& tol_) const override;
     virtual bool comparator(const std::unique_ptr<hittable>& rhs_) const override;
 	// Since virtual is not allowed with template functions I had to have two similar definitions of is_interior.
 	virtual bool is_interior(double _a, double _b, hit_record& _rec) const;

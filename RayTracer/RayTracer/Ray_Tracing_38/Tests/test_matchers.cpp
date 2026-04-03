@@ -1,6 +1,10 @@
 #include "test_shared.h"
 #include "catch_amalgamated.hpp"
 
+#include "../Geometry/sphere.h"
+#include "../Geometry/triangle_mesh.h"
+#include "../Geometry/quad.h"
+
 TEST_CASE("Testing colorArrayMatcher")
 {
 	color_array c_array_1;
@@ -47,38 +51,155 @@ TEST_CASE("Testing hittableListMatcher")
 {
 	std::unique_ptr<hittable_list> world1;
 	std::unique_ptr<hittable_list> world2;
-	std::unique_ptr<material> mat1, mat2;
-
-	std::array<point3,3> vs = {
-		point3{1.0,0.0,0.0},
-		point3{0.0,1.0,0.0},
-		point3{0.0,0.0,1.0}
-	};
-	std::array<point3,3> vts = {
-		point3{0.0,0.0,1.0},
-		point3{1.0,0.0,0.0},
-		point3{0.0,1.0,0.0}
-	};
-	std::array<point3,3> vns = {
-		point3{0.0,0.0,1.0},
-		point3{2.0,0.0,1.0},
-		point3{1.0,3.0,2.0}
-	};
-
-	mat1 = std::make_unique<fake_material>();
-	mat2 = std::make_unique<fake_material>();
-
-	std::unique_ptr<hittable> triangle1 =
-		std::make_unique<triangle_mesh>(vs, vts, vns, std::move(mat1));
-
-	std::unique_ptr<hittable> triangle2 =
-		std::make_unique<triangle_mesh>(vs, vts, vns, std::move(mat2));
 
 	world1 = std::make_unique<hittable_list>();
 	world2 = std::make_unique<hittable_list>();
 
-	world1->add(std::move(triangle1));
-	world2->add(std::move(triangle2));
+	SECTION("A Simple Triangle test")
+	{
+		std::unique_ptr<material> mat1, mat2;
+
+		std::array<point3, 3> vs = {
+			point3{1.0,0.0,0.0},
+			point3{0.0,1.0,0.0},
+			point3{0.0,0.0,1.0}
+		};
+		std::array<point3, 3> vts = {
+			point3{0.0,0.0,1.0},
+			point3{1.0,0.0,0.0},
+			point3{0.0,1.0,0.0}
+		};
+		std::array<point3, 3> vns = {
+			point3{0.0,0.0,1.0},
+			point3{2.0,0.0,1.0},
+			point3{1.0,3.0,2.0}
+		};
+
+		mat1 = std::make_unique<fake_material>();
+		mat2 = std::make_unique<fake_material>();
+
+		std::unique_ptr<hittable> triangle1 =
+			std::make_unique<triangle_mesh>(vs, vts, vns, std::move(mat1));
+
+		std::unique_ptr<hittable> triangle2 =
+			std::make_unique<triangle_mesh>(vs, vts, vns, std::move(mat2));
+
+
+		world1->add(std::move(triangle1));
+		world2->add(std::move(triangle2));
+	}
+	/*
+	SECTION("Comparing a sorted with an unsorted hittable_list")
+	{
+		// sphere
+		std::vector<point3> centers;
+		std::vector<double> radius;
+
+		centers.reserve(3);
+		centers.emplace_back(5.0, 0.0, -1.0);
+		centers.emplace_back(-1.0, 2.0, 3.0);
+		centers.emplace_back(0.5, -4.0, 2.0);
+
+		radius.reserve(3);
+		radius.push_back(9.1);
+		radius.push_back(1.2);
+		radius.push_back(4.4);
+
+		for (int i = 0; i < 3; i++)
+		{
+			std::unique_ptr<material> mat = std::make_unique<fake_material>();
+			std::unique_ptr<material> mat2 = std::make_unique<fake_material>();
+			auto sphr = std::make_unique<sphere>(centers[i], radius[i], std::move(mat));
+			auto sphr2 = std::make_unique<sphere>(centers[i], radius[i], std::move(mat2));
+			world1->add(std::move(sphr));
+			world2->add(std::move(sphr2));
+		}
+
+		// triangle meshes
+		std::array<point3, 3> vs[3];
+		std::array<point3, 3> vts[3] =
+		{
+			{point3{},point3{},point3{}},
+			{point3{},point3{},point3{}},
+			{point3{},point3{},point3{}}
+		};
+		std::array<point3, 3> vns[3] =
+		{
+			{point3{},point3{},point3{}},
+			{point3{},point3{},point3{}},
+			{point3{},point3{},point3{}}
+		};
+
+		// Triangle 0
+		vs[0] = {
+			point3{0.0, 0.0, 0.0},
+			point3{2.0, 0.0, 0.0},
+			point3{0.0, 2.0, 0.0}
+		};
+		// Area = 2.0
+
+		// Triangle 1
+		vs[1] = {
+			point3{0.0, 0.0, 0.0},
+			point3{3.0, 0.0, 0.0},
+			point3{0.0, 4.0, 0.0}
+		};
+		// Area = 6.0
+
+		// Triangle 2
+		vs[2] = {
+			point3{0.0, 0.0, 1.0},
+			point3{2.0, 0.0, 1.0},
+			point3{0.0, 2.0, 2.0}
+		};
+		// u = (2,0,0), v = (0,2,1), |u x v| = sqrt(20)
+		// Area ≈ 2.236067977
+
+		for (int i = 0; i < 3; i++)
+		{
+			std::unique_ptr<material> mat = std::make_unique<fake_material>();
+			std::unique_ptr<material> mat2 = std::make_unique<fake_material>();
+			auto trng = std::make_unique<triangle_mesh>(vs[i], vts[i], vns[i], std::move(mat));
+			auto trng2 = std::make_unique<triangle_mesh>(vs[i], vts[i], vns[i], std::move(mat2));
+			world1->add(std::move(trng));
+			world2->add(std::move(trng2));
+		}
+
+
+		// quads
+		point3 Q{ 0.0,0.0,0.0 };
+		vec3 uq[3];
+		vec3 vq[3];
+
+		// Quad 0
+		uq[0] = vec3{ 2.0, 0.0, 0.0 };
+		vq[0] = vec3{ 0.0, 3.0, 0.0 };
+		// Area = 6.0
+
+		// Quad 1
+		uq[1] = vec3{ 1.0, 1.0, 0.0 };
+		vq[1] = vec3{ 2.0, -1.0, 0.0 };
+		// cross = (0,0,-3) -> Area = 3.0
+
+		// Quad 2
+		uq[2] = vec3{ 2.0, 1.0, 2.0 };
+		vq[2] = vec3{ 1.0, 3.0, 0.0 };
+		// cross = (-6, 2, 5) -> |.| = sqrt(65)
+		// Area ≈ 8.062257748
+
+		for (int i = 0; i < 3; i++)
+		{
+			std::unique_ptr<material> mat = std::make_unique<fake_material>();
+			std::unique_ptr<material> mat2 = std::make_unique<fake_material>();
+			auto qd = std::make_unique<quad>(Q, uq[i], vq[i], std::move(mat));
+			auto qd2 = std::make_unique<quad>(Q, uq[i], vq[i], std::move(mat2));
+			world1->add(std::move(qd));
+			world2->add(std::move(qd2));
+		}
+
+		world1->sort();
+	}
+	*/
 
 	REQUIRE_THAT(world1.get(), hittableListMatcher(world2.get(), 1e-6));
 }
