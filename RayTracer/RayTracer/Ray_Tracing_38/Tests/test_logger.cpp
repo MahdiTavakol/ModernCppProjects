@@ -13,19 +13,52 @@ TEST_CASE("Testing the logger object")
 	std::unique_ptr<Logger> logger_ptr =
 		std::make_unique<Logger>(strms);
 
-
-	std::string text1 = "info: running the information";
-	std::string text2 = "warning: running the information";
-	std::string text3 = "error: running the information";
+	std::vector<std::string> texts;
+	std::vector<std::string> logVec;
 	std::vector<std::string> expectedLog;
-	expectedLog.push_back(text1);
-	expectedLog.push_back(text2);
-	expectedLog.push_back(text3);
+	
 
-	logger_ptr->print(text1);
-	logger_ptr->print(text2);
-	logger_ptr->print(text3);
+	SECTION("log-1")
+	{
+		texts.emplace_back("info: running the information");
+		texts.emplace_back("warning: running the information");
+		texts.emplace_back("error: running the information");
+	}
+
+	SECTION("log-2")
+	{
+		texts.emplace_back("info: initialization complete");
+		texts.emplace_back("debug: entering main loop");
+		texts.emplace_back("warning: low memory detected");
+		texts.emplace_back("error: failed to open file");
+		texts.emplace_back("trace: function call xyz()");
+	}
+
+	SECTION("log-3")
+	{
+		texts.emplace_back("ok");
+		texts.emplace_back("");
+		texts.emplace_back("error");
+	}
+
+	SECTION("log-4")
+	{
+		texts.emplace_back("INFO [2026-04-03 10:15:32]: System started successfully.");
+		texts.emplace_back("WARNING [module=IO]: Disk usage at 92%!");
+		texts.emplace_back("ERROR [code=500]: Unexpected failure occurred @ process#42");
+		texts.emplace_back("DEBUG: value(x)=3.14159, value(y)=2.71828");
+	}
+
+
+	for (const auto& text : texts)
+	{
+		expectedLog.push_back(text);
+		logger_ptr->print(text);
+	}
+	
 
 	REQUIRE_THAT(&oss1, OStringStreamMatcher(&expectedLog));
+	REQUIRE_THAT(&oss2, OStringStreamMatcher(&expectedLog));
+	REQUIRE_THAT(&oss3, OStringStreamMatcher(&expectedLog));
 
 }

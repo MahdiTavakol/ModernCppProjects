@@ -11,7 +11,7 @@ public:
 		strms{strms_}
 	{}
 
-	void print(std::string& text) const;
+	void print(const std::string& text) const;
 
 private:
 	std::vector<std::reference_wrapper<std::ostream>> strms;
