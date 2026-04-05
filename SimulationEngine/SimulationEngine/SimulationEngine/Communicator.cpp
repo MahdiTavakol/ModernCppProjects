@@ -150,9 +150,10 @@ void Communicator::init()
 
 }
 
-std::vector<int>* Communicator::setInterVec4NeighborRank(const int& partnerRank_)
+std::array<std::vector<int>*, 2> Communicator::setInterVec4NeighborRank(const int& partnerRank_)
 {
 	std::vector<int>* vecRef = &interXLo;
+	std::vector<int>* vecGhostRef = &interGhostXLo;
 
 	auto iter = std::find(&forward_partner[0][0], &forward_partner[0][0] + 6, partnerRank_);
 	int distance = std::distance(&forward_partner[0][0], iter);
@@ -161,42 +162,53 @@ std::vector<int>* Communicator::setInterVec4NeighborRank(const int& partnerRank_
 	case 0:
 		// xlo
 		vecRef = &interXLo;
+		vecGhostRef = &interGhostXLo;
 		break;
 	case 1:
 		// xhi
 		vecRef = &interXHi;
+		vecGhostRef = &interGhostXHi;
 		break;
 	case 2:
 		// ylo
 		vecRef = &interYLo;
+		vecGhostRef = &interGhostYLo;
 		break;
 	case 3:
 		// yhi
 		vecRef = &interYHi;
+		vecGhostRef = &interGhostYHi;
 		break;
 	case 4:
 		// zlo
 		vecRef = &interZLo;
+		vecGhostRef = &interGhostZLo;
 		break;
 	case 5:
 		// zhi
 		vecRef = &interZHi;
+		vecGhostRef = &interGhostZHi;
 		break;
 	default:
 		throw std::invalid_argument("Wrong partner id!");
 	}
 
-	return vecRef;
+
+	std::array<std::vector<int>*, 2> output = { vecRef,vecGhostRef };
+	return output;
 }
 
 void Communicator::sendGhosts(const int& partnerRank_,
 	                                void*& trandata_)
 {
-	std::vector<int>* vecRef = setInterVec4NeighborRank(partnerRank_);
+	std::array<std::vector<int>*,2> arrayRef = setInterVec4NeighborRank(partnerRank_);
+	std::vector<int>* vecRef = arrayRef[0];
+	std::vector<int>* vecGhostRef = arrayRef[1];
 
 
 	int nParticles = vecRef->size();
-	int nData = 1 + (particles->dataPerParticle)*nParticles; // id, (X, V, F) (3) and M, R
+	int nGhosts = vecGhostRef->size();
+	int nData = 1 + (particles->dataPerParticle)*(nParticles+nGhosts); // id, (X, V, F) (3) and M, R
 
 
 	double* sendBuffer = new double[nData];
@@ -205,6 +217,13 @@ void Communicator::sendGhosts(const int& partnerRank_,
 	
 	sendBuffer[indx++] = static_cast<double>(nParticles);
 	for (const auto& id : *vecRef)
+	{
+		std::vector<double> dataI = particles->packParticleData(id);
+
+		for (auto& data : dataI)
+			sendBuffer[indx++] = data;
+	}
+	for (const auto& id : *vecGhostRef)
 	{
 		std::vector<double> dataI = particles->packParticleData(id);
 
@@ -233,10 +252,13 @@ void Communicator::recvGhosts(void*& trandata_) {
 		std::vector<double> dataI;
 		for (int i = 0; i < particles->dataPerParticle; i++)
 			dataI.push_back(recvBuffer[loc++]);
-		particles->unpackParticleData(dataI);
+		int i = particles->unpackParticleData(dataI);
 
 		// incrementing the number of particles read
 		particlesRead++;
+		// the i is a ghost particle here
+		if (i != -1)
+			addGhostInterior(i);
 	}
 		
 
@@ -339,9 +361,48 @@ void Communicator::resetInterior()
 			interZLo.push_back(i);
 		else if (!zInter && z > zMaxInter)
 			interZHi.push_back(i);
-
-
 	}
+}
+
+void Communicator::clearGhostInterior()
+{
+	interGhostXLo.clear();
+	interGhostXHi.clear();
+	interGhostYLo.clear();
+	interGhostYHi.clear();
+	interGhostZLo.clear();
+	interGhostZHi.clear();
+}
+
+void Communicator::addGhostInterior(const int& i_)
+{
+	double xMinInter = myMin[0] + skin;
+	double xMaxInter = myMax[0] - skin;
+
+	double yMinInter = myMin[1] + skin;
+	double yMaxInter = myMax[1] - skin;
+
+	double zMinInter = myMin[2] + skin;
+	double zMaxInter = myMax[2] - skin;
+
+	double x = particles->X(i_, 0);
+	double y = particles->X(i_, 1);
+	double z = particles->X(i_, 2);
+
+
+	// checking the interior atoms
+	if (x <= xMinInter)
+		interGhostXLo.push_back(i_);
+	else if (x > xMaxInter)
+		interGhostXHi.push_back(i_);
+	if (y <= yMinInter)
+		interGhostYLo.push_back(i_);
+	else if (y > yMaxInter)
+		interGhostYHi.push_back(i_);
+	if (z <= zMinInter)
+		interGhostZLo.push_back(i_);
+	else if (z > zMaxInter)
+		interGhostZHi.push_back(i_);
 
 }
 

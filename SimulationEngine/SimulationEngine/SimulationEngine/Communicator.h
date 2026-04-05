@@ -17,7 +17,7 @@ public:
 	void setInteriorParticles() {}
 
 
-	std::vector<int>* setInterVec4NeighborRank(const int& partnerRank_);
+	std::array<std::vector<int>*,2> setInterVec4NeighborRank(const int& partnerRank_);
 	void sendGhosts(const int& partnerRank_,
 		                  void*& trandata_);
 	void recvGhosts(void*& trandata_);
@@ -40,6 +40,10 @@ public:
 	void resetOwned();
 	// resetting the interior particles
 	void resetInterior();
+	// clearing the ghost particles to be sent to neighboring ranks
+	void clearGhostInterior();
+	// adding to the ghost particles to be sent to the neighboring ranks
+	void addGhostInterior(const int& i_);
 	// resetting the ghost particles
 	void resetGhosts();
 	// resetting the particles
@@ -61,8 +65,10 @@ protected:
 	// the box dimensions
 	std::array<double, 3> myMin = { 0,0,0 }, myMax = { 0,0,0 };
 
-	// interior particles id (to serve as ghosts for neighboring ranks
+	// interior particles id (to serve as ghosts for neighboring ranks)
 	std::vector<int> interXLo, interXHi, interYLo, interYHi, interZLo, interZHi;
+	// interior ghost ids (to serve as ghosts for neighboring ranks)
+	std::vector<int> interGhostXLo, interGhostXHi, interGhostYLo, interGhostYHi, interGhostZLo, interGhostZHi;
 	// skin
 	double skin = 0.0;
 	// communicator id

@@ -340,7 +340,7 @@ void Particles::addZeroParticle(const int id_)
 	r.push_back(0.0); m.push_back(0.0);
 }
 
-void Particles::updateGhostParticle(
+int Particles::updateGhostParticle(
 	const int gid,
 	std::array<double, 3> newX_,
 	std::array<double, 3> newV_,
@@ -361,7 +361,7 @@ void Particles::updateGhostParticle(
 	}
 	else if (i < nlocal) {
 		// do nothing
-		return;
+		return -1;
 	}
 
 
@@ -376,6 +376,7 @@ void Particles::updateGhostParticle(
 	F(i, 2) = newF_[2];
 	M(i) = newM_;
 	R(i) = newR_;
+	return  i;
 }
 
 // get atom i position
@@ -449,7 +450,7 @@ std::vector<double> Particles::packParticleData(const int& id)
 	return out;
 }
 
-void Particles::unpackParticleData( std::vector<double>& data)
+int Particles::unpackParticleData( std::vector<double>& data, const bool& ghost_)
 {
 	std::array<double, 3> newX, newV, newF;
 	double newR, newM;
@@ -469,5 +470,12 @@ void Particles::unpackParticleData( std::vector<double>& data)
 	newM = data[loc++];
 	newR = data[loc++];
 
-	updateGhostParticle(gid, newX, newV, newF, newM, newR);
+	if (!ghost_) {
+		addParticle(newX, newV, newF, newM, newR);
+		return -1;
+	}
+	else {
+		int i = updateGhostParticle(gid, newX, newV, newF, newM, newR);
+		return i;
+	}
 }

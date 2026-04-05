@@ -68,7 +68,7 @@ public:
 	// adding a zero line at the end of each container
 	void addZeroParticle(const int id_);
 	// updating a particle
-	void updateGhostParticle(const int gid,
+	int updateGhostParticle(const int gid,
 						std::array<double,3> newX_,
 						std::array<double,3> newV_,
 						std::array<double,3> newF_,
@@ -89,7 +89,7 @@ public:
 	void swapParticles(const int& id1, const int& id2);
 	// packing the data for the ghost transfer
 	std::vector<double> packParticleData(const int& id);
-	void unpackParticleData(std::vector<double>& data);
+	int unpackParticleData(std::vector<double>& data, const bool& ghost_ = true);
 
 	// used int* const on purpose to avoid the 
 	// memory managed by vector to be destructed or changed

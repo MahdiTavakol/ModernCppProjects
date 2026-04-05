@@ -1975,7 +1975,7 @@ TEST_CASE("Testing the recvGhost function to receive the ghost particles")
 }
 
 
-TEST_CASE("Testing the movement of particles for the case with the skin value of 50","[.][Ignored it for now]")
+TEST_CASE("Testing the movement of particles for the case with the skin value of 50")
 {
     std::cout << "Testing the movement of particles for the case with the skin value of 50" << std::endl;
     std::cout << std::string(80, '=') << std::endl;
@@ -2540,6 +2540,9 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
     // NRanks X 6 (directions) X number of moved particles
     std::vector<double>* messagesArray[4];
 
+    // sending the ghost particles for neighbors
+    void* transData[4];
+
 
     // number of destinations
     int nDestsTotal = 0;
@@ -2579,6 +2582,15 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
             exchangeDestArray[i] = communicatorArray[i]->returnExchangeDests();
             // an array of vector<double> is returned for each communicatoriRef
             messagesArray[i] = communicatorArray[i]->sendExchangeParticles();
+            // directions xlo, xhi, ylo, yhi, zlo and zhi
+            for (int j = 0; j <6; j++)
+            {
+                if (exchangeDestArray[i][j] < 0)
+                    continue;
+                int dest = exchangeDestArray[i][j];
+                // sending the ghost particles info
+                communicatorArray[i]->sendGhosts(dest, transData[dest]);
+            }
         }
 
         // getting the nDests values
@@ -2587,6 +2599,8 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
 
         // ranks
         for (int i = 0; i < 4; i++) {
+            // receiving ghosts
+            communicatorArray[i]->recvGhosts(transData[i]);
             // directions xlo, xhi, ylo, yhi, zlo, zhi
             for (int j = 0; j < 6; j++) {
                 // ref is very important
