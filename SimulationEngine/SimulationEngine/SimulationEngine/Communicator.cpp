@@ -198,8 +198,8 @@ std::array<std::vector<int>*, 2> Communicator::setInterVec4NeighborRank(const in
 	return output;
 }
 
-void Communicator::sendGhosts(const int& partnerRank_,
-	                                void*& trandata_)
+int Communicator::sendGhosts(const int& partnerRank_,
+	                         std::vector<double>& trandata_)
 {
 	std::array<std::vector<int>*,2> arrayRef = setInterVec4NeighborRank(partnerRank_);
 	std::vector<int>* vecRef = arrayRef[0];
@@ -208,40 +208,44 @@ void Communicator::sendGhosts(const int& partnerRank_,
 
 	int nParticles = vecRef->size();
 	int nGhosts = vecGhostRef->size();
+
 	int nData = 1 + (particles->dataPerParticle)*(nParticles+nGhosts); // id, (X, V, F) (3) and M, R
 
 
-	double* sendBuffer = new double[nData];
-
 	int indx = 0;
-	
-	sendBuffer[indx++] = static_cast<double>(nParticles);
+
+	if (trandata_.size() == 0)
+		trandata_.push_back(0.0);
+
+	trandata_[0] += static_cast<double>(nParticles+nGhosts);
+
 	for (const auto& id : *vecRef)
 	{
 		std::vector<double> dataI = particles->packParticleData(id);
 
 		for (auto& data : dataI)
-			sendBuffer[indx++] = data;
+			trandata_.push_back(data);
+
 	}
 	for (const auto& id : *vecGhostRef)
 	{
 		std::vector<double> dataI = particles->packParticleData(id);
 
 		for (auto& data : dataI)
-			sendBuffer[indx++] = data;
+			trandata_.push_back(data);
+
+
 	}
-	trandata_ = (void *)sendBuffer;
+
+	return nParticles + nGhosts;
 }
 
-void Communicator::recvGhosts(void*& trandata_) {
-	if (trandata_ == nullptr)
-		throw std::invalid_argument("The buffer memory has not been initialized yet!");
-
-	double* recvBuffer = static_cast<double*>(trandata_);
+void Communicator::recvGhosts(std::vector<double>& trandata_) {
 
 	int loc = 0;
-	int nParticles = recvBuffer[loc++];
+	int nParticles = static_cast<int>(trandata_[loc++]);
 	int particlesRead = 0;
+
 
 
 
@@ -250,8 +254,9 @@ void Communicator::recvGhosts(void*& trandata_) {
 	while (particlesRead < nParticles) {
 		// reading the data
 		std::vector<double> dataI;
-		for (int i = 0; i < particles->dataPerParticle; i++)
-			dataI.push_back(recvBuffer[loc++]);
+		for (int i = 0; i < particles->dataPerParticle; i++) {
+			dataI.push_back(trandata_[loc++]);
+		}
 		int i = particles->unpackParticleData(dataI);
 
 		// incrementing the number of particles read
@@ -260,8 +265,6 @@ void Communicator::recvGhosts(void*& trandata_) {
 		if (i != -1)
 			addGhostInterior(i);
 	}
-		
-
 
 }
 
@@ -336,10 +339,7 @@ void Communicator::resetInterior()
 		bool xOwned = (x >= myMin[0] && x < myMax[0]);
 		bool yOwned = (y >= myMin[1] && y < myMax[1]);
 		bool zOwned = (z >= myMin[2] && z < myMax[2]);
-		// interior region .. not a ghost region for neighboring ranks
-		bool xInter = (x >= xMinInter && x < xMaxInter);
-		bool yInter = (y >= yMinInter && y < yMaxInter);
-		bool zInter = (z >= zMinInter && z < zMaxInter);
+
 
 		// if it belongs here
 		bool Owned = xOwned && yOwned && zOwned;
@@ -349,18 +349,65 @@ void Communicator::resetInterior()
 
 
 		// checking the interior atoms
-		if (!xInter && x <= xMinInter)
+		if (x <= xMinInter)
 			interXLo.push_back(i);
-		else if (!xInter && x > xMaxInter)
+		else if (x > xMaxInter)
 			interXHi.push_back(i);
-		if (!yInter && y <= yMinInter)
+		if (y <= yMinInter)
 			interYLo.push_back(i);
-		else if (!yInter && y > yMaxInter)
+		else if ( y > yMaxInter)
 			interYHi.push_back(i);
-		if (!zInter && z <= zMinInter)
+		if (z <= zMinInter)
 			interZLo.push_back(i);
-		else if (!zInter && z > zMaxInter)
+		else if (z > zMaxInter)
 			interZHi.push_back(i);
+	}
+
+}
+
+void Communicator::resetGhostInterior()
+{
+	interGhostXLo.clear();
+	interGhostXHi.clear();
+	interGhostYLo.clear();
+	interGhostYHi.clear();
+	interGhostZLo.clear();
+	interGhostZHi.clear();
+
+	int nlocal, nmax, nghost;
+	particles->getNmaxNlocal(nmax, nlocal);
+	particles->getNGhosts(nghost);
+
+
+	double xMinInter = myMin[0] + skin;
+	double xMaxInter = myMax[0] - skin;
+
+	double yMinInter = myMin[1] + skin;
+	double yMaxInter = myMax[1] - skin;
+
+	double zMinInter = myMin[2] + skin;
+	double zMaxInter = myMax[2] - skin;
+
+
+	for (int i = nlocal; i < nlocal + nghost; i++) {
+		double x = particles->X(i, 0);
+		double y = particles->X(i, 1);
+		double z = particles->X(i, 2);
+
+
+		// checking the interior atoms
+		if (x <= xMinInter)
+			interGhostXLo.push_back(i);
+		else if (x > xMaxInter)
+			interGhostXHi.push_back(i);
+		if (y <= yMinInter)
+			interGhostYLo.push_back(i);
+		else if (y > yMaxInter)
+			interGhostYHi.push_back(i);
+		if (z <= zMinInter)
+			interGhostZLo.push_back(i);
+		else if (z > zMaxInter)
+			interGhostZHi.push_back(i);
 	}
 }
 
@@ -485,6 +532,7 @@ std::vector<double>* Communicator::sendExchangeParticles()
 	std::array<double, 3> min, max;
 	box->getDimensions(min, max);
 
+
 	// resetting the nDests
 	nDests = 0;
 	// the id of particles to be removed
@@ -501,7 +549,7 @@ std::vector<double>* Communicator::sendExchangeParticles()
 		const double z = particles->X(i, 2);
 
 		bool removed = false;
-		// checking where does it go out of the rank
+		// checking whether it go out of the rank
 		if (x < min[0]) {
 			removed = true;
 			addParticles2ExchangeMessages(0, i);
@@ -549,7 +597,7 @@ std::vector<double>* Communicator::sendExchangeParticles()
 void Communicator::recvExchangeParticles(std::vector<double>& message) {
 	int messageSize = static_cast<int>(message.size());
 	int nParticles = static_cast<int>(message[0]);
-	int nData = 11 * nParticles + 1;
+	int nData = 12 * nParticles + 1;
 	// int nData = static_cast<int>(message[0]);
 	// checking the data container
 	if (nData != messageSize) {
@@ -557,7 +605,7 @@ void Communicator::recvExchangeParticles(std::vector<double>& message) {
  		throw std::invalid_argument("Corrupted data container!");
 	}
 	
-
+	int gid;
 	std::array<double, 3> x, v, f;
 	double m, r;
 
@@ -571,24 +619,25 @@ void Communicator::recvExchangeParticles(std::vector<double>& message) {
 	
 	for (int i = 0; i < nParticles; i++)
 	{
+		gid = message[12 * i + 1];
 		// x values
-		x[0] = message[11 * i + 1];
-		x[1] = message[11 * i + 2];
-		x[2] = message[11 * i + 3];
+		x[0] = message[12 * i + 2];
+		x[1] = message[12 * i + 3];
+		x[2] = message[12 * i + 4];
 		// v values
-		v[0] = message[11 * i + 4];
-		v[1] = message[11 * i + 5];
-		v[2] = message[11 * i + 6];
+		v[0] = message[12 * i + 5];
+		v[1] = message[12 * i + 6];
+		v[2] = message[12 * i + 7];
 		// f values
-		f[0] = message[11 * i + 7];
-		f[1] = message[11 * i + 8];
-		f[2] = message[11 * i + 9];
+		f[0] = message[12 * i + 8];
+		f[1] = message[12 * i + 9];
+		f[2] = message[12 * i + 10];
 		// m value
-		m = message[11 * i + 10];
+		m = message[12 * i + 11];
 		// r values
-		r = message[11 * i + 11];
+		r = message[12 * i + 12];
 		// adding that data to the particles
-		particles->addParticle(x, v, f, m, r);
+		particles->addParticle(gid,x, v, f, m, r);
 	}
 	// the message has to be cleared so one particle is not added multiple times
 	message.clear();
@@ -599,7 +648,7 @@ void Communicator::recvExchangeParticles(std::vector<double>& message) {
 void Communicator::addParticles2ExchangeMessages(const int& loc, const int& particleId)
 {
 	// 3*x, 3*v, 3*f, m, r
-	int nDataPerParticle = 11;
+	int nDataPerParticle = 12;
 	// nData and rest of the data
 	//exchangeMessages[loc].reserve(nData);
 
@@ -607,11 +656,13 @@ void Communicator::addParticles2ExchangeMessages(const int& loc, const int& part
 	std::array<double, 3> x, v, f;
 	double m, r;
 	particles->getParticle(particleId, x, v, f, m, r);
+	int gid = particles->Id(particleId);
 
 	// Adding the number
 	exchangeMessages[loc][0] += 1;
 
-
+	// adding id info
+	exchangeMessages[loc].push_back(static_cast<double>(gid));
 	// adding x info
 	exchangeMessages[loc].push_back(x[0]);
 	exchangeMessages[loc].push_back(x[1]);

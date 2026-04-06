@@ -350,7 +350,7 @@ int Particles::updateGhostParticle(
 {
 	int i = this->global2local(gid);
 
-	// checking three different situations
+	// checking three different situation
 	// first if it is not found -->> add a new empty line and update i to the last local id
 	// second if it is found --->>> update its values
 	// third if it is local atoms -->> do nothing!
@@ -450,7 +450,7 @@ std::vector<double> Particles::packParticleData(const int& id)
 	return out;
 }
 
-int Particles::unpackParticleData( std::vector<double>& data, const bool& ghost_)
+int Particles::unpackParticleData(std::vector<double>& data, const bool& ghost_)
 {
 	std::array<double, 3> newX, newV, newF;
 	double newR, newM;

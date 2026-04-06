@@ -41,6 +41,7 @@ std::unique_ptr<Engine> build_engine_set_particles(const int& myId_,
             std::make_unique<MockedParticles>();
 
 
+
         // calculating the nmax values
         int nmax = x_.size() / 3;
         // converting the pointer back
@@ -84,6 +85,7 @@ std::unique_ptr<Engine> build_engine_set_particles(const int& myId_,
         if (communicatorRef == nullptr)
             throw std::invalid_argument("This engine does not have any communicator objects!");
         // calling the init function of just the communicator... 
+        // 
         // returning the engine
         return engine_ptr;
     };

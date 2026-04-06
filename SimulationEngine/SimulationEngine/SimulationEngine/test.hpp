@@ -465,6 +465,7 @@ public:
 	{
 		nmax = nmax_;
 		nlocal = x_.size() / 3 - nghost_;
+		nghosts = nghost_;
 		id = std::move(id_);
 		x = std::move(x_);
 		v = std::move(v_);

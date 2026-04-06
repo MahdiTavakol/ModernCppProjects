@@ -756,6 +756,7 @@ TEST_CASE("Testing the message for sending an out of range particle from a rank"
     std::cout << std::string(80, '=') << std::endl;
 
     // Particles
+    std::vector<int> id1 = { 0,1,2,3,4,5 };
     std::vector<double> x1 = {
         -220.40, -180.10,   80.55,   // particle 0  owned by Q00 (-- interior) region 1
         -140.75, -260.33, -120.18,   // particle 1  owned by Q00 (-- interior) region 1
@@ -809,9 +810,9 @@ TEST_CASE("Testing the message for sending an out of range particle from a rank"
     // size
     int expectedMessagesSize[6] = {
         1,
-        23,
+        25,
         1,
-        23,
+        25,
         1,
         1
     };
@@ -819,11 +820,13 @@ TEST_CASE("Testing the message for sending an out of range particle from a rank"
     std::vector<double> expectedMessages[6] = {
         {0.0}, // to xlo --> no xlo
         {2.0,
+          4.0, // id
           12.6, -18.9,130.10,   // x
          -97.1,  28.9, -74.4,   // v
          -22.1,  16.0, -49.7,   // f
            5.6,                 // m
           56.4,                 // r
+          5.0,
           35.1,-140.48, 12.66,  // x
            3.6,   89.2, -12.5,  // v
             3.1,  27.6, -14.8,  // f
@@ -832,11 +835,13 @@ TEST_CASE("Testing the message for sending an out of range particle from a rank"
         }, //  to xhi --> to the region 2
         {0.0}, // to ylo --> no ylo
         {2.0,
+          2.0, //id
          -180.66,30.77, 14.95, // x
           41.2, -19.8,  63.5,  // v
           29.7,  -5.4,  38.9,  // f
           0.9,                 // m
           73.9,                // r
+           3.0, // id
         -280.66,  130.77, 214.95,
            51.2,   -19.8, 163.5,
            39.7,   -15.4,  18.9,
@@ -846,6 +851,8 @@ TEST_CASE("Testing the message for sending an out of range particle from a rank"
         {0.0},  // to zlo
         {0.0},  // to zhi
     };
+
+    std::vector<int> expectedId1 = { 0,1 };
 
     std::vector<double> expectedX1 = {
         -220.40, -180.10,   80.55,   // particle 0  owned by Q00 (-- interior) region 1
@@ -881,8 +888,9 @@ TEST_CASE("Testing the message for sending an out of range particle from a rank"
     std::array<int, 3> ranks = { 2,2,1 };
 
     // creating the engine_ptr
+    std::vector<int> id0 = {};
     std::vector<double> x0 = {}, v0 = {}, f0 = {}, m0 = {}, r0 = {};
-    auto engine_ptr = build_engine_set_particles(myId, ranks, x0, v0, f0, r0, m0);
+    auto engine_ptr = build_engine_set_particles(myId, ranks,id0, x0, v0, f0, r0, m0);
 
     /* After the engine_ptr is created in the engineFixture
      * the init function is called form every Ref object
@@ -907,11 +915,9 @@ TEST_CASE("Testing the message for sending an out of range particle from a rank"
     // so these would be null after moving into 
     // the mockedParticles object
     std::vector<double> x1Copy = x1, v1Copy = v1, f1Copy = f1, r1Copy = r1, m1Copy = m1;
-    std::vector<int> idCopy;
-    idCopy.resize(x1.size() / 3);
-    std::iota(idCopy.begin(), idCopy.end(), 0);
+    std::vector<int> id1Copy =id1;
     int nmax = static_cast<int>(x1Copy.size()) / 3;
-    mockedParticlesConv->resetParticles(nmax, idCopy, x1Copy, v1Copy, f1Copy, r1Copy, m1Copy);
+    mockedParticlesConv->resetParticles(nmax, id1Copy, x1Copy, v1Copy, f1Copy, r1Copy, m1Copy);
 
 
     // returning the communicatorRef from the engine_ptr
@@ -1149,11 +1155,13 @@ TEST_CASE("Testing receiving the particles from another processor")
     std::vector<double> messages[6] = {
         {0.0}, // to xlo --> no xlo
         {2.0,
+          20.0,
           12.6, -18.9,130.10,   // x
          -97.1,  28.9, -74.4,   // v
          -22.1,  16.0, -49.7,   // f
            5.6,                 // m
           56.4,                 // r
+          22.0,
           35.1,-140.48, 12.66,  // x
            3.6,   89.2, -12.5,  // v
            3.1,   27.6, -14.8,  // f
@@ -1162,6 +1170,7 @@ TEST_CASE("Testing receiving the particles from another processor")
         }, //  to xhi --> to the region 2
         {0.0}, // to ylo --> no ylo
         {1.0,
+          23,
          -180.66,30.77, 14.95, // x
           41.2, -19.8,  63.5,  // v
           29.7,  -5.4,  38.9,  // f
@@ -1822,14 +1831,14 @@ TEST_CASE("Test sending and recieving ghost particles") {
     // rank 1 
     int myId1 = 0, myId2 = 1, myId3 = 2, myId4 = 3;
     // transfered data
-    void* tranDataRaw12 = nullptr;
-    void* tranDataRaw13 = nullptr;
-    void* tranDataRaw21 = nullptr;
-    void* tranDataRaw24 = nullptr;
-    void* tranDataRaw31 = nullptr;
-    void* tranDataRaw34 = nullptr;
-    void* tranDataRaw42 = nullptr;
-    void* tranDataRaw43 = nullptr;
+    std::vector<double> tranDataRaw12;
+    std::vector<double> tranDataRaw13;
+    std::vector<double> tranDataRaw21;
+    std::vector<double> tranDataRaw24;
+    std::vector<double> tranDataRaw31;
+    std::vector<double> tranDataRaw34;
+    std::vector<double> tranDataRaw42;
+    std::vector<double> tranDataRaw43;
 
 
     std::vector<std::unique_ptr<Engine>> engineVector;
@@ -1881,8 +1890,8 @@ TEST_CASE("Test sending and recieving ghost particles") {
     struct {
         int commId;
         int destId1, destId2;
-        void*& sendBuffer1;
-        void*& sendBuffer2;
+        std::vector<double>& sendBuffer1;
+        std::vector<double>& sendBuffer2;
     } sendInfoArrays[4] = {
         {
             0,
@@ -1906,8 +1915,8 @@ TEST_CASE("Test sending and recieving ghost particles") {
     // receiving data info
     struct {
         int commId;
-        void*& srcBuffer1;
-        void*& srcBuffer2;
+        std::vector<double>& srcBuffer1;
+        std::vector<double>& srcBuffer2;
     } recvInfoArrays[4] = {
         {
             0,

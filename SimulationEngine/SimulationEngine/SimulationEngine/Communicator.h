@@ -18,9 +18,9 @@ public:
 
 
 	std::array<std::vector<int>*,2> setInterVec4NeighborRank(const int& partnerRank_);
-	void sendGhosts(const int& partnerRank_,
-		                  void*& trandata_);
-	void recvGhosts(void*& trandata_);
+	int sendGhosts(const int& partnerRank_,
+		                  std::vector<double>& trandata_);
+	void recvGhosts(std::vector<double>& trandata_);
 	
 
 	// getting the nDests used to see if there is no more data exchange
@@ -42,6 +42,8 @@ public:
 	void resetInterior();
 	// clearing the ghost particles to be sent to neighboring ranks
 	void clearGhostInterior();
+	// resetting the interior particles (from ghost particles)
+	void resetGhostInterior();
 	// adding to the ghost particles to be sent to the neighboring ranks
 	void addGhostInterior(const int& i_);
 	// resetting the ghost particles
