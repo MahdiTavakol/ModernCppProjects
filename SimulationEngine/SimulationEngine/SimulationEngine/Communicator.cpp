@@ -334,6 +334,8 @@ int Communicator::sendParticles(const int& partnerRank_,
 	if (trandata_.size() == 0)
 		trandata_.push_back(0.0);
 
+	nDests = 0;
+
 	for (int i = 0; i < nlocal; i++)
 	{
 		double x = particles->X(i, 0);
@@ -343,6 +345,7 @@ int Communicator::sendParticles(const int& partnerRank_,
 		bool result = (this->*f)(x, y, z);
 		if (result == true)
 		{
+			nDests++;
 			nParticles++;
 			ids2beRemoved.push_back(i);
 			trandata_[0] += 1.0;
@@ -355,7 +358,7 @@ int Communicator::sendParticles(const int& partnerRank_,
 	}
 
 	// sorting ids
-	std::sort(ids2beRemoved.begin(), ids2beRemoved.end(), [&](double a, double b) {return a > b; });
+	std::sort(ids2beRemoved.begin(), ids2beRemoved.end(), [&](int a, int b) {return a > b; });
 	// removing ids
 	for (auto& id : ids2beRemoved)
 		particles->removeParticleLocalId(id);
@@ -451,51 +454,6 @@ void Communicator::resetOwned()
 	particles->setNGhosts(nghosts);
 }
 
-void Communicator::resetExterior()
-{
-	int nlocal, nmax;
-	particles->getNmaxNlocal(nmax, nlocal);
-	
-	exterXLo.clear();
-	exterXHi.clear();
-	exterYLo.clear();
-	exterYHi.clear();
-	exterZLo.clear();
-	exterZHi.clear();
-
-	for (int i = 0; i < nlocal; i++)
-	{
-		double x = particles->X(i, 0);
-		double y = particles->X(i, 1);
-		double z = particles->X(i, 2);
-
-		// ranges
-		// owned region.. local region of this rank
-		bool xOwned = (x >= myMin[0] && x < myMax[0]);
-		bool yOwned = (y >= myMin[1] && y < myMax[1]);
-		bool zOwned = (z >= myMin[2] && z < myMax[2]);
-
-		// if it belongs here
-		bool Owned = xOwned && yOwned && zOwned;
-
-		if (Owned)
-			continue;
-
-		if (x < myMin[0])
-			exterXLo.push_back(i);
-		else if (x > myMax[0])
-			exterXHi.push_back(i);
-		else if (y < myMin[1])
-			exterYLo.push_back(i);
-		else if (y > myMax[1])
-			exterYHi.push_back(i);
-		else if (z < myMin[2])
-			exterZLo.push_back(i);
-		else if (z > myMax[2])
-			exterZHi.push_back(i);
-
-	}
-}
 
 void Communicator::resetInterior()
 {	

@@ -49,8 +49,7 @@ public:
 	void clearGhostInterior();
 	// resetting the interior particles (from ghost particles)
 	void resetGhostInterior();
-	// resetting the exterior particles (staged for exchange)
-	void resetExterior();
+
 	// adding to the ghost particles to be sent to the neighboring ranks
 	void addGhostInterior(const int& i_);
 	// resetting the ghost particles
@@ -85,7 +84,7 @@ protected:
 	bool isExterYLo(double x, double y, double z) { return y < myMin[1]; }
 	bool isExterYHi(double x, double y, double z) { return y > myMax[1]; }
 	bool isExterZLo(double x, double y, double z) { return z < myMin[2]; }
-	bool isExterZHi(double x, double y, double z) { return z > myMin[2]; }
+	bool isExterZHi(double x, double y, double z) { return z > myMax[2]; }
 	// skin
 	double skin = 0.0;
 	// communicator id
