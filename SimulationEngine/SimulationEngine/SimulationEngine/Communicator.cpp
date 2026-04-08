@@ -198,6 +198,47 @@ std::array<std::vector<int>*, 2> Communicator::setInterVec4NeighborRank(const in
 	return output;
 }
 
+
+std::vector<int>* Communicator::setExterVec4NeighborRank(const int& partnerRank_)
+{
+	std::vector<int>* vecRef = &exterXLo;
+
+	auto iter = std::find(&forward_partner[0][0], &forward_partner[0][0] + 6, partnerRank_);
+	int distance = std::distance(&forward_partner[0][0], iter);
+
+	switch (distance) {
+	case 0:
+		// xlo
+		vecRef = &exterXLo;
+		break;
+	case 1:
+		// xhi
+		vecRef = &exterXHi;
+		break;
+	case 2:
+		// ylo
+		vecRef = &exterYLo;
+		break;
+	case 3:
+		// yhi
+		vecRef = &exterYHi;
+		break;
+	case 4:
+		// zlo
+		vecRef = &exterZLo;
+		break;
+	case 5:
+		// zhi
+		vecRef = &exterZHi;
+		break;
+	default:
+		throw std::invalid_argument("Wrong partner id!");
+	}
+
+
+	return vecRef;
+}
+
 int Communicator::sendGhosts(const int& partnerRank_,
 	                         std::vector<double>& trandata_)
 {
@@ -238,6 +279,56 @@ int Communicator::sendGhosts(const int& partnerRank_,
 	}
 
 	return nParticles + nGhosts;
+}
+
+int Communicator::sendParticles(const int& partnerRank_,
+	std::vector<double>& trandata_) {
+	std::vector<int>* vecRef = setExterVec4NeighborRank(partnerRank_);
+
+
+	int nParticles = vecRef->size();
+
+	int nData = 1 + (particles->dataPerParticle) * (nParticles); // id, (X, V, F) (3) and M, R
+
+
+	int indx = 0;
+
+	if (trandata_.size() == 0)
+		trandata_.push_back(0.0);
+
+	trandata_[0] += static_cast<double>(nParticles);
+
+	for (const auto& id : *vecRef)
+	{
+		std::vector<double> dataI = particles->packParticleData(id);
+
+		for (auto& data : dataI)
+			trandata_.push_back(data);
+
+	}
+
+	return nParticles;
+}
+
+void Communicator::recvParticles(std::vector<double>& trandata_)
+{
+	int loc = 0;
+	int nParticles = static_cast<int>(trandata_[loc++]);
+	int particlesRead = 0;
+
+
+
+
+	std::array<double, 3> newX, newV, newF;
+	double newR, newM;
+	while (particlesRead < nParticles) {
+		// reading the data
+		std::vector<double> dataI;
+		for (int i = 0; i < particles->dataPerParticle; i++) {
+			dataI.push_back(trandata_[loc++]);
+		}
+		particles->unpackParticleData(dataI,false);
+	}
 }
 
 void Communicator::recvGhosts(std::vector<double>& trandata_) {
@@ -304,6 +395,52 @@ void Communicator::resetOwned()
 
 	particles->setNmaxNlocal(nmax, nlocal);
 	particles->setNGhosts(nghosts);
+}
+
+void Communicator::resetExterior()
+{
+	int nlocal, nmax;
+	particles->getNmaxNlocal(nmax, nlocal);
+	
+	exterXLo.clear();
+	exterXHi.clear();
+	exterYLo.clear();
+	exterYHi.clear();
+	exterZLo.clear();
+	exterZHi.clear();
+
+	for (int i = 0; i < nlocal; i++)
+	{
+		double x = particles->X(i, 0);
+		double y = particles->X(i, 1);
+		double z = particles->X(i, 2);
+
+		// ranges
+		// owned region.. local region of this rank
+		bool xOwned = (x >= myMin[0] && x < myMax[0]);
+		bool yOwned = (y >= myMin[1] && y < myMax[1]);
+		bool zOwned = (z >= myMin[2] && z < myMax[2]);
+
+		// if it belongs here
+		bool Owned = xOwned && yOwned && zOwned;
+
+		if (Owned)
+			continue;
+
+		if (x < myMin[0])
+			exterXLo.push_back(i);
+		else if (x > myMax[0])
+			exterXHi.push_back(i);
+		else if (y < myMin[1])
+			exterYLo.push_back(i);
+		else if (y > myMax[1])
+			exterYHi.push_back(i);
+		else if (z < myMin[2])
+			exterZLo.push_back(i);
+		else if (z > myMax[2])
+			exterZHi.push_back(i);
+
+	}
 }
 
 void Communicator::resetInterior()
@@ -619,25 +756,11 @@ void Communicator::recvExchangeParticles(std::vector<double>& message) {
 	
 	for (int i = 0; i < nParticles; i++)
 	{
-		gid = message[12 * i + 1];
-		// x values
-		x[0] = message[12 * i + 2];
-		x[1] = message[12 * i + 3];
-		x[2] = message[12 * i + 4];
-		// v values
-		v[0] = message[12 * i + 5];
-		v[1] = message[12 * i + 6];
-		v[2] = message[12 * i + 7];
-		// f values
-		f[0] = message[12 * i + 8];
-		f[1] = message[12 * i + 9];
-		f[2] = message[12 * i + 10];
-		// m value
-		m = message[12 * i + 11];
-		// r values
-		r = message[12 * i + 12];
-		// adding that data to the particles
-		particles->addParticle(gid,x, v, f, m, r);
+		std::vector<double> dataI;
+		int dataPerParticle = particles->dataPerParticle;
+		dataI.resize(dataPerParticle);
+		std::copy_n(message.data() + dataPerParticle * i + 1, dataPerParticle, dataI.data());
+		particles->unpackParticleData(dataI, false);
 	}
 	// the message has to be cleared so one particle is not added multiple times
 	message.clear();

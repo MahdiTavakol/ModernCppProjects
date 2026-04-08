@@ -18,9 +18,14 @@ public:
 
 
 	std::array<std::vector<int>*,2> setInterVec4NeighborRank(const int& partnerRank_);
+	std::vector<int>* setExterVec4NeighborRank(const int& partnerRank_);
 	int sendGhosts(const int& partnerRank_,
 		                  std::vector<double>& trandata_);
 	void recvGhosts(std::vector<double>& trandata_);
+
+	int sendParticles(const int& partnerRank_,
+		std::vector<double>& trandata_);
+	void recvParticles(std::vector<double>& trandata_);
 	
 
 	// getting the nDests used to see if there is no more data exchange
@@ -44,6 +49,8 @@ public:
 	void clearGhostInterior();
 	// resetting the interior particles (from ghost particles)
 	void resetGhostInterior();
+	// resetting the exterior particles (staged for exchange)
+	void resetExterior();
 	// adding to the ghost particles to be sent to the neighboring ranks
 	void addGhostInterior(const int& i_);
 	// resetting the ghost particles
@@ -71,6 +78,8 @@ protected:
 	std::vector<int> interXLo, interXHi, interYLo, interYHi, interZLo, interZHi;
 	// interior ghost ids (to serve as ghosts for neighboring ranks)
 	std::vector<int> interGhostXLo, interGhostXHi, interGhostYLo, interGhostYHi, interGhostZLo, interGhostZHi;
+	// particle ids set for sending to a neighboring rank (out of this rank borders)
+	std::vector<int> exterXLo, exterXHi, exterYLo, exterYHi, exterZLo, exterZHi;
 	// skin
 	double skin = 0.0;
 	// communicator id

@@ -471,7 +471,7 @@ int Particles::unpackParticleData(std::vector<double>& data, const bool& ghost_)
 	newR = data[loc++];
 
 	if (!ghost_) {
-		addParticle(newX, newV, newF, newM, newR);
+		addParticle(gid, newX, newV, newF, newM, newR);
 		return -1;
 	}
 	else {

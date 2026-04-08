@@ -444,6 +444,8 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
 
     std::vector<double>* messagesArray[4];
 
+    std::vector<double> messageVec[4];
+
 
     // number of destinations
     int nDestsTotal = 0;
@@ -470,6 +472,19 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
             // an array of vector<double> is returned for each communicatoriRef
             // bugging ===>>> it is a possible bug
             messagesArray[i] = communicatorArray[i]->sendExchangeParticles();
+
+            // xlo, xhi, ylo, yhi, ...
+            for (int j = 0; j < 6; j++)
+            {
+                // not sure about this yet.
+                int dest = exchangeDestArray[i][j];
+                if (dest < 0)
+                    continue;
+                // 
+                // may be I need to call some reset function to reset exterXLo, ...
+                communicatorArray[i]->sendParticles(dest, messageVec[dest]);
+
+            }
         }
 
         // getting the nDests values
@@ -478,6 +493,7 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
 
         // ranks
         for (int i = 0; i < 4; i++) {
+            communicatorArray[i]->recvParticles(messageVec[i]);
             // directions xlo, xhi, ylo, yhi, zlo, zhi
             for (int j = 0; j < 6; j++) {
                 // ref is very important
@@ -489,7 +505,7 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
                     continue;
 
                 
-                communicatorArray[exchangeDestArray[i][j]]->recvExchangeParticles(message);
+                //communicatorArray[exchangeDestArray[i][j]]->recvExchangeParticles(message);
             }
         }
 
