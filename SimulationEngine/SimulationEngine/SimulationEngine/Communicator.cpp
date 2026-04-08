@@ -283,29 +283,82 @@ int Communicator::sendGhosts(const int& partnerRank_,
 
 int Communicator::sendParticles(const int& partnerRank_,
 	std::vector<double>& trandata_) {
-	std::vector<int>* vecRef = setExterVec4NeighborRank(partnerRank_);
+	
+
+	auto iter = std::find(&forward_partner[0][0], &forward_partner[0][0] + 6, partnerRank_);
+	int distance = std::distance(&forward_partner[0][0], iter);
+
+	bool (Communicator::*f)(double x, double y, double z) = nullptr;
+	f = &Communicator::isExterXLo;
+
+	switch (distance) {
+	case 0:
+		// xlo
+		f = &Communicator::isExterXLo;
+		break;
+	case 1:
+		// xhi
+		f = &Communicator::isExterXHi;
+		break;
+	case 2:
+		// ylo
+		f = &Communicator::isExterYLo;
+		break;
+	case 3:
+		// yhi
+		f = &Communicator::isExterYHi;
+		break;
+	case 4:
+		// zlo
+		f = &Communicator::isExterZLo;
+		break;
+	case 5:
+		// zhi
+		f = &Communicator::isExterZHi;
+		break;
+	default:
+		throw std::invalid_argument("Wrong partner id!");
+	}
 
 
-	int nParticles = vecRef->size();
+	int nlocal, nmax;
+	particles->getNmaxNlocal(nmax, nlocal);
 
-	int nData = 1 + (particles->dataPerParticle) * (nParticles); // id, (X, V, F) (3) and M, R
 
+	// the id of particles to be removed
+	// we cannot remove them in the loop
+	std::vector<int> ids2beRemoved;
 
-	int indx = 0;
+	int nParticles = 0;
 
 	if (trandata_.size() == 0)
 		trandata_.push_back(0.0);
 
-	trandata_[0] += static_cast<double>(nParticles);
-
-	for (const auto& id : *vecRef)
+	for (int i = 0; i < nlocal; i++)
 	{
-		std::vector<double> dataI = particles->packParticleData(id);
+		double x = particles->X(i, 0);
+		double y = particles->X(i, 1);
+		double z = particles->X(i, 2);
 
-		for (auto& data : dataI)
-			trandata_.push_back(data);
+		bool result = (this->*f)(x, y, z);
+		if (result == true)
+		{
+			nParticles++;
+			ids2beRemoved.push_back(i);
+			trandata_[0] += 1.0;
 
+			std::vector<double> dataI = particles->packParticleData(i);
+
+			for (auto& data : dataI)
+				trandata_.push_back(data);
+		}
 	}
+
+	// sorting ids
+	std::sort(ids2beRemoved.begin(), ids2beRemoved.end(), [&](double a, double b) {return a > b; });
+	// removing ids
+	for (auto& id : ids2beRemoved)
+		particles->removeParticleLocalId(id);
 
 	return nParticles;
 }
@@ -328,6 +381,7 @@ void Communicator::recvParticles(std::vector<double>& trandata_)
 			dataI.push_back(trandata_[loc++]);
 		}
 		particles->unpackParticleData(dataI,false);
+		particlesRead++;
 	}
 }
 

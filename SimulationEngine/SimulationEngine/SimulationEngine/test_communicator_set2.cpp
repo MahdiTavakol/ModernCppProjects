@@ -468,6 +468,7 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
         numberOfAttempts++;
 
         for (int i = 0; i < 4; i++) {
+            communicatorArray[i]->resetExterior();
             exchangeDestArray[i] = communicatorArray[i]->returnExchangeDests();
             // an array of vector<double> is returned for each communicatoriRef
             // bugging ===>>> it is a possible bug
@@ -500,7 +501,7 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
                 // since the recvExchangeParticles
                 // after setting the new particle 
                 // needs to reset the message
-                auto& message = messagesArray[i][j];
+                //auto& message = messagesArray[i][j];
                 if (exchangeDestArray[i][j] < 0)
                     continue;
 

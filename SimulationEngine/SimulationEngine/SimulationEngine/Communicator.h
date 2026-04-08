@@ -80,6 +80,12 @@ protected:
 	std::vector<int> interGhostXLo, interGhostXHi, interGhostYLo, interGhostYHi, interGhostZLo, interGhostZHi;
 	// particle ids set for sending to a neighboring rank (out of this rank borders)
 	std::vector<int> exterXLo, exterXHi, exterYLo, exterYHi, exterZLo, exterZHi;
+	bool isExterXLo(double x, double y, double z) { return x < myMin[0]; }
+	bool isExterXHi(double x, double y, double z) { return x > myMax[0]; }
+	bool isExterYLo(double x, double y, double z) { return y < myMin[1]; }
+	bool isExterYHi(double x, double y, double z) { return y > myMax[1]; }
+	bool isExterZLo(double x, double y, double z) { return z < myMin[2]; }
+	bool isExterZHi(double x, double y, double z) { return z > myMin[2]; }
 	// skin
 	double skin = 0.0;
 	// communicator id
