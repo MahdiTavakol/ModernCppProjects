@@ -2636,7 +2636,9 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
     // and finally in the z dimension... This way there is a need
     // for knowing 6 neighboring ranks in contrast to the general 
     // case of 26 neighboring ranks!
-    do {
+    
+    
+    /*do {
         nDestsTotal = 0;
         numberOfAttempts++;
 
@@ -2680,13 +2682,75 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
             }
         }
 
-    } while ( numberOfAttempts < maxAttempts);
+    } while ( numberOfAttempts < maxAttempts);*/
 
-    auto& o = engineArray[3]->getParticles();
-    int nl, nm, ng;
-    o->getNmaxNlocal(nm, nl);
-    o->getNGhosts(ng);
-    auto x = o->getXData();
+
+
+    do {
+        std::vector<double> messageVec[4];
+        nDestsTotal = 0;
+        numberOfAttempts++;
+
+        for (int i = 0; i < 4; i++) {
+            exchangeDestArray[i] = communicatorArray[i]->returnExchangeDests();
+            // directions xlo, xhi, ylo, yhi, zlo and zhi
+            for (int j = 0; j < 6; j++)
+            {
+                //std::cout << "[" << i << "," << j << "] == " << exchangeDestArray[i][j] << std::endl;
+                if (exchangeDestArray[i][j] < 0)
+                    continue;
+                int dest = exchangeDestArray[i][j];
+                // sending the ghost particles info
+                communicatorArray[i]->sendParticles(dest, messageVec[dest]);
+            }
+        }
+
+        // getting the nDests values
+        for (int i = 0; i < 4; i++)
+            nDestsTotal += communicatorArray[i]->getNDests();
+
+
+        // ranks
+        for (int i = 0; i < 4; i++) {
+            // receiving ghosts
+            communicatorArray[i]->recvParticles(messageVec[i]);
+        }
+
+    } while (numberOfAttempts < maxAttempts);
+
+
+    do {
+        nDestsTotal = 0;
+        numberOfAttempts++;
+
+        for (int i = 0; i < 4; i++) {
+            exchangeDestArray[i] = communicatorArray[i]->returnExchangeDests();
+            communicatorArray[i]->resetInterior();
+            communicatorArray[i]->resetGhostInterior();
+            // directions xlo, xhi, ylo, yhi, zlo and zhi
+            for (int j = 0; j < 6; j++)
+            {
+                //std::cout << "[" << i << "," << j << "] == " << exchangeDestArray[i][j] << std::endl;
+                if (exchangeDestArray[i][j] < 0)
+                    continue;
+                int dest = exchangeDestArray[i][j];
+                // sending the ghost particles info
+                nDestsTotal += communicatorArray[i]->sendGhosts(dest, transData[dest]);
+            }
+        }
+
+        // getting the nDests values
+        for (int i = 0; i < 4; i++)
+            nDestsTotal += communicatorArray[i]->getNDests();
+
+
+        // ranks
+        for (int i = 0; i < 4; i++) {
+            // receiving ghosts
+            communicatorArray[i]->recvGhosts(transData[i]);
+        }
+
+    } while (numberOfAttempts < maxAttempts);
 
 
 
