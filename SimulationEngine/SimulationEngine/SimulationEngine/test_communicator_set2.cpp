@@ -442,8 +442,6 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
 
     std::vector<std::array<int, 6>> exchangeDestArray(nranks, std::array<int, 6>{});
 
-    std::vector<double>* messagesArray[4];
-
     
 
 
@@ -471,9 +469,6 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
 
         for (int i = 0; i < 4; i++) {
             exchangeDestArray[i] = communicatorArray[i]->returnExchangeDests();
-            // an array of vector<double> is returned for each communicatoriRef
-            // bugging ===>>> it is a possible bug
-            //messagesArray[i] = communicatorArray[i]->sendExchangeParticles();
 
             // xlo, xhi, ylo, yhi, ...
             for (int j = 0; j < 6; j++)
@@ -496,19 +491,6 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
         // ranks
         for (int i = 0; i < 4; i++) {
             communicatorArray[i]->recvParticles(messageVec[i]);
-            // directions xlo, xhi, ylo, yhi, zlo, zhi
-            for (int j = 0; j < 6; j++) {
-                // ref is very important
-                // since the recvExchangeParticles
-                // after setting the new particle 
-                // needs to reset the message
-                //auto& message = messagesArray[i][j];
-                if (exchangeDestArray[i][j] < 0)
-                    continue;
-
-                
-                //communicatorArray[exchangeDestArray[i][j]]->recvExchangeParticles(message);
-            }
         }
 
     } while (nDestsTotal > 0 && numberOfAttempts < maxAttempts);
@@ -518,17 +500,7 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
     for (int i = 0; i < nranks; i++) {
         int id = ids[i];
         Engine* engine_ptr = engineArray[i].get();
-        auto& particle = engine_ptr->getParticles();
-        int nmax, nlocal;
-        particle->getNmaxNlocal(nmax, nlocal);
-        auto x = particle->getXData();
 
-        for (int j = 0; j < nlocal; j++)
-        {
-            std::cout << "[" << x[3 * j] << "," << x[3 * j + 1] << "," << x[3 * j + 2] << "]"
-                << "[" << expectedXsVec[i][3 * j] << "," << expectedXsVec[i][3 * j+1] << "," << expectedXsVec[i][3 * j+2] << "]"
-                << std::endl;
-        }
         checking_communicator(
             id, engine_ptr,
             expectedXsVec,
@@ -845,7 +817,6 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
 
 
 
-    std::vector<double>* messagesArray[9];
 
     // number of destinations
     int nDestsTotal = 0;
@@ -865,14 +836,26 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
     // for knowing 6 neighboring ranks in contrast to the general 
     // case of 26 neighboring ranks!
     do {
+        std::vector<double> messageVec[9];
         nDestsTotal = 0;
         numberOfAttempts++;
 
         for (int i = 0; i < nranks; i++) {
             exchangeDestArray[i] = communicatorArray[i]->returnExchangeDests();
    
-            // an array of vector<double> is returned for each communicatoriRef
-            messagesArray[i] = communicatorArray[i]->sendExchangeParticles();
+
+            // xlo, xhi, ylo, yhi, ...
+            for (int j = 0; j < 6; j++)
+            {
+                // not sure about this yet.
+                int dest = exchangeDestArray[i][j];
+                if (dest < 0)
+                    continue;
+                // 
+                // may be I need to call some reset function to reset exterXLo, ...
+                communicatorArray[i]->sendParticles(dest, messageVec[dest]);
+
+            }
 
         }
 
@@ -883,17 +866,8 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
 
         // ranks
         for (int i = 0; i < nranks; i++) {
-            // directions xlo, xhi, ylo, yhi, zlo, zhi
-            for (int j = 0; j < 6; j++) {
-                // ref is very important
-                // since the recvExchangeParticles
-                // after setting the new particle 
-                // needs to reset the message
-                auto& message = messagesArray[i][j];
-                if (exchangeDestArray[i][j] < 0)
-                    continue;
-                communicatorArray[exchangeDestArray[i][j]]->recvExchangeParticles(message);
-            }
+            communicatorArray[i]->recvParticles(messageVec[i]);
+
         }
 
     } while (nDestsTotal > 0 && numberOfAttempts < maxAttempts);
@@ -1240,14 +1214,20 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
     // for knowing 6 neighboring ranks in contrast to the general 
     // case of 26 neighboring ranks!
     do {
+        std::vector<double> messageVec[27];
         nDestsTotal = 0;
         numberOfAttempts++;
 
         for (int i = 0; i < nranks; i++) {
             exchangeDestArray[i] = communicatorArray[i]->returnExchangeDests();
 
-            // an array of vector<double> is returned for each communicatoriRef
-            messagesArray[i] = communicatorArray[i]->sendExchangeParticles();
+            for (int j = 0; j < 6; j++)
+            {
+                int dest = exchangeDestArray[i][j];
+                if (dest < 0)
+                    continue;
+                communicatorArray[i]->sendParticles(dest, messageVec[dest]);
+            }
 
         }
 
@@ -1258,17 +1238,7 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
 
         // ranks
         for (int i = 0; i < nranks; i++) {
-            // directions xlo, xhi, ylo, yhi, zlo, zhi
-            for (int j = 0; j < 6; j++) {
-                // ref is very important
-                // since the recvExchangeParticles
-                // after setting the new particle 
-                // needs to reset the message
-                auto& message = messagesArray[i][j];
-                if (exchangeDestArray[i][j] < 0)
-                    continue;
-                communicatorArray[exchangeDestArray[i][j]]->recvExchangeParticles(message);
-            }
+            communicatorArray[i]->recvParticles(messageVec[i]);
         }
 
     } while (nDestsTotal > 0 && numberOfAttempts < maxAttempts);
