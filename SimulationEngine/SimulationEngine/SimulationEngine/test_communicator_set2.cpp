@@ -444,7 +444,7 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
 
     std::vector<double>* messagesArray[4];
 
-    std::vector<double> messageVec[4];
+    
 
 
     // number of destinations
@@ -464,6 +464,8 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
     // for knowing 6 neighboring ranks in contrast to the general 
     // case of 26 neighboring ranks!
     do {
+        std::vector<double> messageVec[4];
+
         nDestsTotal = 0;
         numberOfAttempts++;
 
@@ -516,6 +518,17 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
     for (int i = 0; i < nranks; i++) {
         int id = ids[i];
         Engine* engine_ptr = engineArray[i].get();
+        auto& particle = engine_ptr->getParticles();
+        int nmax, nlocal;
+        particle->getNmaxNlocal(nmax, nlocal);
+        auto x = particle->getXData();
+
+        for (int j = 0; j < nlocal; j++)
+        {
+            std::cout << "[" << x[3 * j] << "," << x[3 * j + 1] << "," << x[3 * j + 2] << "]"
+                << "[" << expectedXsVec[i][3 * j] << "," << expectedXsVec[i][3 * j+1] << "," << expectedXsVec[i][3 * j+2] << "]"
+                << std::endl;
+        }
         checking_communicator(
             id, engine_ptr,
             expectedXsVec,
