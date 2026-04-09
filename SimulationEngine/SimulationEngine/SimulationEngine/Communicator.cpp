@@ -286,6 +286,10 @@ int Communicator::sendGhosts(const int& partnerRank_,
 int Communicator::sendParticles(const int& partnerRank_,
 	std::vector<double>& trandata_) {
 	
+	// such a rank does not exist
+	if (partnerRank_ == -1)
+		if (trandata_.size() == 0)
+			trandata_.push_back(0.0);
 
 	auto iter = std::find(&forward_partner[0][0], &forward_partner[0][0] + 6, partnerRank_);
 	int distance = std::distance(&forward_partner[0][0], iter);
@@ -388,6 +392,10 @@ void Communicator::recvParticles(std::vector<double>& trandata_)
 		particles->unpackParticleData(dataI,false);
 		particlesRead++;
 	}
+
+	// the message has to be cleared so one particle is not added multiple times
+	trandata_.clear();
+	trandata_.push_back(0.0);
 }
 
 void Communicator::recvGhosts(std::vector<double>& trandata_) {
@@ -674,113 +682,6 @@ int Communicator::getNDests() {
 	return nDests;
 }
 
-std::vector<double>* Communicator::sendExchangeParticles()
-{
-	int nlocal, nmax;
-	// updating the nmax and nlocal
-	particles->getNmaxNlocal(nmax, nlocal);
-	// getting the min and max of the box dimension
-	std::array<double, 3> min, max;
-	box->getDimensions(min, max);
-
-
-	// resetting the nDests
-	nDests = 0;
-	// the id of particles to be removed
-	// we cannot remove them in the loop
-	std::vector<int> ids2beRemoved;
-
-	auto& xRef = particles->xRef();
-	auto nsize = static_cast<int>(xRef.size()) / 3;
-
-	for (int i = 0; i < nlocal; i++) {
-		// getting particle x, y, z values
-		const double x = particles->X(i, 0);
-		const double y = particles->X(i, 1);
-		const double z = particles->X(i, 2);
-
-		bool removed = false;
-		// checking whether it go out of the rank
-		if (x < min[0]) {
-			removed = true;
-			addParticles2ExchangeMessages(0, i);
-		}
-		else if (x > max[0]) {
-			removed = true;
-			addParticles2ExchangeMessages(1, i);
-		}
-		else if (y < min[1]) {
-			removed = true;
-			addParticles2ExchangeMessages(2, i);
-		}
-		else if (y > max[1]) {
-			removed = true;
-			addParticles2ExchangeMessages(3, i);
-		}
-		else if (z < min[2]) {
-			removed = true;
-			addParticles2ExchangeMessages(4, i);
-		}
-		else if (z > max[2]) {
-			removed = true;
-			addParticles2ExchangeMessages(5, i);
-		}
-
-		if (removed == true) {
-			nDests++;
-			ids2beRemoved.push_back(i);
-		}
-	}
-
-	// sorting ids
-	std::sort(ids2beRemoved.begin(), ids2beRemoved.end(), [&](double a, double b) {return a > b; });
-	// removing ids
-	for (auto& id : ids2beRemoved)
-		particles->removeParticleLocalId(id);
-
-
-	xRef = particles->xRef();
-	nsize = static_cast<int>(xRef.size()) / 3;
-	// returning the exchanged messages
-	return exchangeMessages;
-}
-
-void Communicator::recvExchangeParticles(std::vector<double>& message) {
-	int messageSize = static_cast<int>(message.size());
-	int nParticles = static_cast<int>(message[0]);
-	int nData = 12 * nParticles + 1;
-	// int nData = static_cast<int>(message[0]);
-	// checking the data container
-	if (nData != messageSize) {
-		std::cout << "nParticles(" << nParticles << ") and messageSize(" << messageSize << ")" << std::endl;
- 		throw std::invalid_argument("Corrupted data container!");
-	}
-	
-	int gid;
-	std::array<double, 3> x, v, f;
-	double m, r;
-
-	if (nParticles == 0) {
-		// This is an empty data container
-		return;
-	}
-
-	auto& xRef = particles->xRef();
-	auto nsize = static_cast<int>(xRef.size()) / 3;
-	
-	for (int i = 0; i < nParticles; i++)
-	{
-		std::vector<double> dataI;
-		int dataPerParticle = particles->dataPerParticle;
-		dataI.resize(dataPerParticle);
-		std::copy_n(message.data() + dataPerParticle * i + 1, dataPerParticle, dataI.data());
-		particles->unpackParticleData(dataI, false);
-	}
-	// the message has to be cleared so one particle is not added multiple times
-	message.clear();
-	message.push_back(0.0);
-
-}
 
 void Communicator::addParticles2ExchangeMessages(const int& loc, const int& particleId)
 {

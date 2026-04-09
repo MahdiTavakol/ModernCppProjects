@@ -879,8 +879,8 @@ TEST_CASE("Testing the message for sending an out of range particle from a rank"
         18.3,  // particle 1
     };
 
-    // expected destinations
-    std::array<double, 6> expectedDests = { -1,1,-1,2,-1,-1 };
+    // destinations
+    std::array<double, 6> dests = { -1,1,-1,2,-1,-1 };
 
 
 
@@ -925,7 +925,13 @@ TEST_CASE("Testing the message for sending an out of range particle from a rank"
     // checking the communicator 
     REQUIRE(communicator1Ref);
     // returning the exchange message
-    std::vector<double>* messages1 = communicator1Ref->sendExchangeParticles();
+    std::vector<double> messages[6];
+    for (int i = 0; i < 6; i++)
+    {
+        communicator1Ref->sendParticles(dests[i] , messages[i] );
+    }
+    
+    //std::vector<double>* messages1 = communicator1Ref->sendExchangeParticles();
 
     // getting x,v,f,m and r values
     auto* myX = particlesRef->getXData();
@@ -937,15 +943,15 @@ TEST_CASE("Testing the message for sending an out of range particle from a rank"
     /*
      * checking the message
      */
-    REQUIRE(messages1);
+    //REQUIRE(messages1);
     // checking its size
     for (int i = 0; i < 6; i++) {
-        REQUIRE(messages1[i].size() == expectedMessagesSize[i]);
+        REQUIRE(messages[i].size() == expectedMessagesSize[i]);
     }
     // checking its contents
     for (int i = 0; i < 6; i++) {
-        for (int j = 0; j < messages1[i].size(); j++)
-            REQUIRE_THAT(messages1[i][j], Catch::Matchers::WithinAbs(expectedMessages[i][j], 1e-6));
+        for (int j = 0; j < messages[i].size(); j++)
+            REQUIRE_THAT(messages[i][j], Catch::Matchers::WithinAbs(expectedMessages[i][j], 1e-6));
     }
     // checking message destinations
     auto exchangeDests = communicator1Ref->returnExchangeDests();
@@ -1201,9 +1207,9 @@ TEST_CASE("Testing receiving the particles from another processor")
     REQUIRE(communicator3Ref);
 
     // receiving the messages
-    communicator2Ref->recvExchangeParticles(messages[1]);
+    communicator2Ref->recvParticles(messages[1]);
     // receiving the messages
-    communicator3Ref->recvExchangeParticles(messages[3]);
+    communicator3Ref->recvParticles(messages[3]);
     // the message has to be empty after recvExchangeParticles
     // as the transfer is completed afterwards
     REQUIRE(messages[1].size() == 1);

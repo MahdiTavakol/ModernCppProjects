@@ -33,10 +33,6 @@ public:
 	// getting the destination array for the exchange
 	// xlo xhi ylo yhi zlo zhi
 	std::array<int,6> returnExchangeDests();
-	// getting the data for the exchanged particles 
-	std::vector<double>* sendExchangeParticles();
-	// receving the exchanged particle data
-	void recvExchangeParticles(std::vector<double>& messages);
 	// getting min max
 	void getMinMax(std::array<double, 3>& min_, std::array<double, 3>& max_) {
 		min_ = myMin; max_ = myMax;
