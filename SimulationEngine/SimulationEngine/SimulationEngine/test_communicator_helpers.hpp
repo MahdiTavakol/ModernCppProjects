@@ -79,3 +79,7 @@ void checking_communicator(
     std::vector<std::vector<double>> expectedFsVec_,
     std::vector<std::vector<double>> expectedRsVec_,
     std::vector<std::vector<double>> expectedMsVec_);
+
+
+
+void print_particles(std::unique_ptr<Engine>& engine_, std::vector<double> expectedXs, const int& expectedNGhost = 0);

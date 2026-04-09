@@ -2685,7 +2685,6 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
     } while ( numberOfAttempts < maxAttempts);*/
 
 
-
     do {
         std::vector<double> messageVec[4];
         nDestsTotal = 0;
@@ -2693,10 +2692,10 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
 
         for (int i = 0; i < 4; i++) {
             exchangeDestArray[i] = communicatorArray[i]->returnExchangeDests();
+
             // directions xlo, xhi, ylo, yhi, zlo and zhi
             for (int j = 0; j < 6; j++)
             {
-                //std::cout << "[" << i << "," << j << "] == " << exchangeDestArray[i][j] << std::endl;
                 if (exchangeDestArray[i][j] < 0)
                     continue;
                 int dest = exchangeDestArray[i][j];
@@ -2718,7 +2717,7 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
 
     } while (numberOfAttempts < maxAttempts);
 
-
+    numberOfAttempts = 0;
     do {
         nDestsTotal = 0;
         numberOfAttempts++;
@@ -2730,7 +2729,6 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
             // directions xlo, xhi, ylo, yhi, zlo and zhi
             for (int j = 0; j < 6; j++)
             {
-                //std::cout << "[" << i << "," << j << "] == " << exchangeDestArray[i][j] << std::endl;
                 if (exchangeDestArray[i][j] < 0)
                     continue;
                 int dest = exchangeDestArray[i][j];
@@ -2751,8 +2749,6 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
         }
 
     } while (numberOfAttempts < maxAttempts);
-
-
 
 
     for (int i = 0; i < nranks; i++) {

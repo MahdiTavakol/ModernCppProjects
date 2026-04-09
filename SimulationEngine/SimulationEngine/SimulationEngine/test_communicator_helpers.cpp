@@ -256,3 +256,48 @@ void checking_communicator(
         REQUIRE_THAT(myMs, Array1DMatcher(expMs.data(), expMs.size(), 1e-6));
 
     };
+
+
+void print_particles(std::unique_ptr<Engine>& engine_, std::vector<double> expectedXs, const int& expectedNGhost)
+{
+    int nmax, nlocal, nghost;
+    auto& particles = engine_->getParticles();
+    particles->getNmaxNlocal(nmax, nlocal);
+    particles->getNGhosts(nghost);
+    int nexpected = static_cast<int>(expectedXs.size()) / 3;
+    int nlocalexpected = nexpected - expectedNGhost;
+    int n = std::max(nlocal + nghost, nexpected);
+
+    std::cout << "[value]-[expected]" << std::endl;
+    std::cout << "[" << nlocal << "]-[" << nlocalexpected << "]" << std::endl;
+
+    for (int i = 0; i < n; i++)
+    {
+        std::cout << "[";
+
+        if (i == nlocal && i == nlocalexpected)
+            std::cout << "ghosts]-[ghosts]" << std::endl << "[";
+        else if (i == nlocal)
+            std::cout << "ghosts]" << std::endl << "[";
+        else if (i == nlocalexpected)
+            std::cout << "ghosts]" << std::endl << std::string(18, ' ') << "[";
+        if (i < nlocal + nghost)
+        {
+            double x = particles->X(i, 0);
+            double y = particles->X(i, 1);
+            double z = particles->X(i, 2);
+            std::cout << x << "," << y << "," << z;
+        }
+        std::cout << "] - [";
+        if (i < nexpected)
+        {
+            double x = expectedXs[3 * i];
+            double y = expectedXs[3 * i + 1];
+            double z = expectedXs[3 * i + 2];
+            std::cout << x << "," << y << "," << z;
+        }
+        std::cout << "]" << std::endl;
+
+    }
+
+}

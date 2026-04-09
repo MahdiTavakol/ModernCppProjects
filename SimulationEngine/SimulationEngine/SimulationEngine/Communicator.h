@@ -62,7 +62,7 @@ public:
 		return interXLo;
 	}
 
-	
+
 protected:
 	// box ref
 	Box* box = nullptr;

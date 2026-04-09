@@ -264,6 +264,7 @@ int Communicator::sendGhosts(const int& partnerRank_,
 	{
 		std::vector<double> dataI = particles->packParticleData(id);
 
+
 		for (auto& data : dataI)
 			trandata_.push_back(data);
 
@@ -271,6 +272,7 @@ int Communicator::sendGhosts(const int& partnerRank_,
 	for (const auto& id : *vecGhostRef)
 	{
 		std::vector<double> dataI = particles->packParticleData(id);
+
 
 		for (auto& data : dataI)
 			trandata_.push_back(data);
@@ -537,11 +539,11 @@ void Communicator::resetGhostInterior()
 	double zMinInter = myMin[2] + skin;
 	double zMaxInter = myMax[2] - skin;
 
-
 	for (int i = nlocal; i < nlocal + nghost; i++) {
 		double x = particles->X(i, 0);
 		double y = particles->X(i, 1);
 		double z = particles->X(i, 2);
+
 
 
 		// checking the interior atoms
