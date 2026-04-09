@@ -412,7 +412,20 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
 
     auto& communicatorRef = engine->getCommunicator();
 
-    std::array<int, 6> destArray;
+    std::array<int, 6> dests;
+
+    // transfered data
+    std::vector<double> sendBuff;
+    std::vector<double> recvBuff;
+    std::vector<double> sendVec;
+
+    // the maximum number of particles
+    const int dataPerParticle = Particles::dataPerParticle;
+    const int nmax = 30;
+    const int bufferSize = nmax * dataPerParticle;
+
+    sendBuff.resize(bufferSize);
+    recvBuff.resize(bufferSize);
 
 
     int nDestLocal = 0, nDestTotal;
@@ -421,8 +434,28 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
     constexpr int maxAttempts = 4;
 
     do {
+        nDestLocal = 0;
+        numberOfAttempts++;
 
-    }
+        dests = communicatorRef->returnExchangeDests();
+
+        for (const auto& dst : dests)
+        {
+            nDestLocal += communicatorRef->sendParticles(dst, sendVec);
+            std::copy_n(sendVec.data(), sendVec.size(), sendBuff.data());
+            comm_strategy->send(sendBuff.data(), sendBuff.size(), dst, 0);
+        }
+
+        for (const auto& src : dests)
+        {
+            comm_strategy->recv(recvBuff.data(), recvBuff.size(), src, 0);
+            communicatorRef->recvParticles(recvBuff);
+        }
+
+        // MPI_Allreduce to get nDestsTotal
+
+
+    } while (nDestsTotal > 0 && numberOfAttempts < maxAttempts);
 
 
 
