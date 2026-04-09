@@ -13,6 +13,7 @@
 int main(int argc, char* argv[])
 {
 	MPI_Init(&argc, &argv);
+	std::cout << "i" << std::endl;
 
 
 	int result = Catch::Session().run(argc, argv);
