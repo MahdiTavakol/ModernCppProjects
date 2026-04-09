@@ -4,7 +4,7 @@
 #include "MPI_comm_strategy.h"
 
 
-TEST_CASE("Testing sending a buffer through MPI_comm_strategy")
+TEST_CASE("Testing sending a buffer through MPI_comm_strategy","[mpi]")
 {
 	std::cout << "Testing MPI_comm_strategy" << std::endl;
 	std::cout << std::string(80, '=');
