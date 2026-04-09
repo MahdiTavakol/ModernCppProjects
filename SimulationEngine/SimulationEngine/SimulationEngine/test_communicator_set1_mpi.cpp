@@ -949,21 +949,18 @@ TEST_CASE("Test sending and recieving ghost particles") {
 
 
     // forward communication
-    // rank 1 
-    int myId1 = 0, myId2 = 1, myId3 = 2, myId4 = 3;
+
     // transfered data
-    std::vector<double> tranDataRaw12;
-    std::vector<double> tranDataRaw13;
-    std::vector<double> tranDataRaw21;
-    std::vector<double> tranDataRaw24;
-    std::vector<double> tranDataRaw31;
-    std::vector<double> tranDataRaw34;
-    std::vector<double> tranDataRaw42;
-    std::vector<double> tranDataRaw43;
+    std::vector<double> sendBuff;
+    std::vector<double> recvBuff;
 
+    sendBuff.resize(20);
+    recvBuff.resize(20);
 
-    std::vector<std::unique_ptr<Engine>> engineVector;
-    std::vector<Communicator*> communicatorVector;
+    std::unique_ptr<Engine> engine;
+    Communicator* comm;
+
+    set_particles_build_engine(rank, ranks, id, x, v, f, r, m, skin);
 
     struct {
         int myId;
