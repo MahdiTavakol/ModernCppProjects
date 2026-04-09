@@ -70,6 +70,23 @@ void build_engine_check_communicator(
     );
 
 
+void build_engine_check_communicator(
+    const int& myId_,
+    std::array<int, 3> ranks_,
+    std::vector<double>& x_,
+    std::vector<double>& v_,
+    std::vector<double>& f_,
+    std::vector<double>& r_,
+    std::vector<double>& m_,
+    std::vector<double>& expectedX_,
+    std::vector<double>& expectedV_,
+    std::vector<double>& expectedF_,
+    std::vector<double>& expectedR_,
+    std::vector<double>& expectedM_,
+    const double& skin_ = 0.0
+);
+
+
 
 void checking_communicator(
     const int& myId_,

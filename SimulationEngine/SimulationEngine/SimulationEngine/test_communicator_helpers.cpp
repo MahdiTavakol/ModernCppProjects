@@ -221,6 +221,77 @@ void build_engine_check_communicator(
     };
 
 
+void build_engine_check_communicator(
+    const int& myId_,
+    std::array<int, 3> ranks_,
+    std::vector<double>& x_,
+    std::vector<double>& v_,
+    std::vector<double>& f_,
+    std::vector<double>& r_,
+    std::vector<double>& m_,
+    std::vector<double>& expectedX_,
+    std::vector<double>& expectedV_,
+    std::vector<double>& expectedF_,
+    std::vector<double>& expectedR_,
+    std::vector<double>& expectedM_,
+    const double& skin_
+)
+{
+    // creating the communicator object
+// each communicator gets its id from the MPI_Comm_rank before creation
+// in the real scenarios
+    std::unique_ptr<Communicator> communicator =
+        std::make_unique<Communicator>(myId_, ranks_, skin_);
+    // box dimensions
+    array<double, 3> min = { -300.0,-300.0,-300.0 };
+    array<double, 3> max = { 300.0, 300.0, 300.0 };
+    // box
+    std::unique_ptr<Box> box = std::make_unique<Box>(min, max);
+    // particles
+    int nmax = 20;
+    int nlocal = 20;
+    // copies since we used the std::move in the mockedParticles class
+    std::vector<double> xCopy = x_;
+    std::vector<double> vCopy = v_;
+    std::vector<double> fCopy = f_;
+    std::vector<double> rCopy = r_;
+    std::vector<double> mCopy = m_;
+    // creating the mockedParticles object
+    std::unique_ptr<Particles> mockedParticles =
+        std::make_unique<MockedParticles>(nmax, xCopy, vCopy, fCopy, rCopy, mCopy);
+    // putting everything into the engine
+    std::vector<std::unique_ptr<Ref>> inputs;
+    inputs.push_back(std::move(mockedParticles));
+    inputs.push_back(std::move(box));
+    inputs.push_back(std::move(communicator));
+    // creating the engine fixture
+    EngineFixture engineFixture(inputs);
+    // getting the engine_ptr
+    auto engine_ptr = engineFixture.returnEngine();
+    // checking the ids of atoms
+    auto& particles = engine_ptr->getParticlesForUpdate();
+    // getting xs, vs, fs, ms and rs
+    double* myXs = particles->getXData();
+    double* myVs = particles->getVData();
+    double* myFs = particles->getFData();
+    double* myMs = particles->getMData();
+    double* myRs = particles->getRData();
+    particles->getNmaxNlocal(nmax, nlocal);
+    // 
+    auto& expXs = expectedX_;
+    auto& expVs = expectedV_;
+    auto& expFs = expectedF_;
+    auto& expRs = expectedR_;
+    auto& expMs = expectedM_;
+    // checking output
+    REQUIRE_THAT(myXs, Array3DMatcher(expXs.data(), expXs.size() / 3, 1e-6));
+    REQUIRE_THAT(myVs, Array3DMatcher(expVs.data(), expVs.size() / 3, 1e-6));
+    REQUIRE_THAT(myFs, Array3DMatcher(expFs.data(), expFs.size() / 3, 1e-6));
+    REQUIRE_THAT(myRs, Array1DMatcher(expRs.data(), expRs.size(), 1e-6));
+    REQUIRE_THAT(myMs, Array1DMatcher(expMs.data(), expMs.size(), 1e-6));
+}
+
+
 
 void checking_communicator(
     const int& myId_,

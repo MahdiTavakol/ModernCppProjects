@@ -161,6 +161,7 @@
     <ClCompile Include="test_box.cpp" />
     <ClCompile Include="test_colliintegrator.cpp" />
     <ClCompile Include="test_communicator_helpers.cpp" />
+    <ClCompile Include="test_communicator_set1_mpi.cpp" />
     <ClCompile Include="test_communicator_set2.cpp" />
     <ClCompile Include="test_communicator_set1.cpp" />
     <ClCompile Include="test_comm_strategy.cpp" />
