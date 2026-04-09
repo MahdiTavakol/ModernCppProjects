@@ -18,6 +18,7 @@
 #include "Box.h"
 #include "Run.h"
 #include "Error.h"
+#include "Comm_strategy.h"
 
 #include "catch_amalgamated.hpp"
 #include <algorithm>
@@ -34,6 +35,12 @@ using std::make_unique, std::unique_ptr;
 * Non default matcher for X, V and F arrays
 * 
 */
+
+// checking the minimum number of required ranks
+void minRanksRequirement(std::unique_ptr<Comm_strategy>& comm_strategy_, const int minSize_);
+
+// skipping the extra ranks
+void skipExtraRanks(std::unique_ptr<Comm_strategy>& comm_strategy_, const int maxSize_);
 
 
 class Array3DMatcher : public Catch::Matchers::MatcherGenericBase

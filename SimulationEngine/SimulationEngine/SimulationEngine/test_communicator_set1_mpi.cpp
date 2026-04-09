@@ -329,7 +329,7 @@ TEST_CASE("Testing receiving the particles from another processor", "[.]")
     // I need to think about this test!
 }
 
-TEST_CASE("Test sending and recieving ghost particles") {
+TEST_CASE("Test sending and recieving ghost particles","[mpi]") {
     std::cout << "Test sending and receiving ghost particles" << std::endl;
     std::cout << std::string(80, '=') << std::endl;
 
@@ -344,16 +344,21 @@ TEST_CASE("Test sending and recieving ghost particles") {
     // the skin values
     double skin = 50.0;
 
+    // the minimum number of ranks
+    minRanksRequirement(comm_strategy, 4);
+    // skipping the extra ranks
+    skipExtraRanks(comm_strategy, 4);
+
 
     int nlocal, nghost;
     std::vector<int> ids;
     std::vector<double> xs, vs, fs, ms, rs;
-    int expectedNlocal, expectedNGhost;
+    int expectedNlocal, expectedNghost;
     std::vector<int> expectedIds;
     std::vector<double> expectedXs, expectedVs, expectedFs, expectedMs, expectedRs;
     // new values
-    // core 1
-    if (rank == 1)
+    // core 0
+    if (rank == 0)
     {
         nlocal = 5;
         nghost = 4;
@@ -501,7 +506,7 @@ TEST_CASE("Test sending and recieving ghost particles") {
             14.2,                       // particle 16
         };
     }
-    else if (rank == 2)
+    else if (rank == 1)
     {
         nlocal = 5;
         nghost = 4;
@@ -649,7 +654,7 @@ TEST_CASE("Test sending and recieving ghost particles") {
             26.4                        // particle 19
         };
     }
-    else if (rank == 3)
+    else if (rank == 2)
     {
         nlocal = 5;
         nghost = 4;
@@ -797,7 +802,7 @@ TEST_CASE("Test sending and recieving ghost particles") {
             26.4                        // particle 19
         };
         }
-    else if (rank == 4)
+    else if (rank == 3)
     {
         nlocal = 5;
         nghost = 4;
@@ -953,180 +958,61 @@ TEST_CASE("Test sending and recieving ghost particles") {
     // transfered data
     std::vector<double> sendBuff;
     std::vector<double> recvBuff;
+    std::vector<double> sendVec;
 
-    sendBuff.resize(20);
-    recvBuff.resize(20);
+    // the maximum number of particles
+    const int dataPerParticle = Particles::dataPerParticle;
+    const int nmax = 30;
+    const int bufferSize = nmax * dataPerParticle;
+
+    sendBuff.resize(bufferSize);
+    recvBuff.resize(bufferSize);
 
     std::unique_ptr<Engine> engine;
     Communicator* comm;
 
-    set_particles_build_engine(rank, ranks, id, x, v, f, r, m, skin);
+    engine = set_particles_build_engine(rank, ranks, ids, xs, vs, fs, rs, ms, skin);
 
-    struct {
-        int myId;
-        std::vector<int>& id;
-        std::vector<double>& xs, vs, fs, rs, ms;
-    } engineArgs[4] = {
-        {
-            myId1, is1,
-            xs1, vs1, fs1, rs1, ms1
-        },
-        {
-            myId2, is2,
-            xs2, vs2, fs2, rs2, ms2
-        },
-        {
-            myId3, is3,
-            xs3, vs3, fs3, rs3, ms3
-        },
-        {
-            myId4, is4,
-            xs4, vs4, fs4, rs4, ms4
-        }
-    };
+    auto& communicatorRef = engine->getCommunicator();
 
-    for (auto& arg : engineArgs) {
-        int myId = arg.myId;
-        std::vector<int>& id = arg.id;
-        std::vector<double>& x = arg.xs, v = arg.vs, f = arg.fs, r = arg.rs, m = arg.ms;
-        auto engine_ptr =
-            set_particles_build_engine(myId, ranks, id, x, v, f, r, m, skin);
+    std::array<int, 6> dests = communicatorRef->returnExchangeDests();
 
-        auto& communicatorRef = engine_ptr->getCommunicator();
-        communicatorVector.push_back(communicatorRef.get());
-        engineVector.push_back(std::move(engine_ptr));
+    for (const auto& dst : dests)
+    {
+        communicatorRef->sendGhosts(dst, sendVec);
+        std::copy_n(sendVec.data(), sendVec.size(), sendBuff.data());
+        comm_strategy->send(sendBuff.data(), sendBuff.size(), dst, 0);
     }
 
-    // returning the communicators
-
-    auto& communicator1Ref = engineVector[0]->getCommunicator();
-    auto& communicator2Ref = engineVector[1]->getCommunicator();
-    auto& communicator3Ref = engineVector[2]->getCommunicator();
-    auto& communicator4Ref = engineVector[3]->getCommunicator();
-
-    // sending data info
-    struct {
-        int commId;
-        int destId1, destId2;
-        std::vector<double>& sendBuffer1;
-        std::vector<double>& sendBuffer2;
-    } sendInfoArrays[4] = {
-        {
-            0,
-            myId2, myId3,
-            tranDataRaw12, tranDataRaw13},
-        {
-            1,
-            myId1, myId4,
-            tranDataRaw21, tranDataRaw24},
-        {
-            2,
-            myId1, myId4,
-            tranDataRaw31, tranDataRaw34},
-        {
-            3,
-            myId2, myId3,
-            tranDataRaw42, tranDataRaw43}
-
-    };
-
-    // receiving data info
-    struct {
-        int commId;
-        std::vector<double>& srcBuffer1;
-        std::vector<double>& srcBuffer2;
-    } recvInfoArrays[4] = {
-        {
-            0,
-            tranDataRaw21,
-            tranDataRaw31
-        },
-        {
-            1,
-            tranDataRaw12,
-            tranDataRaw42
-        },
-        {
-            2,
-            tranDataRaw43,
-            tranDataRaw13
-        },
-        {
-            3,
-            tranDataRaw34,
-            tranDataRaw24
-        }
-    };
-
-    // sending ghosts
-    for (auto& sendInfo : sendInfoArrays) {
-        auto& commRef = communicatorVector[sendInfo.commId];
-        int destId1 = sendInfo.destId1;
-        int destId2 = sendInfo.destId2;
-        auto& sendBuffer1 = sendInfo.sendBuffer1;
-        auto& sendBuffer2 = sendInfo.sendBuffer2;
-        commRef->sendGhosts(destId1, sendBuffer1);
-        commRef->sendGhosts(destId2, sendBuffer2);
-    }
-    // receiving ghost
-    for (auto& recvInfo : recvInfoArrays) {
-        Communicator* commPtr = communicatorVector[recvInfo.commId];
-        commPtr->recvGhosts(recvInfo.srcBuffer1);
-        commPtr->recvGhosts(recvInfo.srcBuffer2);
+    for (const auto& src : dests)
+    {
+        comm_strategy->recv(recvBuff.data(), recvBuff.size(), src, 0);
+        communicatorRef->recvGhosts(recvBuff);
     }
 
-    // data checker struct
-    struct {
-        int engineId;
-        int expectedNlocal, expectedNGhost;
-        std::vector<int>& expectedIds;
-        std::vector<double>& expectedXs, expectedVs, expectedFs, expectedRs, expectedMs;
-    } dataCheckerArray[] = {
-        {0,
-           expectedNlocal1, expectedNghost1,
-           expectedIds1,
-           expectedXs1,expectedVs1,expectedFs1,expectedRs1,expectedMs1},
-        {1,
-           expectedNlocal2, expectedNghost2,
-           expectedIds2,
-           expectedXs2,expectedVs2,expectedFs2,expectedRs2,expectedMs2},
-        {2,
-           expectedNlocal3, expectedNghost3,
-           expectedIds3,
-           expectedXs3,expectedVs3,expectedFs3,expectedRs3,expectedMs3},
-        {3,
-           expectedNlocal4, expectedNghost4,
-           expectedIds4,
-           expectedXs4,expectedVs4,expectedFs4,expectedRs4,expectedMs4}
+    auto& particlesRef = engine->getParticles();
 
-    };
+    auto myIs = particlesRef->getIdData();
+    auto myXs = particlesRef->getXData();
+    auto myVs = particlesRef->getVData();
+    auto myFs = particlesRef->getFData();
+    auto myRs = particlesRef->getRData();
+    auto myMs = particlesRef->getMData();
 
-    // checking data
-    int i = 0;
-    for (auto& dataCheck : dataCheckerArray) {
-        // particle reference
-        auto& particlesRef = engineVector[dataCheck.engineId]->getParticlesForUpdate();
-        // getting the data data
-        auto myIs = particlesRef->getIdData();
-        auto myXs = particlesRef->getXData();
-        auto myVs = particlesRef->getVData();
-        auto myFs = particlesRef->getFData();
-        auto myRs = particlesRef->getRData();
-        auto myMs = particlesRef->getMData();
-
-        // 
-        REQUIRE_THAT(myIs,
-            Array1DMatcherInt(dataCheck.expectedIds.data(), dataCheck.expectedNlocal, dataCheck.expectedNGhost));
-        REQUIRE_THAT(myXs,
-            Array3DMatcher(dataCheck.expectedXs.data(), dataCheck.expectedNlocal, dataCheck.expectedNGhost, 1e-6));
-        REQUIRE_THAT(myVs,
-            Array3DMatcher(dataCheck.expectedVs.data(), dataCheck.expectedNlocal, dataCheck.expectedNGhost, 1e-6));
-        REQUIRE_THAT(myFs,
-            Array3DMatcher(dataCheck.expectedFs.data(), dataCheck.expectedNlocal, dataCheck.expectedNGhost, 1e-6));
-        REQUIRE_THAT(myRs,
-            Array1DMatcher(dataCheck.expectedRs.data(), dataCheck.expectedNlocal, dataCheck.expectedNGhost, 1e-6));
-        REQUIRE_THAT(myMs,
-            Array1DMatcher(dataCheck.expectedMs.data(), dataCheck.expectedNlocal, dataCheck.expectedNGhost, 1e-6));
-    }
+    REQUIRE_THAT(myIs,
+        Array1DMatcherInt(expectedIds.data(), expectedNlocal, expectedNghost));
+    REQUIRE_THAT(myXs,
+        Array3DMatcher(expectedXs.data(), expectedNlocal, expectedNghost));
+    REQUIRE_THAT(myVs,
+        Array3DMatcher(expectedVs.data(), expectedNlocal, expectedNghost));
+    REQUIRE_THAT(myFs,
+        Array3DMatcher(expectedFs.data(), expectedNlocal, expectedNghost));
+    REQUIRE_THAT(myRs,
+        Array1DMatcher(expectedRs.data(), expectedNlocal, expectedNghost));
+    REQUIRE_THAT(myMs,
+        Array1DMatcher(expectedMs.data(), expectedNlocal, expectedNghost));
 
 }
+
+
+

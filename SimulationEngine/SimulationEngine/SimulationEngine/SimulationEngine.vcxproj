@@ -164,12 +164,14 @@
     <ClCompile Include="test_communicator_set1_mpi.cpp" />
     <ClCompile Include="test_communicator_set2.cpp" />
     <ClCompile Include="test_communicator_set1.cpp" />
+    <ClCompile Include="test_communicator_set2_mpi.cpp" />
     <ClCompile Include="test_comm_strategy.cpp" />
     <ClCompile Include="test_damperfield.cpp" />
     <ClCompile Include="test_enginefactory.cpp" />
     <ClCompile Include="test_error.cpp" />
     <ClCompile Include="test_fixList.cpp" />
     <ClCompile Include="test_integrator.cpp" />
+    <ClCompile Include="test_main.cpp" />
     <ClCompile Include="test_particles.cpp" />
     <ClCompile Include="test_regression.cpp" />
     <ClCompile Include="test_run.cpp" />

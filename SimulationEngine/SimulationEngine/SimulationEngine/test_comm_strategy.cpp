@@ -4,13 +4,6 @@
 #include "MPI_comm_strategy.h"
 
 
-static void minRanksRequirement(std::unique_ptr<Comm_strategy>& comm_strategy_, const int minSize_)
-{
-	int size = comm_strategy_->getSize();
-	std::string warningTest = std::string("This test requires at least ") + std::to_string(minSize_) + std::string(" ranks!");
-	if (size < minSize_)
-		SKIP(warningTest.c_str());
-}
 
 TEST_CASE("Testing updating a buffer MPI_comm_strategy","[mpi]")
 {
