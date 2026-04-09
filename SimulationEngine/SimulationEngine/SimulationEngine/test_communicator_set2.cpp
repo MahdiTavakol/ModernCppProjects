@@ -2638,51 +2638,6 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
     // case of 26 neighboring ranks!
     
     
-    /*do {
-        nDestsTotal = 0;
-        numberOfAttempts++;
-
-        for (int i = 0; i < 4; i++) {
-            exchangeDestArray[i] = communicatorArray[i]->returnExchangeDests();
-            // an array of vector<double> is returned for each communicatoriRef
-            messagesArray[i] = communicatorArray[i]->sendExchangeParticles();
-            communicatorArray[i]->resetInterior();
-            communicatorArray[i]->resetGhostInterior();
-            // directions xlo, xhi, ylo, yhi, zlo and zhi
-            for (int j = 0; j < 6; j++)
-            {
-                //std::cout << "[" << i << "," << j << "] == " << exchangeDestArray[i][j] << std::endl;
-                if (exchangeDestArray[i][j] < 0)
-                    continue;
-                int dest = exchangeDestArray[i][j];
-                // sending the ghost particles info
-                nDestsTotal += communicatorArray[i]->sendGhosts(dest, transData[dest]);
-            }
-        }
-
-        // getting the nDests values
-        for (int i = 0; i < 4; i++)
-            nDestsTotal += communicatorArray[i]->getNDests();
-
-
-        // ranks
-        for (int i = 0; i < 4; i++) {
-            // receiving ghosts
-            communicatorArray[i]->recvGhosts(transData[i]);
-            // directions xlo, xhi, ylo, yhi, zlo, zhi
-            for (int j = 0; j < 6; j++) {
-                // ref is very important
-                // since the recvExchangeParticles
-                // after setting the new particle 
-                // needs to reset the message
-                auto& message = messagesArray[i][j];
-                if (exchangeDestArray[i][j] < 0)
-                    continue;
-                communicatorArray[exchangeDestArray[i][j]]->recvExchangeParticles(message);
-            }
-        }
-
-    } while ( numberOfAttempts < maxAttempts);*/
 
 
     do {
