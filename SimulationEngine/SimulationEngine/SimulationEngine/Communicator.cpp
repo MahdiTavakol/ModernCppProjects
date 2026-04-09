@@ -150,137 +150,72 @@ void Communicator::init()
 
 }
 
-std::array<std::vector<int>*, 2> Communicator::setInterVec4NeighborRank(const int& partnerRank_)
-{
-	std::vector<int>* vecRef = &interXLo;
-	std::vector<int>* vecGhostRef = &interGhostXLo;
-
-	auto iter = std::find(&forward_partner[0][0], &forward_partner[0][0] + 6, partnerRank_);
-	int distance = std::distance(&forward_partner[0][0], iter);
-
-	switch (distance) {
-	case 0:
-		// xlo
-		vecRef = &interXLo;
-		vecGhostRef = &interGhostXLo;
-		break;
-	case 1:
-		// xhi
-		vecRef = &interXHi;
-		vecGhostRef = &interGhostXHi;
-		break;
-	case 2:
-		// ylo
-		vecRef = &interYLo;
-		vecGhostRef = &interGhostYLo;
-		break;
-	case 3:
-		// yhi
-		vecRef = &interYHi;
-		vecGhostRef = &interGhostYHi;
-		break;
-	case 4:
-		// zlo
-		vecRef = &interZLo;
-		vecGhostRef = &interGhostZLo;
-		break;
-	case 5:
-		// zhi
-		vecRef = &interZHi;
-		vecGhostRef = &interGhostZHi;
-		break;
-	default:
-		throw std::invalid_argument("Wrong partner id!");
-	}
-
-
-	std::array<std::vector<int>*, 2> output = { vecRef,vecGhostRef };
-	return output;
-}
-
-
-std::vector<int>* Communicator::setExterVec4NeighborRank(const int& partnerRank_)
-{
-	std::vector<int>* vecRef = &exterXLo;
-
-	auto iter = std::find(&forward_partner[0][0], &forward_partner[0][0] + 6, partnerRank_);
-	int distance = std::distance(&forward_partner[0][0], iter);
-
-	switch (distance) {
-	case 0:
-		// xlo
-		vecRef = &exterXLo;
-		break;
-	case 1:
-		// xhi
-		vecRef = &exterXHi;
-		break;
-	case 2:
-		// ylo
-		vecRef = &exterYLo;
-		break;
-	case 3:
-		// yhi
-		vecRef = &exterYHi;
-		break;
-	case 4:
-		// zlo
-		vecRef = &exterZLo;
-		break;
-	case 5:
-		// zhi
-		vecRef = &exterZHi;
-		break;
-	default:
-		throw std::invalid_argument("Wrong partner id!");
-	}
-
-
-	return vecRef;
-}
 
 int Communicator::sendGhosts(const int& partnerRank_,
 	                         std::vector<double>& trandata_)
 {
-	std::array<std::vector<int>*,2> arrayRef = setInterVec4NeighborRank(partnerRank_);
-	std::vector<int>* vecRef = arrayRef[0];
-	std::vector<int>* vecGhostRef = arrayRef[1];
+	int nmax, nlocal, nghost;
+	particles->getNmaxNlocal(nmax, nlocal);
+	particles->getNGhosts(nghost);
 
+	auto iter = std::find(&forward_partner[0][0], &forward_partner[0][0] + 6, partnerRank_);
+	int distance = std::distance(&forward_partner[0][0], iter);
 
-	int nParticles = vecRef->size();
-	int nGhosts = vecGhostRef->size();
+	bool (Communicator:: * f)(double x, double y, double z) = nullptr;
+	f = &Communicator::isInterXLo;
 
-	int nData = 1 + (particles->dataPerParticle)*(nParticles+nGhosts); // id, (X, V, F) (3) and M, R
-
-
-	int indx = 0;
+	switch (distance) {
+	case 0:
+		// xlo
+		f = &Communicator::isInterXLo;
+		break;
+	case 1:
+		// xhi
+		f = &Communicator::isInterXHi;
+		break;
+	case 2:
+		// ylo
+		f = &Communicator::isInterYLo;
+		break;
+	case 3:
+		// yhi
+		f = &Communicator::isInterYHi;
+		break;
+	case 4:
+		// zlo
+		f = &Communicator::isInterZLo;
+		break;
+	case 5:
+		// zhi
+		f = &Communicator::isInterZHi;
+		break;
+	default:
+		throw std::invalid_argument("Wrong partner id!");
+	}
 
 	if (trandata_.size() == 0)
 		trandata_.push_back(0.0);
 
-	trandata_[0] += static_cast<double>(nParticles+nGhosts);
+	int nParticles = 0;
 
-	for (const auto& id : *vecRef)
+	for (int i = 0; i < nlocal + nghost; i++)
 	{
-		std::vector<double> dataI = particles->packParticleData(id);
+		double x = particles->X(i, 0);
+		double y = particles->X(i, 1);
+		double z = particles->X(i, 2);
+		bool result = (this->*f)(x, y, z);
+		if (result)
+		{
+			trandata_[0] += 1.0;
+			nParticles++;
+			std::vector<double> dataI = particles->packParticleData(i);
+			for (auto& data : dataI)
+				trandata_.push_back(data);
 
-
-		for (auto& data : dataI)
-			trandata_.push_back(data);
-
-	}
-	for (const auto& id : *vecGhostRef)
-	{
-		std::vector<double> dataI = particles->packParticleData(id);
-
-
-		for (auto& data : dataI)
-			trandata_.push_back(data);
-
-
+		}
 	}
 
-	return nParticles + nGhosts;
+	return nParticles;
 }
 
 int Communicator::sendParticles(const int& partnerRank_,
@@ -340,7 +275,7 @@ int Communicator::sendParticles(const int& partnerRank_,
 	if (trandata_.size() == 0)
 		trandata_.push_back(0.0);
 
-	nDests = 0;
+
 
 	for (int i = 0; i < nlocal; i++)
 	{
@@ -351,7 +286,6 @@ int Communicator::sendParticles(const int& partnerRank_,
 		bool result = (this->*f)(x, y, z);
 		if (result == true)
 		{
-			nDests++;
 			nParticles++;
 			ids2beRemoved.push_back(i);
 			trandata_[0] += 1.0;
@@ -415,13 +349,10 @@ void Communicator::recvGhosts(std::vector<double>& trandata_) {
 		for (int i = 0; i < particles->dataPerParticle; i++) {
 			dataI.push_back(trandata_[loc++]);
 		}
-		int i = particles->unpackParticleData(dataI);
+		particles->unpackParticleData(dataI);
 
 		// incrementing the number of particles read
 		particlesRead++;
-		// the i is a ghost particle here
-		if (i != -1)
-			addGhostInterior(i);
 	}
 
 }
@@ -465,152 +396,7 @@ void Communicator::resetOwned()
 }
 
 
-void Communicator::resetInterior()
-{	
-	int nlocal, nmax;
-	particles->getNmaxNlocal(nmax, nlocal);
 
-	interXLo.clear();
-	interXHi.clear();
-	interYLo.clear();
-	interYHi.clear();
-	interZLo.clear();
-	interZHi.clear();
-
-
-	double xMinInter = myMin[0] + skin;
-	double xMaxInter = myMax[0] - skin;
-
-	double yMinInter = myMin[1] + skin;
-	double yMaxInter = myMax[1] - skin;
-
-	double zMinInter = myMin[2] + skin;
-	double zMaxInter = myMax[2] - skin;
-
-
-	for (int i = 0; i < nlocal; i++) {
-		double x = particles->X(i, 0);
-		double y = particles->X(i, 1);
-		double z = particles->X(i, 2);
-
-		// ranges
-		// owned region.. local region of this rank
-		bool xOwned = (x >= myMin[0] && x < myMax[0]);
-		bool yOwned = (y >= myMin[1] && y < myMax[1]);
-		bool zOwned = (z >= myMin[2] && z < myMax[2]);
-
-
-		// if it belongs here
-		bool Owned = xOwned && yOwned && zOwned;
-
-		if (!Owned)
-			continue;
-
-
-		// checking the interior atoms
-		if (x <= xMinInter)
-			interXLo.push_back(i);
-		else if (x > xMaxInter)
-			interXHi.push_back(i);
-		if (y <= yMinInter)
-			interYLo.push_back(i);
-		else if ( y > yMaxInter)
-			interYHi.push_back(i);
-		if (z <= zMinInter)
-			interZLo.push_back(i);
-		else if (z > zMaxInter)
-			interZHi.push_back(i);
-	}
-
-}
-
-void Communicator::resetGhostInterior()
-{
-	interGhostXLo.clear();
-	interGhostXHi.clear();
-	interGhostYLo.clear();
-	interGhostYHi.clear();
-	interGhostZLo.clear();
-	interGhostZHi.clear();
-
-	int nlocal, nmax, nghost;
-	particles->getNmaxNlocal(nmax, nlocal);
-	particles->getNGhosts(nghost);
-
-
-	double xMinInter = myMin[0] + skin;
-	double xMaxInter = myMax[0] - skin;
-
-	double yMinInter = myMin[1] + skin;
-	double yMaxInter = myMax[1] - skin;
-
-	double zMinInter = myMin[2] + skin;
-	double zMaxInter = myMax[2] - skin;
-
-	for (int i = nlocal; i < nlocal + nghost; i++) {
-		double x = particles->X(i, 0);
-		double y = particles->X(i, 1);
-		double z = particles->X(i, 2);
-
-
-
-		// checking the interior atoms
-		if (x <= xMinInter)
-			interGhostXLo.push_back(i);
-		else if (x > xMaxInter)
-			interGhostXHi.push_back(i);
-		if (y <= yMinInter)
-			interGhostYLo.push_back(i);
-		else if (y > yMaxInter)
-			interGhostYHi.push_back(i);
-		if (z <= zMinInter)
-			interGhostZLo.push_back(i);
-		else if (z > zMaxInter)
-			interGhostZHi.push_back(i);
-	}
-}
-
-void Communicator::clearGhostInterior()
-{
-	interGhostXLo.clear();
-	interGhostXHi.clear();
-	interGhostYLo.clear();
-	interGhostYHi.clear();
-	interGhostZLo.clear();
-	interGhostZHi.clear();
-}
-
-void Communicator::addGhostInterior(const int& i_)
-{
-	double xMinInter = myMin[0] + skin;
-	double xMaxInter = myMax[0] - skin;
-
-	double yMinInter = myMin[1] + skin;
-	double yMaxInter = myMax[1] - skin;
-
-	double zMinInter = myMin[2] + skin;
-	double zMaxInter = myMax[2] - skin;
-
-	double x = particles->X(i_, 0);
-	double y = particles->X(i_, 1);
-	double z = particles->X(i_, 2);
-
-
-	// checking the interior atoms
-	if (x <= xMinInter)
-		interGhostXLo.push_back(i_);
-	else if (x > xMaxInter)
-		interGhostXHi.push_back(i_);
-	if (y <= yMinInter)
-		interGhostYLo.push_back(i_);
-	else if (y > yMaxInter)
-		interGhostYHi.push_back(i_);
-	if (z <= zMinInter)
-		interGhostZLo.push_back(i_);
-	else if (z > zMaxInter)
-		interGhostZHi.push_back(i_);
-
-}
 
 void Communicator::resetGhosts()
 {
@@ -662,7 +448,6 @@ void Communicator::resetParticles()
 {
 	resetOwned();
 	resetGhosts();
-	resetInterior();
 }
 
 std::array<int,6> Communicator::returnExchangeDests()
@@ -678,9 +463,7 @@ std::array<int,6> Communicator::returnExchangeDests()
 	return output;
 }
 
-int Communicator::getNDests() {
-	return nDests;
-}
+
 
 
 void Communicator::addParticles2ExchangeMessages(const int& loc, const int& particleId)

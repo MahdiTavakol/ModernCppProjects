@@ -450,7 +450,7 @@ std::vector<double> Particles::packParticleData(const int& id)
 	return out;
 }
 
-int Particles::unpackParticleData(std::vector<double>& data, const bool& ghost_)
+void Particles::unpackParticleData(std::vector<double>& data, const bool& ghost_)
 {
 	std::array<double, 3> newX, newV, newF;
 	double newR, newM;
@@ -472,10 +472,8 @@ int Particles::unpackParticleData(std::vector<double>& data, const bool& ghost_)
 
 	if (!ghost_) {
 		addParticle(gid, newX, newV, newF, newM, newR);
-		return -1;
 	}
 	else {
-		int i = updateGhostParticle(gid, newX, newV, newF, newM, newR);
-		return i;
+		updateGhostParticle(gid, newX, newV, newF, newM, newR);
 	}
 }

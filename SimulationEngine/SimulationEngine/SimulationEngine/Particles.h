@@ -89,7 +89,7 @@ public:
 	void swapParticles(const int& id1, const int& id2);
 	// packing the data for the ghost transfer
 	std::vector<double> packParticleData(const int& id);
-	int unpackParticleData(std::vector<double>& data, const bool& ghost_ = true);
+	void unpackParticleData(std::vector<double>& data, const bool& ghost_ = true);
 
 	// used int* const on purpose to avoid the 
 	// memory managed by vector to be destructed or changed

@@ -479,14 +479,11 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
                     continue;
                 // 
                 // may be I need to call some reset function to reset exterXLo, ...
-                communicatorArray[i]->sendParticles(dest, messageVec[dest]);
+                nDestsTotal += communicatorArray[i]->sendParticles(dest, messageVec[dest]);
 
             }
         }
 
-        // getting the nDests values
-        for (int i = 0; i < 4; i++)
-            nDestsTotal += communicatorArray[i]->getNDests();
 
         // ranks
         for (int i = 0; i < 4; i++) {
@@ -853,15 +850,12 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
                     continue;
                 // 
                 // may be I need to call some reset function to reset exterXLo, ...
-                communicatorArray[i]->sendParticles(dest, messageVec[dest]);
-
+                nDestsTotal += communicatorArray[i]->sendParticles(dest, messageVec[dest]);
             }
 
         }
 
-        // getting the nDests values
-        for (int i = 0; i < nranks; i++)
-            nDestsTotal += communicatorArray[i]->getNDests();
+
 
 
         // ranks
@@ -1226,14 +1220,12 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
                 int dest = exchangeDestArray[i][j];
                 if (dest < 0)
                     continue;
-                communicatorArray[i]->sendParticles(dest, messageVec[dest]);
+                nDestsTotal += communicatorArray[i]->sendParticles(dest, messageVec[dest]);
             }
 
         }
 
-        // getting the nDests values
-        for (int i = 0; i < nranks; i++)
-            nDestsTotal += communicatorArray[i]->getNDests();
+
 
 
         // ranks
@@ -2608,22 +2600,13 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
     constexpr int maxAttempts = 4;
 
 
-    // setting the interior particles (ghosts for neighboring particles)
-    for (auto& communicator : communicatorArray)
-    {
-        communicator->setInteriorParticles();
-    }
+
 
     // sending the interior particles as ghosts
     for (auto& communicator : communicatorArray) {
         //communicator->sendGhosts()
     }
 
-    for (auto& communicator : communicatorArray)
-    {
-        communicator->resetInterior();
-        communicator->clearGhostInterior();
-    }
 
     int nDestsTotal = 0;
     // repeating the particle reassginement until there is no
@@ -2655,13 +2638,10 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
                     continue;
                 int dest = exchangeDestArray[i][j];
                 // sending the ghost particles info
-                communicatorArray[i]->sendParticles(dest, messageVec[dest]);
+                nDestsTotal += communicatorArray[i]->sendParticles(dest, messageVec[dest]);
             }
         }
 
-        // getting the nDests values
-        for (int i = 0; i < 4; i++)
-            nDestsTotal += communicatorArray[i]->getNDests();
 
 
         // ranks
@@ -2679,8 +2659,6 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
 
         for (int i = 0; i < 4; i++) {
             exchangeDestArray[i] = communicatorArray[i]->returnExchangeDests();
-            communicatorArray[i]->resetInterior();
-            communicatorArray[i]->resetGhostInterior();
             // directions xlo, xhi, ylo, yhi, zlo and zhi
             for (int j = 0; j < 6; j++)
             {
@@ -2692,9 +2670,7 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
             }
         }
 
-        // getting the nDests values
-        for (int i = 0; i < 4; i++)
-            nDestsTotal += communicatorArray[i]->getNDests();
+
 
 
         // ranks
