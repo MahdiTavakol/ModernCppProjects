@@ -35,8 +35,6 @@ public:
 	// resetting the owned particles
 	void resetOwned();
 
-
-
 	// resetting the ghost particles
 	void resetGhosts();
 	// resetting the particles
@@ -80,9 +78,6 @@ protected:
 
 	// Reverse_comm Partners
 	int reverse_partner[3][2];
-
-
-
 
 
 	// the information for exchanging particles between ranks

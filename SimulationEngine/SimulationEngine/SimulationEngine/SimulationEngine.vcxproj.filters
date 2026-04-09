@@ -123,6 +123,18 @@
     <ClCompile Include="test_communicator_helpers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="test_comm_strategy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test_simple_neighbor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Comm_strategy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MPI_comm_strategy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="catch_amalgamated.hpp">
@@ -192,6 +204,12 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="test_communicator_helpers.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Comm_strategy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MPI_comm_strategy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -70,6 +70,10 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Program Files (x86)\Microsoft SDKs\MPI\Include</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);C:\Program Files (x86)\Microsoft SDKs\MPI\Lib\x64</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -105,10 +109,13 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>C:\Program Files\Microsoft MPI\Include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Program Files\Microsoft MPI\Lib\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);msmpi.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -131,6 +138,7 @@
     <ClCompile Include="catch_amalgamated.cpp" />
     <ClCompile Include="ColliIntegrator.cpp" />
     <ClCompile Include="Communicator.cpp" />
+    <ClCompile Include="Comm_strategy.cpp" />
     <ClCompile Include="DamperField.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EngineFactory.cpp" />
@@ -141,6 +149,7 @@
     <ClCompile Include="FixPrint.cpp" />
     <ClCompile Include="ForceField.cpp" />
     <ClCompile Include="Integrator.cpp" />
+    <ClCompile Include="MPI_comm_strategy.cpp" />
     <ClCompile Include="Neighbor.cpp" />
     <ClCompile Include="Particles.cpp" />
     <ClCompile Include="Run.cpp" />
@@ -154,6 +163,7 @@
     <ClCompile Include="test_communicator_helpers.cpp" />
     <ClCompile Include="test_communicator_set2.cpp" />
     <ClCompile Include="test_communicator_set1.cpp" />
+    <ClCompile Include="test_comm_strategy.cpp" />
     <ClCompile Include="test_damperfield.cpp" />
     <ClCompile Include="test_enginefactory.cpp" />
     <ClCompile Include="test_error.cpp" />
@@ -162,6 +172,7 @@
     <ClCompile Include="test_particles.cpp" />
     <ClCompile Include="test_regression.cpp" />
     <ClCompile Include="test_run.cpp" />
+    <ClCompile Include="test_simple_neighbor.cpp" />
     <ClCompile Include="test_springfield.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -169,6 +180,7 @@
     <ClInclude Include="catch_amalgamated.hpp" />
     <ClInclude Include="ColliIntegrator.h" />
     <ClInclude Include="Communicator.h" />
+    <ClInclude Include="Comm_strategy.h" />
     <ClInclude Include="DamperField.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="EngineFactory.h" />
@@ -178,6 +190,7 @@
     <ClInclude Include="FixPrint.h" />
     <ClInclude Include="ForceField.h" />
     <ClInclude Include="Integrator.h" />
+    <ClInclude Include="MPI_comm_strategy.h" />
     <ClInclude Include="Neighbor.h" />
     <ClInclude Include="Particles.h" />
     <ClInclude Include="Run.h" />
