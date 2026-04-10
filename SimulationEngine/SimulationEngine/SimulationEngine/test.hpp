@@ -42,6 +42,9 @@ void minRanksRequirement(std::unique_ptr<Comm_strategy>& comm_strategy_, const i
 // skipping the extra ranks
 std::unique_ptr<Comm_strategy> skipExtraRanks(std::unique_ptr<Comm_strategy>& comm_strategy_, const int maxSize_);
 
+// printing title just from the rank zero
+void printRankZero(const std::string text);
+
 
 class Array3DMatcher : public Catch::Matchers::MatcherGenericBase
 {

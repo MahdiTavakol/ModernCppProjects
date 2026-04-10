@@ -8,8 +8,8 @@
 /// </summary>
 
 TEST_CASE("Testing the communication class","[mpi]") {
-    std::cout << "Testing the communication class" << std::endl;
-    std::cout << std::string(80, '=') << std::endl;
+    printRankZero("Testing the communication class");
+    printRankZero(std::string(80, '='));
 
     std::unique_ptr<Comm_strategy> comm_strategy = std::make_unique<MPI_comm_strategy>();
     int rank = comm_strategy->getRank();
@@ -330,8 +330,8 @@ TEST_CASE("Testing receiving the particles from another processor", "[.]")
 }
 
 TEST_CASE("Test sending and recieving ghost particles","[mpi]") {
-    std::cout << "Test sending and receiving ghost particles" << std::endl;
-    std::cout << std::string(80, '=') << std::endl;
+    printRankZero("Test sending and receiving ghost particles");
+    printRankZero(std::string(80, '='));
 
     // data 
     // number of ranks 

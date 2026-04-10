@@ -5,8 +5,8 @@
 
 TEST_CASE("Testing the movement of particles between processors without skin (2X2X1)","[mpi]")
 {
-    std::cout << "Testing the movement of particles between processors without skin (2X2X1)" << std::endl;
-    std::cout << std::string(80, '=') << std::endl;
+    printRankZero("Testing the movement of particles between processors without skin (2X2X1)");
+    printRankZero(std::string(80, '='));
 
 
     std::unique_ptr<Comm_strategy> comm_strategy = std::make_unique<MPI_comm_strategy>();
@@ -411,8 +411,7 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
         rank, ranks, newId, newX, newV, newF, newR, newM);
 
     auto& communicatorRef = engine->getCommunicator();
-
-    std::array<int, 6> dests;
+    std::array<int, 6> dests = communicatorRef->returnExchangeDests();
 
     // transfered data
     std::vector<double> sendBuff;
@@ -437,7 +436,7 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
         nDestLocal = 0;
         nAttemptsLocal++;
 
-        dests = communicatorRef->returnExchangeDests();
+        
 
         MPI_Request requests[6];
 
@@ -491,8 +490,6 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
 
     } while (nDestTotal > 0 && nAttemptsTotal < maxAttempts);
 
-    MPI_comm_strategy* mpi_comm_strategy = dynamic_cast<MPI_comm_strategy*>(comm_strategy.get());
-    MPI_Comm* worldPtr = mpi_comm_strategy->getWorldPtr();
 
 
 
@@ -503,5 +500,563 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
         expectedFs,
         expectedRs,
         expectedMs
+    );
+}
+
+
+TEST_CASE("Testing the movement of particles between processors without skin (3X3X1)", "[mpi]")
+{
+    printRankZero("Testing the movement of particles between processors without skin (3X3X1)");
+    printRankZero(std::string(80, '='));
+
+    std::unique_ptr<Comm_strategy> comm_strategy = std::make_unique<MPI_comm_strategy>();
+    int rank = comm_strategy->getRank();
+    int size = comm_strategy->getSize();
+
+    // checking the min required number of ranks
+    minRanksRequirement(comm_strategy, 9);
+    // skipping the extra ranks
+    comm_strategy = skipExtraRanks(comm_strategy, 9);
+
+
+    // moving particles
+    std::vector<double> newX;
+    std::vector<double> expectedX;
+
+    if (rank == 0) {
+        newX =
+        {
+            -220.0, -220.0,   40.0,   // particle 1 stays in Q00    rank0
+            -150.0, -180.0,  -60.0,   // particle 2 stays in Q00    rank0
+             -80.0, -210.0,   15.0,   // particle 3 -> Q10 (x high) rank1
+            -170.0,  -80.0,   90.0,   // particle 4 -> Q01 (y high) rank3
+        };
+
+        // expected values
+
+        // Q00 rank0
+        expectedX =
+        {
+            -220.0, -220.0,   40.0,   // particle 1 stays in Q00    rank0
+            -150.0, -180.0,  -60.0,   // particle 2 stays in Q00    rank0
+            -130.0, -170.0,   10.0,   // particle 7 -> Q00 (x low)  rank0
+            -180.0, -140.0,   80.0    // particle 17 -> Q00 (y low) rank0
+        };
+    }
+    else if (rank == 1) {
+        newX =
+        {
+             -20.0, -220.0,   35.0,   // particle 5 stays in Q10    rank1
+              60.0, -150.0,  -80.0,   // particle 6 stays in Q10    rank1
+            -130.0, -170.0,   10.0,   // particle 7 -> Q00 (x low)  rank0
+             130.0, -190.0,  -25.0,   // particle 8 -> Q20 (x high) rank2
+              40.0,  -70.0,   55.0,   // particle 9 -> Q11 (y high) rank4
+        };
+
+        // Q10 rank1
+        expectedX =
+        {
+            -80.0, -210.0,   15.0,   // particle 3 -> Q10 (x high) rank1
+            -20.0, -220.0,   35.0,   // particle 5 stays in Q10    rank1
+             60.0, -150.0,  -80.0,   // particle 6 stays in Q10    rank1
+             80.0, -160.0,   70.0,   // particle 12 -> Q10 (x low) rank1
+             10.0, -130.0,   45.0    // particle 23 -> Q10 (y low) rank1
+        };
+
+       
+    }
+    else if (rank == 2) {
+        newX =
+        {
+             180.0, -220.0,   10.0,   // particle 10 stays in Q20    rank2
+             240.0, -120.0,  -95.0,   // particle 11 stays in Q20    rank2
+              80.0, -160.0,   70.0,   // particle 12 -> Q10 (x low)  rank1
+             170.0,  -90.0,  -40.0,   // particle 13 -> Q21 (y high) rank5
+        };
+
+        // Q20 rank2
+        expectedX =
+        {
+            130.0, -190.0,  -25.0,   // particle 8 -> Q20 (x high) rank2
+            180.0, -220.0,   10.0,   // particle 10 stays in Q20   rank2
+            240.0, -120.0,  -95.0,   // particle 11 stays in Q20   rank2
+            180.0, -170.0,  -15.0    // particle 28 -> Q20 (y low) rank2
+        };
+    }
+    else if (rank == 3) {
+        newX =
+        {
+            -240.0,  -20.0,   50.0,   // particle 14 stays in Q01    rank3
+            -160.0,   60.0,  -20.0,   // particle 15 stays in Q01    rank3
+             -90.0,   30.0,   15.0,   // particle 16 -> Q11 (x high) rank4
+            -180.0, -140.0,   80.0,   // particle 17 -> Q00 (y low)  rank0
+            -210.0,  140.0,  -35.0,   // particle 18 -> Q02 (y high) rank6
+        };
+
+        // Q01 rank3
+        expectedX =
+        {
+            -170.0,  -80.0,   90.0,   // particle 4 -> Q01 (y high) rank3
+            -240.0,  -20.0,   50.0,   // particle 14 stays in Q01   rank3
+            -160.0,   60.0,  -20.0,   // particle 15 stays in Q01   rank3
+            -140.0,   10.0,   75.0,   // particle 21 -> Q01 (x low) rank3
+            -190.0,   80.0,   95.0    // particle 33 -> Q01 (y low) rank3
+        };
+    }
+    else if (rank == 4) {
+        newX =
+        {
+             -40.0,  -30.0,   20.0,   // particle 19 stays in Q11    rank4
+              70.0,   80.0,  -60.0,   // particle 20 stays in Q11    rank4
+            -140.0,   10.0,   75.0,   // particle 21 -> Q01 (x low)  rank3
+             140.0,  -20.0,  -10.0,   // particle 22 -> Q21 (x high) rank5
+              10.0, -130.0,   45.0,   // particle 23 -> Q10 (y low)  rank1
+             -70.0,  160.0,   90.0,   // particle 24 -> Q12 (y high) rank7
+        };
+
+        // Q11 rank4
+        expectedX =
+        {
+             40.0,  -70.0,   55.0,   // particle 9 -> Q11 (y high)  rank4
+            -90.0,   30.0,   15.0,   // particle 16 -> Q11 (x high) rank4
+            -40.0,  -30.0,   20.0,   // particle 19 stays in Q11    rank4
+             70.0,   80.0,  -60.0,   // particle 20 stays in Q11    rank4
+             60.0,   20.0,   35.0,   // particle 27 -> Q11 (x low)  rank4
+             30.0,   70.0,   75.0    // particle 38 -> Q11 (y low)  rank4
+        };
+
+    }
+    else if (rank == 5) {
+        newX =
+        {
+             160.0,  -40.0,   25.0,   // particle 25 stays in Q21    rank5
+             250.0,   70.0,  -85.0,   // particle 26 stays in Q21    rank5
+              60.0,   20.0,   35.0,   // particle 27 -> Q11 (x low)  rank4
+             180.0, -170.0,  -15.0,   // particle 28 -> Q20 (y low)  rank2
+             220.0,  150.0,   55.0,   // particle 29 -> Q22 (y high) rank8
+        };
+
+
+        // Q21 rank5
+        expectedX =
+        {
+            170.0,  -90.0,  -40.0,   // particle 13 -> Q21 (y high) rank5
+            140.0,  -20.0,  -10.0,   // particle 22 -> Q21 (x high) rank5
+            160.0,  -40.0,   25.0,   // particle 25 stays in Q21    rank5
+            250.0,   70.0,  -85.0,   // particle 26 stays in Q21    rank5
+            220.0,   90.0,  -35.0    // particle 42 -> Q21 (y low)  rank5
+        };
+    }
+    else if (rank == 6) {
+        newX =
+        {
+            -260.0,  180.0,   40.0,   // particle 30 stays in Q02    rank6
+            -140.0,  260.0,  -70.0,   // particle 31 stays in Q02    rank6
+             -80.0,  210.0,   15.0,   // particle 32 -> Q12 (x high) rank7
+            -190.0,   80.0,   95.0,   // particle 33 -> Q01 (y low)  rank3
+        };
+
+        // Q02 rank6
+        std::vector<double> expectedX =
+        {
+            -210.0,  140.0,  -35.0,   // particle 18 -> Q02 (y high) rank6
+            -260.0,  180.0,   40.0,   // particle 30 stays in Q02    rank6
+            -140.0,  260.0,  -70.0,   // particle 31 stays in Q02    rank6
+            -130.0,  150.0,   60.0,   // particle 36 -> Q02 (x low)  rank6
+        };
+    }
+    else if (rank ==7) {
+        newX =
+        {
+             -20.0,  160.0,   35.0,   // particle 34 stays in Q12    rank7
+              80.0,  220.0,  -55.0,   // particle 35 stays in Q12    rank7
+            -130.0,  150.0,   60.0,   // particle 36 -> Q02 (x low)  rank6
+             140.0,  180.0,  -20.0,   // particle 37 -> Q22 (x high) rank8
+              30.0,   70.0,   75.0,   // particle 38 -> Q11 (y low)  rank4
+        };
+
+        // Q12 rank7
+        std::vector<double> expectedX =
+        {
+            -70.0,  160.0,   90.0,   // particle 24 -> Q12 (y high) rank7
+            -80.0,  210.0,   15.0,   // particle 32 -> Q12 (x high) rank7
+            -20.0,  160.0,   35.0,   // particle 34 stays in Q12    rank7
+             80.0,  220.0,  -55.0,   // particle 35 stays in Q12    rank7
+             90.0,  170.0,   45.0    // particle 41 -> Q12 (x low) rank7
+        };
+
+    }
+    else if (rank == 8) {
+        newX =
+        {
+             180.0,  160.0,   10.0,   // particle 39 stays in Q22   rank8
+             260.0,  240.0,  -90.0,   // particle 40 stays in Q22   rank8
+              90.0,  170.0,   45.0,   // particle 41 -> Q12 (x low) rank7
+             220.0,   90.0,  -35.0,   // particle 42 -> Q21 (y low) rank5
+        };
+
+
+        // Q22 rank8
+        expectedX =
+        {
+            220.0,  150.0,   55.0,   // particle 29 -> Q22 (y high) rank8
+            140.0,  180.0,  -20.0,   // particle 37 -> Q22 (x high) rank8
+            180.0,  160.0,   10.0,   // particle 39 stays in Q22   rank8
+            260.0,  240.0,  -90.0,   // particle 40 stays in Q22   rank8
+        };
+    }
+
+    
+    std::vector<double> newV(newX.size(), 0.0), newF(newX.size(), 0.0);
+    std::vector<double> newM(newX.size() / 3, 0.0), newR(newX.size() / 3, 0.0);
+
+
+    std::vector<double> expectedV(expectedX.size(), 0.0), expectedF(expectedX.size(), 0.0);
+    std::vector<double> expectedM(expectedX.size() / 3, 0.0), expectedR(expectedX.size() / 3, 0.0);
+
+
+    // running configuration
+    std::array<int, 3> ranks = { 3,3,1 };
+    // 
+    int nranks = ranks[0] * ranks[1] * ranks[2];
+
+    std::unique_ptr<Engine> engine;
+
+    engine = build_engine_set_particles(rank, ranks, newX, newV, newF, newR, newM);
+
+
+    auto& communicatorRef = engine->getCommunicator();
+    std::array<int, 6> dests = communicatorRef->returnExchangeDests();
+
+    // transfered data
+    std::vector<double> sendBuff;
+    std::vector<double> recvBuff;
+    std::vector<double> sendVec;
+
+    // the maximum number of particles
+    const int dataPerParticle = Particles::dataPerParticle;
+    const int nmax = 50;
+    const int bufferSize = nmax * dataPerParticle;
+
+    sendBuff.resize(bufferSize);
+    recvBuff.resize(bufferSize);
+
+
+    int nDestLocal = 0, nDestTotal = 0;
+    int nAttemptsLocal = 0, nAttemptsTotal = 0;
+
+    constexpr int maxAttempts = 4;
+
+    do {
+        nDestLocal = 0;
+        nAttemptsLocal++;
+
+
+
+        struct
+        {
+            std::array<int, 2> indx;
+            int tag;
+        } loopStruct[6] =
+        {
+            {{0,1},0}, // send in xlo recv in xhi
+            {{1,0},1}, // send in xhi recv in xlo
+            {{2,3},2}, // send in ylo recv in yhi
+            {{3,2},3}, // send in yhi recv in ylo
+            {{4,5},4}, // send in zlo recv in zhi
+            {{5,4},5}  // send in zhi recv in zlo
+        };
+
+        for (const auto& info : loopStruct)
+        {
+            int tgtIndx = info.indx[0];
+            int srcIndx = info.indx[1];
+            int tag = info.tag;
+
+            nDestLocal += communicatorRef->sendParticles(dests[tgtIndx], sendVec);
+            std::copy_n(sendVec.data(), sendVec.size(), sendBuff.data());
+            comm_strategy->send(sendBuff.data(), bufferSize, dests[tgtIndx], tag);
+            sendVec.clear();
+
+            comm_strategy->recv(recvBuff.data(), bufferSize, dests[srcIndx], tag);
+            communicatorRef->recvParticles(recvBuff);
+            recvBuff.resize(bufferSize);
+
+            comm_strategy->waitAll();
+        }
+
+
+        // MPI_Allreduce to get nDestsTotal
+        comm_strategy->reduceAll(&nDestLocal, &nDestTotal, 1);
+        comm_strategy->reduceAll(&nAttemptsLocal, &nAttemptsTotal, 1);
+
+
+    } while (nDestTotal > 0 && nAttemptsTotal < maxAttempts);
+
+
+    checking_communicator(
+        rank, engine.get(),
+        expectedX,
+        expectedV,
+        expectedF,
+        expectedR,
+        expectedM
+    );
+
+
+}
+
+
+
+TEST_CASE("Testing the movement of particles between processors without skin (3X3X3)","[mpi]")
+{
+    printRankZero("Testing the movement of particles between processors without skin (3X3X3)");
+    printRankZero(std::string(80, '='));
+
+
+    std::unique_ptr<Comm_strategy> comm_strategy = std::make_unique<MPI_comm_strategy>();
+    int rank = comm_strategy->getRank();
+    int size = comm_strategy->getSize();
+
+    // checking the min required number of ranks
+    minRanksRequirement(comm_strategy, 27);
+    // skipping the extra ranks
+    comm_strategy = skipExtraRanks(comm_strategy, 27);
+
+
+    // moving particles
+    std::vector<double> newX = {};
+    std::vector<double> expectedX = {};
+
+
+    // rank4
+    if (rank == 4) {
+        newX =
+        {
+             -20.0,  -70.0, -235.0,   // particle 1 stays in rank4
+              60.0,  -30.0, -180.0,   // particle 2 stays in rank4
+              70.0,  -60.0,  -90.0,   // particle 3 ->  (z high) rank13
+              40.0,  -70.0,   55.0,   // particle 4 ->  (z high) rank13
+        };
+
+        expectedX =
+        {
+             -20.0,  -70.0, -235.0,   // particle 1 stays in rank4
+              60.0,  -30.0, -180.0,   // particle 2 stays in rank4
+        };
+    }
+    else if (rank == 10) {
+        // rank10
+        newX =
+        {
+             -40.0,  -240.0,   50.0,   // particle 9  stays in rank10
+              60.0,  -160.0,  -20.0,   // particle 10 stays in rank10
+             -75.0,   -40.0,   80.0,   // particle 11 -> (y high) rank13
+              90.0,    60.0,  -35.0,   // particle 12 -> (y high) rank13
+        };
+        // rank10
+        expectedX =
+        {
+             -40.0,  -240.0,   50.0,   // particle 9  stays in rank10
+              60.0,  -160.0,  -20.0,   // particle 10 stays in rank10
+        };
+    }
+    else if (rank == 12)
+    {
+        // rank12
+        newX =
+        {
+            -280.0,  -20.0,   10.0,   // particle 5 stays in rank12
+            -140.0,   80.0,  -95.0,   // particle 6 stays in rank12
+              80.0,  -60.0,   70.0,   // particle 7 -> (x high)  rank13
+             -70.0,  -90.0,  -40.0,   // particle 8 -> (x high) rank13
+        };
+
+        // rank12
+        expectedX =
+        {
+            -280.0,  -20.0,   10.0,   // particle 5 stays in rank12
+            -140.0,   80.0,  -95.0,   // particle 6 stays in rank12
+        };
+    }
+    else if (rank == 13)
+    {
+        // rank13
+        newX = {
+            -65.0, -85.0, 95.0,  // rank13
+            -12.0, -66.0, -79.0  // rank13
+        };
+
+        // rank13
+        expectedX = {
+            -65.0, -85.0,  95.0,  // rank13
+            -12.0, -66.0, -79.0,  // rank13
+             70.0, -60.0, -90.0,  // particle 3 ->  (z high) rank13
+             40.0, -70.0,  55.0,  // particle 4 ->  (z high) rank13
+            -75.0, -40.0,  80.0,  // particle 11 -> (y high) rank13
+             90.0,  60.0, -35.0,  // particle 12 -> (y high) rank13
+             80.0, -60.0,  70.0,  // particle 7 -> (x high)  rank13
+            -70.0, -90.0, -40.0,  // particle 8 -> (x high) rank13
+             10.0, -30.0,  45.0,  // particle 15 -> (x low)  rank13
+            -70.0,  60.0,  90.0,  // particle 16 -> (x low)  rank13
+             60.0,  20.0,  35.0,  // particle 19 -> (y low)  rank13
+             18.0, -17.0, -15.0,  // particle 20 -> (y low)  rank13
+            -80.0,  21.0,  15.0,  // particle 23 -> (z low)  rank13
+            -19.0,  80.0,  95.0,  // particle 24 -> (z low) rank13
+            -30.0,  95.0,  45.0
+        };
+    }
+    else if (rank == 14)
+    {
+        newX =
+        {
+             230.0,  -30.0,   20.0,   // particle 13 stays in rank14
+             270.0,   80.0,  -60.0,   // particle 14 stays in rank14
+              10.0,  -30.0,   45.0,   // particle 15 -> (x low)  rank13
+             -70.0,   60.0,   90.0,   // particle 16 -> (x low)  rank13
+        };
+
+        // rank14
+        expectedX =
+        {
+             230.0,  -30.0,   20.0,   // particle 13 stays in rank14
+             270.0,   80.0,  -60.0,   // particle 14 stays in rank14
+        };
+    }
+    else if (rank == 16)
+    {
+        // rank16
+        newX =
+        {
+             -40.0,  160.0,   25.0,   // particle 17 stays in rank17
+              70.0,  250.0,  -85.0,   // particle 18 stays in rank17
+              60.0,   20.0,   35.0,   // particle 19 -> (y low)  rank13
+              18.0,  -17.0,  -15.0,   // particle 20 -> (y low)  rank13
+        };
+
+        expectedX =
+        {
+             -40.0,  160.0,   25.0,   // particle 17 stays in rank17
+              70.0,  250.0,  -85.0,   // particle 18 stays in rank17
+        };
+    }
+    else if (rank == 17)
+    {
+        newX = 
+        {
+            -30.0, 95.0, 45.0 // rank 13
+        };
+
+        expectedX = {};
+    }
+    else if (rank == 22)
+    {
+        newX =
+        {
+            -26.0,   80.0,   140.0,   // particle 21 stays in rank22
+            -14.0,   60.0,   170.0,   // particle 22 stays in rank22
+             -80.0,  21.0,    15.0,   // particle 23 -> (z low) rank13
+             -19.0,  80.0,    95.0,   // particle 24 -> (z low) rank13
+        };
+
+        expectedX =
+        {
+            -26.0,   80.0,   140.0,   // particle 21 stays in rank22
+            -14.0,   60.0,   170.0,   // particle 22 stays in rank22
+        };
+    }
+    
+
+    std::vector<double> newV(newX.size(), 0.0), newF(newX.size(), 0.0);
+    std::vector<double> newM(newX.size() / 3, 0.0), newR(newX.size() / 3, 0.0);
+
+
+    std::vector<double> expectedV(newX.size(), 0.0), expectedF(newX.size(), 0.0);
+    std::vector<double> expectedM(newX.size() / 3, 0.0), expectedR(newX.size() / 3, 0.0);
+
+    // running configuration
+    std::array<int, 3> ranks = { 3,3,3 };
+    // 
+    int nranks = ranks[0] * ranks[1] * ranks[2];
+    // Engine
+    std::unique_ptr<Engine> engine = 
+        build_engine_set_particles(
+            rank, ranks, newX, newV,
+            newF, newR, newM);
+    auto& communicatorRef = engine->getCommunicator();
+    std::array<int, 6> dests = communicatorRef->returnExchangeDests();
+
+    // transfered data
+    std::vector<double> sendBuff;
+    std::vector<double> recvBuff;
+    std::vector<double> sendVec;
+
+    // the maximum number of particles
+    const int dataPerParticle = Particles::dataPerParticle;
+    const int nmax = 50;
+    const int bufferSize = nmax * dataPerParticle;
+
+    sendBuff.resize(bufferSize);
+    recvBuff.resize(bufferSize);
+
+
+    int nDestLocal = 0, nDestTotal = 0;
+    int nAttemptsLocal = 0, nAttemptsTotal = 0;
+
+    constexpr int maxAttempts = 4;
+
+    do {
+        nDestLocal = 0;
+        nAttemptsLocal++;
+
+
+        struct
+        {
+            std::array<int, 2> indx;
+            int tag;
+        } loopStruct[6] =
+        {
+            {{0,1},0}, // send to xlo recv from xhi
+            {{1,0},1}, // send to xhi recv from xlo
+            {{2,3},2}, // send to ylo recv from yhi
+            {{3,2},3}, // send to yhi recv from ylo
+            {{4,5},4}, // send to zlo recv from zhi
+            {{5,4},5}  // send to zhi recv from zlo
+        };
+
+        for (const auto& info : loopStruct)
+        {
+            int tgtIndx = info.indx[0];
+            int srcIndx = info.indx[1];
+            int tag = info.tag;
+
+            nDestLocal += communicatorRef->sendParticles(dests[tgtIndx], sendVec);
+            std::copy_n(sendVec.data(), sendVec.size(), sendBuff.data());
+            comm_strategy->send(sendBuff.data(), bufferSize, dests[tgtIndx], tag);
+            sendVec.clear();
+
+            comm_strategy->recv(recvBuff.data(), bufferSize, dests[srcIndx], tag);
+            communicatorRef->recvParticles(recvBuff);
+            recvBuff.resize(bufferSize);
+
+            comm_strategy->waitAll();
+        }
+
+
+        // MPI_Allreduce to get nDestsTotal
+        comm_strategy->reduceAll(&nDestLocal, &nDestTotal, 1);
+        comm_strategy->reduceAll(&nAttemptsLocal, &nAttemptsTotal, 1);
+
+
+    } while (nDestTotal > 0 && nAttemptsTotal < maxAttempts);
+
+
+    checking_communicator(
+        rank, engine.get(),
+        expectedX,
+        expectedV,
+        expectedF,
+        expectedR,
+        expectedM
     );
 }

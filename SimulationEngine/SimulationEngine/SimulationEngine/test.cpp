@@ -1,5 +1,6 @@
 #include "test.hpp"
 #include "Comm_strategy.h"
+#include <mpi.h>
 
 void minRanksRequirement(std::unique_ptr<Comm_strategy>& comm_strategy_, const int minSize_)
 {
@@ -18,4 +19,12 @@ std::unique_ptr<Comm_strategy> skipExtraRanks(std::unique_ptr<Comm_strategy>& co
 	if (rank >= maxSize_)
 		SKIP(warningText.c_str());
 	return new_comm_strategy;
+}
+
+void printRankZero(const std::string text)
+{
+	int rank = -1;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	if (rank == 0)
+		std::cout << text << std::endl;
 }

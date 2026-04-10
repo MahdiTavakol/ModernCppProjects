@@ -7,8 +7,8 @@
 
 TEST_CASE("Testing updating a buffer MPI_comm_strategy","[mpi]")
 {
-	std::cout << "Testing updating a buffer through MPI_comm_strategy" << std::endl;
-	std::cout << std::string(80, '=');
+	printRankZero("Testing updating a buffer through MPI_comm_strategy");
+	printRankZero(std::string(80, '='));
 
 	
 	std::unique_ptr<Comm_strategy> comm_strategy = std::make_unique<MPI_comm_strategy>();
@@ -52,8 +52,8 @@ TEST_CASE("Testing updating a buffer MPI_comm_strategy","[mpi]")
 
 TEST_CASE("Testing sending/receiving a buffer to another buffer with MPI", "[mpi]")
 {
-	std::cout << "Testing sending/receiving a buffer to another buffer with MPI" << std::endl;
-	std::cout << std::string(80, '=') << std::endl;
+	printRankZero("Testing sending/receiving a buffer to another buffer with MPI");
+	printRankZero(std::string(80, '='));
 	
 	std::unique_ptr<Comm_strategy> comm_strategy = std::make_unique<MPI_comm_strategy>();
 
