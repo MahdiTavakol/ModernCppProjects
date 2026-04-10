@@ -300,33 +300,63 @@ void checking_communicator(
     std::vector<std::vector<double>> expectedVsVec_,
     std::vector<std::vector<double>> expectedFsVec_,
     std::vector<std::vector<double>> expectedRsVec_,
-    std::vector<std::vector<double>> expectedMsVec_) {
-        // the number of particles
-        int nmax, nlocal;
-        // getting the particlesRef
-        auto& particlesRef = engine_->getParticlesForUpdate();
-        // getting xs, vs, fs, rs and ms
-        double* myXs = particlesRef->getXData();
-        double* myVs = particlesRef->getVData();
-        double* myFs = particlesRef->getFData();
-        double* myRs = particlesRef->getRData();
-        double* myMs = particlesRef->getMData();
-        // getting the expected values
-        auto& expXs = expectedXsVec_[myId_];
-        auto& expVs = expectedVsVec_[myId_];
-        auto& expFs = expectedFsVec_[myId_];
-        auto& expRs = expectedRsVec_[myId_];
-        auto& expMs = expectedMsVec_[myId_];
-        // getting number of particles 
-        particlesRef->getNmaxNlocal(nmax, nlocal);
-        // checking the results
-        REQUIRE_THAT(myXs, Array3DMatcher(expXs.data(), expXs.size() / 3, 1e-6));
-        REQUIRE_THAT(myVs, Array3DMatcher(expVs.data(), expVs.size() / 3, 1e-6));
-        REQUIRE_THAT(myFs, Array3DMatcher(expFs.data(), expFs.size() / 3, 1e-6));
-        REQUIRE_THAT(myRs, Array1DMatcher(expRs.data(), expRs.size(), 1e-6));
-        REQUIRE_THAT(myMs, Array1DMatcher(expMs.data(), expMs.size(), 1e-6));
+    std::vector<std::vector<double>> expectedMsVec_) 
+{
+    // the number of particles
+    int nmax, nlocal;
+    // getting the particlesRef
+    auto& particlesRef = engine_->getParticlesForUpdate();
+    // getting xs, vs, fs, rs and ms
+    double* myXs = particlesRef->getXData();
+    double* myVs = particlesRef->getVData();
+    double* myFs = particlesRef->getFData();
+    double* myRs = particlesRef->getRData();
+    double* myMs = particlesRef->getMData();
+    // getting the expected values
+    auto& expXs = expectedXsVec_[myId_];
+    auto& expVs = expectedVsVec_[myId_];
+    auto& expFs = expectedFsVec_[myId_];
+    auto& expRs = expectedRsVec_[myId_];
+    auto& expMs = expectedMsVec_[myId_];
+    // getting number of particles 
+    particlesRef->getNmaxNlocal(nmax, nlocal);
+    // checking the results
+    REQUIRE_THAT(myXs, Array3DMatcher(expXs.data(), expXs.size() / 3, 1e-6));
+    REQUIRE_THAT(myVs, Array3DMatcher(expVs.data(), expVs.size() / 3, 1e-6));
+    REQUIRE_THAT(myFs, Array3DMatcher(expFs.data(), expFs.size() / 3, 1e-6));
+    REQUIRE_THAT(myRs, Array1DMatcher(expRs.data(), expRs.size(), 1e-6));
+    REQUIRE_THAT(myMs, Array1DMatcher(expMs.data(), expMs.size(), 1e-6));
+};
 
-    };
+void checking_communicator(
+    const int& myId_,
+    Engine* engine_,
+    std::vector<double> expectedXs_,
+    std::vector<double> expectedVs_,
+    std::vector<double> expectedFs_,
+    std::vector<double> expectedRs_,
+    std::vector<double> expectedMs_
+)
+{
+    // the number of particles
+    int nmax, nlocal;
+    // getting the particlesRef
+    auto& particlesRef = engine_->getParticlesForUpdate();
+    // getting number of particles 
+    particlesRef->getNmaxNlocal(nmax, nlocal);
+    // getting xs, vs, fs, rs and ms
+    double* myXs = particlesRef->getXData();
+    double* myVs = particlesRef->getVData();
+    double* myFs = particlesRef->getFData();
+    double* myRs = particlesRef->getRData();
+    double* myMs = particlesRef->getMData();
+    // checking the results
+    REQUIRE_THAT(myXs, Array3DMatcher(expectedXs_.data(), expectedXs_.size() / 3, 1e-6));
+    REQUIRE_THAT(myVs, Array3DMatcher(expectedVs_.data(), expectedVs_.size() / 3, 1e-6));
+    REQUIRE_THAT(myFs, Array3DMatcher(expectedFs_.data(), expectedFs_.size() / 3, 1e-6));
+    REQUIRE_THAT(myRs, Array1DMatcher(expectedRs_.data(), expectedRs_.size(), 1e-6));
+    REQUIRE_THAT(myMs, Array1DMatcher(expectedMs_.data(), expectedMs_.size(), 1e-6));
+}
 
 
 void print_particles(std::unique_ptr<Engine>& engine_, std::vector<double> expectedXs, const int& expectedNGhost)

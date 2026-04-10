@@ -40,7 +40,7 @@ using std::make_unique, std::unique_ptr;
 void minRanksRequirement(std::unique_ptr<Comm_strategy>& comm_strategy_, const int minSize_);
 
 // skipping the extra ranks
-void skipExtraRanks(std::unique_ptr<Comm_strategy>& comm_strategy_, const int maxSize_);
+std::unique_ptr<Comm_strategy> skipExtraRanks(std::unique_ptr<Comm_strategy>& comm_strategy_, const int maxSize_);
 
 
 class Array3DMatcher : public Catch::Matchers::MatcherGenericBase

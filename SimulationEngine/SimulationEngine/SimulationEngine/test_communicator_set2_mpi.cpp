@@ -16,7 +16,7 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
     // checking the min required number of ranks
     minRanksRequirement(comm_strategy,4);
     // skipping the extra ranks
-    skipExtraRanks(comm_strategy, 4);
+    comm_strategy = skipExtraRanks(comm_strategy, 4);
 
     std::vector<int> newId;
     std::vector<double> newX, newV, newF, newM, newR;
@@ -421,111 +421,87 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
 
     // the maximum number of particles
     const int dataPerParticle = Particles::dataPerParticle;
-    const int nmax = 30;
+    const int nmax = 50;
     const int bufferSize = nmax * dataPerParticle;
 
     sendBuff.resize(bufferSize);
     recvBuff.resize(bufferSize);
 
 
-    int nDestLocal = 0, nDestTotal;
-    int numberOfAttempts;
+    int nDestLocal = 0, nDestTotal = 0;
+    int nAttemptsLocal = 0, nAttemptsTotal = 0;
 
     constexpr int maxAttempts = 4;
 
     do {
         nDestLocal = 0;
-        numberOfAttempts++;
+        nAttemptsLocal++;
 
         dests = communicatorRef->returnExchangeDests();
 
-        for (const auto& dst : dests)
+        MPI_Request requests[6];
+
+        /// <summary>
+        /// the dst orders is xlo, xhi, ylo, yhi, zlo, zhi
+        /// so for the dst this would be their xhi, xlo, yhi, ylo, zhi,zlo
+        /// </summary>
+        std::vector<int> srcTags = { 1,0,3,2,5,4 };
+        std::vector<int> dstTags = { 0,1,2,3,4,5 };
+
+        std::vector<std::array<int, 2>> SrcDst = { {0,1},{1,0},{2,3},{3,2},{ 4,5 },{5,4} };
+        std::vector<int> tags = { 0,1,2,3,4,5 };
+
+        struct
         {
-            nDestLocal += communicatorRef->sendParticles(dst, sendVec);
+            std::array<int, 2> indx;
+            int tag;
+        } loopStruct[6] =
+        {
+            {{0,1},0}, // send in xlo recv in xhi
+            {{1,0},1}, // send in xhi recv in xlo
+            {{2,3},2}, // send in ylo recv in yhi
+            {{3,2},3}, // send in yhi recv in ylo
+            {{4,5},4}, // send in zlo recv in zhi
+            {{5,4},5}  // send in zhi recv in zlo
+        };
+
+        for (const auto& info : loopStruct)
+        {
+            int tgtIndx = info.indx[0];
+            int srcIndx = info.indx[1];
+            int tag = info.tag;
+
+            nDestLocal += communicatorRef->sendParticles(dests[tgtIndx], sendVec);
             std::copy_n(sendVec.data(), sendVec.size(), sendBuff.data());
-            comm_strategy->send(sendBuff.data(), sendBuff.size(), dst, 0);
+            comm_strategy->send(sendBuff.data(), bufferSize, dests[tgtIndx], tag);
+            sendVec.clear();
+
+            comm_strategy->recv(recvBuff.data(), bufferSize, dests[srcIndx], tag);
+            communicatorRef->recvParticles(recvBuff);
+            recvBuff.resize(bufferSize);
+
+            comm_strategy->waitAll();
         }
 
-        for (const auto& src : dests)
-        {
-            comm_strategy->recv(recvBuff.data(), recvBuff.size(), src, 0);
-            communicatorRef->recvParticles(recvBuff);
-        }
 
         // MPI_Allreduce to get nDestsTotal
+        comm_strategy->reduceAll(&nDestLocal, &nDestTotal, 1);
+        comm_strategy->reduceAll(&nAttemptsLocal, &nAttemptsTotal, 1);
 
 
-    } while (nDestsTotal > 0 && numberOfAttempts < maxAttempts);
+    } while (nDestTotal > 0 && nAttemptsTotal < maxAttempts);
 
-
-
-    std::vector<std::array<int, 6>> exchangeDestArray(nranks, std::array<int, 6>{});
-
-
-
-
-
-    // number of destinations
-    int nDestsTotal = 0;
-
-    int numberOfAttempts = 0;
-
-    constexpr int maxAttempts = 4;
-    // repeating the particle reassginement until there is no
-    // outside particles in each communicator
-    // The reason for repeating it is that it is a rare possibility 
-    // that x, y, and z values of a particle are all out of the
-    // rank dimensions. In this case at first attempt the particle is 
-    // moved in the rank which is neighboring the current rank 
-    // in the x dimension. The second time in the y dimension
-    // and finally in the z dimension... This way there is a need
-    // for knowing 6 neighboring ranks in contrast to the general 
-    // case of 26 neighboring ranks!
-    do {
-        std::vector<double> messageVec[4];
-
-        nDestsTotal = 0;
-        numberOfAttempts++;
-
-        for (int i = 0; i < 4; i++) {
-            exchangeDestArray[i] = communicatorArray[i]->returnExchangeDests();
-
-            // xlo, xhi, ylo, yhi, ...
-            for (int j = 0; j < 6; j++)
-            {
-                // not sure about this yet.
-                int dest = exchangeDestArray[i][j];
-                if (dest < 0)
-                    continue;
-                // 
-                // may be I need to call some reset function to reset exterXLo, ...
-                nDestsTotal += communicatorArray[i]->sendParticles(dest, messageVec[dest]);
-
-            }
-        }
-
-
-        // ranks
-        for (int i = 0; i < 4; i++) {
-            communicatorArray[i]->recvParticles(messageVec[i]);
-        }
-
-    } while (nDestsTotal > 0 && numberOfAttempts < maxAttempts);
+    MPI_comm_strategy* mpi_comm_strategy = dynamic_cast<MPI_comm_strategy*>(comm_strategy.get());
+    MPI_Comm* worldPtr = mpi_comm_strategy->getWorldPtr();
 
 
 
-    for (int i = 0; i < nranks; i++) {
-        int id = ids[i];
-        Engine* engine_ptr = engineArray[i].get();
-
-        checking_communicator(
-            id, engine_ptr,
-            expectedXsVec,
-            expectedVsVec,
-            expectedFsVec,
-            expectedRsVec,
-            expectedMsVec
-        );
-    }
-
+    checking_communicator(
+        rank, engine.get(),
+        expectedXs,
+        expectedVs,
+        expectedFs,
+        expectedRs,
+        expectedMs
+    );
 }

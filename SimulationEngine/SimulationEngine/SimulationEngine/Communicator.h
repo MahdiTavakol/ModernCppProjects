@@ -28,6 +28,10 @@ public:
 	// getting the destination array for the exchange
 	// xlo xhi ylo yhi zlo zhi
 	std::array<int,6> returnExchangeDests();
+	// xlo, ylo, zlo --->>> left
+	//std::array<int, 3> returnLeftProcs();
+	// xhi, yhi, zhi --->>> right
+	// s
 	// getting min max
 	void getMinMax(std::array<double, 3>& min_, std::array<double, 3>& max_) {
 		min_ = myMin; max_ = myMax;
