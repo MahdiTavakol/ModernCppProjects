@@ -1060,3 +1060,340 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
         expectedM
     );
 }
+
+
+TEST_CASE("Testing the sendGhost function to transfer the interior particles") {
+    printRankZero("Testing the sendGhost function to transfer the interior particles");
+    printRankZero(std::string(80, '='));
+
+    std::unique_ptr<Comm_strategy> comm_strategy = std::make_unique<MPI_comm_strategy>();
+    int rank = comm_strategy->getRank();
+    int size = comm_strategy->getSize();
+
+    // checking the min required number of ranks
+    minRanksRequirement(comm_strategy, 8);
+    // skipping the extra ranks
+    comm_strategy = skipExtraRanks(comm_strategy, 8);
+
+
+    double skin = 50.0;
+
+    // x values
+    // everthing here belongs to the rank3
+    // so no need for ghost transfer.. just
+    // wanted to check the interior particles (ghosts for other ranks) detection 
+
+    int expectednParticles = 0;
+    std::vector<double> newX, newV, newF, newR, newM;
+    std::vector<double> expectedX, expectedV, expectedF, expectedR, expectedM;
+
+    if (rank == 0) {
+        expectednParticles = 5;
+        // since the order of particles is not known in advance we
+        // need to check X, V, ... separately
+        expectedX = {
+             -28.20,  180.66,  -66.03,   // particle 14 owned by Q01 (-+ interior) region 3 ghost for region 4
+             -18.40,  +22.10,  -95.50,   // particle 8  owned by Q10 (-+ interior) region 3 ghost for region 4
+             -40.11,  170.25, -204.67,   // particle 18 owned by Q01 (-+ interior) region 3 ghost for region 4
+             -28.20,  150.66,  -36.03,   // particle 20 owneb by Q01 (-+ interior) region 3 ghost for region 4
+             -18.15,   30.89,  -12.09    // particle 22 owned by Q01 (-+ interior) region 3 ghost for region 4
+        };
+        expectedV = {
+           -53.7,  27.5, -41.6,   // particle 14
+            59.7, -24.6,  10.9,   // particle 8
+            57.8, -69.2,  39.4,   // particle 18
+            31.5, -75.3,  25.6,   // particle 20
+            66.2,  -8.1,  47.3    // particle 22
+        };
+        expectedF = {
+           -25.7,  17.8, -38.6,   // particle 14
+            47.3, -19.5,   6.2,   // particle 8
+            28.6, -31.4,  19.3,   // particle 18
+            17.8, -39.2,  19.4,   // particle 20
+            21.5, -35.3,  15.6,   // particle 22
+        };
+        expectedR = {
+            37.6,  // particle 14 region 3
+            76.2,  // particle 8  region 3
+            58.9,  // particle 18 region 3
+            14.9,  // particle 20 region 3 
+            22.6,  // particle 22 region 3
+        };
+        expectedM = {
+            5.9,  // particle 14 region 3
+            8.4,  // particle 8  region 3
+            1.8,  // particle 18 region 3
+           18.6,  // particle 20 region 3
+           10.8,  // particle 22 region 3
+        };
+    }
+    else if (rank == 1)
+    {
+        expectednParticles = 6;
+
+        expectedX = {
+            -120.33,   20.18, -199.05,   // particle 12 owned by Q01 (-+ interior) region 3 ghost for region 1
+            -180.66,   30.77,  -74.95,   // particle 2  owned by Q00 (-+ interior) region 3 ghost for region 1
+             -18.40,  +22.10,  -95.50,   // particle 8  owned by Q10 (-+ interior) region 3 ghost for region 1
+            -150.33,   20.18,  -25.05,   // particle 21 owned by Q01 (-+ interior) region 3 ghost for region 1
+             -18.15,   30.89,  -12.09,   // particle 22 owned by Q01 (-+ interior) region 3 ghost for region 1
+            -190.99,   27.46, -150.00    // particle 23 owned by Q01 (-+ interior) region 3 ghost for region 1
+        };
+        expectedV = {
+            46.1, -61.5,  33.8,   // particle 12
+            41.2, -19.8,  63.5,   // particle 2
+            59.7, -24.6,  10.9,   // particle 8
+           -72.4,  18.7, -54.9,   // particle 21
+            66.2,  -8.1,  47.3,   // particle 22
+            21.7, -38.4,  68.2    // particle 23
+        };
+        expectedF = {
+            41.2, -29.8,   9.7,   // particle 12
+            29.7,  -5.4,  38.9,   // particle 2
+            47.3, -19.5,   6.2,   // particle 8
+             4.5,  24.3,  12.9,   // particle 21
+            21.5, -35.3,  15.6,   // particle 22
+            21.7, -38.4,  18.2,   // particle 23
+        };
+        expectedR = {
+            19.8,  // particle 12 region 3
+            45.7,  // particle 2  region 3
+            76.2,  // particle 8  region 3
+            69.1,  // particle 21 region 3
+            22.6,  // particle 22 region 3
+            12.5   // particle 23 region 3
+        };
+    }
+    else if (rank == 4)
+    {
+        expectednParticles = 5;
+        expectedX = {
+            -200.90,  190.36,  -40.58,   // particle 10 owned by Q01 (-+ interior) region 3 ghost for region 7
+            -128.20,  130.66,  -46.03,   // particle 19 owneb by Q01 (-+ interior) region 3 ghost for region 7
+             -28.20,  150.66,  -36.03,   // particle 20 owneb by Q01 (-+ interior) region 3 ghost for region 7
+            -150.33,   20.18,  -25.05,   // particle 21 owned by Q01 (-+ interior) region 3 ghost for region 7
+             -18.15,   30.89,  -12.09    // particle 22 owned by Q01 (-+ interior) region 3 ghost for region 7
+        };
+        expectedV = {
+            21.7, -38.4,  68.2,   // particle 10
+             4.5,  64.3,  12.9,   // particle 19
+            31.5, -75.3,  25.6,   // particle 20
+           -72.4,  18.7, -54.9,   // particle 21
+            66.2,  -8.1,  47.3    // particle 22
+        };
+        expectedF = {
+            14.8,  -7.3,  39.6,   // particle 10
+            29.7, -24.6,  10.9,   // particle 19
+            17.8, -39.2,  19.4,   // particle 20
+             4.5,  24.3,  12.9,   // particle 21
+            21.5, -35.3,  15.6,   // particle 22
+        };
+        expectedR = {
+             8.7,  // particle 10 region 3
+            57.8,  // particle 19 region 3 
+            14.9,  // particle 20 region 3 
+            69.1,  // particle 21 region 3
+            22.6,  // particle 22 region 3 
+        };
+        expectedM = {
+            3.0,  // particle 12 region 3
+            0.9,  // particle 2  region 3
+            8.4,  // particle 8  region 3
+            3.1,  // particle 21 region 3
+           10.8,  // particle 22 region 3
+            8.5   // particle 23 region 3
+        };
+        std::vector<double> expectedM5 = {
+            0.5,  // particle 10 region 3
+            7.2,  // particle 19 region 3
+           18.6,  // particle 20 region 3
+            3.1,  // particle 21 region 3
+           10.8,  // particle 22 region 3
+        };
+    }
+    else if (rank == 2) {
+
+        newX = {
+            -200.90,  190.36,  -40.58,   // particle 10 owned by Q01 (-+ interior) region 3 ghost for region 7
+            -270.22,  120.74, -210.46,   // particle 11 owned by Q01 (-+ interior) region 3
+            -120.33,   20.18, -199.05,   // particle 12 owned by Q01 (-+ interior) region 3 ghost for region 1
+             -28.20,  180.66,  -66.03,   // particle 14 owned by Q01 (-+ interior) region 3 ghost for region 4
+            -180.66,   30.77,  -74.95,   // particle 2  owned by Q00 (-+ interior) region 3 ghost for region 1
+             -18.40,  +22.10,  -95.50,   // particle 8  owned by Q10 (-+ interior) region 3 ghost for regions 1, 2, 4
+             -40.11,  170.25, -204.67,   // particle 18 owned by Q01 (-+ interior) region 3 ghost for region 4
+            -128.20,  130.66,  -46.03,   // particle 19 owneb by Q01 (-+ interior) region 3 ghost for region 7
+             -28.20,  150.66,  -36.03,   // particle 20 owneb by Q01 (-+ interior) region 3 ghost for regions 4, 7, 8
+            -150.33,   20.18,  -25.05,   // particle 21 owned by Q01 (-+ interior) region 3 ghost for regions 1, 5, 7
+             -18.15,   30.89,  -12.09,   // particle 22 owned by Q01 (-+ interior) region 3 ghost for regions 1, 2, 4, 5, 6, 7, 8
+            -190.99,   27.46, -150.00    // particle 23 owned by Q01 (-+ interior) region 3 ghost for region 1
+        };
+        // v values 
+        newV = {
+            21.7, -38.4,  68.2,   // particle 10
+           -14.9,  87.6, -29.3,   // particle 11
+            46.1, -61.5,  33.8,   // particle 12
+           -53.7,  27.5, -41.6,   // particle 14
+            41.2, -19.8,  63.5,   // particle 2
+            59.7, -24.6,  10.9,   // particle 8
+            57.8, -69.2,  39.4,   // particle 18
+             4.5,  64.3,  12.9,   // particle 19
+            31.5, -75.3,  25.6,   // particle 20
+           -72.4,  18.7, -54.9,   // particle 21
+            66.2,  -8.1,  47.3,   // particle 22
+            21.7, -38.4,  68.2    // particle 23
+        };
+        // f values
+        newF = {
+            14.8,  -7.3,  39.6,   // particle 10
+           -21.9,  30.4, -16.5,   // particle 11
+            41.2, -29.8,   9.7,   // particle 12
+           -25.7,  17.8, -38.6,   // particle 14
+            29.7,  -5.4,  38.9,   // particle 2
+            47.3, -19.5,   6.2,   // particle 8
+            28.6, -31.4,  19.3,   // particle 18
+            29.7, -24.6,  10.9,   // particle 19
+            17.8, -39.2,  19.4,   // particle 20
+             4.5,  24.3,  12.9,   // particle 21
+            21.5, -35.3,  15.6,   // particle 22
+            21.7, -38.4,  18.2,   // particle 23
+        };
+        // r values
+        newR = {
+          8.7,  // particle 10 region 3
+         63.5,  // particle 11 region 3
+         19.8,  // particle 12 region 3
+         37.6,  // particle 14 region 3
+         45.7,  // particle 2  region 3
+         76.2,  // particle 8  region 3
+         58.9,  // particle 18 region 3
+         57.8,  // particle 19 region 3 
+         14.9,  // particle 20 region 3 
+         69.1,  // particle 21 region 3
+         22.6,  // particle 22 region 3
+         12.5   // particle 23 region 3
+        };
+        // m values
+         newM = {
+            0.5,  // particle 10 region 3
+            9.8,  // particle 11 region 3
+            3.0,  // particle 12 region 3
+            5.9,  // particle 14 region 3
+            0.9,  // particle 2  region 3
+            8.4,  // particle 8  region 3
+            1.8,  // particle 18 region 3
+            7.2,  // particle 19 region 3
+           18.6,  // particle 20 region 3
+            3.1,  // particle 21 region 3
+           10.8,  // particle 22 region 3
+            8.5   // particle 23 region 3
+        };
+    }
+
+
+
+
+
+
+    // rank configuration
+    std::array<int, 3> ranks = { 2,2,2 };
+
+
+    // transfered data
+    std::vector<double> sendBuff;
+    std::vector<double> recvBuff;
+    std::vector<double> sendVec;
+
+    // the maximum number of particles
+    const int dataPerParticle = Particles::dataPerParticle;
+    const int nmax = 50;
+    const int bufferSize = nmax * dataPerParticle;
+
+    sendBuff.resize(bufferSize);
+    recvBuff.resize(bufferSize);
+
+    // sending the interior particles
+    std::vector<double> transData[6];
+
+    // building the engine just for the rank == 2
+     auto engine_ptr = set_particles_build_engine(
+            rank, ranks, newX, newV, newF, newR, newM, skin);
+    auto* communicator_ptr = engine_ptr->getCommunicator().get();
+
+
+    if (rank == 2) {
+        // sending to the rank4
+        // xhi
+        communicator_ptr->sendGhosts(3, transData[3]);
+        // sending to the rank1
+        // ylo
+        communicator_ptr->sendGhosts(0, transData[0]);
+        // sending to the rank7
+        // zhi
+        communicator_ptr->sendGhosts(6, transData[6]);
+
+        std::copy_n(transData[3].data(), transData[3].size(), sendBuff.data());
+        comm_strategy->send(sendBuff.data(), bufferSize, 3, 3);
+        sendVec.clear();
+    }
+    if (rank == 3)
+        comm_strategy->recv(recvBuff.data(), bufferSize, 2, 3);
+        communicatorRef->recvParticles(recvBuff);
+        recvBuff.resize(bufferSize);
+    }
+    
+    comm_strategy->waitA
+    
+
+    
+
+
+    // checking the message
+    // at first attempt the message is just send to the immediate neighboring ranks
+    // 1, 4, 7
+    // It is the job of those neighbors to resend the ghost particles
+    // to non-immediate neighboring ranks of 2,5,6,8
+    // The non-immediate case is tested in the next test
+    // That situation is more like a regression test
+    int output_indxs[] = { 1,2,5 };
+
+
+    std::vector<double> X, V, F, R, M;
+    for (int i = 0; i < 3; i++) {
+        auto transDatai = transData[output_indxs[i]];
+        int nParticles = static_cast<int>(transDatai[0]);
+        // checking the number of particles
+        REQUIRE(nParticles == expectednParticlesVec[i]);
+        // outputs 
+        X.clear(); V.clear(); F.clear(); R.clear(); M.clear();
+        X.reserve(3 * nParticles); V.reserve(3 * nParticles); F.reserve(3 * nParticles);
+        R.reserve(nParticles); M.reserve(nParticles);
+
+        int dataLoc = 1;
+        for (int j = 0; j < nParticles; j++) {
+            // the id
+            dataLoc++;
+            X.push_back(transDatai[dataLoc++]);
+            X.push_back(transDatai[dataLoc++]);
+            X.push_back(transDatai[dataLoc++]);
+            V.push_back(transDatai[dataLoc++]);
+            V.push_back(transDatai[dataLoc++]);
+            V.push_back(transDatai[dataLoc++]);
+            F.push_back(transDatai[dataLoc++]);
+            F.push_back(transDatai[dataLoc++]);
+            F.push_back(transDatai[dataLoc++]);
+            M.push_back(transDatai[dataLoc++]);
+            R.push_back(transDatai[dataLoc++]);
+        }
+
+
+
+        // checking the results
+        REQUIRE_THAT(X.data(), Array3DMatcher(expectedXVec[i].data(), nParticles, 1e-6));
+        REQUIRE_THAT(V.data(), Array3DMatcher(expectedVVec[i].data(), nParticles, 1e-6));
+        REQUIRE_THAT(F.data(), Array3DMatcher(expectedFVec[i].data(), nParticles, 1e-6));
+        REQUIRE_THAT(R.data(), Array1DMatcher(expectedRVec[i].data(), nParticles, 1e-6));
+        REQUIRE_THAT(M.data(), Array1DMatcher(expectedMVec[i].data(), nParticles, 1e-6));
+    }
+
+
+}
