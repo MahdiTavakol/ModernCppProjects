@@ -15,6 +15,7 @@ class Fix;
 class Neighbor;
 class Ref;
 class Run;
+class Comm_strategy;
 
 
 class Engine {
@@ -73,6 +74,7 @@ public:
 	std::unique_ptr<Neighbor>& getNeighbor();
 	std::unique_ptr<Error>& getError();
 	std::unique_ptr<Communicator>& getCommunicator();
+	std::unique_ptr<Comm_strategy>& getCommStrategy();
 	// getting the run status of the engine
 	void setStatus(const std::string newStatus_);
 	const Run_Status& getStatus() const;
@@ -88,6 +90,7 @@ private:
 	 * The default value of the forcefield 
 	 * is provided in the constructor
 	 */
+	std::unique_ptr<Comm_strategy> comm_strategy;
 	std::unique_ptr<Communicator> communicator;
 	std::unique_ptr<ForceField> forcefield;
 	std::unique_ptr<Neighbor> neighbor;

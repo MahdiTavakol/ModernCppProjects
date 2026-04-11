@@ -1,4 +1,5 @@
 #include "Communicator.h"
+#include "Comm_strategy.h"
 #include <algorithm>
 #include <iostream>
 #include <utility>
@@ -55,6 +56,7 @@ void Communicator::injectDependencies(Engine& engine_)
 {
 	particles = engine_.getParticlesForUpdate().get();
 	box = engine_.getBox().get();
+	comm_strategy = engine_.getCommStrategy().get();
 	engine = &engine_;
 }
 
@@ -500,4 +502,102 @@ void Communicator::addParticles2ExchangeMessages(const int& loc, const int& part
 	exchangeMessages[loc].push_back(m);
 	// adding r info
 	exchangeMessages[loc].push_back(r);
+}
+
+
+void Communicator::exchangeParticleGhost()
+{
+	// dests
+	auto dests = this->returnExchangeDests();
+	// transfered data
+	std::vector<double> sendBuff;
+	std::vector<double> recvBuff;
+	std::vector<double> sendVec;
+
+	// the maximum number of particles
+	const int dataPerParticle = Particles::dataPerParticle;
+	const int nmax = 50;
+	const int bufferSize = nmax * dataPerParticle;
+
+	sendBuff.resize(bufferSize);
+	recvBuff.resize(bufferSize);
+
+
+	int nDestLocal = 0, nDestTotal = 0;
+	int nAttemptsLocal = 0, nAttemptsTotal = 0;
+
+	constexpr int maxAttempts = 4;
+
+	do {
+		nDestLocal = 0;
+		nAttemptsLocal++;
+
+		/// <summary>
+		/// the dst orders is xlo, xhi, ylo, yhi, zlo, zhi
+		/// so for the dst this would be their xhi, xlo, yhi, ylo, zhi,zlo
+		/// </summary>
+
+		std::vector<std::array<int, 2>> SrcDst = { {0,1},{1,0},{2,3},{3,2},{ 4,5 },{5,4} };
+		std::vector<int> tags = { 0,1,2,3,4,5 };
+
+		struct
+		{
+			std::array<int, 2> indx;
+			int tag;
+		} loopStruct[6] =
+		{
+			{{0,1},0}, // send in xlo recv in xhi
+			{{1,0},1}, // send in xhi recv in xlo
+			{{2,3},2}, // send in ylo recv in yhi
+			{{3,2},3}, // send in yhi recv in ylo
+			{{4,5},4}, // send in zlo recv in zhi
+			{{5,4},5}  // send in zhi recv in zlo
+		};
+
+		// exchanging particles first
+		for (const auto& info : loopStruct)
+		{
+			int tgtIndx = info.indx[0];
+			int srcIndx = info.indx[1];
+			int tag = info.tag;
+
+			nDestLocal += sendParticles(dests[tgtIndx], sendVec);
+			std::copy_n(sendVec.data(), sendVec.size(), sendBuff.data());
+			comm_strategy->send(sendBuff.data(), bufferSize, dests[tgtIndx], tag);
+			sendVec.clear();
+
+			comm_strategy->recv(recvBuff.data(), bufferSize, dests[srcIndx], tag);
+			recvParticles(recvBuff);
+			recvBuff.resize(bufferSize);
+
+			comm_strategy->waitAll();
+		}
+
+		// sending / receiving ghost particles
+		for (const auto& info : loopStruct)
+		{
+			int tgtIndx = info.indx[0];
+			int srcIndx = info.indx[1];
+			int tag = info.tag;
+
+			nDestLocal += sendGhosts(dests[tgtIndx], sendVec);
+			std::copy_n(sendVec.data(), sendVec.size(), sendBuff.data());
+			comm_strategy->send(sendBuff.data(), bufferSize, dests[tgtIndx], tag);
+			sendVec.clear();
+
+			comm_strategy->recv(recvBuff.data(), bufferSize, dests[srcIndx], tag);
+			recvGhosts(recvBuff);
+			recvBuff.clear();
+			recvBuff.resize(bufferSize);
+
+			comm_strategy->waitAll();
+		}
+
+
+		// MPI_Allreduce to get nDestsTotal
+		comm_strategy->reduceAll(&nDestLocal, &nDestTotal, 1);
+		comm_strategy->reduceAll(&nAttemptsLocal, &nAttemptsTotal, 1);
+
+
+	} while (nDestTotal > 0 && nAttemptsTotal < maxAttempts);
 }

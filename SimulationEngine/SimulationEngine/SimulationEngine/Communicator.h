@@ -45,6 +45,10 @@ public:
 	void resetParticles();
 
 
+	// the proxy function for doing the particle and ghost exchange
+	void exchangeParticleGhost();
+
+
 
 
 protected:
@@ -52,6 +56,8 @@ protected:
 	Box* box = nullptr;
 	// Particles ref
 	Particles* particles = nullptr;
+	// we need a pointer to the Comm_strategy object of the Engine
+	Comm_strategy* comm_strategy = nullptr;
 	// we need a pointer to the engine
 	Engine* engine = nullptr;
 	// the box dimensions

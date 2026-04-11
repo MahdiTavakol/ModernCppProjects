@@ -100,6 +100,11 @@ std::unique_ptr<Communicator>& Engine::getCommunicator() {
 	return communicator;
 }
 
+std::unique_ptr<Comm_strategy>& Engine::getCommStrategy()
+{
+	return comm_strategy;
+}
+
 void Engine::setItem(std::unique_ptr<Ref>&& Ref_) {
 	if (auto boxPtr = dynamic_cast<Box*>(Ref_.get())) {
 		box.reset(dynamic_cast<Box*>(Ref_.release()));
