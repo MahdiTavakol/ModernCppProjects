@@ -2532,48 +2532,6 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
             comm_strategy->waitAll();
         }
 
-
-        // MPI_Allreduce to get nDestsTotal
-        comm_strategy->reduceAll(&nDestLocal, &nDestTotal, 1);
-        comm_strategy->reduceAll(&nAttemptsLocal, &nAttemptsTotal, 1);
-
-
-    } while (nDestTotal > 0 && nAttemptsTotal < maxAttempts);
-
-
-    nDestLocal = 0; nDestTotal = 0;
-    nAttemptsLocal = 0; nAttemptsTotal = 0;
-
-
-
-    do {
-        nDestLocal = 0;
-        nAttemptsLocal++;
-
-        /// <summary>
-        /// the dst orders is xlo, xhi, ylo, yhi, zlo, zhi
-        /// so for the dst this would be their xhi, xlo, yhi, ylo, zhi,zlo
-        /// </summary>
-
-
-        std::vector<std::array<int, 2>> SrcDst = { {0,1},{1,0},{2,3},{3,2},{ 4,5 },{5,4} };
-        std::vector<int> tags = { 0,1,2,3,4,5 };
-
-        struct
-        {
-            std::array<int, 2> indx;
-            int tag;
-        } loopStruct[6] =
-        {
-            {{0,1},0}, // send to xlo recv from xhi
-            {{1,0},1}, // send to xhi recv from xlo
-            {{2,3},2}, // send to ylo recv from yhi
-            {{3,2},3}, // send to yhi recv from ylo
-            {{4,5},4}, // send to zlo recv from zhi
-            {{5,4},5}  // send to zhi recv from zlo
-        };
-
-
         // sending / receiving ghost particles
         for (const auto& info : loopStruct)
         {
@@ -2595,15 +2553,12 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
         }
 
 
-
         // MPI_Allreduce to get nDestsTotal
         comm_strategy->reduceAll(&nDestLocal, &nDestTotal, 1);
         comm_strategy->reduceAll(&nAttemptsLocal, &nAttemptsTotal, 1);
 
 
     } while (nDestTotal > 0 && nAttemptsTotal < maxAttempts);
-
-
 
     // checking the particles
     checking_communicator(
