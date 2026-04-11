@@ -190,6 +190,7 @@
     <ClInclude Include="Engine.h" />
     <ClInclude Include="EngineFactory.h" />
     <ClInclude Include="EulerIntegrator.h" />
+    <ClInclude Include="Exception.h" />
     <ClInclude Include="Fix.h" />
     <ClInclude Include="FixList.h" />
     <ClInclude Include="FixPrint.h" />

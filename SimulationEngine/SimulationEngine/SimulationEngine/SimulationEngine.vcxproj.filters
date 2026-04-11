@@ -230,5 +230,8 @@
     <ClInclude Include="Simple_comm_strategy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Exception.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
