@@ -2462,7 +2462,7 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
 
     // builing the engine
     auto engine = build_engine_set_particles(rank, ranks,
-        newX, newV, newF, newR, newM, newNGhost, skin);
+        newId, newX, newV, newF, newR, newM, newNGhost, skin);
 
     // getting the communicator
     auto& communicatorRef = engine->getCommunicator();
@@ -2545,6 +2545,7 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
     nAttemptsLocal = 0; nAttemptsTotal = 0;
 
 
+
     do {
         nDestLocal = 0;
         nAttemptsLocal++;
@@ -2603,12 +2604,16 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
     } while (nDestTotal > 0 && nAttemptsTotal < maxAttempts);
 
 
-    comm_strategy->waitAll();
-    if (rank == 1)
-    print_particles(engine, expectedX, expectedNGhost);
-    comm_strategy->waitAll();
+
     // checking the particles
-    //checking_communicator(rank, engine.get(),
-    //    expectedX, expectedV, expectedF, expectedR, expectedM);
+    checking_communicator(
+        rank, engine.get(),
+        expectedId,
+        expectedX, 
+        expectedV, 
+        expectedF, 
+        expectedR,
+        expectedM,
+        expectedNGhost);
 
 }

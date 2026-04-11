@@ -328,14 +328,14 @@ void checking_communicator(
     REQUIRE_THAT(myMs, Array1DMatcher(expMs.data(), expMs.size(), 1e-6));
 };
 
-void checking_communicator(
-    const int& myId_,
+void checking_communicator(const int& myId_,
     Engine* engine_,
-    std::vector<double> expectedXs_,
-    std::vector<double> expectedVs_,
-    std::vector<double> expectedFs_,
-    std::vector<double> expectedRs_,
-    std::vector<double> expectedMs_
+    std::vector<double>& expectedXs_,
+    std::vector<double>& expectedVs_,
+    std::vector<double>& expectedFs_,
+    std::vector<double>& expectedRs_,
+    std::vector<double>& expectedMs_,
+    const int nghost 
 )
 {
     // the number of particles
@@ -351,11 +351,37 @@ void checking_communicator(
     double* myRs = particlesRef->getRData();
     double* myMs = particlesRef->getMData();
     // checking the results
-    REQUIRE_THAT(myXs, Array3DMatcher(expectedXs_.data(), expectedXs_.size() / 3, 1e-6));
-    REQUIRE_THAT(myVs, Array3DMatcher(expectedVs_.data(), expectedVs_.size() / 3, 1e-6));
-    REQUIRE_THAT(myFs, Array3DMatcher(expectedFs_.data(), expectedFs_.size() / 3, 1e-6));
-    REQUIRE_THAT(myRs, Array1DMatcher(expectedRs_.data(), expectedRs_.size(), 1e-6));
-    REQUIRE_THAT(myMs, Array1DMatcher(expectedMs_.data(), expectedMs_.size(), 1e-6));
+    REQUIRE_THAT(myXs, Array3DMatcher(expectedXs_.data(), expectedXs_.size() / 3 - nghost, nghost, 1e-6));
+    REQUIRE_THAT(myVs, Array3DMatcher(expectedVs_.data(), expectedVs_.size() / 3 - nghost, nghost, 1e-6));
+    REQUIRE_THAT(myFs, Array3DMatcher(expectedFs_.data(), expectedFs_.size() / 3 - nghost, nghost, 1e-6));
+    REQUIRE_THAT(myRs, Array1DMatcher(expectedRs_.data(), expectedRs_.size() - nghost, nghost, 1e-6));
+    REQUIRE_THAT(myMs, Array1DMatcher(expectedMs_.data(), expectedMs_.size() - nghost, nghost, 1e-6));
+}
+
+void checking_communicator(
+    const int& myId_,
+    Engine* engine_,
+    std::vector<int>& expectedIds_,
+    std::vector<double>& expectedXs_,
+    std::vector<double>& expectedVs_,
+    std::vector<double>& expectedFs_,
+    std::vector<double>& expectedRs_,
+    std::vector<double>& expectedMs_,
+    const int nghost
+)
+{
+    // the number of particles
+    int nmax, nlocal;
+    // getting the particlesRef
+    auto& particlesRef = engine_->getParticlesForUpdate();
+    // getting number of particles 
+    particlesRef->getNmaxNlocal(nmax, nlocal);
+    // getting ids
+    int* myIs = particlesRef->getIdData();
+    // checking the results
+    REQUIRE_THAT(myIs, Array1DMatcherInt(expectedIds_.data(), expectedIds_.size()));
+
+    checking_communicator(myId_, engine_, expectedXs_, expectedVs_, expectedFs_, expectedRs_, expectedMs_);
 }
 
 
@@ -402,3 +428,5 @@ void print_particles(std::unique_ptr<Engine>& engine_, std::vector<double> expec
     }
 
 }
+
+

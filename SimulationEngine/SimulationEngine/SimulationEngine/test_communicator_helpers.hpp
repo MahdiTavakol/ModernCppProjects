@@ -95,18 +95,35 @@ void checking_communicator(
     std::vector<std::vector<double>> expectedVsVec_,
     std::vector<std::vector<double>> expectedFsVec_,
     std::vector<std::vector<double>> expectedRsVec_,
-    std::vector<std::vector<double>> expectedMsVec_);
+    std::vector<std::vector<double>> expectedMsVec_
+);
 
 void checking_communicator(
     const int& myId_,
     Engine* engine_,
-    std::vector<double> expectedXs_,
-    std::vector<double> expectedVs_,
-    std::vector<double> expectedFs_,
-    std::vector<double> expectedRs_,
-    std::vector<double> expectedMs_
+    std::vector<double>& expectedXs_,
+    std::vector<double>& expectedVs_,
+    std::vector<double>& expectedFs_,
+    std::vector<double>& expectedRs_,
+    std::vector<double>& expectedMs_,
+    const int nghost = 0
+);
+
+void checking_communicator(
+    const int& myId_,
+    Engine* engine_,
+    std::vector<int>& expectedIds_,
+    std::vector<double>& expectedXs_,
+    std::vector<double>& expectedVs_,
+    std::vector<double>& expectedFs_,
+    std::vector<double>& expectedRs_,
+    std::vector<double>& expectedMs_,
+    const int nghost = 0
 );
 
 
 
-void print_particles(std::unique_ptr<Engine>& engine_, std::vector<double> expectedXs, const int& expectedNGhost = 0);
+void print_particles(
+    std::unique_ptr<Engine>& engine_, 
+    std::vector<double> expectedXs,
+    const int& expectedNGhost = 0);
