@@ -123,7 +123,7 @@
     <ClCompile Include="test_communicator_helpers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="test_comm_strategy.cpp">
+    <ClCompile Include="test_mpi_comm_strategy.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="test_simple_neighbor.cpp">
@@ -142,6 +142,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="test_communicator_set2_mpi.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test_simple_comm_strategy.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

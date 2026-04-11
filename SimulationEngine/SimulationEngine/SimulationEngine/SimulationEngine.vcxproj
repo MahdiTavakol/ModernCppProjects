@@ -165,7 +165,7 @@
     <ClCompile Include="test_communicator_set2.cpp" />
     <ClCompile Include="test_communicator_set1.cpp" />
     <ClCompile Include="test_communicator_set2_mpi.cpp" />
-    <ClCompile Include="test_comm_strategy.cpp" />
+    <ClCompile Include="test_mpi_comm_strategy.cpp" />
     <ClCompile Include="test_damperfield.cpp" />
     <ClCompile Include="test_enginefactory.cpp" />
     <ClCompile Include="test_error.cpp" />
@@ -175,6 +175,7 @@
     <ClCompile Include="test_particles.cpp" />
     <ClCompile Include="test_regression.cpp" />
     <ClCompile Include="test_run.cpp" />
+    <ClCompile Include="test_simple_comm_strategy.cpp" />
     <ClCompile Include="test_simple_neighbor.cpp" />
     <ClCompile Include="test_springfield.cpp" />
   </ItemGroup>
