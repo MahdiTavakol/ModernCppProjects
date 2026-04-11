@@ -436,10 +436,6 @@ TEST_CASE("Testing the movement of particles between processors without skin (2X
         nDestLocal = 0;
         nAttemptsLocal++;
 
-        
-
-        MPI_Request requests[6];
-
         /// <summary>
         /// the dst orders is xlo, xhi, ylo, yhi, zlo, zhi
         /// so for the dst this would be their xhi, xlo, yhi, ylo, zhi,zlo
@@ -1410,6 +1406,1209 @@ TEST_CASE("Testing the sendGhost function to transfer the interior particles", "
     REQUIRE_THAT(F.data(), Array3DMatcher(expectedF.data(), nParticles, 1e-6));
     REQUIRE_THAT(R.data(), Array1DMatcher(expectedR.data(), nParticles, 1e-6));
     REQUIRE_THAT(M.data(), Array1DMatcher(expectedM.data(), nParticles, 1e-6));
-   
+}
+
+
+
+TEST_CASE("Testing the recvGhost function to receive the ghost particles","[mpi]")
+{
+    printRankZero("Testing the recvGhost function to receive the ghost particles");
+    printRankZero(std::string(80, '='));
+
+    std::unique_ptr<Comm_strategy> comm_strategy = std::make_unique<MPI_comm_strategy>();
+    int rank = comm_strategy->getRank();
+    int size = comm_strategy->getSize();
+
+    // checking the min required number of ranks
+    minRanksRequirement(comm_strategy, 27);
+    // skipping the extra ranks
+    comm_strategy = skipExtraRanks(comm_strategy, 27);
+
+    // the particles should be checked if they are not among the 
+    // xlo, ylo, ... of the destination rank they should be added otherwise
+    // they should be updated
+
+    /// 
+    /// 
+    /// 
+    /// Important
+    /// 
+    /// In sending ghost in the oriental direction 
+    /// each particle receives its ghost particles
+    /// then based on some criteria which I am not sure at the moment
+    /// it decides if it is the ghost for its neighbor or not
+    /// For this to work each rank should check if the received ghost is not
+    /// its own local particles
+    /// 
+    /// Important2
+    /// There should be a test to see whether a particle
+    /// is no longer a ghost in this rank
+    /// So I would suggest those ghost particles not updated
+    /// be removed 
+    /// 
+    ///
+    std::array<int, 3> ranks = { 3,3,3 };
+
+    // the skin parameter
+    double skin = 30.0;
+
+    int nlocal = 0, nghost = 0;
+    std::vector<int> newId;
+    std::vector<double> newX;
+
+    // expected results
+    int expectedNLocal = 0;
+    int expectedNGhost = 0;
+
+    std::vector<int> expectedIds;
+    std::vector<double> expectedX, expectedV, expectedF, expectedM, expectedR;
+
+
+    // rank 13
+    if (rank == 13) {
+        nlocal = 3;
+        nghost = 3;
+        newId = {
+            1, 25, 26, 5, 6, 7
+        };
+
+        newX = {
+            // ---- local particles (inside domain) ----
+             42.7, -68.78,  64.20,  // particle 1  (local)
+            -68.3,  49.09, -33.10,  // particle 25  (local)
+            -91.4, -55.55,  98.09,  // particle 26  (local)
+
+            // ---- ghost particles (>= 30 outside [-100,100]) ----
+            124.6,   84.08,  63.02,  // particle 5  (ghost)
+           -127.2,   46.05, -78.01,  // particle 6  (ghost)
+            112.9, -105.05,  12.05   // particle 7  (ghost)
+        };
+
+
+        // expected results
+        expectedNLocal = 3;
+        expectedNGhost = 17;
+        expectedIds = {
+            1,25,26,
+            5,6,7,3,12,8,4,6,11,14,13,15,18,16,17,19,21,22
+        };
+        expectedX = {
+            // ---- local particles (inside domain) ----
+             42.7, -68.78,  64.20,    // particle 1   (local)
+            -68.3,  49.09, -33.10,    // particle 25  (local)
+            -91.4, -55.55,  98.09,    // particle 26  (local)
+
+            // ---- ghost particles (>= 30 outside [-100,100]) ----
+            // original ghosts (5 and 6 are updated)
+           -120.4, -104.10,  116.7,   // Particle 5 (ghost)
+           -111.6,  -122.8,  118.5,   // Particle 6 (ghost)
+           -113.5,  109.20, -125.1,   // particle 7 (ghost)
+           // received ghosts
+            118.4, -121.70,  102.6,   // Particle 3  (ghost)
+            126.8,  111.20, -118.3,   // Particle 12 (ghost)
+            126.1, -117.60,  128.3,   // Particle 8  (ghost)
+            121.9,   127.3, -120.7,   // Particle 4  (ghost)
+            119.0,  -126.4,  109.8,   // Particle 11 (ghost)
+           -121.7,   110.8,  125.9,   // Particle 14 (ghost)
+            106.3,  -119.4,  124.5,   // Particle 13 (ghost)
+           -126.8,   122.1, -110.4,   // Particle 15 (ghost)
+            119.5,  -125.7,  127.6,   // Particle 18 (ghost) 
+           -129.5,   118.9,  102.4,   // Particle 16 (ghost)
+            125.7,  -103.3, -121.6,   // Particle 17 (ghost)
+           -118.6,   129.4, -124.7,   // Particle 19 (ghost)
+            111.8,  -124.6,  126.2,   // Particle 21 (ghost)
+           -107.5,  121.3,  -129.7,   // Particle 22 (ghost)
+        };
+
+        expectedV = {
+            0.0,  0.0,  0.0, // particle 1  (local)
+            0.0,  0.0,  0.0, // particle 25 (local)
+            0.0,  0.0,  0.0, // particle 26 (local)
+
+            // -------- ghost particles -----------
+            // original ghosts 
+           11.3,   62.5, -37.9, // particle 5  (ghost)
+            74.1, -66.3,  39.7, // Particle 6  (ghost)
+           -66.1,  43.7, -92.8, // particle 7  (ghost)
+
+            54.3, -87.2,  11.5, // Particle 3  (ghost)
+            72.9, -11.6,  48.4, // Particle 12 (ghost)
+           -93.4,  25.7,  61.2, // Particle 8  (ghost)
+           -55.8,  89.2, -13.4, // Particle 4  (ghost)
+            17.6,  58.4, -91.1, // Particle 11 (ghost)
+           -71.5,  63.1,  29.4, // Particle 14 (ghost)
+            47.2, -22.9,  93.8, // Particle 13 (ghost)
+           -83.7,  51.3, -14.6, // Particle 15 (ghost)
+            68.4, -73.2,  33.5, // Particle 18 (ghost)
+           -14.8,  72.6, -55.1, // Particle 16 (ghost)
+            83.5, -48.9,  61.7, // Particle 17 (ghost)
+           -67.3,  38.5, -90.2, // Particle 19 (ghost)
+            45.2, -72.1,  18.9, // Particle 21 (ghost)
+           -52.6,  14.8,  83.1, // Particle 22 (ghost)
+        };
+
+
+        expectedF = {
+            0.0,  0.0,  0.0, // particle 1  (local)
+            0.0,  0.0,  0.0, // particle 25 (local)
+            0.0,  0.0,  0.0, // particle 26 (local)
+
+            // -------- ghost particles -----------
+            // original ghosts 
+           -12.7,   28.4,  19.6, // particle 5  (ghost)
+            -21.8,  26.2, -37.5, // Particle 6  (ghost)
+            19.6, -31.4,  27.5,  // particle 7  (ghost)
+
+           -23.4,   14.8,  -9.2, // Particle 3  (ghost)
+           -45.7,    3.1, -18.9, // Particle 12 (ghost)
+            41.6,  -22.8,   7.3, // Particle 8  (ghost)
+            32.5,  -10.7,  17.9, // Particle 4  (ghost)
+             11.2, -45.6,   4.3, // Particle 11 (ghost)
+            -16.9, -34.2,  12.5, // Particle 14 (ghost)
+            -42.1,  15.4, -27.6, // Particle 13 (ghost)
+             25.8, -39.5,  18.2, // Particle 15 (ghost)
+            -11.4,  44.8,  -6.7, // Particle 18 (ghost)
+            -19.7,  36.4,  21.3, // Particle 16 (ghost)
+             14.6, -23.8, -32.1, // Particle 17 (ghost)
+            -35.4,  11.9,  42.7, // Particle 19 (ghost)
+             -7.4,  33.6, -28.5, // Particle 21 (ghost)
+             29.7, -41.2,   6.5, // Particle 22 (ghost)
+        };
+
+        expectedM = {
+            0.0,   // Particle 1
+            0.0,   // Particle 25
+            0.0,   // Particle 26
+
+            // --- ghost particles ------------
+            17.2,  // Particle  5
+            15.8,  // Particle  6
+             4.8,  // Particle  7
+
+
+            12.6,  // Particle  3
+            10.4,  // Particle 12
+             6.4,  // Particle  8
+             3.7,  // Particle  4
+             7.9,  // Particle 11
+             8.2,  // Particle 14
+            12.7,  // Particle 13
+             5.9,  // Particle 15
+            16.1,  // Particle 18
+             9.8,  // Particle 16
+             4.1,  // Particle 17
+            13.6,  // Particle 19
+            11.7,  // Particle 21
+             5.3   // Particle 22
+        };
+
+        expectedR = {
+              0.0,   // Particle 1
+              0.0,   // Particle 25
+              0.0,   // Particle 26
+
+              // --- ghost particles ------------
+               11.5,   // Particle  5
+                2.4,   // Particle  6
+               16.2,   // Particle  7
+
+                7.3,   // Particle 3
+               22.7,   // Particle 12
+                5.1,   // Particle 8
+                9.6,   // Particle 4
+               18.5,   // Particle 11
+               27.4,   // Particle 14
+                6.3,   // Particle 13
+               21.8,   // Particle 15
+                3.7,   // Particle 18
+               17.5,   // Particle 16
+                8.2,   // Particle 17
+               26.9,   // Particle 19
+                 9.4,  // Particle 21
+                21.6,  // Particle 22
+        };
+    }
+
+    std::vector<double> newV(newX.size(), 0.0);
+    std::vector<double> newF(newX.size(), 0.0);
+    std::vector<double> newR(newX.size() / 3, 0.0);
+    std::vector<double> newM(newX.size() / 3, 0.0);
+
+
+    // transfered data
+    std::vector<double> sendVec;
+    std::vector<double> sendBuff;
+    std::vector<double> recvBuff;
+
+    // the maximum number of particles
+    const int dataPerParticle = Particles::dataPerParticle;
+    const int nmax = 50;
+    const int bufferSize = nmax * dataPerParticle;
+
+    sendBuff.resize(bufferSize);
+    recvBuff.resize(bufferSize);
+
+    if (rank == 12)
+    {
+        // xlo 
+        // rank 12
+        sendVec = {
+            3.0,  // number of particles
+
+            3.0,  // particle id
+            118.4, -121.7, 102.6,   // x, y, z
+             54.3,  -87.2,  11.5,   // vx, vy, vz
+            -23.4,   14.8,  -9.2,   // fx, fy, fz
+             12.6,                 // mass
+              7.3,                 // radius
+
+            7.0,  // particle id
+           -113.5, 109.2, -125.1,   // x, y, z
+            -66.1,  43.7, -92.8,    // vx, vy, vz
+             19.6, -31.4,  27.5,    // fx, fy, fz
+              4.8,                 // mass
+             16.2,                 // radius
+
+            12.0, // particle id
+            126.8, 111.2, -118.3,  // x, y, z
+             72.9, -11.6,  48.4,   // vx, vy, vz
+            -45.7,   3.1, -18.9,   // fx, fy, fz
+             10.4,                // mass
+             22.7,                // radius
+        };
+    }
+    else if (rank == 14) {
+        sendVec = {
+            2.0,
+
+            5.0,
+           -120.4, -104.1, 116.7,   // x, y, z
+             11.3,   62.5, -37.9,   // vx, vy, vz
+            -12.7,   28.4,  19.6,   // fx, fy, fz
+             17.2,
+             11.5,
+
+            8.0,
+            126.1, -117.6, 128.3,   // x, y, z
+            -93.4,   25.7,  61.2,   // vx, vy, vz
+             41.6,  -22.8,   7.3,   // fx, fy, fz
+              6.4,
+              5.1,
+
+        };
+    }
+    else if (rank == 10) {
+        sendVec = {
+            3.0,
+
+            4.0,
+            121.9, 127.3, -120.7,  // x, y, z
+            -55.8,  89.2, -13.4,   // vx, vy, vz
+             32.5, -10.7,  17.9,   // fx, fy, fz
+              3.7,
+              9.6,
+
+            6.0,
+           -111.6, -122.8, 118.5,  // x, y, z
+             74.1, -66.3,  39.7,   // vx, vy, vz
+            -21.8,  26.2, -37.5,   // fx, fy, fz
+             15.8,
+              2.4,
+
+            11.0,
+            119.0, -126.4, 109.8,  // x, y, z
+             17.6,  58.4, -91.1,   // vx, vy, vz
+             11.2, -45.6,   4.3,   // fx, fy, fz
+              7.9,
+             18.5,
+        };
+    }
+    else if (rank == 16) {
+        sendVec = {
+            1.0,
+
+
+            14.0,
+           -121.7, 110.8, 125.9,  // x, y, z
+            -71.5,  63.1,  29.4,  // vx, vy, vz
+            -16.9, -34.2,  12.5,  // fx, fy, fz
+              8.2,
+             27.4,
+        };
+    }
+    else if (rank == 4) {
+        sendVec = {
+            3.0,
+
+            13.0,
+            106.3, -119.4, 124.5,  // x, y, z
+             47.2, -22.9,  93.8,   // vx, vy, vz
+            -42.1,  15.4, -27.6,   // fx, fy, fz
+             12.7,
+              6.3,
+
+            15.0,
+           -126.8, 122.1, -110.4,  // x, y, z
+            -83.7,  51.3, -14.6,   // vx, vy, vz
+             25.8, -39.5,  18.2,   // fx, fy, fz
+              5.9,
+             21.8,
+
+            18.0,
+            119.5, -125.7, 127.6,  // x, y, z
+             68.4, -73.2,  33.5,   // vx, vy, vz
+            -11.4,  44.8,  -6.7,   // fx, fy, fz
+             16.1,
+              3.7,
+        };
+    }
+    else if (rank == 22) {
+        sendVec = {
+            5.0,  // number of particles
+
+            16.0,
+           -129.5, 118.9, 102.4,  // x, y, z
+            -14.8,  72.6, -55.1,  // vx, vy, vz
+            -19.7,  36.4,  21.3,  // fx, fy, fz
+              9.8,
+             17.5,
+
+            17.0,
+            125.7, -103.3, -121.6,  // x, y, z
+             83.5, -48.9,  61.7,    // vx, vy, vz
+             14.6, -23.8, -32.1,    // fx, fy, fz
+              4.1,
+              8.2,
+
+            19.0,
+           -118.6, 129.4, -124.7,  // x, y, z
+            -67.3,  38.5, -90.2,   // vx, vy, vz
+            -35.4,  11.9,  42.7,   // fx, fy, fz
+             13.6,
+             26.9,
+
+             21.0,
+             111.8, -124.6, 126.2,  // x, y, z
+              45.2, -72.1,  18.9,   // vx, vy, vz
+              -7.4,  33.6, -28.5,   // fx, fy, fz
+              11.7,
+               9.4,
+
+             22.0,
+            -107.5, 121.3, -129.7,  // x, y, z
+             -52.6,  14.8,  83.1,   // vx, vy, vz
+              29.7, -41.2,   6.5,   // fx, fy, fz
+               5.3,
+             21.6,
+        };
+    }
+
+
+    // building the engine
+    auto engine = set_particles_build_engine(rank, ranks, newId, newX, newV, newF, newR, newM, skin);
+    // returning the communicatorRef
+    auto& communicatorRef = engine->getCommunicator();
+    
+    
+    struct {
+        int tag, src, dst;
+    } loopArgs[6] = {
+        {12,12,13},
+        {14,14,13},
+        {10,10,13},
+        {16,16,13},
+        {4,4,13},
+        {22,22,13}
+    };
+
+    // sending data
+    for (const auto& arg : loopArgs)
+    {
+        if (rank == arg.src)
+        {
+            std::copy_n(sendVec.data(), sendVec.size(), sendBuff.data());
+            comm_strategy->send(sendBuff.data(), sendBuff.size(), arg.dst, arg.tag);
+        }
+        if (rank == arg.dst)
+        {
+            comm_strategy->recv(recvBuff.data(), recvBuff.size(), arg.src, arg.tag);
+            communicatorRef->recvGhosts(recvBuff);
+            recvBuff.resize(bufferSize);
+        }
+        comm_strategy->waitAll();
+    }
+
+    
+    // getting the particles
+    auto& particlesRef = engine->getParticles();
+    // checking the particles Ref
+    REQUIRE(particlesRef);
+    // checking the results
+    int* mId = particlesRef->getIdData();
+    auto* myX = particlesRef->getXData();
+    auto* myV = particlesRef->getVData();
+    auto* myF = particlesRef->getFData();
+    auto* myM = particlesRef->getMData();
+    auto* myR = particlesRef->getRData();
+
+
+
+    //REQUIRE_THAT(mId, Array1DMatcherInt(expectedIds.data(), expectedNLocal, expectedNGhost));
+    REQUIRE_THAT(myX, Array3DMatcher(expectedX.data(), expectedNLocal, expectedNGhost, 1e-6));
+    REQUIRE_THAT(myV, Array3DMatcher(expectedV.data(), expectedNLocal, expectedNGhost, 1e-6));
+    REQUIRE_THAT(myF, Array3DMatcher(expectedF.data(), expectedNLocal, expectedNGhost, 1e-6));
+    REQUIRE_THAT(myM, Array1DMatcher(expectedM.data(), expectedNLocal, expectedNGhost, 1e-6));
+    REQUIRE_THAT(myR, Array1DMatcher(expectedR.data(), expectedNLocal, expectedNGhost, 1e-6));
+
+}
+
+
+TEST_CASE("Testing the movement of particles for the case with the skin value of 50","[mpi]")
+{
+    printRankZero("Testing the movement of particles for the case with the skin value of 50");
+    printRankZero(std::string(80, '='));
+
+    std::unique_ptr<Comm_strategy> comm_strategy = std::make_unique<MPI_comm_strategy>();
+    int rank = comm_strategy->getRank();
+    int size = comm_strategy->getSize();
+
+    // checking the min required number of ranks
+    minRanksRequirement(comm_strategy, 4);
+    // skipping the extra ranks
+    comm_strategy = skipExtraRanks(comm_strategy, 4);
+
+    double skin = 50.0;
+
+    int newNGhost = 0;
+    std::vector<int> newId;
+    std::vector<double> newX, newV, newF, newM, newR;
+
+    int expectedNGhost = 0;
+    std::vector<int> expectedId;
+    std::vector<double> expectedX, expectedV, expectedF, expectedM, expectedR;
+
+    if (rank == 0)
+    {
+        // id values
+        newId = {
+            0,1,2,3,4
+        };
+        //  x values
+        newX =
+        {
+            -220.40, -180.10,   80.55,   // particle 0  (-- interior) region 1
+            -140.75, -260.33, -120.18,   // particle 1  (-- interior) region 1
+            -180.66,   30.77,   14.95,   // particle 2  (-+ interior) region 3
+              12.60,  -18.90,  130.10,   // particle 3  (+- interior) region 2
+              35.10, -140.48,   12.66,   // particle 4  (+- interior) region 2
+        };
+
+        newV =
+        {
+            72.4, -33.1,  95.0,   // particle 0
+           -88.6,  14.3, -56.7,   // particle 1
+            41.2, -19.8,  63.5,   // particle 2
+           -97.1,  28.9, -74.4,   // particle 3
+             3.6,  89.2, -12.5,   // particle 4
+        };
+
+        // force values
+        newF =
+        {
+           12.4, -33.9,  45.2,   // particle 0
+          -18.6,   7.3, -41.5,   // particle 1
+           29.7,  -5.4,  38.9,   // particle 2
+          -22.1,  16.0, -49.7,   // particle 3
+            3.1,  27.6, -14.8,   // particle 4
+        };
+
+        // radius values
+        newR =
+        {
+         12.5,  // particle 0 region 1
+         89.3,  // particle 1 region 1
+         45.7,  // particle 2 region 3
+         3.9,   // particle 3 region 2
+         67.1,  // particle 4 region 2
+        };
+
+        // mass values
+        newM =
+        {
+            3.4,  // particle 0 region 1
+            7.8,  // particle 1 region 1
+            0.9,  // particle 2 region 3
+            5.6,  // particle 3 region 2
+            9.1,  // particle 4 region 2
+        };
+
+        newNGhost = 0;
+
+        // expected id values
+        expectedId = {
+            0,1,7,17,
+            3,4,12,2,8,13
+        };
+
+        // expected x values
+        expectedX = {
+            -220.40, -180.10,   80.55,   // particle 0  (-- interior) region 1
+            -140.75, -260.33, -120.18,   // particle 1  (-- interior) region 1
+             -25.60, -160.15,  -55.27,   // particle 7  (-- interior) region 1 ghost for region 2
+             -30.25,  -22.40,   10.66,   // particle 17 (-- interior) region 1 ghost for regions 2, 3, 4
+
+             // ghosts 
+             12.60,  -18.90,  130.10,   // particle 3  (+- interior) region 2
+             35.10, -140.48,   12.66,   // particle 4  (+- interior) region 2
+             -120.33,   20.18, -199.05,   // particle 12 (-+ interior) region 3
+             -180.66,   30.77,   14.95,   // particle 2  (-+ interior) region 3
+             -18.40,  +22.10,   95.50,   // particle 8  (-+ interior) region 3
+             22.80,   18.10, -140.25,   // particle 13 (++ interior) region 4
+        };
+
+        // expected velocity values
+        expectedV = {
+            72.4, -33.1,  95.0,   // particle 0
+           -88.6,  14.3, -56.7,   // particle 1
+           -11.4,  36.8, -83.2,   // particle 7
+            81.9, -35.0,  24.1,   // particle 17
+
+           -97.1,  28.9, -74.4,   // particle 3
+             3.6,  89.2, -12.5,   // particle 4
+            46.1, -61.5,  33.8,   // particle 12
+            41.2, -19.8,  63.5,   // particle 2
+            59.7, -24.6,  10.9,   // particle 8
+           -79.2,  12.4,  99.1,   // particle 13
+        };
+
+        // expected force values
+        expectedF = {
+           12.4, -33.9,  45.2,   // particle 0
+          -18.6,   7.3, -41.5,   // particle 1
+          -12.7,  18.9, -28.4,   // particle 7
+           35.0, -18.1,  13.7,   // particle 17
+
+          -22.1,  16.0, -49.7,   // particle 3
+            3.1,  27.6, -14.8,   // particle 4
+           41.2, -29.8,   9.7,   // particle 12
+           29.7,  -5.4,  38.9,   // particle 2
+           47.3, -19.5,   6.2,   // particle 8
+          -48.1,  12.6,  33.9,   // particle 13
+        };
+
+
+        // expected radius values
+        expectedR = {
+            12.5,  // particle 0  region 1
+            89.3,  // particle 1  region 1
+            31.4,  // particle 7  region 1
+            83.1,  // particle 17 region 1
+
+            3.9,   // particle 3 region 2
+            67.1,  // particle 4  region 2
+            19.8,  // particle 12 region 3
+            45.7,  // particle 2  region 3
+            76.2,  // particle 8  region 3
+            92.4,  // particle 13 region 4
+        };
+
+        // expected mass values
+        expectedM = {
+            3.4,  // particle 0  region 1
+            7.8,  // particle 1  region 1
+            1.3,  // particle 7  region 1
+            8.2,  // particle 17 region 1
+
+
+            5.6,  // particle 3 region 2
+            9.1,  // particle 4  region 2
+            3.0,  // particle 12 region 3
+            0.9,  // particle 2  region 3
+            8.4,  // particle 8  region 3
+            7.4,  // particle 13 region 4
+        };
+
+        expectedNGhost = 6;
+
+    }
+    else if (rank == 1)
+    {
+        newId = {
+            5,6,9,7,8
+        };
+
+        newX =
+        {
+             180.62, -210.44,   60.91,   // particle 5  (+- interior) region 2
+             260.11, -140.88, -200.30,   // particle 6  (+- interior) region 2
+             190.27,  -40.22, -236.70,   // particle 9  (+- interior) region 2
+             -25.60, -160.15,  -55.27,   // particle 7  (-- interior) region 1
+             -18.40,  +22.10,   95.50,   // particle 8  (-+ interior) region 3
+        };
+
+        newV =
+        {
+            54.7, -66.3,  77.1,   // particle 5
+           -45.9,  18.0,  92.6,   // particle 6
+           -72.5,  44.3, -95.8,   // particle 9
+           -11.4,  36.8, -83.2,   // particle 7
+            59.7, -24.6,  10.9,   // particle 8
+        };
+
+        newF =
+        {
+            44.5, -36.7,  21.4,   // particle 5
+            -9.9,   5.6,  31.2,   // particle 6
+           -34.8,  25.1, -45.6,   // particle 9
+           -12.7,  18.9, -28.4,   // particle 7
+            47.3, -19.5,   6.2,   // particle 8
+        };
+
+        newR =
+        {
+            24.6,  // particle 5 region 2
+            98.0,  // particle 6 region 2
+            54.3,  // particle 9 region 2
+            31.4,  // particle 7 region 1
+            76.2,  // particle 8 region 3
+        };
+
+        newM =
+        {
+            2.7,  // particle 5 region 2
+            6.0,  // particle 6 region 2
+            4.1,  // particle 9 region 2
+            1.3,  // particle 7 region 1
+            8.4,  // particle 8 region 3
+        };
+
+        newNGhost = 0;
+
+        expectedId = {
+            5,6,9,3,4,19,
+            7,17,8,13
+        };
+
+
+        expectedX = {
+            180.62, -210.44,   60.91,   // particle 5  (+- interior) region 2
+            260.11, -140.88, -200.30,   // particle 6  (+- interior) region 2
+            190.27,  -40.22, -236.70,   // particle 9  (+- interior) region 2 ghost for region 4
+            12.60,  -18.90,  130.10,   // particle 3  (+- interior) region 2 ghost for regions 1, 3, 4
+            35.10, -140.48,   12.66,   // particle 4  (+- interior) region 2 ghost for region 1
+            160.81,  -35.42,  289.73,   // particle 19 (+- interior) region 2 ghost for region 4
+            
+            // ghosts
+            -25.60, -160.15,  -55.27,   // particle 7  (-- interior) region 1
+            -30.25,  -22.40,   10.66,   // particle 17 (-- interior) region 1
+            -18.40,  +22.10,   95.50,   // particle 8  (-+ interior) region 3
+            22.80,   18.10, -140.25,   // particle 13 (++ interior) region 4
+        };
+
+        expectedV = {
+            54.7, -66.3,  77.1,   // particle 5
+           -45.9,  18.0,  92.6,   // particle 6
+           -72.5,  44.3, -95.8,   // particle 9
+           -97.1,  28.9, -74.4,   // particle 3
+             3.6,  89.2, -12.5,   // particle 4
+           -16.7,  73.3, -58.9,   // particle 19
+
+
+           -11.4,  36.8, -83.2,   // particle 7
+            81.9, -35.0,  24.1,   // particle 17
+            59.7, -24.6,  10.9,   // particle 8
+           -79.2,  12.4,  99.1,   // particle 13
+        };
+
+        expectedF = {
+            44.5, -36.7,  21.4,   // particle 5
+            -9.9,   5.6,  31.2,   // particle 6
+           -34.8,  25.1, -45.6,   // particle 9
+           -22.1,  16.0, -49.7,   // particle 3
+             3.1,  27.6, -14.8,   // particle 4
+            -8.2,  46.7, -24.5,   // particle 19
+
+
+           -12.7,  18.9, -28.4,   // particle 7
+            35.0, -18.1,  13.7,   // particle 17
+            47.3, -19.5,   6.2,   // particle 8
+           -48.1,  12.6,  33.9,   // particle 13
+        };
+        
+        expectedR = {
+            24.6,  // particle 5 region 2
+            98.0,  // particle 6 region 2
+            54.3,  // particle 9 region 2
+             3.9,  // particle 3 region 2
+            67.1,  // particle 4 region 2
+            26.4,  // particle 19 region 2
+
+
+            31.4,  // particle 7  region 1
+            83.1,  // particle 17 region 1
+            76.2,  // particle 8  region 3
+            92.4,  // particle 13 region 4
+        };
+
+        expectedM = {
+            2.7,  // particle 5 region 2
+            6.0,  // particle 6 region 2
+            4.1,  // particle 9 region 2
+            5.6,  // particle 3 region 2
+            9.1,  // particle 4 region 2
+            4.6,  // particle 19 region 2
+
+
+            1.3,  // particle 7  region 1
+            8.2,  // particle 17 region 1
+            8.4,  // particle 8  region 3
+            7.4,  // particle 13 region 4
+        };
+
+        expectedNGhost = 4;
+
+    }
+    else if (rank == 2)
+    {
+        newId = {
+            10,11,12,13,14
+        };
+
+        newX =
+        {
+            -200.90,  190.36,  -40.58,   // particle 10 (-+ interior) region 3
+            -270.22,  120.74,  210.46,   // particle 11 (-+ interior) region 3
+            -120.33,   20.18, -199.05,   // particle 12 (-+ interior) region 3
+              22.80,   18.10, -140.25,   // particle 13 (++ interior) region 4
+             -28.20,  180.66,   66.03,   // particle 14 (-+ interior) region 3
+        };
+
+        newV =
+        {
+            21.7, -38.4,  68.2,   // particle 10
+           -14.9,  87.6, -29.3,   // particle 11
+            46.1, -61.5,  33.8,   // particle 12
+           -79.2,  12.4,  99.1,   // particle 13
+           -53.7,  27.5, -41.6,   // particle 14
+        };
+
+
+        newF =
+        {
+            14.8,  -7.3,  39.6,   // particle 10
+           -21.9,  30.4, -16.5,   // particle 11
+            41.2, -29.8,   9.7,   // particle 12
+           -48.1,  12.6,  33.9,   // particle 13
+           -25.7,  17.8, -38.6,   // particle 14
+        };
+        
+        newR =
+        {
+            8.7,   // particle 10 region 3
+            63.5,  // particle 11 region 3
+            19.8,  // particle 12 region 3
+            92.4,  // particle 13 region 4
+            37.6,  // particle 14 region 3
+        };
+
+        newM =
+        {
+            0.5,  // particle 10 region 3
+            9.8,  // particle 11 region 3
+            3.0,  // particle 12 region 3
+            7.4,  // particle 13 region 4
+            5.9,  // particle 14 region 3
+        };
+
+        
+
+
+        newNGhost = 0;
+
+
+        expectedId = {
+            10,11,12,14,2,8,18,
+            17,3,13
+        };
+
+        expectedX = {
+            -200.90,  190.36,  -40.58,   // particle 10 (-+ interior) region 3
+            -270.22,  120.74,  210.46,   // particle 11 (-+ interior) region 3
+            -120.33,   20.18, -199.05,   // particle 12 (-+ interior) region 3 ghost for region 1
+            -28.20,  180.66,   66.03,   // particle 14 (-+ interior) region 3 ghost for region 4
+            -180.66,   30.77,   14.95,   // particle 2  (-+ interior) region 3 ghost for region 1
+            -18.40,  +22.10,   95.50,   // particle 8  (-+ interior) region 3 ghost for regions 1, 2, 4
+            -40.11,  170.25,  204.67,   // particle 18 (-+ interior) region 3 ghost for region 4
+
+            // ghosts
+            -30.25,  -22.40,   10.66,   // particle 17 (-- interior) region 1
+            12.60,  -18.90,  130.10,   // particle 3  (+- interior) region 2
+            22.80,   18.10, -140.25,   // particle 13 (++ interior) region 4
+        };
+
+        expectedV = {
+            21.7, -38.4,  68.2,   // particle 10
+           -14.9,  87.6, -29.3,   // particle 11
+            46.1, -61.5,  33.8,   // particle 12
+           -53.7,  27.5, -41.6,   // particle 14
+            41.2, -19.8,  63.5,   // particle 2
+            59.7, -24.6,  10.9,   // particle 8
+            57.8, -69.2,  39.4,   // particle 18
+
+
+            81.9, -35.0,  24.1,   // particle 17
+           -97.1,  28.9, -74.4,   // particle 3
+           -79.2,  12.4,  99.1,   // particle 13
+        };
+
+
+        expectedF = {
+            14.8,  -7.3,  39.6,   // particle 10
+           -21.9,  30.4, -16.5,   // particle 11
+            41.2, -29.8,   9.7,   // particle 12
+           -25.7,  17.8, -38.6,   // particle 14
+            29.7,  -5.4,  38.9,   // particle 2
+            47.3, -19.5,   6.2,   // particle 8
+            28.6, -31.4,  19.3,   // particle 18
+
+
+            35.0, -18.1,  13.7,   // particle 17
+           -22.1,  16.0, -49.7,   // particle 3
+           -48.1,  12.6,  33.9,   // particle 13
+        };
+        
+        
+        expectedR = {
+            8.7,  // particle 10 region 3
+            63.5,  // particle 11 region 3
+            19.8,  // particle 12 region 3
+            37.6,  // particle 14 region 3
+            45.7,  // particle 2  region 3
+            76.2,  // particle 8  region 3
+            58.9,  // particle 18 region 3
+
+
+            83.1,  // particle 17 region 1
+            3.9,  // particle 3  region 2
+            92.4,  // particle 13 region 4
+        };
+
+        expectedM = {
+            0.5,  // particle 10 region 3
+            9.8,  // particle 11 region 3
+            3.0,  // particle 12 region 3
+            5.9,  // particle 14 region 3
+            0.9,  // particle 2  region 3
+            8.4,  // particle 8  region 3
+            1.8,  // particle 18 region 3
+
+
+            8.2,  // particle 17 region 1
+            5.6,  // particle 3  region 2
+            7.4,  // particle 13 region 4
+        };
+
+
+        expectedNGhost = 3;
+
+    }
+    else if (rank == 3)
+    {
+        newId = {
+            15,16,17,18,19
+        };
+
+        newX =
+        {
+             210.83,  220.41, -150.88,   // particle 15 (++ interior) region 4
+             140.62,  160.33,  198.21,   // particle 16 (++ interior) region 4
+             -30.25,  -22.40,   10.66,   // particle 17 (-- interior) region 1
+             -40.11,  170.25,  204.67,   // particle 18 (-+ interior) region 3
+             160.81,  -35.42,  289.73,   // particle 19 (+- interior) region 2
+        };
+
+        newV =
+        {
+            64.0, -22.8,  15.2,   // particle 15
+           -90.3,  48.6,  -7.4,   // particle 16
+            81.9, -35.0,  24.1,   // particle 17
+            57.8, -69.2,  39.4,   // particle 18
+           -16.7,  73.3, -58.9    // particle 19
+        };
+
+
+        newF =
+        {
+            26.4, -11.3,   4.9,   // particle 15
+           -43.2,  22.5,  -6.8,   // particle 16
+            35.0, -18.1,  13.7,   // particle 17
+            28.6, -31.4,  19.3,   // particle 18
+            -8.2,  46.7, -24.5    // particle 19
+        };
+
+        newR =
+        {
+            71.0,  // particle 15 region 4
+            14.2,  // particle 16 region 4
+            83.1,  // particle 17 region 1
+            58.9,  // particle 18 region 3
+            26.4   // particle 19 region 2
+        };
+
+        newM =
+        {
+            2.1,  // particle 15 region 4
+            6.7,  // particle 16 region 4
+            8.2,  // particle 17 region 1
+            1.8,  // particle 18 region 3
+            4.6   // particle 19 region 2
+        };
+
+        newNGhost = 0;
+
+
+        expectedId = {
+            15,16,13,
+            17,9,3,14,8,18,19
+        };
+
+        expectedX = {
+            210.83,  220.41, -150.88,   // particle 15 (++ interior) region 4 
+            140.62,  160.33,  198.21,   // particle 16 (++ interior) region 4
+            22.80,   18.10, -140.25,   // particle 13 (++ interior) region 4 ghost for regions 1, 2, 3
+            
+            
+            -30.25,  -22.40,   10.66,   // particle 17 (-- interior) region 1
+            190.27,  -40.22, -236.70,   // particle 9  (+- interior) region 2
+            12.60,  -18.90,  130.10,   // particle 3  (+- interior) region 2
+            -28.20,  180.66,   66.03,   // particle 14 (-+ interior) region 3 ghost for region 4
+            -18.40,  +22.10,   95.50,   // particle 8  (-+ interior) region 3 ghost for regions 1, 2, 4
+            -40.11,  170.25,  204.67,   // particle 18 (-+ interior) region 3 ghost for region 4
+            160.81,  -35.42,  289.73,   // particle 19 (+- interior) region 2
+        };
+
+        expectedV = {
+            64.0, -22.8,  15.2,   // particle 15
+           -90.3,  48.6,  -7.4,   // particle 16
+           -79.2,  12.4,  99.1,   // particle 13
+
+
+            81.9, -35.0,  24.1,   // particle 17
+           -72.5,  44.3, -95.8,   // particle 9
+           -97.1,  28.9, -74.4,   // particle 3
+           -53.7,  27.5, -41.6,   // particle 14
+            59.7, -24.6,  10.9,   // particle 8
+            57.8, -69.2,  39.4,   // particle 18
+           -16.7,  73.3, -58.9    // particle 19
+        };
+
+        expectedF = {
+            26.4, -11.3,   4.9,   // particle 15
+           -43.2,  22.5,  -6.8,   // particle 16
+           -48.1,  12.6,  33.9,   // particle 13
+
+
+            35.0, -18.1,  13.7,   // particle 17
+           -34.8,  25.1, -45.6,   // particle 9
+           -22.1,  16.0, -49.7,   // particle 3
+           -25.7,  17.8, -38.6,   // particle 14
+            47.3, -19.5,   6.2,   // particle 8
+            28.6, -31.4,  19.3,   // particle 18
+            -8.2,  46.7, -24.5    // particle 19
+        };
+
+
+
+        expectedR = {
+            71.0,  // particle 15 region 4
+            14.2,  // particle 16 region 4
+            92.4,  // particle 13 region 4
+
+
+            83.1,  // particle 17 region 1
+            54.3,  // particle 9  region 2
+            3.9,   // particle 3  region 2
+            37.6,  // particle 14 region 3
+            76.2,  // particle 8  region 3
+            58.9,  // particle 18 region 3
+            26.4   // particle 19 region 2
+        };
+
+        expectedM = {
+            2.1,  // particle 15 region 4
+            6.7,  // particle 16 region 4
+            7.4,  // particle 13 region 4
+
+
+            8.2,  // particle 17 region 1
+            4.1,  // particle 9  region 2
+            5.6,  // particle 3  region 2
+            5.9,  // particle 14 region 3
+            8.4,  // particle 8  region 3
+            1.8,  // particle 18 region 3
+            4.6   // particle 19 region 2
+        };
+
+        expectedNGhost = 7;
+
+    }
+    
+
+
+    // running configuration
+    std::array<int, 3> ranks = { 2,2,1 };
+    //
+    int nranks = ranks[0] * ranks[1] * ranks[2];
+
+    // builing the engine
+    auto engine = build_engine_set_particles(rank, ranks,
+        newX, newV, newF, newR, newM, newNGhost, skin);
+
+    // getting the communicator
+    auto& communicatorRef = engine->getCommunicator();
+    std::array<int, 6> dests = communicatorRef->returnExchangeDests();
+
+    // transfered data
+    std::vector<double> sendBuff;
+    std::vector<double> recvBuff;
+    std::vector<double> sendVec;
+
+    // the maximum number of particles
+    const int dataPerParticle = Particles::dataPerParticle;
+    const int nmax = 50;
+    const int bufferSize = nmax * dataPerParticle;
+
+    sendBuff.resize(bufferSize);
+    recvBuff.resize(bufferSize);
+
+
+    int nDestLocal = 0, nDestTotal = 0;
+    int nAttemptsLocal = 0, nAttemptsTotal = 0;
+
+    constexpr int maxAttempts = 4;
+
+    do {
+        nDestLocal = 0;
+        nAttemptsLocal++;
+
+        /// <summary>
+        /// the dst orders is xlo, xhi, ylo, yhi, zlo, zhi
+        /// so for the dst this would be their xhi, xlo, yhi, ylo, zhi,zlo
+        /// </summary>
+
+        std::vector<std::array<int, 2>> SrcDst = { {0,1},{1,0},{2,3},{3,2},{ 4,5 },{5,4} };
+        std::vector<int> tags = { 0,1,2,3,4,5 };
+
+        struct
+        {
+            std::array<int, 2> indx;
+            int tag;
+        } loopStruct[6] =
+        {
+            {{0,1},0}, // send in xlo recv in xhi
+            {{1,0},1}, // send in xhi recv in xlo
+            {{2,3},2}, // send in ylo recv in yhi
+            {{3,2},3}, // send in yhi recv in ylo
+            {{4,5},4}, // send in zlo recv in zhi
+            {{5,4},5}  // send in zhi recv in zlo
+        };
+
+        // exchanging particles first
+        for (const auto& info : loopStruct)
+        {
+            int tgtIndx = info.indx[0];
+            int srcIndx = info.indx[1];
+            int tag = info.tag;
+
+            nDestLocal += communicatorRef->sendParticles(dests[tgtIndx], sendVec);
+            std::copy_n(sendVec.data(), sendVec.size(), sendBuff.data());
+            comm_strategy->send(sendBuff.data(), bufferSize, dests[tgtIndx], tag);
+            sendVec.clear();
+
+            comm_strategy->recv(recvBuff.data(), bufferSize, dests[srcIndx], tag);
+            communicatorRef->recvParticles(recvBuff);
+            recvBuff.resize(bufferSize);
+
+            comm_strategy->waitAll();
+        }
+
+
+        // MPI_Allreduce to get nDestsTotal
+        comm_strategy->reduceAll(&nDestLocal, &nDestTotal, 1);
+        comm_strategy->reduceAll(&nAttemptsLocal, &nAttemptsTotal, 1);
+
+
+    } while (nDestTotal > 0 && nAttemptsTotal < maxAttempts);
+
+
+    nDestLocal = 0; nDestTotal = 0;
+    nAttemptsLocal = 0; nAttemptsTotal = 0;
+
+
+    do {
+        nDestLocal = 0;
+        nAttemptsLocal++;
+
+        /// <summary>
+        /// the dst orders is xlo, xhi, ylo, yhi, zlo, zhi
+        /// so for the dst this would be their xhi, xlo, yhi, ylo, zhi,zlo
+        /// </summary>
+
+
+        std::vector<std::array<int, 2>> SrcDst = { {0,1},{1,0},{2,3},{3,2},{ 4,5 },{5,4} };
+        std::vector<int> tags = { 0,1,2,3,4,5 };
+
+        struct
+        {
+            std::array<int, 2> indx;
+            int tag;
+        } loopStruct[6] =
+        {
+            {{0,1},0}, // send to xlo recv from xhi
+            {{1,0},1}, // send to xhi recv from xlo
+            {{2,3},2}, // send to ylo recv from yhi
+            {{3,2},3}, // send to yhi recv from ylo
+            {{4,5},4}, // send to zlo recv from zhi
+            {{5,4},5}  // send to zhi recv from zlo
+        };
+
+
+        // sending / receiving ghost particles
+        for (const auto& info : loopStruct)
+        {
+            int tgtIndx = info.indx[0];
+            int srcIndx = info.indx[1];
+            int tag = info.tag;
+
+            nDestLocal += communicatorRef->sendGhosts(dests[tgtIndx], sendVec);
+            std::copy_n(sendVec.data(), sendVec.size(), sendBuff.data());
+            comm_strategy->send(sendBuff.data(), bufferSize, dests[tgtIndx], tag);
+            sendVec.clear();
+
+            comm_strategy->recv(recvBuff.data(), bufferSize, dests[srcIndx], tag);
+            communicatorRef->recvGhosts(recvBuff);
+            recvBuff.clear();
+            recvBuff.resize(bufferSize);
+
+            comm_strategy->waitAll();
+        }
+
+
+
+        // MPI_Allreduce to get nDestsTotal
+        comm_strategy->reduceAll(&nDestLocal, &nDestTotal, 1);
+        comm_strategy->reduceAll(&nAttemptsLocal, &nAttemptsTotal, 1);
+
+
+    } while (nDestTotal > 0 && nAttemptsTotal < maxAttempts);
+
+
+    comm_strategy->waitAll();
+    if (rank == 1)
+    print_particles(engine, expectedX, expectedNGhost);
+    comm_strategy->waitAll();
+    // checking the particles
+    //checking_communicator(rank, engine.get(),
+    //    expectedX, expectedV, expectedF, expectedR, expectedM);
 
 }

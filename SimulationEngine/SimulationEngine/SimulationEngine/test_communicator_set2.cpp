@@ -2602,11 +2602,6 @@ TEST_CASE("Testing the movement of particles for the case with the skin value of
 
 
 
-    // sending the interior particles as ghosts
-    for (auto& communicator : communicatorArray) {
-        //communicator->sendGhosts()
-    }
-
 
     int nDestsTotal = 0;
     // repeating the particle reassginement until there is no
