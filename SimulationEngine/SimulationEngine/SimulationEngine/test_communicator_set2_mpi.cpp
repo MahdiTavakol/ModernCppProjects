@@ -1087,6 +1087,7 @@ TEST_CASE("Testing the sendGhost function to transfer the interior particles", "
     std::vector<double> newX = {}, newV = {}, newF = {}, newR = {}, newM = {};
     std::vector<double> expectedX = {}, expectedV = {}, expectedF = {}, expectedR = {}, expectedM = {};
 
+    // region 4
     if (rank == 3) {
         expectednParticles = 5;
         // since the order of particles is not known in advance we
@@ -1163,6 +1164,15 @@ TEST_CASE("Testing the sendGhost function to transfer the interior particles", "
             22.6,  // particle 22 region 3
             12.5   // particle 23 region 3
         };
+
+        expectedM = {
+            3.0,  // particle 12 region 3
+            0.9,  // particle 2  region 3
+            8.4,  // particle 8  region 3
+            3.1,  // particle 21 region 3
+           10.8,  // particle 22 region 3
+            8.5   // particle 23 region 3
+        };
     }
     else if (rank == 6)
     {
@@ -1196,20 +1206,13 @@ TEST_CASE("Testing the sendGhost function to transfer the interior particles", "
             22.6,  // particle 22 region 3 
         };
         expectedM = {
-            3.0,  // particle 12 region 3
-            0.9,  // particle 2  region 3
-            8.4,  // particle 8  region 3
-            3.1,  // particle 21 region 3
-           10.8,  // particle 22 region 3
-            8.5   // particle 23 region 3
-        };
-        std::vector<double> expectedM5 = {
             0.5,  // particle 10 region 3
             7.2,  // particle 19 region 3
-           18.6,  // particle 20 region 3
+            18.6,  // particle 20 region 3
             3.1,  // particle 21 region 3
-           10.8,  // particle 22 region 3
+            10.8,  // particle 22 region 3
         };
+
     }
     else if (rank == 2) {
 
@@ -1374,19 +1377,18 @@ TEST_CASE("Testing the sendGhost function to transfer the interior particles", "
 
 
     // checking the number of particles
-    //REQUIRE(nParticles == expectednParticles);
-    std::cout << "rank=" << rank << "-nParticles=" << nParticles << "-expectednParticles=" << expectednParticles << std::endl;
+    REQUIRE(nParticles == expectednParticles);
 
 
     std::vector<double> X, V, F, R, M;
-    X.clear(); V.clear(); F.clear(); R.clear(); M.clear();
     X.reserve(3 * nParticles); V.reserve(3 * nParticles); F.reserve(3 * nParticles);
     R.reserve(nParticles); M.reserve(nParticles);
 
 
-    int dataLoc = 0;
+    int dataLoc = 1;
     for (int i = 0; i < nParticles; i++)
     {
+        // the id
         dataLoc++;
         X.push_back(recvBuff[dataLoc++]);
         X.push_back(recvBuff[dataLoc++]);
