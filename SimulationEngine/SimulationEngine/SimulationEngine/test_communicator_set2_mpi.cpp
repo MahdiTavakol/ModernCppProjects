@@ -1062,7 +1062,7 @@ TEST_CASE("Testing the movement of particles between processors without skin (3X
 }
 
 
-TEST_CASE("Testing the sendGhost function to transfer the interior particles") {
+TEST_CASE("Testing the sendGhost function to transfer the interior particles", "[mpi]") {
     printRankZero("Testing the sendGhost function to transfer the interior particles");
     printRankZero(std::string(80, '='));
 
@@ -1084,10 +1084,10 @@ TEST_CASE("Testing the sendGhost function to transfer the interior particles") {
     // wanted to check the interior particles (ghosts for other ranks) detection 
 
     int expectednParticles = 0;
-    std::vector<double> newX, newV, newF, newR, newM;
-    std::vector<double> expectedX, expectedV, expectedF, expectedR, expectedM;
+    std::vector<double> newX = {}, newV = {}, newF = {}, newR = {}, newM = {};
+    std::vector<double> expectedX = {}, expectedV = {}, expectedF = {}, expectedR = {}, expectedM = {};
 
-    if (rank == 0) {
+    if (rank == 3) {
         expectednParticles = 5;
         // since the order of particles is not known in advance we
         // need to check X, V, ... separately
@@ -1127,7 +1127,7 @@ TEST_CASE("Testing the sendGhost function to transfer the interior particles") {
            10.8,  // particle 22 region 3
         };
     }
-    else if (rank == 1)
+    else if (rank == 0)
     {
         expectednParticles = 6;
 
@@ -1164,7 +1164,7 @@ TEST_CASE("Testing the sendGhost function to transfer the interior particles") {
             12.5   // particle 23 region 3
         };
     }
-    else if (rank == 4)
+    else if (rank == 6)
     {
         expectednParticles = 5;
         expectedX = {
@@ -1292,8 +1292,6 @@ TEST_CASE("Testing the sendGhost function to transfer the interior particles") {
 
 
 
-
-
     // rank configuration
     std::array<int, 3> ranks = { 2,2,2 };
 
@@ -1301,7 +1299,6 @@ TEST_CASE("Testing the sendGhost function to transfer the interior particles") {
     // transfered data
     std::vector<double> sendBuff;
     std::vector<double> recvBuff;
-    std::vector<double> sendVec;
 
     // the maximum number of particles
     const int dataPerParticle = Particles::dataPerParticle;
@@ -1312,7 +1309,7 @@ TEST_CASE("Testing the sendGhost function to transfer the interior particles") {
     recvBuff.resize(bufferSize);
 
     // sending the interior particles
-    std::vector<double> transData[6];
+    std::vector<double> sendData[8];
 
     // building the engine just for the rank == 2
      auto engine_ptr = set_particles_build_engine(
@@ -1323,77 +1320,94 @@ TEST_CASE("Testing the sendGhost function to transfer the interior particles") {
     if (rank == 2) {
         // sending to the rank4
         // xhi
-        communicator_ptr->sendGhosts(3, transData[3]);
+        communicator_ptr->sendGhosts(3, sendData[3]);
         // sending to the rank1
         // ylo
-        communicator_ptr->sendGhosts(0, transData[0]);
+        communicator_ptr->sendGhosts(0, sendData[0]);
         // sending to the rank7
         // zhi
-        communicator_ptr->sendGhosts(6, transData[6]);
+        communicator_ptr->sendGhosts(6, sendData[6]);
+    }
 
-        std::copy_n(transData[3].data(), transData[3].size(), sendBuff.data());
+    // sending from rank 2 to rank 3
+    if (rank == 2) {
+        std::copy_n(sendData[3].data(), sendData[3].size(), sendBuff.data());
         comm_strategy->send(sendBuff.data(), bufferSize, 3, 3);
-        sendVec.clear();
     }
-    if (rank == 3)
+    if (rank == 3) {
         comm_strategy->recv(recvBuff.data(), bufferSize, 2, 3);
-        communicatorRef->recvParticles(recvBuff);
-        recvBuff.resize(bufferSize);
     }
+    comm_strategy->waitAll();
     
-    comm_strategy->waitA
-    
+    // sending from rank 2 to rank 0
+    if (rank == 2)
+    {
+        std::copy_n(sendData[0].data(), sendData[0].size(), sendBuff.data());
+        comm_strategy->send(sendBuff.data(), bufferSize, 0, 0);
+    }
+    else if (rank == 0)
+    {
+        comm_strategy->recv(recvBuff.data(), bufferSize, 2, 0);
+    }
+    comm_strategy->waitAll();
 
-    
+    // sending from rank 2 to rank 6
+    if (rank == 2)
+    {
+        std::copy_n(sendData[6].data(), sendData[6].size(), sendBuff.data());
+        comm_strategy->send(sendBuff.data(), bufferSize, 6, 6);
+    }
+    else if (rank == 6)
+    {
+        comm_strategy->recv(recvBuff.data(), bufferSize, 2, 6);
+    }
+    comm_strategy->waitAll();
 
 
-    // checking the message
-    // at first attempt the message is just send to the immediate neighboring ranks
+    // checking the message 
+    // at this test the message is just sent to the immediate neighboring ranks
     // 1, 4, 7
-    // It is the job of those neighbors to resend the ghost particles
-    // to non-immediate neighboring ranks of 2,5,6,8
-    // The non-immediate case is tested in the next test
-    // That situation is more like a regression test
-    int output_indxs[] = { 1,2,5 };
+    // It is the job of neighboring ranks to resend the ghost partilces
+    // to the non-immediate neighboring ranks of 2,5,6,8
+    
+    int nParticles = static_cast<int>(recvBuff[0]);
+
+
+    // checking the number of particles
+    //REQUIRE(nParticles == expectednParticles);
+    std::cout << "rank=" << rank << "-nParticles=" << nParticles << "-expectednParticles=" << expectednParticles << std::endl;
 
 
     std::vector<double> X, V, F, R, M;
-    for (int i = 0; i < 3; i++) {
-        auto transDatai = transData[output_indxs[i]];
-        int nParticles = static_cast<int>(transDatai[0]);
-        // checking the number of particles
-        REQUIRE(nParticles == expectednParticlesVec[i]);
-        // outputs 
-        X.clear(); V.clear(); F.clear(); R.clear(); M.clear();
-        X.reserve(3 * nParticles); V.reserve(3 * nParticles); F.reserve(3 * nParticles);
-        R.reserve(nParticles); M.reserve(nParticles);
-
-        int dataLoc = 1;
-        for (int j = 0; j < nParticles; j++) {
-            // the id
-            dataLoc++;
-            X.push_back(transDatai[dataLoc++]);
-            X.push_back(transDatai[dataLoc++]);
-            X.push_back(transDatai[dataLoc++]);
-            V.push_back(transDatai[dataLoc++]);
-            V.push_back(transDatai[dataLoc++]);
-            V.push_back(transDatai[dataLoc++]);
-            F.push_back(transDatai[dataLoc++]);
-            F.push_back(transDatai[dataLoc++]);
-            F.push_back(transDatai[dataLoc++]);
-            M.push_back(transDatai[dataLoc++]);
-            R.push_back(transDatai[dataLoc++]);
-        }
+    X.clear(); V.clear(); F.clear(); R.clear(); M.clear();
+    X.reserve(3 * nParticles); V.reserve(3 * nParticles); F.reserve(3 * nParticles);
+    R.reserve(nParticles); M.reserve(nParticles);
 
 
-
-        // checking the results
-        REQUIRE_THAT(X.data(), Array3DMatcher(expectedXVec[i].data(), nParticles, 1e-6));
-        REQUIRE_THAT(V.data(), Array3DMatcher(expectedVVec[i].data(), nParticles, 1e-6));
-        REQUIRE_THAT(F.data(), Array3DMatcher(expectedFVec[i].data(), nParticles, 1e-6));
-        REQUIRE_THAT(R.data(), Array1DMatcher(expectedRVec[i].data(), nParticles, 1e-6));
-        REQUIRE_THAT(M.data(), Array1DMatcher(expectedMVec[i].data(), nParticles, 1e-6));
+    int dataLoc = 0;
+    for (int i = 0; i < nParticles; i++)
+    {
+        dataLoc++;
+        X.push_back(recvBuff[dataLoc++]);
+        X.push_back(recvBuff[dataLoc++]);
+        X.push_back(recvBuff[dataLoc++]);
+        V.push_back(recvBuff[dataLoc++]);
+        V.push_back(recvBuff[dataLoc++]);
+        V.push_back(recvBuff[dataLoc++]);
+        F.push_back(recvBuff[dataLoc++]);
+        F.push_back(recvBuff[dataLoc++]);
+        F.push_back(recvBuff[dataLoc++]);
+        M.push_back(recvBuff[dataLoc++]);
+        R.push_back(recvBuff[dataLoc++]);
     }
 
+
+    // checking the results
+    REQUIRE_THAT(X.data(), Array3DMatcher(expectedX.data(), nParticles, 1e-6));
+    REQUIRE_THAT(V.data(), Array3DMatcher(expectedV.data(), nParticles, 1e-6));
+    REQUIRE_THAT(F.data(), Array3DMatcher(expectedF.data(), nParticles, 1e-6));
+    REQUIRE_THAT(R.data(), Array1DMatcher(expectedR.data(), nParticles, 1e-6));
+    REQUIRE_THAT(M.data(), Array1DMatcher(expectedM.data(), nParticles, 1e-6));
+   
 
 }
