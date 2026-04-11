@@ -1,8 +1,10 @@
 #pragma once
+#include "Ref.h"
 
 #include <memory>
 
-class Comm_strategy {
+class Comm_strategy : public Ref 
+{
 public:
 	Comm_strategy() = default;
 	Comm_strategy(const int& rank_);

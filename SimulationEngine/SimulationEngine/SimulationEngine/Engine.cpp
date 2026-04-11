@@ -9,6 +9,7 @@
 #include "FixList.h"
 #include "Error.h"
 #include "Run.h"
+#include "Simple_comm_strategy.h"
 
 
 #include <utility>
@@ -23,6 +24,7 @@ Engine::Engine(unique_ptr<Box>& box_,
 	unique_ptr<Particles>& particles_) :
 	box{ std::move(box_) },
 	particles{ std::move(particles_) },
+	comm_strategy{std::make_unique<Simple_comm_strategy>()},
 	forcefield{ std::make_unique<ForceField>()},
 	neighbor{ std::make_unique<Neighbor>(0.0)},
 	error{std::make_unique<Error>()},
@@ -34,11 +36,13 @@ Engine::Engine() :
 	neighbor{ std::make_unique<Neighbor>(0.0) },
 	fixList{std::make_unique<FixList>()},
 	particles{std::make_unique<Particles>(0)},
+	comm_strategy{ std::make_unique<Simple_comm_strategy>() },
 	error{std::make_unique<Error>()}
 {}
 
 Engine::Engine(Run_Status& run_status_) :
 	run_status{ run_status_ },
+	comm_strategy{ std::make_unique<Simple_comm_strategy>() },
 	forcefield{std::make_unique<ForceField>()},
 	neighbor{ std::make_unique<Neighbor>(0.0) }
 {}
@@ -55,6 +59,8 @@ void Engine::injectDependencies() {
 		forcefield->injectDependencies(*this);
 	if (fixList)
 		fixList->injectDependencies(*this);
+	if (comm_strategy)
+		comm_strategy->injectDependencies(*this);
 	if (communicator)
 		communicator->injectDependencies(*this);
 	if (neighbor)

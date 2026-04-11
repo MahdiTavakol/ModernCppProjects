@@ -147,6 +147,9 @@
     <ClCompile Include="test_simple_comm_strategy.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Simple_comm_strategy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="catch_amalgamated.hpp">
@@ -222,6 +225,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MPI_comm_strategy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Simple_comm_strategy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -155,6 +155,7 @@
     <ClCompile Include="Run.cpp" />
     <ClCompile Include="SemiIntegrator.cpp" />
     <ClCompile Include="SimpleNeighbor.cpp" />
+    <ClCompile Include="Simple_comm_strategy.cpp" />
     <ClCompile Include="SpringField.cpp" />
     <ClCompile Include="test.cpp" />
     <ClCompile Include="Ref.cpp" />
@@ -200,6 +201,7 @@
     <ClInclude Include="Run.h" />
     <ClInclude Include="SemiIntegrator.h" />
     <ClInclude Include="SimpleNeighbor.h" />
+    <ClInclude Include="Simple_comm_strategy.h" />
     <ClInclude Include="SpringField.h" />
     <ClInclude Include="Ref.h" />
     <ClInclude Include="Error.h" />
