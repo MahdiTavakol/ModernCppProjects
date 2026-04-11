@@ -21,9 +21,10 @@ int main(int argc, char* argv[])
 
 	for (int i = 0; i < argc; i++)
 	{
-		if (argv[i] == "--mpi")
+		std::string arg = argv[i];
+		if (arg == "--mpi")
 			mode = MPI;
-		else if (argv[i] == "--serial")
+		else if (arg == "--serial")
 			mode = SERIAL;
 	}
 
@@ -49,9 +50,29 @@ int main(int argc, char* argv[])
 	}
 
 	if (includedRanks.find(rank) != includedRanks.end())
-		session.run();
+		session.run(argc,argv);
 
-	//int result = Catch::Session().run(argc, argv);
+
+
+
+	std::ostringstream oss;
+	auto* oldCout = std::cout.rdbuf(oss.rdbuf());
+	auto* oldCerr = std::cerr.rdbuf(oss.rdbuf());
+
+	std::cout.rdbuf(oldCout);
+	std::cerr.rdbuf(oldCerr);
+
+	for (int i = 0; i < size; i++)
+	{
+		MPI_Barrier(MPI_COMM_WORLD);
+		if (i == rank)
+		{
+			std::cout << "\n=====================================\n";
+			std::cout << "Rank " << rank << " output:\n";
+			std::cout << "=====================================\n";
+			std::cout << oss.str() << std::endl;
+		}
+	}
 
 
 	MPI_Finalize();
