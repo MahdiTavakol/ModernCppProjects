@@ -192,6 +192,12 @@
     <ClCompile Include="Tests\test_quad.cpp">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
+    <ClCompile Include="Tests\test_output_parallel.cpp">
+      <Filter>Source Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Output\output_parallel.cpp">
+      <Filter>Source Files\Output</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Types\color.h">
@@ -324,6 +330,9 @@
       <Filter>Source Files\Tests</Filter>
     </ClInclude>
     <ClInclude Include="Output\Logger.h">
+      <Filter>Source Files\Output</Filter>
+    </ClInclude>
+    <ClInclude Include="Output\output_parallel.h">
       <Filter>Source Files\Output</Filter>
     </ClInclude>
   </ItemGroup>

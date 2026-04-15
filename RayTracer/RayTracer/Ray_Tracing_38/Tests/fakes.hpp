@@ -3,6 +3,7 @@
 #include "../Input/input.h"
 #include "../Geometry/triangle_mesh.h"
 #include "../Algorithms/parallel.h"
+#include <exception>
 
 class fake_camera_settings : public camera_settings
 {
@@ -136,4 +137,30 @@ public:
 	void barrier() const override {
 		return;
 	}
+};
+
+class fake_color_array : public color_array
+{
+public:
+	// attention.. The colors is organized in a row major fashion.
+	fake_color_array(const int& width_, const int& height_, std::vector<double>& colors_):
+		color_array{width_,height_}
+	{
+		int nData = static_cast<int>(colors_.size());
+		if (width_ * height_ * 3 != nData)
+			throw std::invalid_argument("Corrupted data!");
+
+		for (int i = 0; i < width_; i++) {
+			for (int j = 0; j < height_; j++) {
+				int loc = i + j * width_;
+				double r = colors_[3 * loc];
+				double g = colors_[3 * loc + 1];
+				double b = colors_[3 * loc + 2];
+				array[i][j] = color_data{ r,g,b };
+			}
+		}
+	}
+
+private:
+
 };

@@ -168,6 +168,7 @@
     <ClCompile Include="Input\scene_factory.cpp" />
     <ClCompile Include="Output\Logger.cpp" />
     <ClCompile Include="Output\output.cpp" />
+    <ClCompile Include="Output\output_parallel.cpp" />
     <ClCompile Include="Renderer\Renderer.cpp" />
     <ClCompile Include="Renderer\Renderer_Animation.cpp" />
     <ClCompile Include="Tests\catch_amalgamated.cpp" />
@@ -181,6 +182,7 @@
     <ClCompile Include="Tests\test_mpiParallel.cpp" />
     <ClCompile Include="Tests\test_obj_reader.cpp" />
     <ClCompile Include="Tests\test_output.cpp" />
+    <ClCompile Include="Tests\test_output_parallel.cpp" />
     <ClCompile Include="Tests\test_quad.cpp" />
     <ClCompile Include="Tests\test_triangles.cpp" />
     <ClCompile Include="Tests\test_triangle_mesh.cpp" />
@@ -222,6 +224,7 @@
     <ClInclude Include="Materials\material.h" />
     <ClInclude Include="Output\Logger.h" />
     <ClInclude Include="Output\output.h" />
+    <ClInclude Include="Output\output_parallel.h" />
     <ClInclude Include="Renderer\Renderer.h" />
     <ClInclude Include="Renderer\Renderer_Animation.h" />
     <ClInclude Include="Shared\rtweekend.h" />

@@ -1,7 +1,38 @@
 #include "test_shared.h"
-#include "../Output/output.h"
+#include "../Output/output_parallel.h"
 #include "../Data/color_array.h"
 #include <sstream>
+
+void distributeColorArray(
+	const int& width_, const int& height_,
+	std::unique_ptr<color_array>& c_array_,
+	parallel* para_)
+{
+	auto size = para_->return_size_config();
+	auto rank = para_->return_rank_config();
+
+	int sizePerWidth = width_ / size[0];
+	int sizePerHeight = height_ / size[1];
+
+	int x0 = (sizePerWidth * rank[0] < width_ ? sizePerWidth * rank[0] : width_ - 1);
+	int x1 = (x0 + sizePerWidth < width_ ? x0+sizePerWidth : width_ - 1);
+	int y0 = (sizePerHeight * rank[1] < height_ ? sizePerHeight * rank[1] : height_ - 1);
+	int y1 = (y0 + sizePerHeight < height_ ? y0 + sizePerHeight : height_ - 1);
+
+	int newWidth = (x1 - x0);
+	int newHeight = (y1 - y0);
+
+	color_array new_c_array{newWidth,newHeight };
+
+	for (int i = x0; i < x1; i++)
+		for (int j = y0; j < y1; j++)
+		{
+			new_c_array(i,j) = (*c_array_)(x0 + i,y0 + j);
+		}
+
+
+	*c_array_ = new_c_array;
+}
 
 TEST_CASE("Testing the output class")
 {
@@ -24,27 +55,27 @@ TEST_CASE("Testing the output class")
 	int width, height;
 	std::unique_ptr<color_array> c_array;
 	color_data** c_data = nullptr;
-	
+
 	// allocater and deallocator lambda functions
 	auto allocate = [&](color_data**& data_, int width_, int height_)
-	{
-		color_data* temp;
-		temp = new color_data[width_ * height_];
-		data_ = new color_data * [width_];
-		for (int i = 0; i < width_; i++)
-			data_[i] = &temp[i * height_];
-	};
+		{
+			color_data* temp;
+			temp = new color_data[width_ * height_];
+			data_ = new color_data * [width_];
+			for (int i = 0; i < width_; i++)
+				data_[i] = &temp[i * height_];
+		};
 	auto deallocate = [&](color_data**& data_)
-	{
-		delete[] data_[0];
-		delete[] data_;
-	};
+		{
+			delete[] data_[0];
+			delete[] data_;
+		};
 
 
 	SECTION("Test-1")
 	{
-		width = 16;
-		height = 9;
+		width = 100;
+		height = 20;
 
 		allocate(c_data, width, height);
 
@@ -61,8 +92,8 @@ TEST_CASE("Testing the output class")
 
 	SECTION("Test-2")
 	{
-		width = 32;
-		height = 12;
+		width = 1000;
+		height = 800;
 
 		allocate(c_data, width, height);
 
@@ -79,8 +110,8 @@ TEST_CASE("Testing the output class")
 
 	SECTION("Test-3")
 	{
-		width = 48;
-		height = 12;
+		width = 300;
+		height = 1000;
 
 		allocate(c_data, width, height);
 
@@ -95,7 +126,8 @@ TEST_CASE("Testing the output class")
 			}
 	}
 
-
+	// distributing the data among the ranks
+	distributeColorArray(width, height, c_array, );
 
 	// expectedData
 	std::vector<std::string> expectedData;
@@ -115,7 +147,7 @@ TEST_CASE("Testing the output class")
 
 
 	c_array = std::make_unique<color_array>(width, height, c_data);
-	output writer(std::move(dummyOss), c_array.get(), width, height);
+	output_parallel writer(std::move(dummyOss), c_array.get(), width, height);
 	returnedStream = writer.return_stream();
 
 	// converting the returned ostream to ostringstream

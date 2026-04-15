@@ -68,7 +68,7 @@ public:
         return false;
     }
 
-private:
+protected:
     int width, height;
     color_data** array;
 
