@@ -1,23 +1,30 @@
 #include "output.h"
 
 #include <fstream>
+#include <algorithm>
 #include "../Data/color_array.h"
 
-output::output(std::string _file_name, color_array* _colors, int _image_width, int _image_height) :
-	file_name(_file_name), colors(_colors), image_width(_image_width), image_height(_image_height)
-{
-	// if string is empty which is the case
-	// for the constructor of the render_animation
-	// do not open any new files
-	stream = std::make_unique<std::ofstream>(file_name);
-}
+output::output(
+	std::string _file_name, 
+	color_array* _colors, 
+	int _image_width, int _image_height,
+	outputMode mode_) :
+	mode{mode_},
+	file_name{ _file_name }, 
+	colors{ _colors },
+	image_width{ _image_width }, image_height{ _image_height }
+{}
 
-output::output(std::string _file_name) :
-	output{ _file_name, nullptr, 0, 0 } {}
+output::output(std::string _file_name,
+	           outputMode mode_) :
+	output{ _file_name, nullptr, 0, 0, mode_} {}
 
 
-output::output(std::unique_ptr<std::ostream> _stream, color_array* _colors, 
-	           int _image_width, int _image_height):
+output::output(std::unique_ptr<std::ostream> _stream, 
+	           color_array* _colors, 
+	           int _image_width, int _image_height,
+	           outputMode mode_):
+	mode{mode_},
 	stream{std::move(_stream)}, colors{_colors},
 	image_width{_image_width}, image_height{_image_height}
 {}
@@ -45,22 +52,39 @@ void output::open_new_file(std::string _file_name)
 	file_name = _file_name;
 	if (file && file->is_open())
 		file->close();
-	stream = std::make_unique<std::ofstream>(file_name);
+	if (mode == outputMode::P3)
+		stream = std::make_unique<std::ofstream>(file_name);
+	else if (mode == outputMode::P6)
+		stream = std::make_unique<std::ofstream>(file_name, std::ios::binary | std::ios::trunc);
 	file = dynamic_cast<std::ofstream*>(stream.get());
 	if (!file->is_open())
 		std::cerr << "Cannot open the file " << file_name << std::endl << "That is all we know at the moment!" << std::endl;
 }
 
+
 void output::write_file()
 {
-	*stream << "P3\n" << image_width << " " << image_height << "\n255\n";
+	write_header();
 	color_data** c_data = colors->return_array();
 
-	for (int j = 0; j < image_height; j++)
-	{
-		for (int i = 0; i < image_width; i++)
+
+	if (mode == outputMode::P3) {
+		for (int j = 0; j < image_height; j++)
 		{
-			*stream << c_data[i][j]; //This leads to strided access ==> might need to change the indexing to [height_index][width_index]
+			for (int i = 0; i < image_width; i++)
+			{
+				*stream << c_data[i][j]; //This leads to strided access ==> might need to change the indexing to [height_index][width_index]
+			}
+		}
+	}
+	else if (mode == outputMode::P6)
+	{
+		for (int j = 0; j < image_height; j++)
+		{
+			for (int i = 0; i < image_width; i++)
+			{
+				color_array::write_binary(*stream, c_data[i][j]);
+			}
 		}
 	}
 }
@@ -71,6 +95,18 @@ std::unique_ptr<std::ostream> output::return_stream()
 	if (stream == nullptr)
 		std::cerr << "The stream has either been already returned or it is null" << std::endl;
 	return std::move(stream);
+}
+
+void output::write_header()
+{
+	if (mode == outputMode::P3) {
+		*stream << "P3\n";
+	}
+	else if (mode == outputMode::P6)
+	{
+		*stream << "P6\n";
+	}
+	*stream << image_width << " " << image_height << "\n255\n";
 }
 
 

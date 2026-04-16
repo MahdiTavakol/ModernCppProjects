@@ -198,6 +198,12 @@
     <ClCompile Include="Output\output_parallel.cpp">
       <Filter>Source Files\Output</Filter>
     </ClCompile>
+    <ClCompile Include="Tests\test_helpers.cpp">
+      <Filter>Source Files\Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Output\output_serial.cpp">
+      <Filter>Source Files\Output</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Types\color.h">
@@ -333,6 +339,12 @@
       <Filter>Source Files\Output</Filter>
     </ClInclude>
     <ClInclude Include="Output\output_parallel.h">
+      <Filter>Source Files\Output</Filter>
+    </ClInclude>
+    <ClInclude Include="Tests\test_helpers.h">
+      <Filter>Source Files\Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="Output\output_serial.h">
       <Filter>Source Files\Output</Filter>
     </ClInclude>
   </ItemGroup>

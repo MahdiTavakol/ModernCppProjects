@@ -30,9 +30,19 @@ mpiParallel::mpiParallel(
     rank_config = { rank_x, rank_y };
 }
 
-mpiParallel::~mpiParallel()
+mpiParallel::mpiParallel(
+    MPI_Comm comm_, 
+    std::array<int, 2> size_config_,
+    std::array<int, 2> rank_config_):
+    parallel{size_config_,rank_config_}
 {
+    MPI_Comm_rank(MPI_world, &rank);
+    MPI_Comm_size(MPI_world, &size);
 }
+
+
+mpiParallel::~mpiParallel()
+{}
 
 void mpiParallel::gather(int** one_, int** one_all_, const int& width_per_rank_, const int& height_per_rank_) const
 {
@@ -68,6 +78,40 @@ void mpiParallel::gather(int** one_, int** one_all_, const int& width_per_rank_,
 
 	delete[] tempArray[0];
 	delete[] tempArray;
+}
+
+std::unique_ptr<parallel> mpiParallel::split(const std::array<int, 2>& maxRanks_) const
+{
+    int newColor;
+    int newRank = 0;
+    std::array<int, 2> newRankConfig;
+    std::array<int, 2> newSizeConfig;
+
+    if (rank_config[0] < maxRanks_[0] &&
+        rank_config[1] < maxRanks_[1] )
+    {
+        newColor = 0;
+        newRank = rank_config[1] * size_config[0] + rank_config[0];
+        newRankConfig[0] = maxRanks_[0];
+        newRankConfig[1] = maxRanks_[1];
+        newSizeConfig = maxRanks_;
+    }
+    else
+    {
+        newColor = 1;
+        newRank = (rank_config[1] - maxRanks_[1]) * (maxRanks_[0] - size_config[0]) +(maxRanks_[0] - rank_config[0]);
+        newSizeConfig[0] = size_config[0] - maxRanks_[0];
+        newSizeConfig[1] = size_config[1] - maxRanks_[1];
+        newRankConfig[0] = rank_config[0] - maxRanks_[0];
+        newRankConfig[1] = rank_config[1] - maxRanks_[1];
+    }
+
+
+    MPI_Comm newComm;
+    MPI_Comm_split(MPI_world, newColor, newRank, &newComm);
+
+    auto out = std::make_unique<mpiParallel>(newComm, newSizeConfig, newRankConfig);
+    return out;
 }
 
 void mpiParallel::gather(color_data** one_,

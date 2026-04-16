@@ -2,6 +2,26 @@
 #include "../Output/output.h"
 #include "../Data/color_array.h"
 #include <sstream>
+#include <stdint.h>
+#include <cstddef>
+#include <bitset>
+
+// allocater and deallocator lambda functions
+void allocate(color_data**& data_, int width_, int height_)
+{
+	color_data* temp;
+	temp = new color_data[width_ * height_];
+	data_ = new color_data * [width_];
+	for (int i = 0; i < width_; i++)
+		data_[i] = &temp[i * height_];
+};
+
+void deallocate(color_data**& data_)
+{
+	delete[] data_[0];
+	delete[] data_;
+};
+
 
 TEST_CASE("Testing the output class")
 {
@@ -25,21 +45,6 @@ TEST_CASE("Testing the output class")
 	std::unique_ptr<color_array> c_array;
 	color_data** c_data = nullptr;
 	
-	// allocater and deallocator lambda functions
-	auto allocate = [&](color_data**& data_, int width_, int height_)
-	{
-		color_data* temp;
-		temp = new color_data[width_ * height_];
-		data_ = new color_data * [width_];
-		for (int i = 0; i < width_; i++)
-			data_[i] = &temp[i * height_];
-	};
-	auto deallocate = [&](color_data**& data_)
-	{
-		delete[] data_[0];
-		delete[] data_;
-	};
-
 
 	SECTION("Test-1")
 	{
@@ -116,6 +121,7 @@ TEST_CASE("Testing the output class")
 
 	c_array = std::make_unique<color_array>(width, height, c_data);
 	output writer(std::move(dummyOss), c_array.get(), width, height);
+	writer.write_file();
 	returnedStream = writer.return_stream();
 
 	// converting the returned ostream to ostringstream
@@ -125,4 +131,277 @@ TEST_CASE("Testing the output class")
 
 	// checking the written data
 	REQUIRE_THAT(oss, OStringStreamMatcher(&expectedData));
+}
+
+TEST_CASE("Test writing in the P6 format")
+{
+	// streams
+	auto dummyOss = std::make_unique<std::ostringstream>();
+	std::ostringstream* oss;
+	std::unique_ptr<std::ostream> returnedStream;
+
+
+	// color data
+	int width, height;
+	std::unique_ptr<color_array> c_array;
+	color_data** c_data = nullptr;
+
+
+	SECTION("Test-1")
+	{
+		width = 16;
+		height = 9;
+
+		allocate(c_data, width, height);
+
+		for (int j = 0; j < height; j++)
+			for (int i = 0; i < width; i++)
+			{
+				double r = static_cast<double>(i) / static_cast<double>(width);
+				double g = static_cast<double>(j) / static_cast<double>(height);
+				double b = 0.0;
+				color_data myColor = color_data{ r,g,b };
+				c_data[i][j] = myColor;
+			}
+	}
+
+	SECTION("Test-2")
+	{
+		width = 32;
+		height = 12;
+
+		allocate(c_data, width, height);
+
+		for (int j = 0; j < height; j++)
+			for (int i = 0; i < width; i++)
+			{
+				double r = static_cast<double>(i) / static_cast<double>(width);
+				double g = static_cast<double>(j) / static_cast<double>(height);
+				double b = static_cast<double>(j) / static_cast<double>(width);
+				color_data myColor = color_data{ r,g,b };
+				c_data[i][j] = myColor;
+			}
+	}
+
+	SECTION("Test-3")
+	{
+		width = 48;
+		height = 12;
+
+		allocate(c_data, width, height);
+
+		for (int j = 0; j < height; j++)
+			for (int i = 0; i < width; i++)
+			{
+				double r = 0.0;
+				double g = static_cast<double>(j) / static_cast<double>(height);
+				double b = static_cast<double>(i) / static_cast<double>(width);
+				color_data myColor = color_data{ r,g,b };
+				c_data[i][j] = myColor;
+			}
+	}
+
+
+
+	// expectedData
+	std::vector<std::string> expectedData;
+	expectedData.reserve(3 + width * height);
+	expectedData.push_back("P6");
+	expectedData.push_back(std::to_string(width) + " " + std::to_string(height));
+	expectedData.push_back("255");
+	for (int j = 0; j < height; j++)
+		for (int i = 0; i < width; i++)
+		{
+			unsigned __int8 r =
+				static_cast<unsigned __int8>(256 * std::clamp(c_data[i][j].r, 0.0, 0.999));
+			unsigned __int8 g =
+				static_cast<unsigned __int8>(256 * std::clamp(c_data[i][j].g, 0.0, 0.999));
+			unsigned __int8 b =
+				static_cast<unsigned __int8>(256 * std::clamp(c_data[i][j].b, 0.0, 0.999));
+			//auto rCast = reinterpret_cast<std::byte*>(&r);
+			//auto gCast = reinterpret_cast<std::byte*>(&g);
+			//auto bCast = reinterpret_cast<std::byte*>(&b);
+
+			//auto rBits = std::bitset<8>(r);
+			//auto gBits = std::bitset<8>(g);
+			//auto bBits = std::bitset<8>(b);
+
+
+			expectedData.emplace_back(1, r);
+			expectedData.emplace_back(1, g);
+			expectedData.emplace_back(1, b);
+		}
+
+
+
+	c_array = std::make_unique<color_array>(width, height, c_data);
+	outputMode mode = outputMode::P6;
+	output writer(std::move(dummyOss), c_array.get(), width, height,mode);
+	returnedStream = writer.return_stream();
+
+	// converting the returned ostream to ostringstream
+	oss = dynamic_cast<std::ostringstream*>(returnedStream.get());
+	// checking the returned oss pointer type
+	REQUIRE(oss);
+
+	// checking the written data
+	REQUIRE_THAT(oss, OStringStreamMatcher(&expectedData));
+}
+
+TEST_CASE("Writting a test file in P3 format")
+{
+	// filename
+	std::string fileName = "empty";
+
+
+	// color data
+	int width, height;
+	std::unique_ptr<color_array> c_array;
+	color_data** c_data = nullptr;
+
+
+	SECTION("Test-1")
+	{
+		fileName = "Output-P3-Test-1.ppm";
+		width = 192;
+		height = 108;
+
+		allocate(c_data, width, height);
+
+		for (int j = 0; j < height; j++)
+			for (int i = 0; i < width; i++)
+			{
+				double r = static_cast<double>(i) / static_cast<double>(width);
+				double g = static_cast<double>(j) / static_cast<double>(height);
+				double b = 0.0;
+				color_data myColor = color_data{ r,g,b };
+				c_data[i][j] = myColor;
+			}
+	}
+
+	SECTION("Test-2")
+	{
+		fileName = "Output-P3-Test-2.ppm";
+		width = 192;
+		height = 108;
+
+		allocate(c_data, width, height);
+
+		for (int j = 0; j < height; j++)
+			for (int i = 0; i < width; i++)
+			{
+				double r = static_cast<double>(i) / static_cast<double>(width);
+				double g = static_cast<double>(j) / static_cast<double>(height);
+				double b = static_cast<double>(j) / static_cast<double>(width);
+				color_data myColor = color_data{ r,g,b };
+				c_data[i][j] = myColor;
+			}
+	}
+
+	SECTION("Test-3")
+	{
+		fileName = "Output-P3-Test-3.ppm";
+		width = 192;
+		height = 108;
+
+		allocate(c_data, width, height);
+
+		for (int j = 0; j < height; j++)
+			for (int i = 0; i < width; i++)
+			{
+				double r = 0.0;
+				double g = static_cast<double>(j) / static_cast<double>(height);
+				double b = static_cast<double>(i) / static_cast<double>(width);
+				color_data myColor = color_data{ r,g,b };
+				c_data[i][j] = myColor;
+			}
+	}
+
+
+	c_array = std::make_unique<color_array>(width, height, c_data);
+	outputMode mode = outputMode::P3;
+	output writer(fileName, c_array.get(), width, height, mode);
+	writer.write_file();
+
+
+	SUCCEED("Suceeded");
+}
+
+TEST_CASE("Writting a test file in P6 format")
+{
+	// filename
+	std::string fileName = "empty";
+
+
+	// color data
+	int width, height;
+	std::unique_ptr<color_array> c_array;
+	color_data** c_data = nullptr;
+
+
+	SECTION("Test-1")
+	{
+		fileName = "Output-P6-Test-1.ppm";
+		width = 192;
+		height = 108;
+
+		allocate(c_data, width, height);
+
+		for (int j = 0; j < height; j++)
+			for (int i = 0; i < width; i++)
+			{
+				double r = static_cast<double>(i) / static_cast<double>(width);
+				double g = static_cast<double>(j) / static_cast<double>(height);
+				double b = 0.0;
+				color_data myColor = color_data{ r,g,b };
+				c_data[i][j] = myColor;
+			}
+	}
+
+	SECTION("Test-2")
+	{
+		fileName = "Output-P6-Test-2.ppm";
+		width = 192;
+		height = 108;
+
+		allocate(c_data, width, height);
+
+		for (int j = 0; j < height; j++)
+			for (int i = 0; i < width; i++)
+			{
+				double r = static_cast<double>(i) / static_cast<double>(width);
+				double g = static_cast<double>(j) / static_cast<double>(height);
+				double b = static_cast<double>(j) / static_cast<double>(width);
+				color_data myColor = color_data{ r,g,b };
+				c_data[i][j] = myColor;
+			}
+	}
+
+	SECTION("Test-3")
+	{
+		fileName = "Output-P6-Test-3.ppm";
+		width = 192;
+		height = 108;
+
+		allocate(c_data, width, height);
+
+		for (int j = 0; j < height; j++)
+			for (int i = 0; i < width; i++)
+			{
+				double r = 0.0;
+				double g = static_cast<double>(j) / static_cast<double>(height);
+				double b = static_cast<double>(i) / static_cast<double>(width);
+				color_data myColor = color_data{ r,g,b };
+				c_data[i][j] = myColor;
+			}
+	}
+
+
+	c_array = std::make_unique<color_array>(width, height, c_data);
+	outputMode mode = outputMode::P6;
+	output writer(fileName, c_array.get(), width, height, mode);
+	writer.write_file();
+
+
+	SUCCEED("Suceeded");
 }

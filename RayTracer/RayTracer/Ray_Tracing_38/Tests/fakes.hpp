@@ -119,6 +119,11 @@ public:
 		return std::array<int, 2>{1, 1};
 	}
 
+	std::unique_ptr<parallel> split(const std::array<int, 2>& maxRanks_) const override
+	{
+		return std::make_unique<fake_parallel>();
+	}
+
 	void gather(
 		color_data* one_,
 		color_data* one_all,

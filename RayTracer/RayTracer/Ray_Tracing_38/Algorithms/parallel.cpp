@@ -5,6 +5,12 @@ parallel::parallel(std::array<int, 2> size_config_):
      size_config{size_config_}
 {}
 
+parallel::parallel(std::array<int, 2> size_config_, 
+    std::array<int, 2> rank_config_):
+    size_config{size_config_},
+    rank_config{rank_config_}
+{ }
+
 int parallel::return_rank() const {
     return rank;
 }

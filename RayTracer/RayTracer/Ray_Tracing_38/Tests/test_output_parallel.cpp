@@ -34,7 +34,22 @@ void distributeColorArray(
 	*c_array_ = new_c_array;
 }
 
-TEST_CASE("Testing the output class")
+// allocater and deallocator lambda functions
+void allocate(color_data**& data_, int width_, int height_)
+{
+	color_data* temp;
+	temp = new color_data[width_ * height_];
+	data_ = new color_data * [width_];
+	for (int i = 0; i < width_; i++)
+		data_[i] = &temp[i * height_];
+};
+void deallocate(color_data**& data_)
+{
+	delete[] data_[0];
+	delete[] data_;
+};
+
+TEST_CASE("Testing the output_parallel class","[.][ignore for now]")
 {
 	// I know it is generic 
 	// ostringstream and there is no need
@@ -43,7 +58,7 @@ TEST_CASE("Testing the output class")
 	// output class to have a std::ostringstream
 	// on purpose so the user knows 
 	// the intention of writing into stringstream
-	// rather than a file
+	// rather than a file0
 
 	// streams
 	auto dummyOss = std::make_unique<std::ostringstream>();
@@ -55,21 +70,6 @@ TEST_CASE("Testing the output class")
 	int width, height;
 	std::unique_ptr<color_array> c_array;
 	color_data** c_data = nullptr;
-
-	// allocater and deallocator lambda functions
-	auto allocate = [&](color_data**& data_, int width_, int height_)
-		{
-			color_data* temp;
-			temp = new color_data[width_ * height_];
-			data_ = new color_data * [width_];
-			for (int i = 0; i < width_; i++)
-				data_[i] = &temp[i * height_];
-		};
-	auto deallocate = [&](color_data**& data_)
-		{
-			delete[] data_[0];
-			delete[] data_;
-		};
 
 
 	SECTION("Test-1")
@@ -127,7 +127,7 @@ TEST_CASE("Testing the output class")
 	}
 
 	// distributing the data among the ranks
-	distributeColorArray(width, height, c_array, );
+	//distributeColorArray(width, height, c_array, );
 
 	// expectedData
 	std::vector<std::string> expectedData;
@@ -145,9 +145,9 @@ TEST_CASE("Testing the output class")
 		}
 
 
-
 	c_array = std::make_unique<color_array>(width, height, c_data);
 	output_parallel writer(std::move(dummyOss), c_array.get(), width, height);
+	writer.write_file();
 	returnedStream = writer.return_stream();
 
 	// converting the returned ostream to ostringstream

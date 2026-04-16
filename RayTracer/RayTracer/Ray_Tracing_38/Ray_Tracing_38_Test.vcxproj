@@ -169,9 +169,11 @@
     <ClCompile Include="Output\Logger.cpp" />
     <ClCompile Include="Output\output.cpp" />
     <ClCompile Include="Output\output_parallel.cpp" />
+    <ClCompile Include="Output\output_serial.cpp" />
     <ClCompile Include="Renderer\Renderer.cpp" />
     <ClCompile Include="Renderer\Renderer_Animation.cpp" />
     <ClCompile Include="Tests\catch_amalgamated.cpp" />
+    <ClCompile Include="Tests\test_helpers.cpp" />
     <ClCompile Include="Tests\test_logger.cpp" />
     <ClCompile Include="Tests\Ray_Tracing_38_tests.cpp" />
     <ClCompile Include="Tests\test_hittable_list.cpp" />
@@ -225,12 +227,14 @@
     <ClInclude Include="Output\Logger.h" />
     <ClInclude Include="Output\output.h" />
     <ClInclude Include="Output\output_parallel.h" />
+    <ClInclude Include="Output\output_serial.h" />
     <ClInclude Include="Renderer\Renderer.h" />
     <ClInclude Include="Renderer\Renderer_Animation.h" />
     <ClInclude Include="Shared\rtweekend.h" />
     <ClInclude Include="Tests\catch_amalgamated.hpp" />
     <ClInclude Include="Tests\fakes.hpp" />
     <ClInclude Include="Tests\matchers.hpp" />
+    <ClInclude Include="Tests\test_helpers.h" />
     <ClInclude Include="Tests\test_shared.h" />
     <ClInclude Include="Types\color.h" />
     <ClInclude Include="Types\point3_animated.h" />

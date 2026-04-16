@@ -9,6 +9,7 @@
 #include <iostream>
 #include <vector>
 #include <array>
+#include <algorithm>
 #include "../Geometry/interval.h"
 
 typedef struct { double r, g, b; } color_data;
@@ -66,6 +67,19 @@ public:
                     return true;
             }
         return false;
+    }
+
+    inline static void write_binary(std::ostream& out_, const color_data& c_data_)
+    {
+        std::uint8_t r =
+            static_cast<std::uint8_t>(256 * std::clamp(c_data_.r, 0.0, 0.999));
+        std::uint8_t g =
+            static_cast<std::uint8_t>(256 * std::clamp(c_data_.g, 0.0, 0.999));
+        std::uint8_t b =
+            static_cast<std::uint8_t>(256 * std::clamp(c_data_.b, 0.0, 0.999));
+        out_.write(reinterpret_cast<char*>(&r), 1);
+        out_.write(reinterpret_cast<char*>(&g), 1);
+        out_.write(reinterpret_cast<char*>(&b), 1);
     }
 
 protected:
