@@ -53,41 +53,16 @@ void output::open_new_file(std::string _file_name)
 	if (file && file->is_open())
 		file->close();
 	if (mode == outputMode::P3)
-		stream = std::make_unique<std::ofstream>(file_name);
+		stream = std::make_unique<std::fstream>(file_name);
 	else if (mode == outputMode::P6)
-		stream = std::make_unique<std::ofstream>(file_name, std::ios::binary | std::ios::trunc);
+		stream = std::make_unique<std::fstream>(file_name, std::ios::binary | std::ios::trunc);
 	file = dynamic_cast<std::ofstream*>(stream.get());
 	if (!file->is_open())
 		std::cerr << "Cannot open the file " << file_name << std::endl << "That is all we know at the moment!" << std::endl;
 }
 
 
-void output::write_file()
-{
-	write_header();
-	color_data** c_data = colors->return_array();
 
-
-	if (mode == outputMode::P3) {
-		for (int j = 0; j < image_height; j++)
-		{
-			for (int i = 0; i < image_width; i++)
-			{
-				*stream << c_data[i][j]; //This leads to strided access ==> might need to change the indexing to [height_index][width_index]
-			}
-		}
-	}
-	else if (mode == outputMode::P6)
-	{
-		for (int j = 0; j < image_height; j++)
-		{
-			for (int i = 0; i < image_width; i++)
-			{
-				color_array::write_binary(*stream, c_data[i][j]);
-			}
-		}
-	}
-}
 
 
 std::unique_ptr<std::ostream> output::return_stream()
@@ -107,6 +82,24 @@ void output::write_header()
 		*stream << "P6\n";
 	}
 	*stream << image_width << " " << image_height << "\n255\n";
+}
+
+std::streampos output::return_binary_begin()
+{
+	std::string type;
+	int width, height, maxvel;
+
+	*stream >> type >> width >> height >> maxvel;
+
+	// seeking to the begining of the binary section.
+	stream->get();
+
+
+	// getting the g position (read)
+	std::streampos pos = stream->tellg();
+
+	// returning the pos
+	return pos;
 }
 
 

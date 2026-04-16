@@ -9,6 +9,11 @@
 
 #define FLERR __FILE__, __LINE__
 
+enum class outputMode {
+	P3,
+	P6
+};
+
 
 enum { PARALLEL_CAMERA, CAMERA };
 

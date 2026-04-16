@@ -14,19 +14,22 @@ public:
 		std::unique_ptr<parallel>& para_,
 		outputMode mode = outputMode::P6);
 	output_parallel(
-		std::unique_ptr<std::ostream> _stream,
+		std::unique_ptr<std::iostream> _stream,
 		color_array* _colors,
 		int _image_width, int _image_height,
 		std::unique_ptr<parallel>& para_,
 		outputMode mode = outputMode::P6);
 	~output_parallel();
 
+	void write_file() override;
+
 
 private:
-	void reset_myRange();
+	void init();
 	std::array<int, 2> myWidthRange;
 	std::array<int, 2> myHeightRange;
-	std::vector<std::array<int, 2>> BeginEndPerHeight;
+	std::vector<int> loc4Height;
+	std::vector<std::array<int, 2>> fileRange4Height;
 	parallel* para;
 
 };

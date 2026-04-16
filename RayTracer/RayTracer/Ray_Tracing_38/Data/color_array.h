@@ -69,6 +69,7 @@ public:
         return false;
     }
 
+
     inline static void write_binary(std::ostream& out_, const color_data& c_data_)
     {
         std::uint8_t r =

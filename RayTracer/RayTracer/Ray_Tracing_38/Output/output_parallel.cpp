@@ -15,7 +15,9 @@ output_parallel::output_parallel(
 	// if string is empty which is the case
 	// for the constructor of the render_animation
 	// do not open any new files
-	stream = std::make_unique<std::ofstream>(file_name);
+	if (mode == outputMode::P3)
+		throw std::invalid_argument("The text format is not supported for parallel writing");
+	stream = std::make_unique<std::fstream>(file_name, std::ios::binary | std::ios::trunc);
 }
 
 output_parallel::output_parallel(
@@ -28,7 +30,7 @@ output_parallel::output_parallel(
 
 
 output_parallel::output_parallel(
-	std::unique_ptr<std::ostream> _stream,
+	std::unique_ptr<std::iostream> _stream,
 	color_array* _colors,
 	int _image_width, int _image_height,
 	std::unique_ptr<parallel>& para_,
@@ -41,7 +43,7 @@ output_parallel::output_parallel(
 output_parallel::~output_parallel()
 {}
 
-void output_parallel::reset_myRange()
+void output_parallel::init()
 {
 	auto rank_config = para->return_rank_config();
 	auto size_config = para->return_size_config();
@@ -62,13 +64,39 @@ void output_parallel::reset_myRange()
 	heightMax = heightMax < image_height ? heightMax : image_height - 1;
 
 
-	std::string type;
-	int width, height, maxvel;
+	// setting the location for each height value
+	loc4Height.reserve(heightPerRank);
 
-	*stream >> type >> width >> height >> maxvel;
+	for (int i = heightMin; i < heightMax; i++)
+	{
+		int loc = i * image_width + widthMin;
+		loc4Height.push_back(loc);
+	}
+}
 
-	// seeking to the begining of the binary section.
-	*stream.get();
+void output_parallel::write_file()
+{
+	// writing the header from the rank 0
+	write_header();
+
+	// barrier
+	para->barrier();
+	// getting the begining of the binary section
+	auto pos = return_binary_begin();
+	// moving the write location to the pos
+	stream->seekp(pos);
+
+
+	color_data** c_data = colors->return_array();
+
+	for (int j = myHeightRange[0]; j < myHeightRange[1]; j++)
+	{
+		stream->seekp(loc4Height[j - myHeightRange[0]]);
+		for (int i = myWidthRange[0]; i < myWidthRange[1]; i++)
+		{
+			color_array::write_binary(*stream, c_data[i][j]);
+		}
+	}
 }
 
 

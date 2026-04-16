@@ -6,10 +6,7 @@
 
 #include "../Data/color_array.h"
 
-enum class outputMode {
-	P3,
-	P6
-};
+
 
 class output {
 public:
@@ -25,12 +22,13 @@ public:
 		);
 	virtual ~output();
 
-	void write_file();
+	virtual void write_file() = 0;
 	void reset(color_array* _colors, const int _image_width, const int _image_height);
 	void open_new_file(std::string _file_name);
 	std::unique_ptr<std::ostream> return_stream();
 
 protected:
+	std::streampos return_binary_begin();
 	void write_header();
 	outputMode mode = outputMode::P3;
 	std::string file_name;
