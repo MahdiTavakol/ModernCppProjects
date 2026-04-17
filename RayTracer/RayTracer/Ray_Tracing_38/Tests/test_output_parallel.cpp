@@ -1,6 +1,8 @@
 #include "test_shared.h"
 #include "../Output/output_parallel.h"
 #include "../Data/color_array.h"
+#include "../Algorithms/parallel.h"
+#include "../Algorithms/mpiParallel.h"
 #include <sstream>
 
 void distributeColorArray(
@@ -70,6 +72,12 @@ TEST_CASE("Testing the output_parallel class","[.][ignore for now]")
 	int width, height;
 	std::unique_ptr<color_array> c_array;
 	color_data** c_data = nullptr;
+
+	// the parallel object
+	// since we want the output_parallel
+	// to be run in parallel here we cannot use
+	// a fake version of the parallel
+	std::unique_ptr<parallel> para = std::make_unique<mpiParallel>()
 
 
 	SECTION("Test-1")

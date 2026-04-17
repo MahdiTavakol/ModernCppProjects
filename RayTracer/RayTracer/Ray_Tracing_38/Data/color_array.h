@@ -69,6 +69,7 @@ public:
         return false;
     }
 
+    void write(std::iostream& out_, const outputMode& mode_, const int& strid_ = 0) const;
 
     inline static void write_binary(std::ostream& out_, const color_data& c_data_)
     {

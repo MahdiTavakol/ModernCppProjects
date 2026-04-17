@@ -28,8 +28,7 @@ private:
 	void init();
 	std::array<int, 2> myWidthRange;
 	std::array<int, 2> myHeightRange;
-	std::vector<int> loc4Height;
-	std::vector<std::array<int, 2>> fileRange4Height;
+	int writeStride = 0;
 	parallel* para;
 
 };

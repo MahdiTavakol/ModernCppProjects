@@ -150,3 +150,28 @@ void color_array::deallocate()
     }
     this->array = nullptr;
 }
+
+void color_array::write(std::iostream& out_, const outputMode& mode_, const int& stride_) const
+{
+    if (mode_ == outputMode::P3) {
+        for (int j = 0; j < height; j++)
+        {
+            for (int i = 0; i < width; i++)
+            {
+                out_ << array[i][j]; //This leads to strided access ==> might need to change the indexing to [height_index][width_index]
+            }
+        }
+    }
+    else if (mode_ == outputMode::P6)
+    {
+        for (int j = 0; j < height; j++)
+        {
+            for (int i = 0; i < width; i++)
+            {
+                color_array::write_binary(out_, array[i][j]);
+            }
+            // move the put location stride_ bytes from the current location.
+            out_.seekp(stride_, std::ios::cur);
+        }
+    }
+}

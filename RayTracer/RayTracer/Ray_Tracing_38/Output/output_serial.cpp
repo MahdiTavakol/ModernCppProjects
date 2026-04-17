@@ -33,27 +33,9 @@ output_serial::output_serial(
 
 void output_serial::write_file()
 {
+	// writting the header info
 	write_header();
-	color_data** c_data = colors->return_array();
 
-
-	if (mode == outputMode::P3) {
-		for (int j = 0; j < image_height; j++)
-		{
-			for (int i = 0; i < image_width; i++)
-			{
-				*stream << c_data[i][j]; //This leads to strided access ==> might need to change the indexing to [height_index][width_index]
-			}
-		}
-	}
-	else if (mode == outputMode::P6)
-	{
-		for (int j = 0; j < image_height; j++)
-		{
-			for (int i = 0; i < image_width; i++)
-			{
-				color_array::write_binary(*stream, c_data[i][j]);
-			}
-		}
-	}
+	// for serial writting the stride is zero
+	colors->write(*stream, mode, 0);
 }

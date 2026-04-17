@@ -52,51 +52,51 @@ void output_parallel::init()
 	int heightPerRank = image_height / size_config[1];
 
 	int widthMin = rank_config[0] * widthPerRank;
+	// the max is not inclusive
 	int widthMax = widthPerRank + widthMin;
 
 	widthMin = widthMin < image_width ? widthMin : image_width - 1;
-	widthMax = widthMax < image_width ? widthMax : image_width - 1;
+	// since the max is not inclusive, it can be equal to image_width
+	widthMax = widthMax <= image_width ? widthMax : image_width;
 	
 	int heightMin = rank_config[1] * heightPerRank;
 	int heightMax = heightPerRank + heightMin;
 
 	heightMin = heightMin < image_height ? heightMin : image_height - 1;
-	heightMax = heightMax < image_height ? heightMax : image_height - 1;
+	// since the max is not inclusove, it can be equal to the image_height
+	heightMax = heightMax <= image_height ? heightMax : image_height;
 
+	// widthMax is not inclusive
+	int myWidth = widthMax - widthMin;
 
-	// setting the location for each height value
-	loc4Height.reserve(heightPerRank);
-
-	for (int i = heightMin; i < heightMax; i++)
-	{
-		int loc = i * image_width + widthMin;
-		loc4Height.push_back(loc);
-	}
+	// when the row range for this rank 
+	// finishes being written the pointer is 
+	// at the end of the current row range.
+	// Thus the stride of image_width 
+	// moves the pointer to the end of
+	// the next row range.
+	// So there is need to go back 
+	// myWidth location.
+	writeStride = image_width - myWidth;
 }
 
 void output_parallel::write_file()
 {
 	// writing the header from the rank 0
 	write_header();
-
 	// barrier
 	para->barrier();
 	// getting the begining of the binary section
 	auto pos = return_binary_begin();
-	// moving the write location to the pos
+	// moving the begining of the binary section
 	stream->seekp(pos);
-
-
-	color_data** c_data = colors->return_array();
-
-	for (int j = myHeightRange[0]; j < myHeightRange[1]; j++)
-	{
-		stream->seekp(loc4Height[j - myHeightRange[0]]);
-		for (int i = myWidthRange[0]; i < myWidthRange[1]; i++)
-		{
-			color_array::write_binary(*stream, c_data[i][j]);
-		}
-	}
+	// going to the begining of the first row
+	// of this rank.
+	// Moving with respect to the current location 
+	// which is the begining of the binary section
+	stream->seekp(myWidthRange[0], std::ios::cur);
+	// writing the data
+	colors->write(*stream, mode, writeStride);
 }
 
 

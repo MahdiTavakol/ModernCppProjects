@@ -87,13 +87,15 @@ std::unique_ptr<parallel> mpiParallel::split(const std::array<int, 2>& maxRanks_
     std::array<int, 2> newRankConfig;
     std::array<int, 2> newSizeConfig;
 
-    if (rank_config[0] < maxRanks_[0] &&
-        rank_config[1] < maxRanks_[1] )
+    int maxNumRanks = maxRanks_[0] * maxRanks_[1];
+
+
+    if (rank < maxNumRanks)
     {
         newColor = 0;
-        newRank = rank_config[1] * size_config[0] + rank_config[0];
-        newRankConfig[0] = maxRanks_[0];
-        newRankConfig[1] = maxRanks_[1];
+        newRank = rank_config[1] * maxRanks_[0] + rank_config[0];
+        newRankConfig[0] = rank % maxRanks_[0];
+        newRankConfig[1] = rank / maxRanks_[0];
         newSizeConfig = maxRanks_;
     }
     else
