@@ -200,7 +200,6 @@ make
 
 **Goal:** Develop a modular 3D particle simulation engine with extensible physics and parallel-ready architecture.
 
----
 
 ### 🧩 Concepts Practiced:
 
