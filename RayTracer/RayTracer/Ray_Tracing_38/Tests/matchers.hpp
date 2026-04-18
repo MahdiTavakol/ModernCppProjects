@@ -215,3 +215,68 @@ private:
 	std::vector<std::string>* expectedData;
 
 };
+
+
+class P6Matcher : public Catch::Matchers::MatcherGenericBase {
+public:
+	P6Matcher(std::string* expectedData_,
+		const int expectedWidth_, 
+		const int expectedHeight_,
+		const int expectedNColors_,
+		const int rank_) :
+		expectedData{ expectedData_ },
+		expectedWidth{expectedWidth_},
+		expectedHeight{expectedHeight_},
+		expectedNColors{expectedNColors_},
+		rank{rank_}
+	{}
+	bool match(std::stringstream* value_) const
+	{
+		if (false) {
+			// checking the format
+			std::string format;
+			*value_ >> format;
+			REQUIRE(format == expectedFormat);
+
+			// checking the size
+			int width, height;
+			*value_ >> width;
+			*value_ >> height;
+			if (width != expectedWidth)
+				return false;
+			if (height != expectedHeight)
+				return false;
+
+			// checking the number of colors
+			int nColors;
+			*value_ >> nColors;
+			if (nColors != expectedNColors)
+				return false;
+		}
+
+		// checking the data
+		// getting the full text
+		std::string text = value_->str();
+		// current pos
+		std::streampos pos = value_->tellg();
+		// the rest of the data
+		std::string rest = text; // text.substr(pos);
+
+		// comparing the data
+		if (expectedData->compare(rest))
+			return false;
+
+		return true;
+	}
+	std::string describe() const override
+	{
+		std::string message = "Checking a P6 file contents";
+		return message;
+	}
+
+private:
+	const std::string expectedFormat = "P6";
+	const int expectedWidth, expectedHeight, expectedNColors;
+	const int rank;
+	std::string* expectedData;
+};

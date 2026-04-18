@@ -6,27 +6,46 @@
 #include "../Tests/test_helpers.h"
 #include <sstream>
 
-void distributeColorArray(
-	std::unique_ptr<color_array>& c_array_,
+void myRange(
+	int width_, int height_,
+	std::array<int, 2>& myWidth_, std::array<int, 2>& myHeight_,
 	parallel* para_)
 {
-	int width, height;
-	c_array_->return_size(width, height);
 	auto size = para_->return_size_config();
 	auto rank = para_->return_rank_config();
 
-	int sizePerWidth = (width + size[0] - 1) / size[0];
-	int sizePerHeight = (height + size[1] - 1) / size[1];
+	int sizePerWidth = (width_ + size[0] - 1) / size[0];
+	int sizePerHeight = (height_ + size[1] - 1) / size[1];
 
 	int x0 = sizePerWidth * rank[0];
 	int x1 = x0 + sizePerWidth;
 	int y0 = sizePerHeight * rank[1];
 	int y1 = y0 + sizePerHeight;
 
-	x0 = x0 < width ? x0 : width - 1;
-	x1 = x1 <= width ? x1 : width;
-	y0 = y0 < height ? y0 : height - 1;
-	y1 = y1 <= height ? y1 : height;
+	x0 = x0 < width_ ? x0 : width_ - 1;
+	x1 = x1 <= width_ ? x1 : width_;
+	y0 = y0 < height_ ? y0 : height_ - 1;
+	y1 = y1 <= height_ ? y1 : height_;
+
+	myWidth_[0] = x0;
+	myWidth_[1] = x1;
+	myHeight_[0] = y0;
+	myHeight_[1] = y1;
+}
+
+void distributeColorArray(
+	std::unique_ptr<color_array>& c_array_,
+	parallel* para_)
+{
+	int width, height;
+	c_array_->return_size(width, height);
+	std::array<int, 2> myWidth, myHeight;
+	myRange(width, height, myWidth, myHeight, para_);
+
+	int x0 = myWidth[0];
+	int x1 = myWidth[1];
+	int y0 = myHeight[0];
+	int y1 = myHeight[1];
 
 	int newWidth = x1 - x0;
 	int newHeight = y1 - y0;
@@ -142,13 +161,13 @@ TEST_CASE("Writting a test file in P6 format in parallel","[mpi]")
 	SUCCEED("Suceeded");
 }
 
-TEST_CASE("Testing the output_parallel class","[.][ignore for now]")
+TEST_CASE("Testing the output_parallel class","[.][Ignore this for now!]")
 {
 	// the number of ranks for this test
 	std::array<int, 2> numRanks = { 2,2 };
 	// I know it is generic 
 	// ostringstream and there is no need
-	// to feed this into the output class
+	// to feed this into the output classf
 	// however I want the c'tor of the 
 	// output class to have a std::stringstream
 	// on purpose so the user knows 
@@ -231,29 +250,40 @@ TEST_CASE("Testing the output_parallel class","[.][ignore for now]")
 			}
 	}
 
-	// distributing the data among the ranks
-	//distributeColorArray(width, height, c_array, );
 
 	// expectedData
-	std::vector<std::string> expectedData;
-	expectedData.reserve(3 + width * height);
-	expectedData.push_back("P6");
-	expectedData.push_back(std::to_string(width) + " " + std::to_string(height));
-	expectedData.push_back("255");
-	for (int j = 0; j < height; j++)
-		for (int i = 0; i < width; i++)
+	std::string expectedData(3*width*height,'\0');
+	int expectedWidth = width;
+	int expectedHeight = height;
+	int expectedNColors = 255;
+
+	std::array<int, 2> myWidth, myHeight;
+	myRange(width, height, myWidth, myHeight, para.get());
+	for (int j = myHeight[0]; j < myHeight[1]; j++)
+		for (int i = myWidth[0]; i < myWidth[1]; i++)
 		{
-			int r = static_cast<int>(256 * std::clamp(c_data[i][j].r, 0.0, 0.999));
-			int g = static_cast<int>(256 * std::clamp(c_data[i][j].g, 0.0, 0.999));
-			int b = static_cast<int>(256 * std::clamp(c_data[i][j].b, 0.0, 0.999));
-			expectedData.push_back(std::to_string(r) + " " + std::to_string(g) + " " + std::to_string(b));
+			unsigned __int8 r =
+				static_cast<unsigned __int8>
+				(256 * std::clamp(c_data[i][j].r, 0.0, 0.999));
+			unsigned __int8 g =
+				static_cast<unsigned __int8>
+				(256 * std::clamp(c_data[i][j].g, 0.0, 0.999));
+			unsigned __int8 b =
+				static_cast<unsigned __int8>
+				(256 * std::clamp(c_data[i][j].b, 0.0, 0.999));
+
+
+			int indx = j * width + i;
+			expectedData[3 * indx] = r;
+			expectedData[3 * indx + 1] = g;
+			expectedData[3 * indx + 2] = b;
 		}
 
 
 	// creating the color_array object
 	c_array = std::make_unique<color_array>(width, height, c_data);
 	// distributing the color_array object among the ranks
-	distributeColorArray( c_array, para.get());
+	distributeColorArray(c_array, para.get());
 	output_parallel writer(std::move(dummyOss), c_array.get(), width,height, para);
 	writer.write_file();
 	returnedStream = writer.return_stream();
@@ -266,6 +296,7 @@ TEST_CASE("Testing the output_parallel class","[.][ignore for now]")
 	// checking the returned oss pointer type
 	REQUIRE(oss);
 
+	int rank = para->return_rank();
 	// checking the written data
-	REQUIRE_THAT(oss, StringStreamMatcher(&expectedData));
+	REQUIRE_THAT(oss, P6Matcher(&expectedData, expectedWidth, expectedHeight, expectedNColors,rank));
 }

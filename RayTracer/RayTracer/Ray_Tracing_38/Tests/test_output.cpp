@@ -208,15 +208,6 @@ TEST_CASE("Test writing in the P6 format")
 				static_cast<unsigned __int8>(256 * std::clamp(c_data[i][j].g, 0.0, 0.999));
 			unsigned __int8 b =
 				static_cast<unsigned __int8>(256 * std::clamp(c_data[i][j].b, 0.0, 0.999));
-			//auto rCast = reinterpret_cast<std::byte*>(&r);
-			//auto gCast = reinterpret_cast<std::byte*>(&g);
-			//auto bCast = reinterpret_cast<std::byte*>(&b);
-
-			//auto rBits = std::bitset<8>(r);
-			//auto gBits = std::bitset<8>(g);
-			//auto bBits = std::bitset<8>(b);
-
-
 			expectedData.emplace_back(1, r);
 			expectedData.emplace_back(1, g);
 			expectedData.emplace_back(1, b);

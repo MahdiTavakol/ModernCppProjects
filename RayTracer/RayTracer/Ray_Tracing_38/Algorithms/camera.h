@@ -61,7 +61,7 @@ protected:
 	// primary parameters set by the class input;
 	double aspect_ratio = 1.0;
 	int image_width = 100;
-	int image_height;
+	int image_height = 100;
 	int samples_per_pixel = 10;
 	int max_depth = 10;
 	color background;
@@ -76,7 +76,7 @@ protected:
 
 
 	// secondary parameters set by the initialize method
-	double pixel_samples_scale;
+	double pixel_samples_scale = 1;
 	point3 center;
 	point3 pixel00_loc;
 	vec3 pixel_delta_u;
