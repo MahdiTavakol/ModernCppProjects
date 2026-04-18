@@ -32,6 +32,7 @@ public:
                         color_data** one_all_,
                         const int& width_per_rank_,
                         const int& height_per_rank_) const = 0;
+    virtual void bcast(void *buff_, int nBytes_, int root_ = 0) const {}
     virtual void barrier() const = 0;
 
 protected:

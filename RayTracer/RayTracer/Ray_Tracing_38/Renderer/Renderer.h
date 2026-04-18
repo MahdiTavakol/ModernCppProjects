@@ -33,6 +33,7 @@
 #include "../Geometry/texture.h"
 #include "../Types/vec3.h"
 #include "../Output/output.h"
+#include "../Output/output_serial.h"
 
 
 class renderer

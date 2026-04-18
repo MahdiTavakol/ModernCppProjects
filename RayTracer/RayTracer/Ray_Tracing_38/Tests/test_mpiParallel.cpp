@@ -1,7 +1,7 @@
 #include "test_shared.h"
 #include "../Algorithms/mpiParallel.h"
 
-TEST_CASE("Testing the gather function for 2Dimensional rank arrangement with int** type")
+TEST_CASE("Testing the gather function for 2Dimensional rank arrangement with int** type","[mpi]")
 {
 	int width_per_rank = 4;
 	int height_per_rank = 3;
@@ -78,7 +78,7 @@ TEST_CASE("Testing the gather function for 2Dimensional rank arrangement with in
 	deallocate_c_data(c_data_all_expected);
 }
 
-TEST_CASE("Testing the gather function for 2Dimensional rank arrangement")
+TEST_CASE("Testing the gather function for 2Dimensional rank arrangement", "[mpi]")
 {
 	int width_per_rank = 4;
 	int height_per_rank = 3;

@@ -86,7 +86,7 @@ void renderer_animation::open_file(const int frame_i)
 	std::string file_name = "temp/frame-" + std::to_string(frame_i) + ".ppm";
 #endif
 	if (writer == nullptr)
-		writer = std::make_unique<output>(file_name);
+		writer = std::make_unique<output_serial>(file_name);
 	else
 		writer->open_new_file(file_name);
 }

@@ -11,8 +11,6 @@ void minRanksRequirement(std::unique_ptr<parallel>& para_, const std::array<int,
 		std::to_string(minSize_[1]) +
 		std::string(" ranks!");
 
-	if (size < min)
-		SKIP(warningText.c_str());
 }
 
 std::unique_ptr<parallel> skipExtraRanks(std::unique_ptr<parallel>& para_, const std::array<int,2>& maxSize_)
@@ -32,8 +30,24 @@ std::unique_ptr<parallel> skipExtraRanks(std::unique_ptr<parallel>& para_, const
 
 void printRankZero(std::unique_ptr<parallel>& para_, const std::string text)
 {
-	auto rank = para_->return_rank_config();
+	int rank = para_->return_rank();
 
-	if (rank[0] == 0 && rank[1] == 0)
+	if (rank == 0)
 		std::cout << text << std::endl;
 }
+
+// allocater and deallocator lambda functions
+void allocate(color_data**& data_, int width_, int height_)
+{
+	color_data* temp;
+	temp = new color_data[width_ * height_];
+	data_ = new color_data * [width_];
+	for (int i = 0; i < width_; i++)
+		data_[i] = &temp[i * height_];
+};
+
+void deallocate(color_data**& data_)
+{
+	delete[] data_[0];
+	delete[] data_;
+};

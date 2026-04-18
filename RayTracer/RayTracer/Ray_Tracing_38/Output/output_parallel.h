@@ -26,9 +26,12 @@ public:
 
 private:
 	void init();
-	std::array<int, 2> myWidthRange;
-	std::array<int, 2> myHeightRange;
+	std::array<int, 2> myWidthRange = { 0,0 };
+	std::array<int, 2> myHeightRange = { 0,0 };
 	int writeStride = 0;
 	parallel* para;
+
+
+	void bcast_streampos(std::streampos& pos_);
 
 };

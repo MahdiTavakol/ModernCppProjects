@@ -5,7 +5,7 @@
 
 TEST_CASE("Testing the logger object")
 {
-	std::ostringstream oss1, oss2, oss3;
+	std::stringstream oss1, oss2, oss3;
 	std::vector<std::reference_wrapper<std::ostream>> strms = {
 		std::ref(oss1), std::ref(oss2), std::ref(oss3)
 	};
@@ -57,8 +57,8 @@ TEST_CASE("Testing the logger object")
 	}
 	
 
-	REQUIRE_THAT(&oss1, OStringStreamMatcher(&expectedLog));
-	REQUIRE_THAT(&oss2, OStringStreamMatcher(&expectedLog));
-	REQUIRE_THAT(&oss3, OStringStreamMatcher(&expectedLog));
+	REQUIRE_THAT(&oss1, StringStreamMatcher(&expectedLog));
+	REQUIRE_THAT(&oss2, StringStreamMatcher(&expectedLog));
+	REQUIRE_THAT(&oss3, StringStreamMatcher(&expectedLog));
 
 }

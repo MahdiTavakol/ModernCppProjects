@@ -74,7 +74,7 @@ void color_array::set_range(const int& _width, const int& _height)
     this->height = _height;
 }
 
-color_array& color_array::operator=(color_array second)
+color_array& color_array::operator=(const color_array& second)
 {
     if (this == &second)
     {

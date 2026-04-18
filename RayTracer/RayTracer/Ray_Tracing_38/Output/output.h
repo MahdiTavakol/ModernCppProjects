@@ -15,7 +15,7 @@ public:
 		   outputMode mode_ );
 	output(std::string _file_name,
 		   outputMode mode_);
-	output(std::unique_ptr<std::ostream> _stream, 
+	output(std::unique_ptr<std::iostream> _stream, 
 		   color_array* _colors,
 		   int _image_width, int _image_height,
 		   outputMode mode_
@@ -25,17 +25,18 @@ public:
 	virtual void write_file() = 0;
 	void reset(color_array* _colors, const int _image_width, const int _image_height);
 	void open_new_file(std::string _file_name);
-	std::unique_ptr<std::ostream> return_stream();
+	std::unique_ptr<std::iostream> return_stream();
 
 protected:
 	std::streampos return_binary_begin();
-	void write_header();
+	static void remove_file(const std::string& fileName_);
+	std::streampos write_header();
 	outputMode mode = outputMode::P3;
 	std::string file_name;
 	// I want it to be iostream so that output_parallel can read it 
 	// to get the begining of the binary section
 	std::unique_ptr<std::iostream> stream;
-	std::ofstream* file;
+	std::fstream* file = nullptr;
 	color_array* colors;
 	int image_width, image_height;
 };

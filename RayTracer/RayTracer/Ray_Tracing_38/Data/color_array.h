@@ -27,7 +27,7 @@ public:
     void reset_size(const int& _width, const int& _height);
     void reset(const int& _width, const int& _height, color_data* _color_data);
     void set_range(const int& _width, const int& _height);
-    color_array& operator=(color_array second);
+    color_array& operator=(const color_array& second);
     color_data**& return_array();
     bool equal(color_array* rhs_, const double& tol_, 
                const std::vector<std::array<int,2>>& ignoredCoors_);

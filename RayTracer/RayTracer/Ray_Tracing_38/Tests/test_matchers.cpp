@@ -239,7 +239,7 @@ TEST_CASE("Point3 matcher test")
 }
 
 TEST_CASE("Testing ostringstream matcher") {
-	std::ostringstream oss;
+	std::stringstream oss;
 	std::vector<std::string> expectedOutput;
 
 	SECTION("test-1")
@@ -332,5 +332,5 @@ TEST_CASE("Testing ostringstream matcher") {
 
 
 
-	REQUIRE_THAT(&oss, OStringStreamMatcher(&expectedOutput));
+	REQUIRE_THAT(&oss, StringStreamMatcher(&expectedOutput));
 }

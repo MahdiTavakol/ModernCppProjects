@@ -47,7 +47,7 @@ public:
 				vec3 ray_direction{ 0.0,0.0,-1.0 };
 				double ray_time{ 0.0 };
 				ray myray{ ray_origin,ray_direction,ray_time };
-				color pixel_color = ray_color(myray, 0.0, object);
+				color pixel_color = ray_color(myray, 0, object);
 				color_data** c_data = c_array->return_array();
 				c_data[i][j].r = pixel_color.x();
 				c_data[i][j].g = pixel_color.y();

@@ -3,69 +3,164 @@
 #include "../Data/color_array.h"
 #include "../Algorithms/parallel.h"
 #include "../Algorithms/mpiParallel.h"
+#include "../Tests/test_helpers.h"
 #include <sstream>
 
 void distributeColorArray(
-	const int& width_, const int& height_,
 	std::unique_ptr<color_array>& c_array_,
 	parallel* para_)
 {
+	int width, height;
+	c_array_->return_size(width, height);
 	auto size = para_->return_size_config();
 	auto rank = para_->return_rank_config();
 
-	int sizePerWidth = width_ / size[0];
-	int sizePerHeight = height_ / size[1];
+	int sizePerWidth = (width + size[0] - 1) / size[0];
+	int sizePerHeight = (height + size[1] - 1) / size[1];
 
-	int x0 = (sizePerWidth * rank[0] < width_ ? sizePerWidth * rank[0] : width_ - 1);
-	int x1 = (x0 + sizePerWidth < width_ ? x0+sizePerWidth : width_ - 1);
-	int y0 = (sizePerHeight * rank[1] < height_ ? sizePerHeight * rank[1] : height_ - 1);
-	int y1 = (y0 + sizePerHeight < height_ ? y0 + sizePerHeight : height_ - 1);
+	int x0 = sizePerWidth * rank[0];
+	int x1 = x0 + sizePerWidth;
+	int y0 = sizePerHeight * rank[1];
+	int y1 = y0 + sizePerHeight;
 
-	int newWidth = (x1 - x0);
-	int newHeight = (y1 - y0);
+	x0 = x0 < width ? x0 : width - 1;
+	x1 = x1 <= width ? x1 : width;
+	y0 = y0 < height ? y0 : height - 1;
+	y1 = y1 <= height ? y1 : height;
+
+	int newWidth = x1 - x0;
+	int newHeight = y1 - y0;
 
 	color_array new_c_array{newWidth,newHeight };
 
 	for (int i = x0; i < x1; i++)
 		for (int j = y0; j < y1; j++)
 		{
-			new_c_array(i,j) = (*c_array_)(x0 + i,y0 + j);
+			new_c_array(i-x0,j-y0) = (*c_array_)(i,j);
 		}
 
 
 	*c_array_ = new_c_array;
 }
 
-// allocater and deallocator lambda functions
-void allocate(color_data**& data_, int width_, int height_)
+TEST_CASE("Writting a test file in P6 format in parallel","[mpi]")
 {
-	color_data* temp;
-	temp = new color_data[width_ * height_];
-	data_ = new color_data * [width_];
-	for (int i = 0; i < width_; i++)
-		data_[i] = &temp[i * height_];
-};
-void deallocate(color_data**& data_)
-{
-	delete[] data_[0];
-	delete[] data_;
-};
+	// the number of ranks for this test
+	std::array<int, 2> numRanks = { 2,3 };
+	// the parallel object
+	// since we want the output_parallel
+	// to be run in parallel here we cannot use
+	// a fake version of the parallel
+	std::unique_ptr<parallel> para = std::make_unique<mpiParallel>(MPI_COMM_WORLD);
+
+	// splitting the communicator and skipping the extra ranks
+	para = skipExtraRanks(para, numRanks);
+	int rank = para->return_rank();
+
+
+	// filename
+	std::string fileName = "empty";
+
+
+	// color data
+	int width, height;
+	std::unique_ptr<color_array> c_array;
+	color_data** c_data = nullptr;
+
+
+	SECTION("Test-1")
+	{
+		fileName = "Output-P6-Test-1-Parallel.ppm";
+		width = 192;
+		height = 108;
+
+		allocate(c_data, width, height);
+
+		for (int j = 0; j < height; j++)
+			for (int i = 0; i < width; i++)
+			{
+				double r = static_cast<double>(i) / static_cast<double>(width);
+				double g = static_cast<double>(j) / static_cast<double>(height);
+				double b = 0.0;
+				color_data myColor = color_data{ r,g,b };
+				c_data[i][j] = myColor;
+			}
+	}
+
+	SECTION("Test-2")
+	{
+		fileName = "Output-P6-Test-2-Parallel.ppm";
+		width = 192;
+		height = 108;
+
+		allocate(c_data, width, height);
+
+		for (int j = 0; j < height; j++)
+			for (int i = 0; i < width; i++)
+			{
+				double r = static_cast<double>(i) / static_cast<double>(width);
+				double g = static_cast<double>(j) / static_cast<double>(height);
+				double b = static_cast<double>(j) / static_cast<double>(width);
+				color_data myColor = color_data{ r,g,b };
+				c_data[i][j] = myColor;
+			}
+	}
+
+	SECTION("Test-3")
+	{
+		fileName = "Output-P6-Test-3-Parallel.ppm";
+		width = 192;
+		height = 108;
+
+		allocate(c_data, width, height);
+
+		for (int j = 0; j < height; j++)
+			for (int i = 0; i < width; i++)
+			{
+				double r = 0.0;
+				double g = static_cast<double>(j) / static_cast<double>(height);
+				double b = static_cast<double>(i) / static_cast<double>(width);
+				color_data myColor = color_data{ r,g,b };
+				c_data[i][j] = myColor;
+			}
+	}
+
+
+	c_array = std::make_unique<color_array>(width, height, c_data);
+
+	distributeColorArray(c_array,para.get());
+
+
+	outputMode mode = outputMode::P6;
+	std::cout << "Creating the writer object" << std::endl;
+	output_parallel writer(fileName, c_array.get(), width, height,para, mode);
+	std::cout << "Writing the file" << std::endl;
+ 	writer.write_file();
+
+	// deallocating the color_array
+	deallocate(c_data);
+
+
+	SUCCEED("Suceeded");
+}
 
 TEST_CASE("Testing the output_parallel class","[.][ignore for now]")
 {
+	// the number of ranks for this test
+	std::array<int, 2> numRanks = { 2,2 };
 	// I know it is generic 
 	// ostringstream and there is no need
 	// to feed this into the output class
 	// however I want the c'tor of the 
-	// output class to have a std::ostringstream
+	// output class to have a std::stringstream
 	// on purpose so the user knows 
 	// the intention of writing into stringstream
 	// rather than a file0
 
 	// streams
-	auto dummyOss = std::make_unique<std::ostringstream>();
-	std::ostringstream* oss;
-	std::unique_ptr<std::ostream> returnedStream;
+	auto dummyOss = std::make_unique<std::stringstream>();
+	std::stringstream* oss;
+	std::unique_ptr<std::iostream> returnedStream;
 
 
 	// color data
@@ -77,7 +172,11 @@ TEST_CASE("Testing the output_parallel class","[.][ignore for now]")
 	// since we want the output_parallel
 	// to be run in parallel here we cannot use
 	// a fake version of the parallel
-	std::unique_ptr<parallel> para = std::make_unique<mpiParallel>()
+	std::unique_ptr<parallel> para = std::make_unique<mpiParallel>(MPI_COMM_WORLD);
+
+	// splitting the communicator and skipping the extra ranks
+	para = skipExtraRanks(para, numRanks);
+
 
 
 	SECTION("Test-1")
@@ -140,7 +239,7 @@ TEST_CASE("Testing the output_parallel class","[.][ignore for now]")
 	// expectedData
 	std::vector<std::string> expectedData;
 	expectedData.reserve(3 + width * height);
-	expectedData.push_back("P3");
+	expectedData.push_back("P6");
 	expectedData.push_back(std::to_string(width) + " " + std::to_string(height));
 	expectedData.push_back("255");
 	for (int j = 0; j < height; j++)
@@ -153,16 +252,22 @@ TEST_CASE("Testing the output_parallel class","[.][ignore for now]")
 		}
 
 
+	// creating the color_array object
 	c_array = std::make_unique<color_array>(width, height, c_data);
-	output_parallel writer(std::move(dummyOss), c_array.get(), width, height);
+	// distributing the color_array object among the ranks
+	distributeColorArray( c_array, para.get());
+	output_parallel writer(std::move(dummyOss), c_array.get(), width, height,para);
 	writer.write_file();
 	returnedStream = writer.return_stream();
 
+	// deallocating the color_array
+	deallocate(c_data);
+
 	// converting the returned ostream to ostringstream
-	oss = dynamic_cast<std::ostringstream*>(returnedStream.get());
+	oss = dynamic_cast<std::stringstream*>(returnedStream.get());
 	// checking the returned oss pointer type
 	REQUIRE(oss);
 
 	// checking the written data
-	REQUIRE_THAT(oss, OStringStreamMatcher(&expectedData));
+	REQUIRE_THAT(oss, StringStreamMatcher(&expectedData));
 }

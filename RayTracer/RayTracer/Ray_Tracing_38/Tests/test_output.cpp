@@ -1,26 +1,13 @@
 #include "test_shared.h"
 #include "../Output/output.h"
+#include "../Output/output_serial.h"
 #include "../Data/color_array.h"
+#include "../Tests/test_helpers.h"
 #include <sstream>
 #include <stdint.h>
 #include <cstddef>
 #include <bitset>
 
-// allocater and deallocator lambda functions
-void allocate(color_data**& data_, int width_, int height_)
-{
-	color_data* temp;
-	temp = new color_data[width_ * height_];
-	data_ = new color_data * [width_];
-	for (int i = 0; i < width_; i++)
-		data_[i] = &temp[i * height_];
-};
-
-void deallocate(color_data**& data_)
-{
-	delete[] data_[0];
-	delete[] data_;
-};
 
 
 TEST_CASE("Testing the output class")
@@ -29,14 +16,14 @@ TEST_CASE("Testing the output class")
 	// ostringstream and there is no need
 	// to feed this into the output class
 	// however I want the c'tor of the 
-	// output class to have a std::ostringstream
+	// output class to have a std::stringstream
 	// on purpose so the user knows 
 	// the intention of writing into stringstream
 	// rather than a file
 
 	// streams
-	auto dummyOss = std::make_unique<std::ostringstream>();
-	std::ostringstream* oss;
+	auto dummyOss = std::make_unique<std::stringstream>();
+	std::stringstream* oss;
 	std::unique_ptr<std::ostream> returnedStream;
 
 
@@ -120,25 +107,28 @@ TEST_CASE("Testing the output class")
 
 
 	c_array = std::make_unique<color_array>(width, height, c_data);
-	output writer(std::move(dummyOss), c_array.get(), width, height);
+	output_serial writer(std::move(dummyOss), c_array.get(), width, height);
 	writer.write_file();
 	returnedStream = writer.return_stream();
 
+	// deallocating the color_array
+	deallocate(c_data);
+
 	// converting the returned ostream to ostringstream
-	oss = dynamic_cast<std::ostringstream*>(returnedStream.get());
+	oss = dynamic_cast<std::stringstream*>(returnedStream.get());
 	// checking the returned oss pointer type
 	REQUIRE(oss);
 
 	// checking the written data
-	REQUIRE_THAT(oss, OStringStreamMatcher(&expectedData));
+	REQUIRE_THAT(oss, StringStreamMatcher(&expectedData));
 }
 
 TEST_CASE("Test writing in the P6 format")
 {
 	// streams
-	auto dummyOss = std::make_unique<std::ostringstream>();
-	std::ostringstream* oss;
-	std::unique_ptr<std::ostream> returnedStream;
+	auto dummyOss = std::make_unique<std::stringstream>();
+	std::stringstream* oss;
+	std::unique_ptr<std::iostream> returnedStream;
 
 
 	// color data
@@ -236,16 +226,19 @@ TEST_CASE("Test writing in the P6 format")
 
 	c_array = std::make_unique<color_array>(width, height, c_data);
 	outputMode mode = outputMode::P6;
-	output writer(std::move(dummyOss), c_array.get(), width, height,mode);
+	output_serial writer(std::move(dummyOss), c_array.get(), width, height,mode);
 	returnedStream = writer.return_stream();
 
+	// deallocating the color_array
+	deallocate(c_data);
+
 	// converting the returned ostream to ostringstream
-	oss = dynamic_cast<std::ostringstream*>(returnedStream.get());
+	oss = dynamic_cast<std::stringstream*>(returnedStream.get());
 	// checking the returned oss pointer type
 	REQUIRE(oss);
 
 	// checking the written data
-	REQUIRE_THAT(oss, OStringStreamMatcher(&expectedData));
+	REQUIRE_THAT(oss, StringStreamMatcher(&expectedData));
 }
 
 TEST_CASE("Writting a test file in P3 format")
@@ -320,8 +313,11 @@ TEST_CASE("Writting a test file in P3 format")
 
 	c_array = std::make_unique<color_array>(width, height, c_data);
 	outputMode mode = outputMode::P3;
-	output writer(fileName, c_array.get(), width, height, mode);
+	output_serial writer(fileName, c_array.get(), width, height, mode);
 	writer.write_file();
+
+	// deallocating the color_array
+	deallocate(c_data);
 
 
 	SUCCEED("Suceeded");
@@ -399,8 +395,11 @@ TEST_CASE("Writting a test file in P6 format")
 
 	c_array = std::make_unique<color_array>(width, height, c_data);
 	outputMode mode = outputMode::P6;
-	output writer(fileName, c_array.get(), width, height, mode);
+	output_serial writer(fileName, c_array.get(), width, height, mode);
 	writer.write_file();
+
+	// deallocating the color_array
+	deallocate(c_data);
 
 
 	SUCCEED("Suceeded");

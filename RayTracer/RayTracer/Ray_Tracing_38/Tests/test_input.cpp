@@ -156,7 +156,7 @@ TEST_CASE("Testing reading the argv with the input class")
 
 
 
-	std::ostringstream oss;
+	std::stringstream oss;
 	std::vector<std::reference_wrapper<std::ostream>> outStream =
 	{
 		std::ref(oss)
@@ -167,5 +167,5 @@ TEST_CASE("Testing reading the argv with the input class")
 	create_input crt_input(argv_vec, outStream,cam_settings.get(),para.get());
 	auto in = crt_input.return_input_ptr();
 
-	REQUIRE_THAT(&oss, OStringStreamMatcher(&expectedLog));
+	REQUIRE_THAT(&oss, StringStreamMatcher(&expectedLog));
 }

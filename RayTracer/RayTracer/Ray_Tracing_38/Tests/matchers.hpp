@@ -104,8 +104,8 @@ public:
 			throw std::runtime_error("The value in the hittableListMatcher is nullptr!");
 
 
-		int size = value_->size();
-		int expectedsize = expected->size();
+		int size = static_cast<int>(value_->size());
+		int expectedsize = static_cast<int>(expected->size());
 
 		if (size != expectedsize) {
 			std::cout << "Hittable_list size mismatch" << std::endl;
@@ -179,13 +179,13 @@ private:
 	double tol;
 };
 
-class OStringStreamMatcher : public Catch::Matchers::MatcherGenericBase {
+class StringStreamMatcher : public Catch::Matchers::MatcherGenericBase {
 public:
-	OStringStreamMatcher(std::vector<std::string>* expectedData_) :
+	StringStreamMatcher(std::vector<std::string>* expectedData_) :
 		expectedData{ expectedData_ }
 	{
 	}
-	bool match(const std::ostringstream* value_) const
+	bool match(const std::stringstream* value_) const
 	{
 		std::string outputString = value_->str();
 		std::istringstream iss(outputString);
@@ -207,7 +207,7 @@ public:
 	}
 	std::string describe() const override
 	{
-		std::string message = "Comparing a std::ostringstream contents with a pointer of vector of strings";
+		std::string message = "Comparing a std::stringstream contents with a pointer of vector of strings";
 		return message;
 	}
 

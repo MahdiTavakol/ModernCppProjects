@@ -16,6 +16,7 @@ public:
                         const int& width_per_rank_,
                         const int& height_per_rank_) const override;
     virtual void barrier() const override;
+    void bcast(void* buff_, int nBytes_, int root_ = 0) const override;
     MPI_Comm* return_comm()
     {
         return &MPI_world;

@@ -11,10 +11,7 @@ output_serial::output_serial(
 	// if string is empty which is the case
 	// for the constructor of the render_animation
 	// do not open any new files
-	if (mode == outputMode::P3)
-		stream = std::make_unique<std::fstream>(file_name);
-	else if (mode == outputMode::P6)
-		stream = std::make_unique<std::fstream>(file_name, std::ios::binary | std::ios::trunc);
+	open_new_file(_file_name);
 }
 
 output_serial::output_serial(std::string _file_name,
