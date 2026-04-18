@@ -73,6 +73,10 @@ int& camera_settings::get_image_width()
 {
 	return this->image_width;
 }
+int camera_settings::get_image_height()
+{
+	return this->image_width * height_ratio / width_ratio;
+}
 int& camera_settings::get_samples_per_pixel()
 {
 	return this->samples_per_pixel;

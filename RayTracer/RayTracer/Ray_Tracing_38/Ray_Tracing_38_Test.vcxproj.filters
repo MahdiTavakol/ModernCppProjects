@@ -204,6 +204,15 @@
     <ClCompile Include="Output\output_serial.cpp">
       <Filter>Source Files\Output</Filter>
     </ClCompile>
+    <ClCompile Include="Algorithms\image.cpp">
+      <Filter>Source Files\Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithms\image_derived.cpp">
+      <Filter>Source Files\Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithms\image_parallel.cpp">
+      <Filter>Source Files\Algorithms</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Types\color.h">
@@ -346,6 +355,15 @@
     </ClInclude>
     <ClInclude Include="Output\output_serial.h">
       <Filter>Source Files\Output</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithms\image.h">
+      <Filter>Source Files\Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithms\image_derived.h">
+      <Filter>Source Files\Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithms\image_parallel.h">
+      <Filter>Source Files\Algorithms</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

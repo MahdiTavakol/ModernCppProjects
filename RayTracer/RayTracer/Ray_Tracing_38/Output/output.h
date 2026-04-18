@@ -5,6 +5,7 @@
 #include "../Shared/rtweekend.h"
 
 #include "../Data/color_array.h"
+#include "../Algorithms/image.h"
 
 
 
@@ -21,6 +22,7 @@ public:
 	virtual ~output();
 
 	virtual void write_file() = 0;
+	void reset(std::unique_ptr<image>&& img_);
 	void reset(color_array* _colors);
 	void open_new_file(std::string _file_name);
 	std::unique_ptr<std::iostream> return_stream();
@@ -36,6 +38,7 @@ protected:
 	// to get the begining of the binary section
 	std::unique_ptr<std::iostream> stream;
 	std::fstream* file = nullptr;
-	color_array* colors;
+
+	std::unique_ptr<image> img;
 };
 

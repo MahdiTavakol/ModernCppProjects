@@ -129,9 +129,6 @@
     <ClCompile Include="Input\scene_factory.cpp">
       <Filter>Source Files\Input</Filter>
     </ClCompile>
-    <ClCompile Include="Output\write.cpp">
-      <Filter>Source Files\Output</Filter>
-    </ClCompile>
     <ClCompile Include="Renderer\Renderer.cpp">
       <Filter>Source Files\Renderer</Filter>
     </ClCompile>
@@ -139,6 +136,21 @@
       <Filter>Source Files\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="Algorithms\mpiParallel.cpp">
+      <Filter>Source Files\Algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="Output\Logger.cpp">
+      <Filter>Source Files\Output</Filter>
+    </ClCompile>
+    <ClCompile Include="Output\output.cpp">
+      <Filter>Source Files\Output</Filter>
+    </ClCompile>
+    <ClCompile Include="Output\output_parallel.cpp">
+      <Filter>Source Files\Output</Filter>
+    </ClCompile>
+    <ClCompile Include="Output\output_serial.cpp">
+      <Filter>Source Files\Output</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithms\camera_settings.cpp">
       <Filter>Source Files\Algorithm</Filter>
     </ClCompile>
   </ItemGroup>
@@ -242,9 +254,6 @@
     <ClInclude Include="Materials\material.h">
       <Filter>Source Files\Materials</Filter>
     </ClInclude>
-    <ClInclude Include="Output\write.h">
-      <Filter>Source Files\Output</Filter>
-    </ClInclude>
     <ClInclude Include="Shared\rtweekend.h">
       <Filter>Source Files\Shared</Filter>
     </ClInclude>
@@ -255,6 +264,21 @@
       <Filter>Source Files\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Algorithms\mpiParallel.h">
+      <Filter>Source Files\Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Output\Logger.h">
+      <Filter>Source Files\Output</Filter>
+    </ClInclude>
+    <ClInclude Include="Output\output.h">
+      <Filter>Source Files\Output</Filter>
+    </ClInclude>
+    <ClInclude Include="Output\output_parallel.h">
+      <Filter>Source Files\Output</Filter>
+    </ClInclude>
+    <ClInclude Include="Output\output_serial.h">
+      <Filter>Source Files\Output</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithms\camera_settings.h">
       <Filter>Source Files\Algorithm</Filter>
     </ClInclude>
   </ItemGroup>

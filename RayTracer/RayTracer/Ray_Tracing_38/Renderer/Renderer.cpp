@@ -71,9 +71,7 @@ void renderer::render()
 
 void renderer::write_file()
 {
-	int image_width, image_height;
-	update_c_array();
-	cam->return_image_size(image_width, image_height);
+	std::unique_ptr<image> img = cam->return_image();
 
 	if (writer == nullptr)
 		writer = std::make_unique<output_serial>("test.ppm");
@@ -82,10 +80,6 @@ void renderer::write_file()
 	int rank = para->return_rank();
 	if (rank == 0) writer->write_file();
 }
-
-void renderer::update_c_array()
-{
-	c_array = cam->return_color_array_ptr();
 }
 
 

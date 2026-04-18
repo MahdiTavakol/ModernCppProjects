@@ -14,11 +14,7 @@ class camera_derived : public camera
 
 public:
 
-    camera_derived(std::unique_ptr<camera_settings>& cam_setting_):
-		camera{cam_setting_}
-	{
-		initialize_storage();
-	}
+	camera_derived(std::unique_ptr<camera_settings>& cam_setting_);
 
 	void render(const hittable& world) override;
 
@@ -27,7 +23,6 @@ public:
 	}
 
 protected:
-	void initialize_storage() override;
 
 };
 

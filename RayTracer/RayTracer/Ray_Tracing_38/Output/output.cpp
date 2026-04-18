@@ -36,6 +36,11 @@ output::~output()
 	}
 }
 
+void output::reset(std::unique_ptr<image>&& img_)
+{
+	img = std::move(img_);
+}
+
 void output::reset(color_array* _colors)
 {
 	this->colors = _colors;

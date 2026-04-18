@@ -12,6 +12,7 @@
 #include "../Materials/material.h"
 #include "../Types/ray.h"
 #include "../Types/vec3.h"
+#include "image.h"
 #include "camera_settings.h"
 
 
@@ -27,7 +28,7 @@ public:
 
 	virtual void setup(std::unique_ptr<camera_settings>& cam_setting_);
 
-	virtual void render(const hittable& world) = 0;
+	virtual void render(const hittable& world);
 
 	virtual void move_camera(point3 _lookfrom) {
 		this->lookfrom = _lookfrom;
@@ -50,10 +51,13 @@ public:
 		// so that the setup in the parallel class can have generic input of camera* type
 	}
 
-	virtual color_array* return_color_array_ptr()
+	std::unique_ptr<image> return_image()
 	{
-		return c_array.get();
+		if (img == nullptr)
+			throw std::runtime_error("The image has already been returned!");
+		return std::move(img);
 	}
+
 
 
 protected:
@@ -85,8 +89,9 @@ protected:
 	vec3 defocus_disk_u;
 	vec3 defocus_disk_v;
 
-	// the rendered color_array
-	std::unique_ptr<color_array> c_array;
+	// the rendered image
+	std::unique_ptr<image> img;
+
 
 	// the rest of functions
 	ray get_ray(int i, int j) const;
@@ -94,7 +99,6 @@ protected:
 	point3 defocus_disk_sample() const;
 	virtual color ray_color(const ray& r, int depth, const hittable& world) const;
 	void initialize();
-	virtual void initialize_storage() = 0;
 };
 
 

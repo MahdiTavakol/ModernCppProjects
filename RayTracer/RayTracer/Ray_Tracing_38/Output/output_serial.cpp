@@ -30,7 +30,8 @@ void output_serial::write_file()
 {
 	// writting the header info
 	write_header();
-
+	// getting a pointer to the color_array object of the image
+	auto* colors = img->array();
 	// for serial writting the stride is zero
 	colors->write(*stream, mode, 0);
 }

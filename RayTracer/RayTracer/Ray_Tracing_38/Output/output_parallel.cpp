@@ -138,6 +138,8 @@ void output_parallel::write_file()
 	int pos0 = 3 * (myHeightRange[0] * image_width + myWidthRange[0]);
 	
 	stream->seekp(pos0, std::ios::cur);
+	// getting a pointer to the color_array object of the img
+	auto* colors = img->array();
 	// writing the data
 	colors->write(*stream, mode, writeStride);
 }

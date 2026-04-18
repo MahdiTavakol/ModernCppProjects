@@ -13,6 +13,7 @@
 #include "../Input/scene_factory.h"
 #include "../Algorithms/camera_derived.h"
 #include "../Algorithms/camera_parallel.h"
+#include "../Algorithms/image.h"
 #include "../Types/color.h"
 #include "../Data/color_array.h"
 #include "../Geometry/constant_medium.h"
@@ -49,7 +50,6 @@ public:
 	void add(std::unique_ptr<hittable>& object);
 	virtual void render();
 	void write_file();
-	void update_c_array();
 	
 	
 
@@ -66,9 +66,6 @@ protected:
 	std::unique_ptr<output> writer;
 	point3 camera_location;
 
-	// since it is owned by the parallel object
-	// here we should have raw pointer
-	color_array* c_array;
 };
 
 #endif

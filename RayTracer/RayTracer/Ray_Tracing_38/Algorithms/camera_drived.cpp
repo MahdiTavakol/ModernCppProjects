@@ -1,6 +1,14 @@
 #include "camera_derived.h"
+#include "image_derived.h"
+
+camera_derived::camera_derived(std::unique_ptr<camera_settings>& cam_setting_) :
+	camera{ cam_setting_ }
+{
+	img = std::make_unique<image_derived>(cam_setting_);
+}
 
 void camera_derived::render(const hittable& world) {
+	auto* c_array = img->array();
 
 	for (int j = 0; j < image_height; j++)
 	{
@@ -25,7 +33,3 @@ void camera_derived::render(const hittable& world) {
 	std::clog << "\rDone                          ";
 }
 
-void camera_derived::initialize_storage()
-{
-	c_array = std::make_unique<color_array>(image_width, image_height);
-}

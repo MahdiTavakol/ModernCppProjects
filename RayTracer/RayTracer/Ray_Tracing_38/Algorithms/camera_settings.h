@@ -12,6 +12,7 @@ public:
 	{}
 	camera_settings(int mode_);
 	int& get_image_width();
+	int get_image_height();
 	int& get_samples_per_pixel();
 	int& get_max_depth();
 	int& get_vfov();

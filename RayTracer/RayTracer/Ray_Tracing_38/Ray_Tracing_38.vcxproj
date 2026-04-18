@@ -142,6 +142,7 @@
     <ClCompile Include="Algorithms\camera.cpp" />
     <ClCompile Include="Algorithms\camera_drived.cpp" />
     <ClCompile Include="Algorithms\camera_parallel.cpp" />
+    <ClCompile Include="Algorithms\camera_settings.cpp" />
     <ClCompile Include="Algorithms\hittable_list.cpp" />
     <ClCompile Include="Algorithms\hittable_list_parallel.cpp" />
     <ClCompile Include="Algorithms\hit_record.cpp" />
@@ -165,7 +166,10 @@
     <ClCompile Include="Input\obj_model_reader.cpp" />
     <ClCompile Include="Input\obj_model_reader_parallel.cpp" />
     <ClCompile Include="Input\scene_factory.cpp" />
-    <ClCompile Include="Output\write.cpp" />
+    <ClCompile Include="Output\Logger.cpp" />
+    <ClCompile Include="Output\output.cpp" />
+    <ClCompile Include="Output\output_parallel.cpp" />
+    <ClCompile Include="Output\output_serial.cpp" />
     <ClCompile Include="RayTracing_21.cpp" />
     <ClCompile Include="Renderer\Renderer.cpp" />
     <ClCompile Include="Renderer\Renderer_Animation.cpp" />
@@ -177,6 +181,7 @@
     <ClInclude Include="Algorithms\camera.h" />
     <ClInclude Include="Algorithms\camera_derived.h" />
     <ClInclude Include="Algorithms\camera_parallel.h" />
+    <ClInclude Include="Algorithms\camera_settings.h" />
     <ClInclude Include="Algorithms\hittable_list.h" />
     <ClInclude Include="Algorithms\hittable_list_parallel.h" />
     <ClInclude Include="Algorithms\hittable_list_parallel_optimized.h" />
@@ -203,7 +208,10 @@
     <ClInclude Include="Input\obj_model_reader_parallel.h" />
     <ClInclude Include="Input\scene_factory.h" />
     <ClInclude Include="Materials\material.h" />
-    <ClInclude Include="Output\write.h" />
+    <ClInclude Include="Output\Logger.h" />
+    <ClInclude Include="Output\output.h" />
+    <ClInclude Include="Output\output_parallel.h" />
+    <ClInclude Include="Output\output_serial.h" />
     <ClInclude Include="Renderer\Renderer.h" />
     <ClInclude Include="Renderer\Renderer_Animation.h" />
     <ClInclude Include="Shared\rtweekend.h" />
