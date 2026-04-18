@@ -256,7 +256,7 @@ TEST_CASE("Testing the output_parallel class","[.][ignore for now]")
 	c_array = std::make_unique<color_array>(width, height, c_data);
 	// distributing the color_array object among the ranks
 	distributeColorArray( c_array, para.get());
-	output_parallel writer(std::move(dummyOss), c_array.get(), width, height,para);
+	output_parallel writer(std::move(dummyOss), c_array.get(), width,height, para);
 	writer.write_file();
 	returnedStream = writer.return_stream();
 

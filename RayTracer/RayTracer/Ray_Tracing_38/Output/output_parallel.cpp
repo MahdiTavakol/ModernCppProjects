@@ -6,9 +6,11 @@
 output_parallel::output_parallel(
 	std::string _file_name,
 	color_array* _colors,
+	int _image_width, int _image_height,
 	std::unique_ptr<parallel>& para_,
 	outputMode mode_) :
 	output{_file_name,_colors,mode_},
+	image_width{_image_width},image_height{_image_height},
 	para{para_.get()}
 {
 	/*
@@ -48,16 +50,18 @@ output_parallel::output_parallel(
 	std::string _file_name,
 	std::unique_ptr<parallel>& para_,
 	outputMode mode_) :
-	output_parallel{_file_name,nullptr,para_,mode_}
+	output_parallel{_file_name,nullptr,0,0,para_,mode_}
 {}
 
 
 output_parallel::output_parallel(
 	std::unique_ptr<std::iostream> _stream,
 	color_array* _colors,
+	int _image_width, int _image_height,
 	std::unique_ptr<parallel>& para_,
 	outputMode mode_) :
 	output{std::move(_stream),_colors,mode_},
+	image_width{ _image_width }, image_height{ _image_height },
 	para{para_.get()}
 {
 	init();
@@ -69,9 +73,6 @@ output_parallel::~output_parallel()
 
 void output_parallel::init()
 {
-	int image_width, image_height;
-	colors->return_size(image_width, image_height);
-
 	auto rank_config = para->return_rank_config();
 	auto size_config = para->return_size_config();
 
@@ -115,9 +116,6 @@ void output_parallel::init()
 
 void output_parallel::write_file()
 {
-	int image_width, image_height;
-	colors->return_size(image_width, image_height);
-
 	// getting the rank number
 	int rank = para->return_rank();
 	// the begining of the binary section

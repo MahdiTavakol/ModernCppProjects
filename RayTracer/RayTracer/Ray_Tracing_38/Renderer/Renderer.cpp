@@ -77,7 +77,7 @@ void renderer::write_file()
 
 	if (writer == nullptr)
 		writer = std::make_unique<output_serial>("test.ppm");
-	writer->reset(c_array, image_width, image_height);
+	writer->reset(c_array);
 
 	int rank = para->return_rank();
 	if (rank == 0) writer->write_file();
