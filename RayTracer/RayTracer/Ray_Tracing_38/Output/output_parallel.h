@@ -6,7 +6,6 @@ class output_parallel : public output {
 public:
 	output_parallel(std::string _file_name,
 		color_array* _colors,
-		int _image_width, int _image_height,
 		std::unique_ptr<parallel>& para_,
 		outputMode mode = outputMode::P6);
 	output_parallel(
@@ -16,7 +15,6 @@ public:
 	output_parallel(
 		std::unique_ptr<std::iostream> _stream,
 		color_array* _colors,
-		int _image_width, int _image_height,
 		std::unique_ptr<parallel>& para_,
 		outputMode mode = outputMode::P6);
 	~output_parallel();

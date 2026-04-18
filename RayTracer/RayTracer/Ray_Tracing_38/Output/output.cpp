@@ -7,26 +7,22 @@
 output::output(
 	std::string _file_name, 
 	color_array* _colors, 
-	int _image_width, int _image_height,
 	outputMode mode_) :
 	mode{mode_},
 	file_name{ _file_name }, 
-	colors{ _colors },
-	image_width{ _image_width }, image_height{ _image_height }
+	colors{ _colors }
 {}
 
 output::output(std::string _file_name,
 	           outputMode mode_) :
-	output{ _file_name, nullptr, 0, 0, mode_} {}
+	output{ _file_name, nullptr, mode_} {}
 
 
 output::output(std::unique_ptr<std::iostream> _stream, 
 	           color_array* _colors, 
-	           int _image_width, int _image_height,
 	           outputMode mode_):
 	mode{mode_},
-	stream{std::move(_stream)}, colors{_colors},
-	image_width{_image_width}, image_height{_image_height}
+	stream{std::move(_stream)}, colors{_colors}
 {}
 
 	
@@ -40,11 +36,9 @@ output::~output()
 	}
 }
 
-void output::reset(color_array* _colors, const int _image_width, const int _image_height)
+void output::reset(color_array* _colors)
 {
 	this->colors = _colors;
-	this->image_width = _image_width;
-	this->image_height = _image_height;
 }
 
 void output::open_new_file(std::string _file_name)
@@ -78,6 +72,8 @@ std::unique_ptr<std::iostream> output::return_stream()
 
 std::streampos output::write_header()
 {
+	int image_width, image_height;
+	colors->return_size(image_width, image_height);
 	if (mode == outputMode::P3)
 	{
 		*stream << "P3\n";
