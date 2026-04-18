@@ -154,17 +154,18 @@ make
 
 ## ✅ 7. BVH Ray Tracer (Phase 7)
 
-**Goal:** Build a modular ray tracing engine organized around dedicated rendering, scene, geometry, material, input, output, and parallel-processing components, with BVH acceleration, OBJ loading, and animated / distributed render paths.
+**Goal:** Build a modular ray tracing engine organized around dedicated rendering, scene, geometry, material, input, output, and parallel-processing components, with BVH acceleration, OBJ loading, animated render paths, and MPI-based distributed image generation including parallel file output.
 
 ### 🧩 Concepts Practiced
 
-- Object-oriented design using polymorphic `hittable`, `material`, renderer, scene, and camera abstractions
-- `std::unique_ptr` ownership and move semantics across renderer setup, scene construction, and world assembly
+- Object-oriented design using polymorphic `hittable`, `material`, renderer, scene, camera, and output abstractions
+- `std::unique_ptr` ownership and move semantics across renderer setup, scene construction, world assembly, and output coordination
 - Recursive BVH construction for spatial acceleration
 - Scene composition through a dedicated `scene_factory`
 - Separation of concerns across `Renderer`, `Input`, `Geometry`, `Materials`, `Output`, `Algorithms`, `Data`, `Types`, and `Shared`
 - OBJ mesh loading and scene import workflows
-- Parallel and distributed rendering structure using `MPI`, parallel camera components, and parallel renderer support
+- Parallel and distributed rendering structure using `MPI`, parallel camera components, and parallel output writing
+- Binary image writing in both serial and distributed modes through dedicated output classes
 - Support for animated rendering paths through a dedicated animation renderer
 
 ### 🎯 Features
@@ -176,21 +177,22 @@ make
 - Texture support including checker textures, Perlin noise, and image-based textures
 - Scene setup through `scene_factory` and related input modules
 - OBJ / model loading pipeline for external geometry
-- Parallel rendering architecture with MPI-based coordination and parallel camera / renderer components
-- Output pipeline for writing rendered results to files
+- Parallel rendering architecture with MPI-based coordination, parallel camera components, and distributed image generation
+- Output pipeline for writing rendered results to files in both serial and parallel modes, including a dedicated parallel writer for distributed image output
 - Animated scene support through `renderer_animation`
 
 ### 🗂️ Project Design
 
 - `Renderer`: top-level rendering orchestration, including standard and animation renderers
 - `Input`: scene factory, scene selection, and OBJ/model loading
-- `Geometry`: hittables, primitives, spatial bounds, textures/media-related geometry support
+- `Geometry`: hittables, primitives, spatial bounds, textures, and media-related geometry support
 - `Materials`: surface shading and material models
-- `Algorithms`: BVH, camera variants, parallel strategies, and rendering-support algorithms
+- `Algorithms`: BVH, camera variants, parallel strategies, MPI support, and rendering-support algorithms
 - `Types`: foundational math / rendering types such as `vec3`, `ray`, and `color`
 - `Data`: render buffers and shared render data containers
-- `Output`: file-writing and image output logic
+- `Output`: serial and parallel image-writing logic, including dedicated output classes for standard file output and distributed parallel writing
 - `Shared`: project-wide shared utilities and constants
+
 
 ---
 
