@@ -132,9 +132,7 @@ TEST_CASE("Writting a test file in P6 format in parallel","[mpi]")
 
 
 	outputMode mode = outputMode::P6;
-	std::cout << "Creating the writer object" << std::endl;
 	output_parallel writer(fileName, c_array.get(), width, height,para, mode);
-	std::cout << "Writing the file" << std::endl;
  	writer.write_file();
 
 	// deallocating the color_array

@@ -122,7 +122,7 @@ void output_parallel::write_file()
 	std::streampos pos;
 	// writing the header from the rank 0
 	if (rank == 0) {
-		pos = write_header();
+		pos = write_header(image_width,image_height);
 	}
 
 	// broadcasting the begining of the binary section of the file

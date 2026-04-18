@@ -28,6 +28,7 @@ public:
 protected:
 	std::streampos return_binary_begin();
 	static void remove_file(const std::string& fileName_);
+	std::streampos write_header(const int& width_, const int& height_);
 	std::streampos write_header();
 	outputMode mode = outputMode::P3;
 	std::string file_name;

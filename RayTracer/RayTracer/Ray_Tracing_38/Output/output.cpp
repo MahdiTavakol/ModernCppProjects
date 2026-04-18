@@ -70,10 +70,8 @@ std::unique_ptr<std::iostream> output::return_stream()
 	return std::move(stream);
 }
 
-std::streampos output::write_header()
+std::streampos output::write_header(const int& width_, const int& height_)
 {
-	int image_width, image_height;
-	colors->return_size(image_width, image_height);
 	if (mode == outputMode::P3)
 	{
 		*stream << "P3\n";
@@ -82,10 +80,17 @@ std::streampos output::write_header()
 	{
 		*stream << "P6\n";
 	}
-	*stream << image_width << " " << image_height << "\n255\n";
+	*stream << width_ << " " << height_ << "\n255\n";
 
 	auto pos = stream->tellp();
 	return pos;
+}
+
+std::streampos output::write_header()
+{
+	int image_width, image_height;
+	colors->return_size(image_width, image_height);
+	return this->write_header(image_width, image_height);
 }
 
 std::streampos output::return_binary_begin()
