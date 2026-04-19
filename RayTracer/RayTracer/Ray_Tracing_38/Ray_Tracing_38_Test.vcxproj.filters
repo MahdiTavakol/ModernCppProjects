@@ -57,12 +57,6 @@
     <ClCompile Include="Algorithms\camera.cpp">
       <Filter>Source Files\Algorithms</Filter>
     </ClCompile>
-    <ClCompile Include="Algorithms\camera_drived.cpp">
-      <Filter>Source Files\Algorithms</Filter>
-    </ClCompile>
-    <ClCompile Include="Algorithms\camera_parallel.cpp">
-      <Filter>Source Files\Algorithms</Filter>
-    </ClCompile>
     <ClCompile Include="Algorithms\hit_record.cpp">
       <Filter>Source Files\Algorithms</Filter>
     </ClCompile>
@@ -210,9 +204,6 @@
     <ClCompile Include="Algorithms\image_derived.cpp">
       <Filter>Source Files\Algorithms</Filter>
     </ClCompile>
-    <ClCompile Include="Algorithms\image_parallel.cpp">
-      <Filter>Source Files\Algorithms</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Types\color.h">
@@ -231,12 +222,6 @@
       <Filter>Source Files\Algorithms</Filter>
     </ClInclude>
     <ClInclude Include="Algorithms\camera.h">
-      <Filter>Source Files\Algorithms</Filter>
-    </ClInclude>
-    <ClInclude Include="Algorithms\camera_derived.h">
-      <Filter>Source Files\Algorithms</Filter>
-    </ClInclude>
-    <ClInclude Include="Algorithms\camera_parallel.h">
       <Filter>Source Files\Algorithms</Filter>
     </ClInclude>
     <ClInclude Include="Algorithms\hit_record.h">
@@ -360,9 +345,6 @@
       <Filter>Source Files\Algorithms</Filter>
     </ClInclude>
     <ClInclude Include="Algorithms\image_derived.h">
-      <Filter>Source Files\Algorithms</Filter>
-    </ClInclude>
-    <ClInclude Include="Algorithms\image_parallel.h">
       <Filter>Source Files\Algorithms</Filter>
     </ClInclude>
   </ItemGroup>

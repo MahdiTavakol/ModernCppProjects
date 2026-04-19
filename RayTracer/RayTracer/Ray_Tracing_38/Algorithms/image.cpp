@@ -1,6 +1,8 @@
 #include "image.h"
 
-image::image(std::unique_ptr<camera_settings>& cam_setting_) :
+image::image(std::unique_ptr<camera_settings>& cam_setting_,
+	std::unique_ptr<parallel>& _para) :
+	para{_para.get()},
 	image_width{ cam_setting_->get_image_width()},
 	image_height{cam_setting_->get_image_height()}
 {
@@ -19,4 +21,9 @@ void image::returnRange(std::array<int, 2>& widthRange_, std::array<int, 2>& hei
 	widthRange_[1] = widthMax;
 	heightRange_[0] = heightMin;
 	heightRange_[1] = heightMax;
+}
+
+void image::returnSize(int& width_, int& height_) const
+{
+	c_array->return_size(width_, height_);
 }

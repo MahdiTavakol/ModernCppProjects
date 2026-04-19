@@ -11,19 +11,15 @@
 
 class output {
 public:
-	output(std::string _file_name, color_array* _colors,
+	output(std::string _file_name, 
+		   std::unique_ptr<image>&& img_,
 		   outputMode mode_ );
 	output(std::string _file_name,
 		   outputMode mode_);
-	output(std::unique_ptr<std::iostream> _stream, 
-		   color_array* _colors,
-		   outputMode mode_
-		);
 	virtual ~output();
 
 	virtual void write_file() = 0;
 	void reset(std::unique_ptr<image>&& img_);
-	void reset(color_array* _colors);
 	void open_new_file(std::string _file_name);
 	std::unique_ptr<std::iostream> return_stream();
 

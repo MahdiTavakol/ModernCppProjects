@@ -6,24 +6,16 @@
 
 output::output(
 	std::string _file_name, 
-	color_array* _colors, 
+	std::unique_ptr<image>&& img_,
 	outputMode mode_) :
 	mode{mode_},
 	file_name{ _file_name }, 
-	colors{ _colors }
+	img{std::move(img_)}
 {}
 
 output::output(std::string _file_name,
 	           outputMode mode_) :
 	output{ _file_name, nullptr, mode_} {}
-
-
-output::output(std::unique_ptr<std::iostream> _stream, 
-	           color_array* _colors, 
-	           outputMode mode_):
-	mode{mode_},
-	stream{std::move(_stream)}, colors{_colors}
-{}
 
 	
 output::~output()
@@ -39,11 +31,6 @@ output::~output()
 void output::reset(std::unique_ptr<image>&& img_)
 {
 	img = std::move(img_);
-}
-
-void output::reset(color_array* _colors)
-{
-	this->colors = _colors;
 }
 
 void output::open_new_file(std::string _file_name)
@@ -94,7 +81,7 @@ std::streampos output::write_header(const int& width_, const int& height_)
 std::streampos output::write_header()
 {
 	int image_width, image_height;
-	colors->return_size(image_width, image_height);
+	img->returnSize(image_width, image_height);
 	return this->write_header(image_width, image_height);
 }
 

@@ -8,6 +8,7 @@
 #include "../Types/color.h"
 #include "../Data/color_array.h"
 #include "../Geometry/hittable.h"
+#include "image.h"
 #include "hittable_list.h"
 #include "../Materials/material.h"
 #include "../Types/ray.h"
@@ -22,13 +23,14 @@ class camera {
 public:
 	friend class parallel;
 
-	camera(std::unique_ptr<camera_settings>& cam_setting_);
+	camera(std::unique_ptr<camera_settings>& cam_setting_, std::unique_ptr<image>&& img_);
 	camera() = default;
 
 
 	virtual void setup(std::unique_ptr<camera_settings>& cam_setting_);
 
 	virtual void render(const hittable& world);
+	virtual void render_verbose(const hittable& world);
 
 	virtual void move_camera(point3 _lookfrom) {
 		this->lookfrom = _lookfrom;
@@ -61,6 +63,7 @@ public:
 
 
 protected:
+
 
 	// primary parameters set by the class input;
 	double aspect_ratio = 1.0;
