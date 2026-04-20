@@ -8,6 +8,7 @@ TEST_CASE("Testing rendering of a triangle_mesh object")
 	std::array<point3, 3> vns = { point3(0.0, 0.0, 1.0),point3(0.0, 0.0, 1.0),point3(0.0, 0.0, 1.0) };
 	std::array<point3,3> vts = vs;
 
+
 	std::unique_ptr<material> mat =
 		std::make_unique<fake_material>();
 	std::unique_ptr<hittable> mesh;
@@ -130,10 +131,12 @@ TEST_CASE("Testing rendering of a triangle_mesh object")
 				}
 		};
 
+	
 	SECTION("45 deg num_points = 10")
 	{
 		set_params_45deg(10);
 	}
+
 
 	SECTION("45 deg num_points = 20")
 	{

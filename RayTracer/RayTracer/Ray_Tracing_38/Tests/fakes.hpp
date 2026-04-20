@@ -29,7 +29,10 @@ public:
 		imageSize{ imageSize_ },
 		background{ background_ },
 		rendercolor{ rendercolor_ }
-	{}
+	{
+		std::unique_ptr<color_array> c_array = std::make_unique<color_array>(imageSize[0], imageSize[1]);
+		img = std::make_unique<image>(imageSize, std::move(c_array), nullptr);
+	}
 
 	virtual void render(const hittable& object) override
 	{
