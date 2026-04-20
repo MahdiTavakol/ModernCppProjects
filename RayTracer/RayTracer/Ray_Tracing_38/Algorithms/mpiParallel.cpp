@@ -167,6 +167,39 @@ void mpiParallel::gather(color_data* one_, color_data* one_all_, const int& num_
     MPI_Allgather(one_, num_data_, MPI_DOUBLE, one_all_, num_data_, MPI_DOUBLE, MPI_world);
 }
 
+void mpiParallel::gather(
+    std::unique_ptr<color_array>& one_,
+    std::unique_ptr<color_array>& one_all_,
+    std::array<int, 2>& size_per_rank_,
+    std::array<int, 2>& size_) const
+{
+	int width_per_rank = size_per_rank_[0];
+	int height_per_rank = size_per_rank_[1];
+	int image_width = size_[0];
+	int image_height = size_[1];
+
+    int extended_width = width_per_rank * size_config[0];
+    int extended_height = height_per_rank * size_config[1];
+
+    color_data** colors = one_->return_array();
+    color_data** colors_all = (color_data**)malloc(extended_width * sizeof(color_data*));
+    color_data* temp = (color_data*)malloc(extended_width * extended_height * sizeof(color_data));
+    for (int i = 0; i < extended_width; i++)
+        colors_all[i] = &temp[i * extended_height];
+
+
+    gather(colors, colors_all, width_per_rank, height_per_rank);
+
+
+    // a copy of data is involved here I should work on removing this!
+    one_all_ =
+        std::make_unique<color_array>(image_width, image_height, colors_all);
+
+    free(colors_all[0]);
+    free(colors_all);
+    colors_all = nullptr;
+}
+
 void mpiParallel::barrier() const {
     MPI_Barrier(MPI_world);
 }

@@ -32,6 +32,11 @@ public:
                         color_data** one_all_,
                         const int& width_per_rank_,
                         const int& height_per_rank_) const = 0;
+	virtual void gather(
+        std::unique_ptr<color_array>& one_,
+        std::unique_ptr<color_array>& one_all_,
+        std::array<int, 2>& size_per_rank_,
+        std::array<int, 2>& size_) const = 0;
     virtual void bcast(void *buff_, int nBytes_, int root_ = 0) const {}
     virtual void barrier() const = 0;
 

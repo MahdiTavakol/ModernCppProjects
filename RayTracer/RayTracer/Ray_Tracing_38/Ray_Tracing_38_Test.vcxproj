@@ -142,7 +142,6 @@
     <ClCompile Include="Algorithms\camera.cpp" />
     <ClCompile Include="Algorithms\camera_settings.cpp" />
     <ClCompile Include="Algorithms\image.cpp" />
-    <ClCompile Include="Algorithms\image_derived.cpp" />
     <ClCompile Include="Algorithms\hittable_list.cpp" />
     <ClCompile Include="Algorithms\hittable_list_parallel.cpp" />
     <ClCompile Include="Algorithms\hit_record.cpp" />
@@ -197,7 +196,6 @@
     <ClInclude Include="Algorithms\camera.h" />
     <ClInclude Include="Algorithms\camera_settings.h" />
     <ClInclude Include="Algorithms\image.h" />
-    <ClInclude Include="Algorithms\image_derived.h" />
     <ClInclude Include="Algorithms\hittable_list.h" />
     <ClInclude Include="Algorithms\hittable_list_parallel.h" />
     <ClInclude Include="Algorithms\hittable_list_parallel_optimized.h" />
