@@ -11,8 +11,7 @@
 #include "../Algorithms/camera.h"
 #include "../Algorithms/camera_settings.h"
 #include "../Input/scene_factory.h"
-#include "../Algorithms/camera_derived.h"
-#include "../Algorithms/camera_parallel.h"
+#include "../Algorithms/camera.h"
 #include "../Algorithms/image.h"
 #include "../Types/color.h"
 #include "../Data/color_array.h"
@@ -23,8 +22,8 @@
 #include "../Geometry/interval.h"
 #include "../Materials/material.h"
 #include "../Algorithms/path.h"
-#include "../Algorithms/parallel.h"
-#include "../Algorithms/mpiParallel.h"
+#include "../Algorithms/communicator.h"
+#include "../Algorithms/mpiComm.h"
 #include "../Geometry/quad.h"
 #include "../Types/ray.h"
 #include "../Algorithms/rtw_stb_image.h"
@@ -60,7 +59,7 @@ protected:
 	std::unique_ptr<scene_factory> world_factory;
 	std::unique_ptr<camera_settings> cam_settings;
 	std::unique_ptr<camera> cam;
-	std::unique_ptr<parallel> para;
+	std::unique_ptr<communicator> para;
 	std::unique_ptr<input> in;
 	std::unique_ptr<hittable_list> world;
 	std::unique_ptr<output> writer;

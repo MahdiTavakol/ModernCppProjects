@@ -13,14 +13,14 @@ class output {
 public:
 	output(std::string _file_name, 
 		   std::unique_ptr<image>&& img_,
-		   std::unique_ptr<parallel>& para_,
+		   std::unique_ptr<communicator>& para_,
 		   outputMode mode_ );
 	output(std::string _file_name,
-		   std::unique_ptr<parallel>& para_,
+		   std::unique_ptr<communicator>& para_,
 		   outputMode mode_);
 	output(std::unique_ptr<std::iostream> _stream,
 		   std::unique_ptr<image>&& img_,
-		   std::unique_ptr<parallel>& para_,
+		   std::unique_ptr<communicator>& para_,
 		   outputMode mode_);
 	virtual ~output();
 
@@ -44,6 +44,6 @@ protected:
 	std::unique_ptr<image> img;
 
 	// running strategy
-	parallel* para;
+	communicator* para;
 };
 

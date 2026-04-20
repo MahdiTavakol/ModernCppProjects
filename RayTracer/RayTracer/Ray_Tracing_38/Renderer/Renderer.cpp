@@ -14,7 +14,7 @@ renderer::renderer(int argc, char** argv, int _mode,
 	 */
 	cam_settings = std::make_unique<camera_settings>(mode);
 	// the parallel class in charge of the parallel communicator
-	para = std::make_unique<mpiParallel>(comm_,size_config_);
+	para = std::make_unique<mpiComm>(comm_,size_config_);
 	// changing the camera settings based on the user input
 	in = std::make_unique<input>(argc, argv, cam_settings.get(),para.get());
 	// the world_factory is in charge of lazy creation of the scene.

@@ -1,7 +1,7 @@
-#include "mpiParallel.h"
+#include "mpiComm.h"
 
-mpiParallel::mpiParallel(MPI_Comm comm_):
-    parallel{},
+mpiComm::mpiComm(MPI_Comm comm_):
+    communicator{},
     MPI_world{comm_}
 {
     // MPI variables
@@ -12,10 +12,10 @@ mpiParallel::mpiParallel(MPI_Comm comm_):
 }
 
 
-mpiParallel::mpiParallel(
+mpiComm::mpiComm(
     MPI_Comm comm_,
     std::array<int, 2> size_config_) :
-    parallel{size_config_ },
+    communicator{size_config_ },
 	MPI_world{ comm_ }
 {
     MPI_Comm_rank(MPI_world, &rank);
@@ -30,11 +30,11 @@ mpiParallel::mpiParallel(
     rank_config = { rank_x, rank_y };
 }
 
-mpiParallel::mpiParallel(
+mpiComm::mpiComm(
     MPI_Comm comm_, 
     std::array<int, 2> size_config_,
     std::array<int, 2> rank_config_):
-    parallel{size_config_,rank_config_},
+    communicator{size_config_,rank_config_},
     MPI_world{comm_}
 {
     MPI_Comm_rank(MPI_world, &rank);
@@ -42,10 +42,10 @@ mpiParallel::mpiParallel(
 }
 
 
-mpiParallel::~mpiParallel()
+mpiComm::~mpiComm()
 {}
 
-void mpiParallel::gather(int** one_, int** one_all_, const int& width_per_rank_, const int& height_per_rank_) const
+void mpiComm::gather(int** one_, int** one_all_, const int& width_per_rank_, const int& height_per_rank_) const
 {
 	int num_data = width_per_rank_ * height_per_rank_;
 	int width = width_per_rank_ * size_config[0];
@@ -81,7 +81,7 @@ void mpiParallel::gather(int** one_, int** one_all_, const int& width_per_rank_,
 	delete[] tempArray;
 }
 
-std::unique_ptr<parallel> mpiParallel::split(const std::array<int, 2>& maxRanks_) const
+std::unique_ptr<communicator> mpiComm::split(const std::array<int, 2>& maxRanks_) const
 {
     int newColor;
     int newRank = 0;
@@ -114,13 +114,13 @@ std::unique_ptr<parallel> mpiParallel::split(const std::array<int, 2>& maxRanks_
     MPI_Comm newComm;
     MPI_Comm_split(MPI_world, newColor, newRank, &newComm);
 
-    auto out = std::make_unique<mpiParallel>(newComm, newSizeConfig, newRankConfig);
+    auto out = std::make_unique<mpiComm>(newComm, newSizeConfig, newRankConfig);
 
     return out;
 }
 
 
-void mpiParallel::gather(color_data** one_,
+void mpiComm::gather(color_data** one_,
                          color_data** one_all_,
                          const int& width_per_rank_,
                          const int& height_per_rank_) const
@@ -162,12 +162,12 @@ void mpiParallel::gather(color_data** one_,
     delete[] tempArray;
 }
 
-void mpiParallel::gather(color_data* one_, color_data* one_all_, const int& num_data_) const
+void mpiComm::gather(color_data* one_, color_data* one_all_, const int& num_data_) const
 {
     MPI_Allgather(one_, num_data_, MPI_DOUBLE, one_all_, num_data_, MPI_DOUBLE, MPI_world);
 }
 
-void mpiParallel::gather(
+void mpiComm::gather(
     std::unique_ptr<color_array>& one_,
     std::unique_ptr<color_array>& one_all_,
     std::array<int, 2>& size_per_rank_,
@@ -200,24 +200,12 @@ void mpiParallel::gather(
     colors_all = nullptr;
 }
 
-void mpiParallel::gather(
-    std::unique_ptr<image>& one_,
-    std::unique_ptr<image>& one_all_
-) const
-{
-	one_all_ = one_->all_copy();
-    auto& one_c_array = one_->array_unique_ptr();
-	auto& one_all_c_array = one_all_->array_unique_ptr();
-    std::array<int, 2> size_per_rank{ one_->returnSizePerRank()};
-    std::array<int, 2> size{ one_->returnSize()};
-	gather(one_c_array, one_all_c_array, size_per_rank, size);
-}
 
-void mpiParallel::barrier() const {
+void mpiComm::barrier() const {
     MPI_Barrier(MPI_world);
 }
 
-void mpiParallel::bcast(void* buff_, int nBytes_, int root_) const
+void mpiComm::bcast(void* buff_, int nBytes_, int root_) const
 {
     MPI_Bcast(buff_, nBytes_, MPI_BYTE, root_, MPI_world);
 }

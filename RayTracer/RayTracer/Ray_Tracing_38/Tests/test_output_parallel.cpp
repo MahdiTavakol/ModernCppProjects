@@ -1,15 +1,15 @@
 #include "test_shared.h"
 #include "../Output/output_parallel.h"
 #include "../Data/color_array.h"
-#include "../Algorithms/parallel.h"
-#include "../Algorithms/mpiParallel.h"
+#include "../Algorithms/communicator.h"
+#include "../Algorithms/mpiComm.h"
 #include "../Tests/test_helpers.h"
 #include <sstream>
 
 void myRange(
 	int width_, int height_,
 	std::array<int, 2>& myWidth_, std::array<int, 2>& myHeight_,
-	parallel* para_)
+	communicator* para_)
 {
 	auto size = para_->return_size_config();
 	auto rank = para_->return_rank_config();
@@ -35,7 +35,7 @@ void myRange(
 
 void distributeColorArray(
 	std::unique_ptr<color_array>& c_array_,
-	parallel* para_)
+	communicator* para_)
 {
 	int width, height;
 	c_array_->return_size(width, height);
@@ -70,7 +70,7 @@ TEST_CASE("Writting a test file in P6 format in parallel","[mpi]")
 	// since we want the output_parallel
 	// to be run in parallel here we cannot use
 	// a fake version of the parallel
-	std::unique_ptr<parallel> para = std::make_unique<mpiParallel>(MPI_COMM_WORLD);
+	std::unique_ptr<communicator> para = std::make_unique<mpiComm>(MPI_COMM_WORLD);
 
 	// splitting the communicator and skipping the extra ranks
 	para = skipExtraRanks(para, numRanks);
@@ -189,7 +189,7 @@ TEST_CASE("Testing the output_parallel class","[.][Ignore this for now!]")
 	// since we want the output_parallel
 	// to be run in parallel here we cannot use
 	// a fake version of the parallel
-	std::unique_ptr<parallel> para = std::make_unique<mpiParallel>(MPI_COMM_WORLD);
+	std::unique_ptr<communicator> para = std::make_unique<mpiComm>(MPI_COMM_WORLD);
 
 	// splitting the communicator and skipping the extra ranks
 	para = skipExtraRanks(para, numRanks);
@@ -284,7 +284,7 @@ TEST_CASE("Testing the output_parallel class","[.][Ignore this for now!]")
 	c_array = std::make_unique<color_array>(width, height, c_data);
 	// distributing the color_array object among the ranks
 	distributeColorArray(c_array, para.get());
-	output_parallel writer(std::move(dummyOss), c_array.get(), width,height, para);
+	output_communicator writer(std::move(dummyOss), c_array.get(), width,height, para);
 	writer.write_file();
 	returnedStream = writer.return_stream();
 

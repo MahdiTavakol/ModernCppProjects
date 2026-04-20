@@ -4,7 +4,7 @@
 
 
 #include "../Algorithms/hittable_list.h"
-#include "../Algorithms/parallel.h"
+#include "../Algorithms/communicator.h"
 
 class scene_factory {
 public:

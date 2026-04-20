@@ -66,7 +66,7 @@
     <ClCompile Include="Algorithms\hittable_list_parallel.cpp">
       <Filter>Source Files\Algorithms</Filter>
     </ClCompile>
-    <ClCompile Include="Algorithms\parallel.cpp">
+    <ClCompile Include="Algorithms\communicator.cpp">
       <Filter>Source Files\Algorithms</Filter>
     </ClCompile>
     <ClCompile Include="Algorithms\path.cpp">
@@ -150,7 +150,7 @@
     <ClCompile Include="Tests\test_matchers.cpp">
       <Filter>Source Files\Tests</Filter>
     </ClCompile>
-    <ClCompile Include="Algorithms\mpiParallel.cpp">
+    <ClCompile Include="Algorithms\mpiComm.cpp">
       <Filter>Source Files\Algorithms</Filter>
     </ClCompile>
     <ClCompile Include="Tests\test_obj_reader.cpp">
@@ -201,6 +201,9 @@
     <ClCompile Include="Algorithms\image.cpp">
       <Filter>Source Files\Algorithms</Filter>
     </ClCompile>
+    <ClCompile Include="Algorithms\serialComm.cpp">
+      <Filter>Source Files\Algorithms</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Types\color.h">
@@ -233,7 +236,7 @@
     <ClInclude Include="Algorithms\hittable_list_parallel_optimized.h">
       <Filter>Source Files\Algorithms</Filter>
     </ClInclude>
-    <ClInclude Include="Algorithms\parallel.h">
+    <ClInclude Include="Algorithms\communicator.h">
       <Filter>Source Files\Algorithms</Filter>
     </ClInclude>
     <ClInclude Include="Algorithms\path.h">
@@ -314,7 +317,7 @@
     <ClInclude Include="Tests\test_shared.h">
       <Filter>Source Files\Tests</Filter>
     </ClInclude>
-    <ClInclude Include="Algorithms\mpiParallel.h">
+    <ClInclude Include="Algorithms\mpiComm.h">
       <Filter>Source Files\Algorithms</Filter>
     </ClInclude>
     <ClInclude Include="Algorithms\camera_settings.h">
@@ -339,6 +342,9 @@
       <Filter>Source Files\Output</Filter>
     </ClInclude>
     <ClInclude Include="Algorithms\image.h">
+      <Filter>Source Files\Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithms\serialComm.h">
       <Filter>Source Files\Algorithms</Filter>
     </ClInclude>
   </ItemGroup>

@@ -3,8 +3,8 @@
 #include <fstream>
 
 obj_model_reader::obj_model_reader(std::string _obj_file_name,
-	parallel* _para) :
-	para{_para},
+	std::unique_ptr<communicator>& _para) :
+	para{_para.get()},
 	obj_file_name(_obj_file_name), 
 	v_num(0), vt_num(0), vn_num(0),
 	world{std::make_unique<hittable_list>()}
@@ -22,8 +22,8 @@ obj_model_reader::obj_model_reader(std::string _obj_file_name,
 
 obj_model_reader::obj_model_reader(std::string _obj_file_name,
 	std::string _mtl_file_name,
-	parallel* _para):
-	para{ _para},
+	std::unique_ptr<communicator>& _para):
+	para{ _para.get()},
 	obj_file_name{_obj_file_name},
 	mtl_file_name{_mtl_file_name},
 	v_num{ 0 }, vt_num{ 0 }, vn_num{ 0 },
@@ -38,8 +38,8 @@ obj_model_reader::obj_model_reader(std::string _obj_file_name,
 obj_model_reader::obj_model_reader(
 	std::unique_ptr<std::istream> _obj_file_ptr,
 	std::unique_ptr<std::istream> _mtl_file_ptr,
-	parallel* _para):
-	para{ _para },
+	std::unique_ptr<communicator>& _para):
+	para{ _para.get() },
 	obj_file_name{},
 	mtl_file_name{},
 	v_num{ 0 }, vt_num{ 0 }, vn_num{ 0 },

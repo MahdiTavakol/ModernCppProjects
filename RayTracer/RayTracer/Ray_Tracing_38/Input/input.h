@@ -6,7 +6,7 @@
 #include <variant>
 #include "../Algorithms/camera.h"
 #include "../Algorithms/camera_settings.h"
-#include "../Algorithms/parallel.h"
+#include "../Algorithms/communicator.h"
 
 
 class input

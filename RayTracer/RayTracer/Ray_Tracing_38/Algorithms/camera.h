@@ -21,7 +21,6 @@
 
 class camera {
 public:
-	friend class parallel;
 
 	camera(std::unique_ptr<camera_settings>& cam_setting_, std::unique_ptr<image>&& img_);
 	camera() = default;

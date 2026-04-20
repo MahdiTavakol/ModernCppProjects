@@ -6,7 +6,7 @@
 output_parallel::output_parallel(
 	std::string _file_name,
 	std::unique_ptr<image>&& img_,
-	std::unique_ptr<parallel>& para_,
+	std::unique_ptr<communicator>& para_,
 	outputMode mode_) :
 	output{_file_name,img_,mode_}
 {
@@ -44,7 +44,7 @@ output_parallel::output_parallel(
 
 output_parallel::output_parallel(
 	std::string _file_name,
-	std::unique_ptr<parallel>& para_,
+	std::unique_ptr<communicator>& para_,
 	outputMode mode_) :
 	output_parallel{_file_name,nullptr,para_,mode_}
 {}
@@ -53,7 +53,7 @@ output_parallel::output_parallel(
 output_parallel::output_parallel(
 	std::unique_ptr<std::iostream> _stream,
 	std::unique_ptr<image>&& img_,
-	std::unique_ptr<parallel>& para_,
+	std::unique_ptr<communicator>& para_,
 	outputMode mode_) :
 	output{std::move(_stream),std::move(img_),para_,mode_}
 {}

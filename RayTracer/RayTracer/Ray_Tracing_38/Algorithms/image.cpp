@@ -1,7 +1,7 @@
 #include "image.h"
 
 image::image(std::unique_ptr<camera_settings>& cam_setting_,
-	std::unique_ptr<parallel>& _para) :
+	std::unique_ptr<communicator>& _para) :
 	para{_para.get()},
 	image_width{ cam_setting_->get_image_width()},
 	image_height{cam_setting_->get_image_height()}
@@ -29,7 +29,7 @@ image::image(std::unique_ptr<camera_settings>& cam_setting_,
     c_array = std::make_unique<color_array>(myWidth, myHeight);
 }
 
-image::image(const int& image_width_, const int& image_height_, parallel* _para) :
+image::image(const int& image_width_, const int& image_height_, communicator* _para) :
     image_width{ image_width_ }, image_height{ image_height_ }, para{ _para }
 {
 	c_array = std::make_unique<color_array>(image_width, image_height);
@@ -93,4 +93,19 @@ void image::set_range_per_node(
     max_ = min_ + dimPerNode_;
     min_ = min_ >= dimension_ ? dimension_ : min_;
     max_ = max_ >= dimension_ ? dimension_ : max_;
+}
+
+void image::gather(
+    std::unique_ptr<image>& one_,
+    std::unique_ptr<image>& one_all_,
+    communicator* para_
+)
+{
+    one_all_ = one_->all_copy();
+    auto& one_c_array = one_->array_unique_ptr();
+    auto& one_all_c_array = one_all_->array_unique_ptr();
+    std::array<int, 2> size_per_rank{ one_->returnSizePerRank() };
+    std::array<int, 2> size{ one_->returnSize() };
+    // As the gather is static, it cannot use the class para pointer.
+    para_->gather(one_c_array, one_all_c_array, size_per_rank, size);
 }

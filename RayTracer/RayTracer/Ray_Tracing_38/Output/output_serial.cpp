@@ -4,7 +4,7 @@
 output_serial::output_serial(
 	std::string _file_name,
 	std::unique_ptr<image>&& img_,
-	std::unique_ptr<parallel>& para_,
+	std::unique_ptr<communicator>& para_,
 	outputMode mode_) :
 	output{_file_name,std::move(img_),para_,mode_}
 {
@@ -16,7 +16,7 @@ output_serial::output_serial(
 
 output_serial::output_serial(
 	std::string _file_name,
-	std::unique_ptr<parallel>& para_,
+	std::unique_ptr<communicator>& para_,
 	outputMode mode_) :
 	output_serial{ _file_name, nullptr,para_, mode_ } {
 }
@@ -25,7 +25,7 @@ output_serial::output_serial(
 output_serial::output_serial(
 	std::unique_ptr<std::iostream> _stream,
 	std::unique_ptr<image>&& img_,
-	std::unique_ptr<parallel>& para_,
+	std::unique_ptr<communicator>& para_,
 	outputMode mode_) :
 	output{std::move(_stream),std::move(img_),para_,mode_}
 {}
@@ -37,7 +37,7 @@ void output_serial::write_file()
 	std::unique_ptr<image> img_all;
 	// the parallel class is written the way
 	// that if the number of ranks is one, the gather function just copies the data from one_ to one_all.
-	para->gather(img, img_all);
+	image::gather(img, img_all, para);
 	// swapping the img with the gathered img
 	img.swap(img_all);
 	// getting the rank

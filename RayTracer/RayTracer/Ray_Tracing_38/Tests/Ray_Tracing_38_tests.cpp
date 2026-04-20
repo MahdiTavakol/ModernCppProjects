@@ -6,7 +6,7 @@
 #include <sstream>
 #include <unordered_set>
 
-#include "../Algorithms/mpiParallel.h"
+#include "../Algorithms/mpiComm.h"
 
 enum { SERIAL, MPI };
 

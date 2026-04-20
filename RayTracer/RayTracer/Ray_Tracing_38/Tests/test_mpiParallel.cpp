@@ -1,5 +1,5 @@
 #include "test_shared.h"
-#include "../Algorithms/mpiParallel.h"
+#include "../Algorithms/mpiComm.h"
 
 TEST_CASE("Testing the gather function for 2Dimensional rank arrangement with int** type","[mpi]")
 {
@@ -9,7 +9,7 @@ TEST_CASE("Testing the gather function for 2Dimensional rank arrangement with in
 	std::array<int, 2> size_config{ 3,2 };
 	int width = width_per_rank * size_config[0];
 	int height = height_per_rank * size_config[1];
-	std::unique_ptr<parallel> para = std::make_unique<mpiParallel>(MPI_COMM_WORLD, size_config);
+	std::unique_ptr<communicator> para = std::make_unique<mpiComm>(MPI_COMM_WORLD, size_config);
 
 	int size = para->return_size();
 	if (size != 6)
@@ -86,7 +86,7 @@ TEST_CASE("Testing the gather function for 2Dimensional rank arrangement", "[mpi
 	std::array<int, 2> size_config{ 3,2 };
 	int width = width_per_rank * size_config[0];
 	int height = height_per_rank * size_config[1];
-	std::unique_ptr<parallel> para = std::make_unique<mpiParallel>(MPI_COMM_WORLD, size_config);
+	std::unique_ptr<communicator> para = std::make_unique<mpiComm>(MPI_COMM_WORLD, size_config);
 
 	int size = para->return_size();
 	if (size != 6)

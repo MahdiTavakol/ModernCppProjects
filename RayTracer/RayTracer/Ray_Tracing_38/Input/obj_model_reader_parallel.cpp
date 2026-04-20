@@ -4,10 +4,10 @@
 
 obj_model_reader_parallel::obj_model_reader_parallel(
 	std::string _obj_file_name,
-	parallel* para_) :
-	para{para_}
+	std::unique_ptr<communicator>& _para) :
+	obj_model_reader{ _obj_file_name, _para }
 {
-	rank = para->return_rank();
+	int rank = para->return_rank();
 	if (rank == 0)
 		silent = false;
 	else
