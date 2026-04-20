@@ -49,28 +49,15 @@ void renderer_animation::render()
 
 	for (int i = 0; i < num_frames; i++)
 	{
-		message(rank, "Moving the camera to the frame " + std::to_string(i));
-
-		move_camera(i);
-
-		message(rank, "Rendering the frame " + std::to_string(i) + "                ");
-
-		renderer::render();
-
-		message(rank, "Gathering data from nodes for frame " + std::to_string(i));
-
-
-		if (rank == 0)
 		message(rank, "Opening the file for the frame" + std::to_string(i));
 		if (rank == 0)
 			open_file(i);
 
-		message(rank, "Writing the data for frame " + std::to_string(i) + "     ");
-		if (rank == 0)
-			write_file();
+		message(rank, "Moving the camera to the frame " + std::to_string(i));
 
-		message(rank, "Closing the current file");		
+		move_camera(i);
 
+		renderer::render(std::to_string(i));	
 	}
 }
 

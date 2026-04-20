@@ -57,12 +57,6 @@
     <ClCompile Include="Algorithms\camera.cpp">
       <Filter>Source Files\Algorithm</Filter>
     </ClCompile>
-    <ClCompile Include="Algorithms\camera_drived.cpp">
-      <Filter>Source Files\Algorithm</Filter>
-    </ClCompile>
-    <ClCompile Include="Algorithms\camera_parallel.cpp">
-      <Filter>Source Files\Algorithm</Filter>
-    </ClCompile>
     <ClCompile Include="Algorithms\hit_record.cpp">
       <Filter>Source Files\Algorithm</Filter>
     </ClCompile>
@@ -70,9 +64,6 @@
       <Filter>Source Files\Algorithm</Filter>
     </ClCompile>
     <ClCompile Include="Algorithms\hittable_list_parallel.cpp">
-      <Filter>Source Files\Algorithm</Filter>
-    </ClCompile>
-    <ClCompile Include="Algorithms\parallel.cpp">
       <Filter>Source Files\Algorithm</Filter>
     </ClCompile>
     <ClCompile Include="Algorithms\path.cpp">
@@ -135,9 +126,6 @@
     <ClCompile Include="Renderer\Renderer_Animation.cpp">
       <Filter>Source Files\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="Algorithms\mpiParallel.cpp">
-      <Filter>Source Files\Algorithm</Filter>
-    </ClCompile>
     <ClCompile Include="Output\Logger.cpp">
       <Filter>Source Files\Output</Filter>
     </ClCompile>
@@ -152,6 +140,18 @@
     </ClCompile>
     <ClCompile Include="Algorithms\camera_settings.cpp">
       <Filter>Source Files\Algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithms\image.cpp">
+      <Filter>Source Files\Algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithms\communicator.cpp">
+      <Filter>Source Files\Algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithms\mpiComm.cpp">
+      <Filter>Source Files\Algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\Renderer_facade.cpp">
+      <Filter>Source Files\Renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -173,12 +173,6 @@
     <ClInclude Include="Algorithms\camera.h">
       <Filter>Source Files\Algorithm</Filter>
     </ClInclude>
-    <ClInclude Include="Algorithms\camera_derived.h">
-      <Filter>Source Files\Algorithm</Filter>
-    </ClInclude>
-    <ClInclude Include="Algorithms\camera_parallel.h">
-      <Filter>Source Files\Algorithm</Filter>
-    </ClInclude>
     <ClInclude Include="Algorithms\hit_record.h">
       <Filter>Source Files\Algorithm</Filter>
     </ClInclude>
@@ -189,9 +183,6 @@
       <Filter>Source Files\Algorithm</Filter>
     </ClInclude>
     <ClInclude Include="Algorithms\hittable_list_parallel_optimized.h">
-      <Filter>Source Files\Algorithm</Filter>
-    </ClInclude>
-    <ClInclude Include="Algorithms\parallel.h">
       <Filter>Source Files\Algorithm</Filter>
     </ClInclude>
     <ClInclude Include="Algorithms\path.h">
@@ -263,9 +254,6 @@
     <ClInclude Include="Renderer\Renderer_Animation.h">
       <Filter>Source Files\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Algorithms\mpiParallel.h">
-      <Filter>Source Files\Algorithm</Filter>
-    </ClInclude>
     <ClInclude Include="Output\Logger.h">
       <Filter>Source Files\Output</Filter>
     </ClInclude>
@@ -280,6 +268,18 @@
     </ClInclude>
     <ClInclude Include="Algorithms\camera_settings.h">
       <Filter>Source Files\Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithms\image.h">
+      <Filter>Source Files\Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithms\communicator.h">
+      <Filter>Source Files\Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithms\mpiComm.h">
+      <Filter>Source Files\Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Renderer_facade.h">
+      <Filter>Source Files\Renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

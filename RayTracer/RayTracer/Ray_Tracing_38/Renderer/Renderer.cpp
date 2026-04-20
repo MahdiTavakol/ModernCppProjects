@@ -53,9 +53,34 @@ void renderer::add(std::unique_ptr<hittable>& object)
 	world->add(std::move(object));
 }
 
-void renderer::render()
+void renderer::render(std::string info, bool verbose)
 {
+	if (verbose)
+	{
+		int rank = para->return_rank();
+		if (rank == 0)
+		{
+			if (!info.empty())
+				std::clog << "Rendering the frame " << info << std::endl;
+			else 
+				std::clog << "Rendering" << std::endl;
+			fflush(stdout);
+		}
+	}
 	cam->render(*world);
+	if (verbose)
+	{
+		int rank = para->return_rank();
+		if (rank == 0)
+		{
+			if (!info.empty())
+				std::clog << "Writing the data for frame " << info << std::endl;
+			else
+				std::clog << "Writing the data" << std::endl;
+			fflush(stdout);
+		}
+	}
+	write_file();
 }
 
 

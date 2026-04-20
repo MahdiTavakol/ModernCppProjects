@@ -140,14 +140,13 @@
   <ItemGroup>
     <ClCompile Include="Algorithms\bvh.cpp" />
     <ClCompile Include="Algorithms\camera.cpp" />
-    <ClCompile Include="Algorithms\camera_drived.cpp" />
-    <ClCompile Include="Algorithms\camera_parallel.cpp" />
     <ClCompile Include="Algorithms\camera_settings.cpp" />
+    <ClCompile Include="Algorithms\communicator.cpp" />
     <ClCompile Include="Algorithms\hittable_list.cpp" />
     <ClCompile Include="Algorithms\hittable_list_parallel.cpp" />
     <ClCompile Include="Algorithms\hit_record.cpp" />
-    <ClCompile Include="Algorithms\mpiParallel.cpp" />
-    <ClCompile Include="Algorithms\parallel.cpp" />
+    <ClCompile Include="Algorithms\image.cpp" />
+    <ClCompile Include="Algorithms\mpiComm.cpp" />
     <ClCompile Include="Algorithms\path.cpp" />
     <ClCompile Include="Algorithms\rtw_stb_image.cpp" />
     <ClCompile Include="Algorithms\sphere_list.cpp" />
@@ -173,21 +172,21 @@
     <ClCompile Include="RayTracing_21.cpp" />
     <ClCompile Include="Renderer\Renderer.cpp" />
     <ClCompile Include="Renderer\Renderer_Animation.cpp" />
+    <ClCompile Include="Renderer\Renderer_facade.cpp" />
     <ClCompile Include="Types\color.cpp" />
     <ClCompile Include="Types\vec3.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Algorithms\bvh.h" />
     <ClInclude Include="Algorithms\camera.h" />
-    <ClInclude Include="Algorithms\camera_derived.h" />
-    <ClInclude Include="Algorithms\camera_parallel.h" />
     <ClInclude Include="Algorithms\camera_settings.h" />
+    <ClInclude Include="Algorithms\communicator.h" />
     <ClInclude Include="Algorithms\hittable_list.h" />
     <ClInclude Include="Algorithms\hittable_list_parallel.h" />
     <ClInclude Include="Algorithms\hittable_list_parallel_optimized.h" />
     <ClInclude Include="Algorithms\hit_record.h" />
-    <ClInclude Include="Algorithms\mpiParallel.h" />
-    <ClInclude Include="Algorithms\parallel.h" />
+    <ClInclude Include="Algorithms\image.h" />
+    <ClInclude Include="Algorithms\mpiComm.h" />
     <ClInclude Include="Algorithms\path.h" />
     <ClInclude Include="Algorithms\rtw_stb_image.h" />
     <ClInclude Include="Algorithms\sphere_list.h" />
@@ -214,6 +213,7 @@
     <ClInclude Include="Output\output_serial.h" />
     <ClInclude Include="Renderer\Renderer.h" />
     <ClInclude Include="Renderer\Renderer_Animation.h" />
+    <ClInclude Include="Renderer\Renderer_facade.h" />
     <ClInclude Include="Shared\rtweekend.h" />
     <ClInclude Include="Types\color.h" />
     <ClInclude Include="Types\point3_animated.h" />

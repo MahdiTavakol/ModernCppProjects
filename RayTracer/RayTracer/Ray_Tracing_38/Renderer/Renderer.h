@@ -47,7 +47,7 @@ public:
 	virtual ~renderer();
 	virtual void setup();
 	void add(std::unique_ptr<hittable>& object);
-	virtual void render();
+	virtual void render(std::string info="", bool verbose=false);
 	void write_file();
 	
 	
