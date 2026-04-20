@@ -54,24 +54,17 @@ image::image(const std::array<int, 2>& size_,
 {}
 
 image::image(
-    const int& image_width_, const int& image_height_,
+    const std::array<int, 2>& size_,
     std::unique_ptr<color_array>&& c_array_,
     communicator* para_):
     para{ para_ },
-    image_width{ image_width_ }, image_height{ image_height_ },
-	c_array{ std::move(c_array_) }
+    image_width{ size_[0]}, image_height{size_[1]},
+	c_array{ std::move(c_array_) },
+	widthMin{ 0 }, widthMax{ size_[0]},
+	heightMin{ 0 }, heightMax{ size_[1]}
 { }
 
-image::image(
-    const int& image_width_, const int& image_height_,
-    std::unique_ptr<color_array>& c_array_,
-    std::unique_ptr<communicator>& para_) :
-    para{ para_.get() },
-    image_width{ image_width_ }, image_height{ image_height_ },
-	c_array{ std::move(c_array_) }
-{
 
-}
 
 std::unique_ptr<image> image::all_copy() const {
 	auto copy = std::make_unique<image>(image_width, image_height, para);

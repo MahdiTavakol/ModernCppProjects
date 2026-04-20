@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
 {
 	MPI_Init(&argc, &argv);
 
-	int mode = MPI;
+	int mode = SERIAL;
 
 	for (int i = 0; i < argc; i++)
 	{

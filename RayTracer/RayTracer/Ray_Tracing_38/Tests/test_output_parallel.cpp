@@ -284,7 +284,8 @@ TEST_CASE("Testing the output_parallel class","[.][Ignore this for now!]")
 
 
 	c_array = std::make_unique<color_array>(width, height, c_data);
-	auto img = std::make_unique<image>(width, height, std::move(c_array),para.get());
+	std::array<int, 2> imgSize = { width, height };
+	auto img = std::make_unique<image>(imgSize, std::move(c_array),para.get());
 	output_parallel writer(std::move(dummyOss), std::move(img), para);
 	writer.write_file();
 	returnedStream = writer.return_stream();

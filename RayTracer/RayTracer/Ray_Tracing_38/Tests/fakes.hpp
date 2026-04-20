@@ -125,14 +125,25 @@ public:
 		const int& num_data
 	) const override
 	{
-		return;
+		color_data* dummy = one_all;
+		one_all = one_;
+		one_ = dummy;
 	}
 	void gather(color_data** one_,
 		color_data** one_all_,
 		const int& width_per_rank_,
 		const int& height_per_rank_) const override
 	{
-		return;
+		color_data** dummy = one_all_;
+		one_all_ = one_;
+		one_ = dummy;
+	}
+	void gather(
+		std::unique_ptr<color_array>& one_,
+		std::unique_ptr<color_array>& one_all_,
+		std::array<int, 2>& size_per_rank_,
+		std::array<int, 2>& size_) const {
+		one_.swap(one_all_);
 	}
 	void barrier() const override {
 		return;

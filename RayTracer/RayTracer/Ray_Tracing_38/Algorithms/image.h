@@ -15,12 +15,10 @@ public:
 		 const std::array<int, 2> widthRange_, const std::array<int, 2> heightRange_,
 		 std::unique_ptr<color_array>&& c_array_,
 		 communicator* _para);
-	image(const int& image_width_, const int& image_height_,
+	image(
+		const std::array<int,2>& size_,
 		std::unique_ptr<color_array>&& c_array_,
 		communicator* para_);
-	image(const int& image_width_, const int& image_height_,
-		 std::unique_ptr<color_array>& c_array_,
-		 std::unique_ptr<communicator>& para_);
 	// a nondefault copy constructor 
 	// required by the parallel to create the gathered image object
 	std::unique_ptr<image> all_copy() const;
