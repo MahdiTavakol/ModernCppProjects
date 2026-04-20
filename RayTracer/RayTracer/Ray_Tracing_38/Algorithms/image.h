@@ -4,16 +4,25 @@
 #include "../Algorithms/parallel.h"
 #include <memory>
 #include <array>
+#include "parallel.h"
 
 class image
 {
 public:
 	image(std::unique_ptr<camera_settings>& cam_setting_,
 		std::unique_ptr<parallel>& _para);
+	image(const int& image_width_, const int& image_height_, parallel* _para);
+	// a nondefault copy constructor 
+	// required by the parallel to create the gathered image object
+	std::unique_ptr<image> all_copy() const;
 	virtual void returnRange(std::array<int, 2>& widthRange_, std::array<int, 2>& heightRange_) const;
 	void returnRange(std::array<int, 2>& widthRange_, std::array<int, 2>& heightRange_) const;
 	void returnSize(int& width_, int& height_) const;
+	std::array<int, 2> returnSize() const;
+	std::array<int, 2> returnSizePerRank() const;
+	parallel* returnPara() { return para; }
 	color_array* array() { return c_array.get(); }
+	std::unique_ptr<color_array>& array_unique_ptr() { return c_array; }
 
 protected:
 	parallel* para;

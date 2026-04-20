@@ -19,8 +19,6 @@ renderer::renderer(int argc, char** argv, int _mode,
 	in = std::make_unique<input>(argc, argv, cam_settings.get(),para.get());
 	// the world_factory is in charge of lazy creation of the scene.
 	world_factory = std::make_unique<scene_factory>(mode,para);
-	if (!filename.empty())
-		writer = std::make_unique<output_serial>(filename);
 }
 
 renderer::renderer(int argc, char** argv, int _mode, std::string _filename,
@@ -42,19 +40,11 @@ void renderer::setup()
 	// returning the hittable_list pointe from the world_factory to the renderer
  	world = world_factory->return_world();
 
+	// creating the image object with the camera settings and the parallel object
+	auto img = std::make_unique<image>(cam_settings, para);
 
 	// building the camera object
-	cam = std::make_unique<camera_parallel>(cam_settings,para);
-
-
-	// cases with extra setups
-	switch (mode)
-	{
-		case OBJ_MODEL_PARALLEL:
-			cam = std::make_unique<camera_derived>(cam_settings);
-			break;
-	}
-
+	cam = std::make_unique<camera>(cam_settings, std::move(img));
 }
 
 
@@ -71,15 +61,12 @@ void renderer::render()
 
 void renderer::write_file()
 {
+	// transfering the ownership of the image from the camera to the writer
 	std::unique_ptr<image> img = cam->return_image();
-
-	if (writer == nullptr)
-		writer = std::make_unique<output_serial>("test.ppm");
-	writer->reset(c_array);
-
-	int rank = para->return_rank();
-	if (rank == 0) writer->write_file();
-}
+	// creating the writer object with the filename, the image and the parallel object
+	writer = std::make_unique<output_serial>(filename, std::move(img), para);
+	// writing the file - it is the job of the writer to just write the file in the rank 0, so no need to check the rank here.
+	writer->write_file();
 }
 
 

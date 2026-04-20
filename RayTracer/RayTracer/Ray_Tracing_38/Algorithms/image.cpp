@@ -29,6 +29,23 @@ image::image(std::unique_ptr<camera_settings>& cam_setting_,
     c_array = std::make_unique<color_array>(myWidth, myHeight);
 }
 
+image::image(const int& image_width_, const int& image_height_, parallel* _para) :
+    image_width{ image_width_ }, image_height{ image_height_ }, para{ _para }
+{
+	c_array = std::make_unique<color_array>(image_width, image_height);
+	width_per_rank = image_width;
+	height_per_rank = image_height;
+	widthMin = 0;
+	heightMin = 0;
+	widthMax = image_width;
+	heightMax = image_height;
+}
+
+std::unique_ptr<image> image::all_copy() const {
+	auto copy = std::make_unique<image>(image_width, image_height, para);
+	return std::move(copy);
+}
+
 void image::returnRange(std::array<int, 2>& widthRange_, std::array<int, 2>& heightRange_) const
 {
 	widthRange_[0] = widthMin;
@@ -40,6 +57,24 @@ void image::returnRange(std::array<int, 2>& widthRange_, std::array<int, 2>& hei
 void image::returnSize(int& width_, int& height_) const
 {
 	c_array->return_size(width_, height_);
+}
+
+std::array<int, 2> image::returnSize() const
+{
+    std::array<int,2> size{
+        image_width,
+        image_height
+	};
+    return size;
+}
+
+std::array<int, 2> image::returnSizePerRank() const
+{
+    std::array<int, 2> size_per_rank{
+        width_per_rank,
+        height_per_rank
+	};
+	return size_per_rank;
 }
 
 void image::set_range_per_node(

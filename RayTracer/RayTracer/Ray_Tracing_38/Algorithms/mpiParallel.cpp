@@ -200,6 +200,19 @@ void mpiParallel::gather(
     colors_all = nullptr;
 }
 
+void mpiParallel::gather(
+    std::unique_ptr<image>& one_,
+    std::unique_ptr<image>& one_all_
+) const
+{
+	one_all_ = one_->all_copy();
+    auto& one_c_array = one_->array_unique_ptr();
+	auto& one_all_c_array = one_all_->array_unique_ptr();
+    std::array<int, 2> size_per_rank{ one_->returnSizePerRank()};
+    std::array<int, 2> size{ one_->returnSize()};
+	gather(one_c_array, one_all_c_array, size_per_rank, size);
+}
+
 void mpiParallel::barrier() const {
     MPI_Barrier(MPI_world);
 }

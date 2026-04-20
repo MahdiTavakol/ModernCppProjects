@@ -5,13 +5,10 @@
 
 output_parallel::output_parallel(
 	std::string _file_name,
-	color_array* _colors,
-	int _image_width, int _image_height,
+	std::unique_ptr<image>&& img_,
 	std::unique_ptr<parallel>& para_,
 	outputMode mode_) :
-	output{_file_name,_colors,mode_},
-	image_width{_image_width},image_height{_image_height},
-	para{para_.get()}
+	output{_file_name,img_,mode_}
 {
 	/*
 	 * First, the rank 0 checks if the file exists
@@ -43,60 +40,39 @@ output_parallel::output_parallel(
 		throw std::invalid_argument("The text format is not supported for parallel writing");
 	open_new_file(_file_name);
 
-	init();
 }
 
 output_parallel::output_parallel(
 	std::string _file_name,
 	std::unique_ptr<parallel>& para_,
 	outputMode mode_) :
-	output_parallel{_file_name,nullptr,0,0,para_,mode_}
+	output_parallel{_file_name,nullptr,para_,mode_}
 {}
 
 
 output_parallel::output_parallel(
 	std::unique_ptr<std::iostream> _stream,
-	color_array* _colors,
-	int _image_width, int _image_height,
+	std::unique_ptr<image>&& img_,
 	std::unique_ptr<parallel>& para_,
 	outputMode mode_) :
-	output{std::move(_stream),_colors,mode_},
-	image_width{ _image_width }, image_height{ _image_height },
-	para{para_.get()}
-{
-	init();
-}
+	output{std::move(_stream),std::move(img_),para_,mode_}
+{}
 
 
 output_parallel::~output_parallel()
 {}
 
-void output_parallel::init()
+
+void output_parallel::write_file()
 {
-	auto rank_config = para->return_rank_config();
-	auto size_config = para->return_size_config();
-
-	int widthPerRank = (image_width + size_config[0] - 1) / size_config[0];
-	int heightPerRank = (image_height + size_config[1] - 1) / size_config[1];
-
-	int widthMin = rank_config[0] * widthPerRank;
-	// the max is not inclusive
-	int widthMax = widthPerRank + widthMin;
-
-	widthMin = widthMin < image_width ? widthMin : image_width - 1;
-	// since the max is not inclusive, it can be equal to image_width
-	widthMax = widthMax <= image_width ? widthMax : image_width;
-	
-	int heightMin = rank_config[1] * heightPerRank;
-	int heightMax = heightPerRank + heightMin;
-
-	heightMin = heightMin < image_height ? heightMin : image_height - 1;
-	// since the max is not inclusove, it can be equal to the image_height
-	heightMax = heightMax <= image_height ? heightMax : image_height;
-
+	// getting the image properties
+	int image_width, image_height;
+	std::array<int, 2> myWidthRange, myHeightRange;
+	int writeStride;
+	img->returnSize(image_width, image_height);
+	img->returnRange(myWidthRange, myHeightRange);
 	// widthMax is not inclusive
-	int myWidth = widthMax - widthMin;
-
+	int myWidth = myWidthRange[1] - myWidthRange[0];
 	// when the row range for this rank 
 	// finishes being written the pointer is 
 	// at the end of the current row range.
@@ -105,17 +81,7 @@ void output_parallel::init()
 	// the next row range.
 	// So there is need to go back 
 	// myWidth location.
-	writeStride = 3*(image_width - myWidth);
-
-	myWidthRange[0] = widthMin;
-	myWidthRange[1] = widthMax;
-
-	myHeightRange[0] = heightMin;
-	myHeightRange[1] = heightMax;
-}
-
-void output_parallel::write_file()
-{
+	writeStride = 3 * (image_width - myWidth);
 	// getting the rank number
 	int rank = para->return_rank();
 	// the begining of the binary section

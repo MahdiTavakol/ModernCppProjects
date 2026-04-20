@@ -7,15 +7,29 @@
 output::output(
 	std::string _file_name, 
 	std::unique_ptr<image>&& img_,
+	std::unique_ptr<parallel>& para_,
 	outputMode mode_) :
 	mode{mode_},
 	file_name{ _file_name }, 
-	img{std::move(img_)}
+	img{std::move(img_)},
+	para{ para_.get() }
 {}
 
 output::output(std::string _file_name,
+			   std::unique_ptr<parallel>& para_,
 	           outputMode mode_) :
-	output{ _file_name, nullptr, mode_} {}
+	output{ _file_name, nullptr, para_, mode_} {}
+
+output::output(
+	std::unique_ptr<std::iostream> _stream,
+	std::unique_ptr<image>&& img_,
+	std::unique_ptr<parallel>& para_,
+	outputMode mode_) :
+	mode{ mode_ },
+	stream{ std::move(_stream)},
+	img{ std::move(img_) },
+	para{ para_.get() }
+{}
 
 	
 output::~output()

@@ -5,8 +5,7 @@
 class output_parallel : public output {
 public:
 	output_parallel(std::string _file_name,
-		color_array* _colors,
-		int _image_width, int _image_height,
+		std::unique_ptr<image>&& img_,
 		std::unique_ptr<parallel>& para_,
 		outputMode mode = outputMode::P6);
 	output_parallel(
@@ -15,8 +14,7 @@ public:
 		outputMode mode = outputMode::P6);
 	output_parallel(
 		std::unique_ptr<std::iostream> _stream,
-		color_array* _colors,
-		int _image_width, int _image_height,
+		std::unique_ptr<image>&& img_,
 		std::unique_ptr<parallel>& para_,
 		outputMode mode = outputMode::P6);
 	~output_parallel();
@@ -25,16 +23,6 @@ public:
 
 
 private:
-	void init();
-	// these are the overall image size
-	// as the c_array in this class are partial ones
-	// we do need these info
-	int image_width, image_height;
-	std::array<int, 2> myWidthRange = { 0,0 };
-	std::array<int, 2> myHeightRange = { 0,0 };
-	int writeStride = 0;
-	parallel* para;
-
 
 	void bcast_streampos(std::streampos& pos_);
 

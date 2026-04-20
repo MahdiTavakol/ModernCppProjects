@@ -3,12 +3,16 @@
 
 class output_serial : public output {
 public:
-	output_serial(std::string _file_name, color_array* _colors,
+	output_serial(std::string _file_name,
+		std::unique_ptr<image>&& img_,
+		std::unique_ptr<parallel>& para_,
 		outputMode mode_ = outputMode::P3);
 	output_serial(std::string _file_name,
+		std::unique_ptr<parallel>& para_,
 		outputMode mode_ = outputMode::P3);
 	output_serial(std::unique_ptr<std::iostream> _stream,
-		color_array* _colors,
+		std::unique_ptr<image>&& img_,
+		std::unique_ptr<parallel>& para_,
 		outputMode mode_ = outputMode::P3
 	);
 
