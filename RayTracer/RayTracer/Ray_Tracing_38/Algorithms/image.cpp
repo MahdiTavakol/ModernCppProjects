@@ -41,6 +41,18 @@ image::image(const int& image_width_, const int& image_height_, communicator* _p
 	heightMax = image_height;
 }
 
+
+image::image(const std::array<int, 2>& size_, 
+    const std::array<int, 2> widthRange_, const std::array<int, 2> heightRange_,
+    std::unique_ptr<color_array>&& c_array_,
+    communicator* _para) :
+    para{_para},
+    image_width{ size_[0]}, image_height{size_[1]},
+	c_array{ std::move(c_array_) },
+	widthMin{ widthRange_[0] }, widthMax{ widthRange_[1] },
+	heightMin{ heightRange_[0] }, heightMax{ heightRange_[1] }
+{}
+
 image::image(
     const int& image_width_, const int& image_height_,
     std::unique_ptr<color_array>&& c_array_,
@@ -76,7 +88,11 @@ void image::returnRange(std::array<int, 2>& widthRange_, std::array<int, 2>& hei
 
 void image::returnSize(int& width_, int& height_) const
 {
-	c_array->return_size(width_, height_);
+    // since the c_array object here is a partial 
+    // part of the image we need to return 
+	// the image_width and image_height instead of the c_array width and height
+	width_ = image_width;
+    height_ = image_height;
 }
 
 std::array<int, 2> image::returnSize() const

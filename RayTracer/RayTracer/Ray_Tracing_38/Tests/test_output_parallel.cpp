@@ -144,10 +144,14 @@ TEST_CASE("Writting a test file in P6 format in parallel","[mpi]")
 			}
 	}
 
-
 	c_array = std::make_unique<color_array>(width, height, c_data);
+	std::array<int, 2> myWidth, myHeight;
+	std::array<int, 2> imgSize = { width, height };
+	myRange(width, height,
+		myWidth, myHeight,
+		para.get());
 	distributeColorArray(c_array,para.get());
-	auto img = std::make_unique<image>(width, height,std::move(c_array), para.get());
+	auto img = std::make_unique<image>(imgSize, myWidth, myHeight, std::move(c_array), para.get());
 	outputMode mode = outputMode::P6;
 	output_parallel writer(fileName, std::move(img), para, mode);
 	writer.write_file();

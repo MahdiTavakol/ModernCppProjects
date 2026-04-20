@@ -11,6 +11,10 @@ public:
 	image(std::unique_ptr<camera_settings>& cam_setting_,
 		std::unique_ptr<communicator>& _para);
 	image(const int& image_width_, const int& image_height_, communicator* _para);
+	image(const std::array<int, 2>& size_,
+		 const std::array<int, 2> widthRange_, const std::array<int, 2> heightRange_,
+		 std::unique_ptr<color_array>&& c_array_,
+		 communicator* _para);
 	image(const int& image_width_, const int& image_height_,
 		std::unique_ptr<color_array>&& c_array_,
 		communicator* para_);
