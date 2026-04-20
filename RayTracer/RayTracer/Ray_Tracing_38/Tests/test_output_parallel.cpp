@@ -146,13 +146,12 @@ TEST_CASE("Writting a test file in P6 format in parallel","[mpi]")
 
 
 	c_array = std::make_unique<color_array>(width, height, c_data);
-
 	distributeColorArray(c_array,para.get());
-
-
+	auto img = std::make_unique<image>(width, height,std::move(c_array), para.get());
 	outputMode mode = outputMode::P6;
-	output_parallel writer(fileName, c_array.get(), width, height,para, mode);
- 	writer.write_file();
+	output_parallel writer(fileName, std::move(img), para, mode);
+	writer.write_file();
+
 
 	// deallocating the color_array
 	deallocate(c_data);
@@ -280,11 +279,9 @@ TEST_CASE("Testing the output_parallel class","[.][Ignore this for now!]")
 		}
 
 
-	// creating the color_array object
 	c_array = std::make_unique<color_array>(width, height, c_data);
-	// distributing the color_array object among the ranks
-	distributeColorArray(c_array, para.get());
-	output_communicator writer(std::move(dummyOss), c_array.get(), width,height, para);
+	auto img = std::make_unique<image>(width, height, std::move(c_array),para.get());
+	output_parallel writer(std::move(dummyOss), std::move(img), para);
 	writer.write_file();
 	returnedStream = writer.return_stream();
 

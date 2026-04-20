@@ -7,8 +7,6 @@
 #include "../Geometry/aabb.h"
 #include "../Algorithms/bvh.h"
 #include "../Algorithms/camera.h"
-#include "../Algorithms/camera_derived.h"
-#include "../Algorithms/camera_parallel.h"
 #include "../Types/color.h"
 #include "../Data/color_array.h"
 #include "../Geometry/constant_medium.h"
@@ -18,7 +16,7 @@
 #include "../Geometry/interval.h"
 #include "../Materials/material.h"
 #include "../Algorithms/path.h"
-#include "../Algorithms/parallel.h"
+#include "../Algorithms/communicator.h"
 #include "../Geometry/quad.h"
 #include "../Types/ray.h"
 #include "../Algorithms/rtw_stb_image.h"
@@ -29,11 +27,11 @@
 #include "../Types/vec3.h"
 #include "../Output/output.h"
 
-scene_factory::scene_factory(int mode_, std::unique_ptr<parallel>& para_) :
+scene_factory::scene_factory(int mode_, std::unique_ptr<communicator>& para_) :
 	mode{ mode_ }, para{para_.get()}
 {}
 
-scene_factory::scene_factory(int mode_, std::unique_ptr<parallel>& para_, 
+scene_factory::scene_factory(int mode_, std::unique_ptr<communicator>& para_,
 	                         std::string obj_file_name_):
 	mode{mode_}, para{para_.get()}, 
 	obj_file_name{obj_file_name_}

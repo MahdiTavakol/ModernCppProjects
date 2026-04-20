@@ -1,5 +1,6 @@
 #pragma once
 #include "communicator.h"
+#include <mpi.h>
 
 class mpiComm : public communicator
 {

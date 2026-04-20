@@ -4,10 +4,16 @@
 
 obj_model_reader::obj_model_reader(std::string _obj_file_name,
 	std::unique_ptr<communicator>& _para) :
-	para{_para.get()},
-	obj_file_name(_obj_file_name), 
+	obj_model_reader{_obj_file_name,_para.get()}
+{}
+
+obj_model_reader::obj_model_reader(
+	std::string obj_file_name_,
+    communicator* para_) :
+	para{ para_ },
+	obj_file_name(obj_file_name_),
 	v_num(0), vt_num(0), vn_num(0),
-	world{std::make_unique<hittable_list>()}
+	world{ std::make_unique<hittable_list>() }
 
 {
 	set_silent_status();
@@ -36,10 +42,10 @@ obj_model_reader::obj_model_reader(std::string _obj_file_name,
 }
 
 obj_model_reader::obj_model_reader(
-	std::unique_ptr<std::istream> _obj_file_ptr,
-	std::unique_ptr<std::istream> _mtl_file_ptr,
-	std::unique_ptr<communicator>& _para):
-	para{ _para.get() },
+	std::unique_ptr<std::iostream> _obj_file_ptr,
+	std::unique_ptr<std::iostream> _mtl_file_ptr,
+	communicator* _para):
+	para{ _para},
 	obj_file_name{},
 	mtl_file_name{},
 	v_num{ 0 }, vt_num{ 0 }, vn_num{ 0 },
@@ -49,6 +55,13 @@ obj_model_reader::obj_model_reader(
 {
 	silent = true;
 }
+
+obj_model_reader::obj_model_reader(
+	std::unique_ptr<std::iostream> _obj_file_ptr,
+	std::unique_ptr<std::iostream> _mtl_file_ptr,
+	std::unique_ptr<communicator>& _para) :
+	obj_model_reader{ std::move(_obj_file_ptr), std::move(_mtl_file_ptr), _para.get()}
+{}
 
 
 void obj_model_reader::read()

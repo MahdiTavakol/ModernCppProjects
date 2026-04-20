@@ -1,6 +1,6 @@
 #include "test_helpers.h"
 
-void minRanksRequirement(std::unique_ptr<parallel>& para_, const std::array<int,2>& minSize_)
+void minRanksRequirement(std::unique_ptr<communicator>& para_, const std::array<int,2>& minSize_)
 {
 	int size = para_->return_size();
 	int min = minSize_[0] * minSize_[1];
@@ -13,10 +13,10 @@ void minRanksRequirement(std::unique_ptr<parallel>& para_, const std::array<int,
 
 }
 
-std::unique_ptr<parallel> skipExtraRanks(std::unique_ptr<parallel>& para_, const std::array<int,2>& maxSize_)
+std::unique_ptr<communicator> skipExtraRanks(std::unique_ptr<communicator>& para_, const std::array<int,2>& maxSize_)
 {
 	auto rank = para_->return_rank();
-	std::unique_ptr<parallel> new_para = para_->split(maxSize_);
+	std::unique_ptr<communicator> new_para = para_->split(maxSize_);
 	std::string warningText = 
 		std::string("This test just uses the first ") +
 		std::to_string(maxSize_[0]) + 
@@ -28,7 +28,7 @@ std::unique_ptr<parallel> skipExtraRanks(std::unique_ptr<parallel>& para_, const
 	return new_para;
 }
 
-void printRankZero(std::unique_ptr<parallel>& para_, const std::string text)
+void printRankZero(std::unique_ptr<communicator>& para_, const std::string text)
 {
 	int rank = para_->return_rank();
 

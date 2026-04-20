@@ -8,11 +8,11 @@ struct hit_record_struct
 {
 	point3 p;
 	vec3 normal;
-	double t;
-	double u;
-	double v;
-	double w;
-	bool front_face;
+	double t{ 0.0 };
+	double u{ 0.0 };
+	double v{ 0.0 };
+	double w{ 0.0 };
+	bool front_face = false;
 };
 
 hit_record_struct hit_record_to_struct(const hit_record&);

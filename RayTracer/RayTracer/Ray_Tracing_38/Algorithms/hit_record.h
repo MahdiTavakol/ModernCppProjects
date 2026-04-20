@@ -15,11 +15,11 @@ public:
      * The object owns it!
      */
     material* mat;
-    double t;
-    double u;
-    double v;
-    double w;
-    bool front_face;
+    double t{ 0.0 };
+    double u{ 0.0 };
+    double v{ 0.0 };
+    double w{ 0.0 };
+    bool front_face = false;
 
     void set_face_normal(const ray& r, const vec3& outward_normal);
 };

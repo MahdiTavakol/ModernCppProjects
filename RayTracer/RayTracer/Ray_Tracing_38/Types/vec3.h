@@ -112,6 +112,7 @@ inline std::strong_ordering compare_x(vec3& a, vec3& b) noexcept
         return std::strong_ordering::less;
     else if (a.x() > b.x())
         return std::strong_ordering::greater;
+	return std::strong_ordering::greater; // to silence the compiler warning about control reaching end of non-void function
 }
 
 inline std::strong_ordering compare_y(vec3& a, vec3& b) noexcept
@@ -122,6 +123,7 @@ inline std::strong_ordering compare_y(vec3& a, vec3& b) noexcept
         return std::strong_ordering::less;
     else if (a.y() > b.y())
         return std::strong_ordering::greater;
+	return std::strong_ordering::greater; // to silence the compiler warning about control reaching end of non-void function
 }
 
 inline std::strong_ordering compare_z(vec3& a, vec3& b) noexcept
@@ -132,6 +134,7 @@ inline std::strong_ordering compare_z(vec3& a, vec3& b) noexcept
         return std::strong_ordering::less;
     else if (a.z() > b.z())
         return std::strong_ordering::greater;
+	return std::strong_ordering::greater; // to silence the compiler warning about control reaching end of non-void function
 }
 
 inline std::strong_ordering operator<=>(vec3& a, vec3& b) noexcept

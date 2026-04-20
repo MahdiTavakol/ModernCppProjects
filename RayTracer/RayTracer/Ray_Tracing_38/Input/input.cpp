@@ -11,22 +11,22 @@ input::input(int argc, char** argv,
 	int _image_width, int _samples_per_pixel,
 	int _max_depth, int _vfov, 
 	double _width_ratio, double _height_ratio,
-	camera_settings* cam_settings_,
-	parallel* para_,
+	std::unique_ptr<camera_settings>& cam_settings_,
+	std::unique_ptr<communicator>& para_,
 	std::vector<std::reference_wrapper<std::ostream>> strmVec_)
 	: 
-	cam_settings{ cam_settings_ }, 
-	para{ para_ }
+	cam_settings{ cam_settings_.get()},
+	para{ para_.get()}
 {
 	initialize(argc, argv);
 }
 
 input::input(int argc, char** argv,
-	camera_settings* cam_settings_,
-	parallel* para_,
+	std::unique_ptr<camera_settings>& cam_settings_,
+	std::unique_ptr<communicator>& para_,
 	std::vector<std::reference_wrapper<std::ostream>> strmVec_):
-	cam_settings{cam_settings_},
-	para{ para_ },
+	cam_settings{cam_settings_.get()},
+	para{ para_.get()},
 	outStreams{ strmVec_ }
 {
 	initialize(argc, argv);

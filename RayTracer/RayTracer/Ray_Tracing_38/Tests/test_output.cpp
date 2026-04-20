@@ -107,7 +107,9 @@ TEST_CASE("Testing the output class")
 
 
 	c_array = std::make_unique<color_array>(width, height, c_data);
-	output_serial writer(std::move(dummyOss), c_array.get());
+	std::unique_ptr<communicator> para = std::make_unique<fake_parallel>();
+	auto img = std::make_unique<image>(width, height, std::move(c_array), para.get());
+	output_serial writer(std::move(dummyOss), std::move(img),para);
 	writer.write_file();
 	returnedStream = writer.return_stream();
 
@@ -214,10 +216,11 @@ TEST_CASE("Test writing in the P6 format")
 		}
 
 
-
 	c_array = std::make_unique<color_array>(width, height, c_data);
+	std::unique_ptr<communicator> para = std::make_unique<fake_parallel>();
+	auto img = std::make_unique<image>(width, height, std::move(c_array),para.get());
 	outputMode mode = outputMode::P6;
-	output_serial writer(std::move(dummyOss), c_array.get(), mode);
+	output_serial writer(std::move(dummyOss),std::move(img),para,mode);
 	returnedStream = writer.return_stream();
 
 	// deallocating the color_array
@@ -301,10 +304,11 @@ TEST_CASE("Writting a test file in P3 format")
 			}
 	}
 
-
 	c_array = std::make_unique<color_array>(width, height, c_data);
+	std::unique_ptr<communicator> para = std::make_unique<fake_parallel>();
+	auto img = std::make_unique<image>(width, height, std::move(c_array),para.get());
 	outputMode mode = outputMode::P3;
-	output_serial writer(fileName, c_array.get(), mode);
+	output_serial writer(fileName, std::move(img), para, mode);
 	writer.write_file();
 
 	// deallocating the color_array
@@ -383,11 +387,13 @@ TEST_CASE("Writting a test file in P6 format")
 			}
 	}
 
-
 	c_array = std::make_unique<color_array>(width, height, c_data);
+	std::unique_ptr<communicator> para = std::make_unique<fake_parallel>();
+	auto img = std::make_unique<image>(width, height, std::move(c_array),para.get());
 	outputMode mode = outputMode::P6;
-	output_serial writer(fileName, c_array.get(),  mode);
+	output_serial writer(fileName, std::move(img), para, mode);
 	writer.write_file();
+
 
 	// deallocating the color_array
 	deallocate(c_data);

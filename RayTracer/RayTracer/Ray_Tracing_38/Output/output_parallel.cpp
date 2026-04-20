@@ -8,7 +8,7 @@ output_parallel::output_parallel(
 	std::unique_ptr<image>&& img_,
 	std::unique_ptr<communicator>& para_,
 	outputMode mode_) :
-	output{_file_name,img_,mode_}
+	output{_file_name,std::move(img_),para_,mode_}
 {
 	/*
 	 * First, the rank 0 checks if the file exists

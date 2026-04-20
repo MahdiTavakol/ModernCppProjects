@@ -23,6 +23,9 @@ public:
 	obj_model_reader_parallel(
 		std::string _obj_file_name,
 		std::unique_ptr<communicator>& _para);
+	obj_model_reader_parallel(
+		std::string _obj_file_name,
+		communicator* _para);
 
 protected:
 	void set_range(int& low_, int& hi_) override;

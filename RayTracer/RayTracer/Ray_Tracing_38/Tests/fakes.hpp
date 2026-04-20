@@ -2,7 +2,7 @@
 #include "catch_amalgamated.hpp"
 #include "../Input/input.h"
 #include "../Geometry/triangle_mesh.h"
-#include "../Algorithms/parallel.h"
+#include "../Algorithms/communicator.h"
 #include <exception>
 
 class fake_camera_settings : public camera_settings
@@ -29,14 +29,13 @@ public:
 		imageSize{ imageSize_ },
 		background{ background_ },
 		rendercolor{ rendercolor_ }
-	{
-		initialize_storage();
-	}
+	{}
 
 	virtual void render(const hittable& object) override
 	{
 		double xPerDot = (max.x() - min.x()) / static_cast<double>(imageSize[0]);
 		double yPerDot = (max.y() - min.y()) / static_cast<double>(imageSize[1]);
+		color_data** c_data = img->returnColorData();
 		for (int j = 0; j < imageSize[1]; j++)
 		{
 			for (int i = 0; i < imageSize[0]; i++)
@@ -48,7 +47,6 @@ public:
 				double ray_time{ 0.0 };
 				ray myray{ ray_origin,ray_direction,ray_time };
 				color pixel_color = ray_color(myray, 0, object);
-				color_data** c_data = c_array->return_array();
 				c_data[i][j].r = pixel_color.x();
 				c_data[i][j].g = pixel_color.y();
 				c_data[i][j].b = pixel_color.z();
@@ -66,10 +64,7 @@ public:
 
 
 protected:
-	void initialize_storage() override
-	{
-		c_array = std::make_unique<color_array>(imageSize[0], imageSize[1]);
-	}
+
 
 private:
 	vec3 min, max;
@@ -99,11 +94,11 @@ public:
 	}
 };
 
-class fake_parallel : public parallel
+class fake_parallel : public communicator
 {
 public:
 	fake_parallel() :
-		parallel{}
+		communicator{}
 	{
 	}
 	int return_rank() const override {
@@ -119,7 +114,7 @@ public:
 		return std::array<int, 2>{1, 1};
 	}
 
-	std::unique_ptr<parallel> split(const std::array<int, 2>& maxRanks_) const override
+	std::unique_ptr<communicator> split(const std::array<int, 2>& maxRanks_) const override
 	{
 		return std::make_unique<fake_parallel>();
 	}

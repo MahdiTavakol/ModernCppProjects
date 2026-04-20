@@ -5,6 +5,12 @@
 obj_model_reader_parallel::obj_model_reader_parallel(
 	std::string _obj_file_name,
 	std::unique_ptr<communicator>& _para) :
+	obj_model_reader_parallel{ _obj_file_name, _para.get()}
+{}
+
+obj_model_reader_parallel::obj_model_reader_parallel(
+	std::string _obj_file_name,
+	communicator* _para) :
 	obj_model_reader{ _obj_file_name, _para }
 {
 	int rank = para->return_rank();

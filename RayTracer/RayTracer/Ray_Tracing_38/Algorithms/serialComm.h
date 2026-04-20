@@ -3,6 +3,7 @@
 
 class serialComm : public communicator
 {
+public:
     explicit serialComm();
     virtual ~serialComm() override;
     virtual std::unique_ptr<communicator> split(const std::array<int, 2>& maxRanks_) const override;

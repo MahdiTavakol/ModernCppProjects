@@ -3,6 +3,10 @@
 serialComm::serialComm() :
     communicator{}
 {
+    rank = 0;
+	size = 1;
+	rank_config = { 0,0 };
+	size_config = { 1,1 };
 }
 
 serialComm::~serialComm()

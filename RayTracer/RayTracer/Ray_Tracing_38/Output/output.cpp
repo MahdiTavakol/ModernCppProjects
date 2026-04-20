@@ -63,6 +63,11 @@ void output::open_new_file(std::string _file_name)
 		std::cerr << "Cannot open the file " << file_name << std::endl << "That is all we know at the moment!" << std::endl;
 }
 
+void output::reset_image(std::unique_ptr<image>&& img_)
+{
+	img = std::move(img_);
+}
+
 void output::remove_file(const std::string& fileName_)
 {
 	std::remove(fileName_.c_str());

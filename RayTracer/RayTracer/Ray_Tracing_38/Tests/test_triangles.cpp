@@ -4,7 +4,6 @@
 
 TEST_CASE("Testing rendering of a triangle_mesh object")
 {
-	int num_points;
 	std::array<point3,3> vs;
 	std::array<point3, 3> vns = { point3(0.0, 0.0, 1.0),point3(0.0, 0.0, 1.0),point3(0.0, 0.0, 1.0) };
 	std::array<point3,3> vts = vs;

@@ -14,15 +14,16 @@ class input
 public:
 	input(int argc, char** argv, int _image_width, int _samples_per_pixel,
 		int _max_depth, int _vfov, double _width_ratio, double _height_ratio,
-		camera_settings* cam_settings_,
-		parallel* para_,
+		std::unique_ptr<camera_settings>& cam_settings_,
+		std::unique_ptr<communicator>& para_,
 		std::vector<std::reference_wrapper<std::ostream>> strmVec_ = {
 			std::vector<std::reference_wrapper<std::ostream>>{
 				std::ref(std::cout)
 			}
 		});
-	input(int argc, char** argv, camera_settings* cam_settings, 
-		parallel* para_,
+	input(int argc, char** argv,
+		std::unique_ptr<camera_settings>& cam_settings_,
+		std::unique_ptr<communicator>& para_,
 		std::vector<std::reference_wrapper<std::ostream>> strmVec_ = {
 			std::vector<std::reference_wrapper<std::ostream>>{
 				std::ref(std::cout)
@@ -35,7 +36,7 @@ protected:
 	template<typename T>
 	T convert_char(char* _chr);
 	camera_settings* cam_settings;
-	parallel* para;
+	communicator* para;
 
 
 	std::vector<std::reference_wrapper<std::ostream>> outStreams;

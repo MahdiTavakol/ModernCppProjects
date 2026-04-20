@@ -8,8 +8,8 @@ class create_input
 public:
 	create_input(std::vector<std::string> argv_vec_,
 		std::vector<std::reference_wrapper<std::ostream>>& outStream_,
-		camera_settings* cam_setting_,
-		parallel* para_)
+		std::unique_ptr<camera_settings>& cam_setting_,
+		std::unique_ptr<communicator>& para_)
 	{
 		argc = static_cast<int>(argv_vec_.size());
 		argv = new char* [argc];
@@ -163,8 +163,8 @@ TEST_CASE("Testing reading the argv with the input class")
 	};
 
 	std::unique_ptr<camera_settings> cam_settings = std::make_unique<camera_settings>();
-	std::unique_ptr<parallel> para = std::make_unique<fake_parallel>();
-	create_input crt_input(argv_vec, outStream,cam_settings.get(),para.get());
+	std::unique_ptr<communicator> para = std::make_unique<fake_parallel>();
+	create_input crt_input(argv_vec, outStream,cam_settings,para);
 	auto in = crt_input.return_input_ptr();
 
 	REQUIRE_THAT(&oss, StringStreamMatcher(&expectedLog));

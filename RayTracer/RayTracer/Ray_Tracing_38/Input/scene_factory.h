@@ -8,8 +8,8 @@
 
 class scene_factory {
 public:
-	scene_factory(int mode_, std::unique_ptr<parallel>& para_);
-	scene_factory(int mode_, std::unique_ptr<parallel>& para_,
+	scene_factory(int mode_, std::unique_ptr<communicator>& para_);
+	scene_factory(int mode_, std::unique_ptr<communicator>& para_,
 		          std::string obj_file_name_);
 	void create();
 	std::unique_ptr<hittable_list> return_world();
@@ -17,7 +17,7 @@ public:
 protected:
 	const int mode;
 	std::unique_ptr<hittable_list> world;
-	parallel* para;
+	communicator* para;
 	std::string obj_file_name = "../../models/Toyota_Sequoia_2023/Toyota_Sequoia_2023_2015_obj.obj";
 
 private:

@@ -2,7 +2,7 @@
 #include "test_shared.h"
 #include "../Input/obj_model_reader.h"
 
-std::unique_ptr<std::istream> fake_obj_file_contents(
+std::unique_ptr<std::iostream> fake_obj_file_contents(
 	std::vector<point3>& vs_,
 	std::vector<point3>& vts_,
 	std::vector<point3>& vns_,
@@ -48,12 +48,12 @@ std::unique_ptr<std::istream> fake_obj_file_contents(
 		contents += "\n";
 	}
 
-	auto iss_ptr = std::make_unique<std::istringstream>(contents);
+	auto iss_ptr = std::make_unique<std::stringstream>(contents);
 	return iss_ptr;
 }
 
 
-std::unique_ptr<std::istream> fake_mtl_file_contents(
+std::unique_ptr<std::iostream> fake_mtl_file_contents(
 	const color Kd, color Tf, color Ks,
 	double Ns, double d, double Tr
 )
@@ -69,7 +69,7 @@ std::unique_ptr<std::istream> fake_mtl_file_contents(
 	contents += "Kd " + std::to_string(Kd[0]) + " " + std::to_string(Kd[1]) + " " + std::to_string(Kd[2]) + "\n";
 	contents += "Ks " + std::to_string(Ks[0]) + " " + std::to_string(Ks[1]) + " " + std::to_string(Ks[2]) + "\n";
 
-	auto iss_ptr = std::make_unique<std::istringstream>(contents);
+	auto iss_ptr = std::make_unique<std::stringstream>(contents);
 	return iss_ptr;
 }
 
@@ -78,14 +78,14 @@ std::unique_ptr<std::istream> fake_mtl_file_contents(
 TEST_CASE("Testing the obj_model_reader class")
 {
 	// creating the input streams
-	std::unique_ptr<std::istream> obj_iss;
-	std::unique_ptr<std::istream> mtl_iss;
+	std::unique_ptr<std::iostream> obj_iss;
+	std::unique_ptr<std::iostream> mtl_iss;
 
 	// the parallel object
 	char** argv;
 	argv = nullptr;
 	int argc = 0;
-	parallel* para = new fake_parallel{};
+	communicator* para = new fake_parallel{};
 
 
 	// material properties

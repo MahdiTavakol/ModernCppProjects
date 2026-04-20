@@ -13,7 +13,6 @@
 #include "../Materials/material.h"
 #include "../Types/ray.h"
 #include "../Types/vec3.h"
-#include "image.h"
 #include "camera_settings.h"
 
 
@@ -57,6 +56,11 @@ public:
 		if (img == nullptr)
 			throw std::runtime_error("The image has already been returned!");
 		return std::move(img);
+	}
+
+	color_array* return_color_array_ptr()
+	{
+		return img->array();
 	}
 
 

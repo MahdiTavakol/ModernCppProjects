@@ -1,4 +1,5 @@
 #include "Renderer_Animation.h"
+#include "../Output/output_parallel.h"
 
 
 
@@ -85,10 +86,13 @@ void renderer_animation::open_file(const int frame_i)
 #else
 	std::string file_name = "temp/frame-" + std::to_string(frame_i) + ".ppm";
 #endif
-	if (writer == nullptr)
-		writer = std::make_unique<output_serial>(file_name);
-	else
-		writer->open_new_file(file_name);
+	// getting the image from the camera.
+	auto img = cam->return_image();
+	// the only resource that output_parallel has
+	// is the image which needs to be replaced for each frame.
+	// So creating a new output_parallel object here
+	// does not cause extra overhead.
+	writer = std::make_unique<output_parallel>(file_name, std::move(img), para, outputMode::P6);
 }
 
 int renderer_animation::return_num_frames() const

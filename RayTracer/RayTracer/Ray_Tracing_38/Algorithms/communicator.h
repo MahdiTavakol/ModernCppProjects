@@ -4,12 +4,8 @@
 
 
 #include <iostream>
-#include <mpi.h>
 #include <array>
-#include "camera.h"
-#include "hittable_list.h"
 #include "../Data/color_array.h"
-#include "image.h"
 
 
 class communicator
@@ -41,8 +37,8 @@ public:
     virtual void barrier() const = 0;
 
 protected:
-    int size, rank;
-    std::array<int, 2> rank_config;
-    std::array<int, 2> size_config;
+    int size = 1, rank = 0;
+    std::array<int, 2> rank_config = { 0,0 };
+    std::array<int, 2> size_config = { 1,1 };
 };
 

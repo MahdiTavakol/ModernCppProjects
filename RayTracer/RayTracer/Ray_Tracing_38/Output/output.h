@@ -27,6 +27,7 @@ public:
 	virtual void write_file() = 0;
 	void reset(std::unique_ptr<image>&& img_);
 	void open_new_file(std::string _file_name);
+	void reset_image(std::unique_ptr<image>&& img_);
 	std::unique_ptr<std::iostream> return_stream();
 
 protected:

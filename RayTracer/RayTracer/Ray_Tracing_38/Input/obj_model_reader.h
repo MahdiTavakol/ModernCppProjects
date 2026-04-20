@@ -29,18 +29,23 @@ public:
 	obj_model_reader(){}
 	obj_model_reader(std::string _obj_file_name,
 		             std::unique_ptr<communicator>& _para);
+	obj_model_reader(std::string obj_file_name_,
+		             communicator* para_);
 	obj_model_reader(std::string _obj_file_name,
 		             std::string _mtl_file_name,
 		             std::unique_ptr<communicator>& _para);
-	obj_model_reader(std::unique_ptr<std::istream> _obj_file_ptr,
-		             std::unique_ptr<std::istream> _mtl_file_ptr,
+	obj_model_reader(std::unique_ptr<std::iostream> _obj_file_ptr,
+					 std::unique_ptr<std::iostream> _mtl_file_ptr,
+		             communicator* _para);
+	obj_model_reader(std::unique_ptr<std::iostream> _obj_file_ptr,
+		             std::unique_ptr<std::iostream> _mtl_file_ptr,
 		             std::unique_ptr<communicator>& _para);
 	virtual void read();
 	std::unique_ptr<hittable_list> return_world();
 
 protected:
 	// the parallel object
-	communicator* para;
+	communicator* para = nullptr;
 	// the object container
 	std::unique_ptr<hittable_list> world;
 	// file names
