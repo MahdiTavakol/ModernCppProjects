@@ -3,11 +3,10 @@
 
 
 
-renderer_animation::renderer_animation(int argc, char** argv, int _mode, [[maybe_unused]] std::string _file_name, MPI_Comm comm_) :
-	renderer{ argc,argv,_mode,"",std::array<int,2>{1,1}, comm_ }
+renderer_animation::renderer_animation(communicator *para_, settings* settingsObj_,std::string info_) :
+	renderer{ para_, settingsObj_,info_}
 {
 	// The default value
-	// mode = RANDOM_SPHERES_ANIMATED;
 	pth = std::make_unique<path>(point3(0, 0, 12));
 }
 
@@ -20,7 +19,6 @@ renderer_animation::renderer_animation(int argc, char** argv, int _mode, std::st
 
 void renderer_animation::setup()
 {
-	renderer::setup();
 	switch (mode)
 	{
 	case RANDOM_SPHERES_ANIMATED:
@@ -31,6 +29,7 @@ void renderer_animation::setup()
 		double radius = 13.49;
 		double theta = 45.0;
 		// Get the fps and num_frames
+		camera_settings* cam_settings = settingsObj->return_cam_settings();
 		fps = cam_settings->get_fps();
 		num_seconds = cam_settings->get_num_seconds();
 		// Creating a new path variable containing the camera locations
@@ -39,7 +38,7 @@ void renderer_animation::setup()
 	}
 }
 
-void renderer_animation::render()
+void renderer_animation::render(camera* cam_, output* writer_, hittable_list* world_)
 {
 	int rank = para->return_rank();
 
@@ -49,59 +48,24 @@ void renderer_animation::render()
 
 	for (int i = 0; i < num_frames; i++)
 	{
-		message(rank, "Opening the file for the frame" + std::to_string(i));
-		if (rank == 0)
-			open_file(i);
+		message("Moving the camera to the frame " + std::to_string(i));
+		cam_->move_camera((*pth)[i]);
 
-		message(rank, "Moving the camera to the frame " + std::to_string(i));
+		message("Updating the filename for the frame" + std::to_string(i));
+		info = "frame-" + std::to_string(i);
+		update_filename(info);
 
-		move_camera(i);
-
-		renderer::render(std::to_string(i));	
+		renderer::render(cam_, writer_, world_);
 	}
 }
 
 
-void renderer_animation::open_file(const int frame_i)
+void renderer_animation::update_filename(std::string filename_)
 {
-	int fps, num_seconds, num_frames;
-	fps = cam_settings->get_fps();
-	num_seconds = cam_settings->get_num_seconds();
-	num_frames = fps * num_seconds;
 #ifdef _WIN32
-	std::string file_name = "temp\\frame-" + std::to_string(frame_i) + ".ppm";
+	filename = "temp\\" + info + ".ppm";
 #else
-	std::string file_name = "temp/frame-" + std::to_string(frame_i) + ".ppm";
+	filename = "temp/" + info + ".ppm";
 #endif
-	// getting the image from the camera.
-	auto img = cam->return_image();
-	// the only resource that output_parallel has
-	// is the image which needs to be replaced for each frame.
-	// So creating a new output_parallel object here
-	// does not cause extra overhead.
-	writer = std::make_unique<output_parallel>(file_name, std::move(img), para, outputMode::P6);
 }
 
-int renderer_animation::return_num_frames() const
-{
-	int fps, num_seconds, num_frames;
-	fps = cam_settings->get_fps();
-	num_seconds = cam_settings->get_num_seconds();
-	num_frames = fps * num_seconds;
-	return num_frames;
-}
-
-void renderer_animation::move_camera(const int frame_i)
-{
-	// moving the camera
-	cam->move_camera((*pth)[frame_i]);
-}
-
-void renderer_animation::message(int _rank, std::string _text)
-{
-	if (_rank == 0)
-	{
-		std::clog << _text << std::endl;
-		fflush(stdout);
-	}
-}

@@ -27,6 +27,18 @@
 #include "../Types/vec3.h"
 #include "../Output/output.h"
 
+scene_factory::scene_factory(settings* wld_settings_, communicator* para_):
+	mode{wld_settings_->return_mode()}, para{para_}
+{
+	// checking the setting type
+	scene_settings* sett = dynamic_cast<scene_settings*>(wld_settings_);
+	if (!sett)
+		throw std::invalid_argument("Wrong settings object");
+
+	obj_file_name = sett->return_obj_file_name();
+	mtl_file_name = sett->return_mtl_file_name();
+}
+
 scene_factory::scene_factory(int mode_, std::unique_ptr<communicator>& para_) :
 	mode{ mode_ }, para{para_.get()}
 {}

@@ -5,9 +5,11 @@
 
 #include "../Algorithms/hittable_list.h"
 #include "../Algorithms/communicator.h"
+#include "scene_settings.h"
 
 class scene_factory {
 public:
+	scene_factory(settings* wld_settings, communicator* para_);
 	scene_factory(int mode_, std::unique_ptr<communicator>& para_);
 	scene_factory(int mode_, std::unique_ptr<communicator>& para_,
 		          std::string obj_file_name_);
@@ -19,6 +21,7 @@ protected:
 	std::unique_ptr<hittable_list> world;
 	communicator* para;
 	std::string obj_file_name = "../../models/Toyota_Sequoia_2023/Toyota_Sequoia_2023_2015_obj.obj";
+	std::string mtl_file_name;
 
 private:
 	void setup_random_spheres();

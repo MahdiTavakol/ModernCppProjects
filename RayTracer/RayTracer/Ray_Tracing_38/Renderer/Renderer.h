@@ -39,32 +39,28 @@
 class renderer
 {
 public:
+	renderer(communicator* para_, settings* settingsObj_, std::string info = "", bool verbose = false);
+
 	renderer(int argc, char** argv, int _mode, std::string _filename, 
 			 std::array<int, 2> size_config_, MPI_Comm comm_ = MPI_COMM_WORLD);
-	renderer(int argc, char** argv, int _mode, std::string _filename,
-		std::string obj_file_, std::array<int, 2> size_config_,
-			 MPI_Comm comm_ = MPI_COMM_WORLD);
+
 	virtual ~renderer();
-	virtual void setup();
-	void add(std::unique_ptr<hittable>& object);
-	virtual void render(std::string info="", bool verbose=false);
-	void write_file();
+	virtual void setup() {}
+	virtual void render(camera* cam_, output* writer_, hittable_list* world_);
+	void write_file(output* writer_);
 	
 	
 
 protected:
 	int mode;
-	std::string obj_file_name = "../../models/Toyota_Sequoia_2023/Toyota_Sequoia_2023_2015_obj.obj";
-	std::string filename;
-	std::unique_ptr<scene_factory> world_factory;
-	std::unique_ptr<camera_settings> cam_settings;
-	std::unique_ptr<camera> cam;
-	std::unique_ptr<communicator> para;
-	std::unique_ptr<input> in;
-	std::unique_ptr<hittable_list> world;
-	std::unique_ptr<output> writer;
-	point3 camera_location;
+	std::string info = "";
+	bool verbose = false;
+	settings* settingsObj;
+	communicator* para;
 
+
+	void message(std::string _text);
+	std::string filename;
 };
 
 #endif

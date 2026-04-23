@@ -4,6 +4,22 @@
 #include <algorithm>
 #include "../Data/color_array.h"
 
+
+output::output(settings* out_settings_,
+	           std::unique_ptr<image>&& img_,
+	           communicator* para_):
+	mode{out_settings_->return_mode()},
+	img{std::move(img_)},
+	para{para_}
+{
+	// checking the setting type
+	output_settings* sett = dynamic_cast<output_settings*>(out_settings_);
+	if (!sett)
+		throw std::invalid_argument("Wrong settings object");
+
+	file_name = sett->return_file_name();
+}
+
 output::output(
 	std::string _file_name, 
 	std::unique_ptr<image>&& img_,
@@ -63,8 +79,9 @@ void output::open_new_file(std::string _file_name)
 		std::cerr << "Cannot open the file " << file_name << std::endl << "That is all we know at the moment!" << std::endl;
 }
 
-void output::reset_image(std::unique_ptr<image>&& img_)
+void output::reset_image(std::string file_name_, std::unique_ptr<image>&& img_)
 {
+	open_new_file(file_name_);
 	img = std::move(img_);
 }
 

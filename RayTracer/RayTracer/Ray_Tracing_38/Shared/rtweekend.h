@@ -9,6 +9,11 @@
 
 #define FLERR __FILE__, __LINE__
 
+enum class outputType {
+	SERIAL,
+	PARALLEL
+};
+
 enum class outputMode {
 	P3,
 	P6
@@ -24,6 +29,11 @@ enum {
 	CORNELL_BOX, TWO_BOXES, TWO_BOXES_ROTATED,
 	CORNELL_SMOKE, OBJ_MODEL, OBJ_MODEL_PARALLEL
 	, RANDOM_SPHERES_ANIMATED, SIMPLE_2D_PARALEL_TEST
+};
+
+enum class renderMode {
+	STATIC,
+	ANIMATION
 };
 
 

@@ -5,37 +5,32 @@
 #include <map>
 #include <variant>
 #include "../Algorithms/camera.h"
-#include "../Algorithms/camera_settings.h"
-#include "../Algorithms/communicator.h"
+#include "settings.h"
+#include "camera_settings.h"
+#include "app_settings.h"
+#include "image_settings.h"
+#include "output_settings.h"
+#include "scene_settings.h"
 
 
 class input
 {
 public:
-	input(int argc, char** argv, int _image_width, int _samples_per_pixel,
-		int _max_depth, int _vfov, double _width_ratio, double _height_ratio,
-		std::unique_ptr<camera_settings>& cam_settings_,
-		std::unique_ptr<communicator>& para_,
+	input(int argc, char** argv, 
+		std::map<std::string, int> app_set_map,
+		communicator* para_,
 		std::vector<std::reference_wrapper<std::ostream>> strmVec_ = {
 			std::vector<std::reference_wrapper<std::ostream>>{
 				std::ref(std::cout)
 			}
 		});
-	input(int argc, char** argv,
-		std::unique_ptr<camera_settings>& cam_settings_,
-		std::unique_ptr<communicator>& para_,
-		std::vector<std::reference_wrapper<std::ostream>> strmVec_ = {
-			std::vector<std::reference_wrapper<std::ostream>>{
-				std::ref(std::cout)
-			}
-		}
-	);
+
+	std::unique_ptr<app_settings> return_app_settings();
 
 
 protected:
 	template<typename T>
 	T convert_char(char* _chr);
-	camera_settings* cam_settings;
 	communicator* para;
 
 
@@ -79,6 +74,20 @@ protected:
 			std::cerr << "Invalid input arguments" << std::endl;
 		}
 	}
+
+
+	void init_app_settings();
+	bool parse_scene_settings(char** argv, int argc, int& iarg);
+	bool parse_camera_settings(char** argv, int argc, int& iarg);
+	bool parse_image_settings(char** argv, int argc, int& iarg);
+	bool parse_output_settings(char** argv, int argc, int& iarg);
+	bool parse_render_mode(char** argv, int argc, int& iarg);
+
+
+
+private:
+	std::unique_ptr<app_settings> app_set;
+	std::map<std::string, int> app_set_map;
 };
 
 #endif

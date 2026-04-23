@@ -1,5 +1,6 @@
 #pragma once
-#include "camera_settings.h"
+#include "../Input/settings.h"
+#include "../Input/image_settings.h"
 #include "../Data/color_array.h"
 #include "communicator.h"
 #include <memory>
@@ -8,8 +9,10 @@
 class image
 {
 public:
-	image(std::unique_ptr<camera_settings>& cam_setting_,
+	image(std::unique_ptr<image_settings>& img_setting_,
 		std::unique_ptr<communicator>& _para);
+	image(settings* img_setting_,
+		  communicator* para_);
 	image(const int& image_width_, const int& image_height_, communicator* _para);
 	image(const std::array<int, 2>& size_,
 		 const std::array<int, 2> widthRange_, const std::array<int, 2> heightRange_,
@@ -40,7 +43,7 @@ public:
 protected:
 	communicator* para;
 	// the whole image dimensions. 
-	const int image_width, image_height;
+	int image_width, image_height;
 	// the color_array object
 	std::unique_ptr<color_array> c_array;
 

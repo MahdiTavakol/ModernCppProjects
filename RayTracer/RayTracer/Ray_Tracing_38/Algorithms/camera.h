@@ -13,7 +13,8 @@
 #include "../Materials/material.h"
 #include "../Types/ray.h"
 #include "../Types/vec3.h"
-#include "camera_settings.h"
+#include "../Input/settings.h"
+#include "../Input/camera_settings.h"
 
 
 
@@ -21,11 +22,12 @@
 class camera {
 public:
 
-	camera(std::unique_ptr<camera_settings>& cam_setting_, std::unique_ptr<image>&& img_);
 	camera() = default;
+	camera(std::unique_ptr<camera_settings>& cam_setting_, std::unique_ptr<image>&& img_);
+	camera(settings* cam_setting_, std::unique_ptr<image>&& img_);
 
 
-	virtual void setup(std::unique_ptr<camera_settings>& cam_setting_);
+	virtual void setup(camera_settings* cam_setting_);
 
 	virtual void render(const hittable& world);
 	virtual void render_verbose(const hittable& world);
@@ -69,9 +71,6 @@ protected:
 
 
 	// primary parameters set by the class input;
-	double aspect_ratio = 1.0;
-	int image_width = 100;
-	int image_height = 100;
 	int samples_per_pixel = 10;
 	int max_depth = 10;
 	color background;

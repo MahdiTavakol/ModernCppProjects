@@ -6,11 +6,16 @@
 
 #include "../Data/color_array.h"
 #include "../Algorithms/image.h"
+#include "../Input/settings.h"
+#include "../Input/output_settings.h"
 
 
 
 class output {
 public:
+	output(settings* out_settings,
+		   std::unique_ptr<image>&& img_,
+		   communicator* para_);
 	output(std::string _file_name, 
 		   std::unique_ptr<image>&& img_,
 		   std::unique_ptr<communicator>& para_,
@@ -27,7 +32,7 @@ public:
 	virtual void write_file() = 0;
 	void reset(std::unique_ptr<image>&& img_);
 	void open_new_file(std::string _file_name);
-	void reset_image(std::unique_ptr<image>&& img_);
+	void reset_image(std::string file_name_, std::unique_ptr<image>&& img_);
 	std::unique_ptr<std::iostream> return_stream();
 
 protected:
