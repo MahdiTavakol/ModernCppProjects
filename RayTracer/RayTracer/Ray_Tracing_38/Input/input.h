@@ -28,6 +28,12 @@ public:
 	std::unique_ptr<app_settings> return_app_settings();
 
 
+	// since a communicator object is required to 
+	// create the input class we consider settings
+	// for a communicator as a special case
+	static void set_communicator_settings(int argc, char** argv, settings* com_settings);
+
+
 protected:
 	template<typename T>
 	T convert_char(char* _chr);
@@ -40,8 +46,6 @@ protected:
 
 	// parsing the input file
 	void parse_file();
-	// parsing argv
-	void parse_argv(char** argv, int argc);
 	// parsing parameters
 	template<typename T>
 	void parse_input(char** argv, int argc, int& iarg, T& param)
@@ -80,7 +84,7 @@ protected:
 	void init_app_settings();
 	void parse_render_mode(std::stringstream& ss);
 	void fill_iostream(int argc, char** argv);
-	bool parse_render_mode(char** argv, int argc, int& iarg);
+
 
 
 

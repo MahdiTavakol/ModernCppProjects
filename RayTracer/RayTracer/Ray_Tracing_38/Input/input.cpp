@@ -135,7 +135,7 @@ void input::parse_file()
 
 		std::string newCmd;
 		getline(ss, newCmd);
-		if (!app_set->add_cmd(text, newCmd))
+		if (!app_set->add_cmd(text, newCmd) && text.compare("rank_config"))
 			throw std::invalid_argument("Wrong input argument!");
 	}
 
@@ -176,4 +176,24 @@ void input::fill_iostream(int argc, char** argv)
 		*input_stream >> text;
 	}
 
+}
+
+void input::set_communicator_settings(int argc, char** argv, settings* com_settings)
+{
+	int iarg = 1;
+	std::string newCmd = "size_config";
+	while (iarg < argc)
+	{
+		if (!strcmp(argv[iarg], newCmd.c_str()))
+		{
+			if (iarg + 2 >= argc)
+				throw std::invalid_argument("Corrupted input!");
+			std::string text1(argv[iarg + 1]);
+			std::string text2(argv[iarg + 2]);
+			newCmd += " " + text1 + " " + text2;
+			com_settings->add_cmd(newCmd);
+			break;
+		}
+	}
+	com_settings->parse_commands();
 }

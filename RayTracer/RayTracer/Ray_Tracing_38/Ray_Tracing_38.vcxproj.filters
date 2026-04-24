@@ -72,9 +72,6 @@
     <ClCompile Include="Algorithms\rtw_stb_image.cpp">
       <Filter>Source Files\Algorithms</Filter>
     </ClCompile>
-    <ClCompile Include="Algorithms\sphere_list.cpp">
-      <Filter>Source Files\Algorithms</Filter>
-    </ClCompile>
     <ClCompile Include="Data\color_array.cpp">
       <Filter>Source Files\Data</Filter>
     </ClCompile>
@@ -150,12 +147,6 @@
     <ClCompile Include="Renderer\Renderer_facade.cpp">
       <Filter>Source Files\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="Algorithms\output_settings.cpp">
-      <Filter>Source Files\Algorithms</Filter>
-    </ClCompile>
-    <ClCompile Include="Algorithms\world_settings.cpp">
-      <Filter>Source Files\Algorithms</Filter>
-    </ClCompile>
     <ClCompile Include="Input\camera_settings.cpp">
       <Filter>Source Files\Input</Filter>
     </ClCompile>
@@ -172,6 +163,9 @@
       <Filter>Source Files\Input</Filter>
     </ClCompile>
     <ClCompile Include="Input\settings.cpp">
+      <Filter>Source Files\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Input\communicator_settings.cpp">
       <Filter>Source Files\Input</Filter>
     </ClCompile>
   </ItemGroup>
@@ -210,9 +204,6 @@
       <Filter>Source Files\Algorithms</Filter>
     </ClInclude>
     <ClInclude Include="Algorithms\rtw_stb_image.h">
-      <Filter>Source Files\Algorithms</Filter>
-    </ClInclude>
-    <ClInclude Include="Algorithms\sphere_list.h">
       <Filter>Source Files\Algorithms</Filter>
     </ClInclude>
     <ClInclude Include="Data\color_array.h">
@@ -299,12 +290,6 @@
     <ClInclude Include="Renderer\Renderer_facade.h">
       <Filter>Source Files\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Algorithms\output_settings.h">
-      <Filter>Source Files\Algorithms</Filter>
-    </ClInclude>
-    <ClInclude Include="Algorithms\world_settings.h">
-      <Filter>Source Files\Algorithms</Filter>
-    </ClInclude>
     <ClInclude Include="Input\camera_settings.h">
       <Filter>Source Files\Input</Filter>
     </ClInclude>
@@ -321,6 +306,9 @@
       <Filter>Source Files\Input</Filter>
     </ClInclude>
     <ClInclude Include="Input\settings.h">
+      <Filter>Source Files\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Input\communicator_settings.h">
       <Filter>Source Files\Input</Filter>
     </ClInclude>
   </ItemGroup>

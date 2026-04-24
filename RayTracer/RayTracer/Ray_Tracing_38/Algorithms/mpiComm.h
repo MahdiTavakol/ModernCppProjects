@@ -7,6 +7,7 @@ class mpiComm : public communicator
 public:
     explicit mpiComm(MPI_Comm comm_);
     explicit mpiComm(MPI_Comm comm_,std::array<int, 2> size_config_);
+    explicit mpiComm(MPI_Comm comm_, communicator_settings* stngs_);
     explicit mpiComm(MPI_Comm comm_, std::array<int, 2> size_config_, std::array<int, 2> rank_config_);
     virtual ~mpiComm() override;
     virtual std::unique_ptr<communicator> split(const std::array<int,2>& maxRanks_) const override;

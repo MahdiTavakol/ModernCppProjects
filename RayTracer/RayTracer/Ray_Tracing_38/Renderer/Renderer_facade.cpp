@@ -1,5 +1,7 @@
 #include "Renderer_facade.h"
 
+#include "../Input/communicator_settings.h"
+
 
 renderer_facade::renderer_facade(int argc, char** argv, int _mode,
 	std::string _filename,
@@ -26,9 +28,15 @@ renderer_facade::renderer_facade(int argc, char** argv, int _mode,
 	* the settings implementation. Thus, the input is
 	* the only class coupled to the settings classes implementations.
 	*/
+	
 
+	// parsing the input arguments for the parallel communicator from the cml
+	std::unique_ptr<settings> comm_settings = std::make_unique<communicator_settings>();
+	input::set_communicator_settings(argc, argv, comm_settings.get());
 	// the parallel class in charge of the parallel communicator
-	para = std::make_unique<mpiComm>(comm_, size_config_);
+	para = std::make_unique<mpiComm>(comm_, comm_settings.get());
+
+
 	// changing the camera settings based on the user input
 	in = std::make_unique<input>(argc, argv, app_set_map, para.get());
 	// getting the app_settings object from the in

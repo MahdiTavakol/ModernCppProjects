@@ -5,6 +5,7 @@
 class image_settings: public settings
 {
 public:
+	image_settings() = delete;
 	image_settings(int mode_);
 
 	void set_mode(int mode_) override;

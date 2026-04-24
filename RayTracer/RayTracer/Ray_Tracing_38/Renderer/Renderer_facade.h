@@ -4,12 +4,8 @@
 
 #include "../Shared/rtweekend.h"
 
-#include "../Input/obj_model_reader.h"
-#include "../Input/obj_model_reader_parallel.h"
 #include "../Algorithms/camera.h"
 #include "../Input/app_settings.h"
-#include "../Algorithms/camera_settings.h"
-#include "../Algorithms/settings.h"
 #include "../Input/scene_factory.h"
 #include "../Geometry/hittable.h"
 #include "../Algorithms/hittable_list.h"
@@ -60,4 +56,5 @@ protected:
 		{"image",2},
 		{"output",3}
 	};
+	
 };

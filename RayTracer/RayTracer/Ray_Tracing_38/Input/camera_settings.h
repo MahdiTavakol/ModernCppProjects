@@ -9,8 +9,7 @@
 class camera_settings: public settings
 {
 public:
-	camera_settings()
-	{}
+	camera_settings() = delete;
 	camera_settings(int mode_);
 	void set_input_map() override;
 	void check_validity() const override;

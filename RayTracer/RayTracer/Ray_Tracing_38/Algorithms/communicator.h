@@ -6,6 +6,7 @@
 #include <iostream>
 #include <array>
 #include "../Data/color_array.h"
+#include "../Input/communicator_settings.h"
 
 
 class communicator
@@ -13,10 +14,12 @@ class communicator
 public:
     communicator() = default;
 	communicator(std::array<int, 2> size_config_);
+    communicator(settings* comm_settings_);
     communicator(std::array<int, 2> size_config_, std::array<int, 2> rank_config_);
     virtual ~communicator() = default;
     virtual int return_rank() const;
     virtual int return_size() const;
+    virtual void reset_size_ratio(std::array<int,2> new_size_ratio_);
     virtual std::array<int, 2> return_rank_config() const;
     virtual std::array<int, 2> return_size_config() const;
     virtual std::unique_ptr<communicator> split(const std::array<int,2>& maxRanks_) const = 0;

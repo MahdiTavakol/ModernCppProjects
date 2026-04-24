@@ -146,11 +146,8 @@
     <ClCompile Include="Algorithms\hit_record.cpp" />
     <ClCompile Include="Algorithms\image.cpp" />
     <ClCompile Include="Algorithms\mpiComm.cpp" />
-    <ClCompile Include="Algorithms\output_settings.cpp" />
     <ClCompile Include="Algorithms\path.cpp" />
     <ClCompile Include="Algorithms\rtw_stb_image.cpp" />
-    <ClCompile Include="Algorithms\sphere_list.cpp" />
-    <ClCompile Include="Algorithms\world_settings.cpp" />
     <ClCompile Include="Data\color_array.cpp" />
     <ClCompile Include="Geometry\aabb.cpp" />
     <ClCompile Include="Geometry\constant_medium.cpp" />
@@ -163,6 +160,7 @@
     <ClCompile Include="Geometry\sphere.cpp" />
     <ClCompile Include="Geometry\triangle_mesh.cpp" />
     <ClCompile Include="Input\camera_settings.cpp" />
+    <ClCompile Include="Input\communicator_settings.cpp" />
     <ClCompile Include="Input\image_settings.cpp" />
     <ClCompile Include="Input\input.cpp" />
     <ClCompile Include="Input\obj_model_reader.cpp" />
@@ -193,11 +191,8 @@
     <ClInclude Include="Algorithms\hit_record.h" />
     <ClInclude Include="Algorithms\image.h" />
     <ClInclude Include="Algorithms\mpiComm.h" />
-    <ClInclude Include="Algorithms\output_settings.h" />
     <ClInclude Include="Algorithms\path.h" />
     <ClInclude Include="Algorithms\rtw_stb_image.h" />
-    <ClInclude Include="Algorithms\sphere_list.h" />
-    <ClInclude Include="Algorithms\world_settings.h" />
     <ClInclude Include="Data\color_array.h" />
     <ClInclude Include="Geometry\aabb.h" />
     <ClInclude Include="Geometry\constant_medium.h" />
@@ -211,6 +206,7 @@
     <ClInclude Include="Geometry\texture.h" />
     <ClInclude Include="Geometry\triangle_mesh.h" />
     <ClInclude Include="Input\camera_settings.h" />
+    <ClInclude Include="Input\communicator_settings.h" />
     <ClInclude Include="Input\image_settings.h" />
     <ClInclude Include="Input\input.h" />
     <ClInclude Include="Input\obj_model_reader.h" />
