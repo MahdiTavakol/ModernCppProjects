@@ -161,6 +161,7 @@
     <ClCompile Include="Geometry\triangle_mesh.cpp" />
     <ClCompile Include="Input\camera_settings.cpp" />
     <ClCompile Include="Input\communicator_settings.cpp" />
+    <ClCompile Include="Input\factory.cpp" />
     <ClCompile Include="Input\image_settings.cpp" />
     <ClCompile Include="Input\input.cpp" />
     <ClCompile Include="Input\obj_model_reader.cpp" />
@@ -207,6 +208,7 @@
     <ClInclude Include="Geometry\triangle_mesh.h" />
     <ClInclude Include="Input\camera_settings.h" />
     <ClInclude Include="Input\communicator_settings.h" />
+    <ClInclude Include="Input\factory.hpp" />
     <ClInclude Include="Input\image_settings.h" />
     <ClInclude Include="Input\input.h" />
     <ClInclude Include="Input\obj_model_reader.h" />

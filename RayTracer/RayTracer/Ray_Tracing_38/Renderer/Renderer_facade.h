@@ -2,26 +2,21 @@
 
 #include <memory>
 
-#include "../Shared/rtweekend.h"
 
-#include "../Algorithms/camera.h"
-#include "../Input/app_settings.h"
-#include "../Input/scene_factory.h"
-#include "../Geometry/hittable.h"
-#include "../Algorithms/hittable_list.h"
-#include "../Input/input.h"
-#include "../Algorithms/communicator.h"
-#include "../Types/vec3.h"
-#include "../Output/output.h"
 #include "Renderer.h"
-#include "Renderer_Animation.h"
+#include "../Algorithms/camera.h"
+#include "../Algorithms/communicator.h"
+#include "../Output/output.h"
+#include "../Algorithms/hittable_list.h"
+
+
+#include "../Input/factory.hpp"
 
 
 class renderer_facade
 {
 public:
-	renderer_facade(int argc, char** argv, int _mode, std::string _filename,
-		std::array<int, 2> size_config_, MPI_Comm comm_ = MPI_COMM_WORLD);
+	renderer_facade(int argc, char** argv, int _mode, MPI_Comm comm_ = MPI_COMM_WORLD);
 	virtual ~renderer_facade();
 	virtual void setup();
 	void add(std::unique_ptr<hittable>& object);
@@ -31,30 +26,14 @@ public:
 
 
 protected:
-	int mode;
-	
+	// the factory object
+	std::unique_ptr<factory> builder;
 
-	std::string obj_file_name = "../../models/Toyota_Sequoia_2023/Toyota_Sequoia_2023_2015_obj.obj";
-	std::string filename;
-
-
+	// resources
 	std::unique_ptr<renderer> rendererObj;
-	std::unique_ptr<scene_factory> world_factory;
-	std::unique_ptr<app_settings> stngs;
 	std::unique_ptr<camera> cam;
 	std::unique_ptr<communicator> para;
-	std::unique_ptr<input> in;
-	std::unique_ptr<hittable_list> world;
 	std::unique_ptr<output> writer;
-	point3 camera_location;
-
-
-	std::map<std::string, int> app_set_map =
-	{
-		{"scene",0},
-		{"camera",1},
-		{"image",2},
-		{"output",3}
-	};
+	std::unique_ptr<hittable_list> world;
 	
 };
