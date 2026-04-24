@@ -10,14 +10,8 @@ renderer_animation::renderer_animation(communicator *para_, settings* settingsOb
 	pth = std::make_unique<path>(point3(0, 0, 12));
 }
 
-renderer_animation::renderer_animation(int argc, char** argv, int _mode, std::string _filename,
-	std::string obj_file_, MPI_Comm comm_) :
-	renderer_animation{ argc,argv,_mode,_filename, comm_ }
-{
-	obj_file_name = obj_file_;
-}
 
-void renderer_animation::setup()
+void renderer_animation::setup(camera* cam_)
 {
 	switch (mode)
 	{
@@ -29,6 +23,8 @@ void renderer_animation::setup()
 		double radius = 13.49;
 		double theta = 45.0;
 		// Get the fps and num_frames
+		fps = cam->get_fps();
+		settings* 
 		camera_settings* cam_settings = settingsObj->return_cam_settings();
 		fps = cam_settings->get_fps();
 		num_seconds = cam_settings->get_num_seconds();

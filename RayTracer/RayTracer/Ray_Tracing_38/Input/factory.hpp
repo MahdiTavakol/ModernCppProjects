@@ -31,6 +31,8 @@ protected:
 	std::unique_ptr<app_settings> stngs;
 	std::unique_ptr<camera> cam;
 	std::unique_ptr<output> writer;
+	// the path just for the animation rendering mode
+	std::unique_ptr<path> pth;
 	point3 camera_location;
 	// objects with special factories
 	// we will call their return method so 
@@ -42,7 +44,9 @@ protected:
 		{"scene",0},
 		{"camera",1},
 		{"image",2},
-		{"output",3}
+		{"output",3},
+		{"output",3},
+		{"path",4}
 	};
 
 };

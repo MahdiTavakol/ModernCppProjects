@@ -2,9 +2,14 @@
 #include <cstring>
 #include <sstream>
 #include <iostream>
-#include <mpi.h>
 
 #include "input.h"
+
+#include "image_settings.h"
+#include "output_settings.h"
+#include "scene_settings.h"
+#include "camera_settings.h"
+#include "path_settings.h"
 
 input::input(int argc, char** argv,
 	std::map<std::string, int> app_set_map,
@@ -111,6 +116,8 @@ void input::init_app_settings()
 			app_set->push_back(std::make_unique<image_settings>());
 		else if (!pair.first.compare("output"))
 			app_set->push_back(std::make_unique<output_settings>());
+		else if (!pair.first.compare("path"))
+			app_set->push_back(std::make_unique<path_settings>());
 		else
 			throw std::invalid_argument("Nonrecoverable error!");
 	}
@@ -143,6 +150,7 @@ void input::parse_file()
 	app_set->parse_commands();
 	// checking the validity of parameters
 	app_set->check_validity();
+
 }
 
 void input::parse_render_mode(std::stringstream& ss)
@@ -196,4 +204,23 @@ void input::set_communicator_settings(int argc, char** argv, settings* com_setti
 		}
 	}
 	com_settings->parse_commands();
+}
+
+void input::check_compatibility()
+{
+	// just animation mode has fps and num_seconds
+	auto renderMode = app_set->return_render_mode();
+	settings* pth_settings =  (*app_set)["path"];
+	path_settings* sett = dynamic_cast<path_settings*>(pth_settings);
+	int num_seconds;
+	int fps;
+	sett->return_movie_params(num_seconds, fps);
+	if (renderMode == renderMode::STATIC)
+		if (fps || num_seconds)
+			std::cout << "Warning the path variable will be ignored for the static rendering!" << std::endl;
+
+
+
+
+	
 }

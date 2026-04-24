@@ -6,11 +6,7 @@
 #include <variant>
 #include "../Algorithms/camera.h"
 #include "settings.h"
-#include "camera_settings.h"
 #include "app_settings.h"
-#include "image_settings.h"
-#include "output_settings.h"
-#include "scene_settings.h"
 
 
 class input
@@ -84,6 +80,8 @@ protected:
 	void init_app_settings();
 	void parse_render_mode(std::stringstream& ss);
 	void fill_iostream(int argc, char** argv);
+	// some options are not compatible so this checks their compatibility
+	void check_compatibility();
 
 
 

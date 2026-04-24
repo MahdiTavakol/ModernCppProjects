@@ -4,10 +4,6 @@
 #include <vector>
 #include <map>
 
-#include "camera_settings.h"
-#include "image_settings.h"
-#include "output_settings.h"
-#include "scene_settings.h"
 
 class app_settings: public settings
 {

@@ -10,11 +10,13 @@
 
 #include "../Types/vec3.h"
 #include "../Types/point3_animated.h"
+#include "../Input/path_settings.h"
 
 class path
 {
 public:
 	path(std::string _filename, int _num_seconds, int _fps);
+	path(settings* pth_setting_);
 	path(const path& pth); // the copy constructor
 	path(point3& center, double& radius, int& _num_seconds, int& _fps, double& theta);
 	path(point3 _point); // For backward compatibility with the static case.

@@ -11,6 +11,7 @@ void settings::parse_commands()
 		while (iss >> text) {
 			auto iter = singleInputMap.find(text);
 			auto iter2 = doubleInputMap.find(text);
+			auto iter3 = threeInputMap.find(text);
 			if (iter != singleInputMap.end())
 			{
 				auto& val = iter->second;
@@ -46,6 +47,26 @@ void settings::parse_commands()
 					double* first = rawPair.first;
 					double* second = rawPair.second;
 					parse_input<double>(iss, *first, *second);
+				}
+			}
+			else if (iter3 != threeInputMap.end())
+			{
+				auto& val = iter3->second;
+				if (val.index() == 0)
+				{
+					std::tuple<int*, int*,int*> rawPair = std::get<std::tuple<int*, int*,int*>>(val);
+					int* first  = std::get<0>(rawPair);
+					int* second = std::get<1>(rawPair);
+					int* third  = std::get<2>(rawPair);
+					parse_input<int>(iss, *first, *second, *third);
+				}
+				else if (val.index() == 1)
+				{
+					std::tuple<double*, double*, double*> rawPair = std::get<std::tuple<double*, double*, double*>>(val);
+					double* first = std::get<0>(rawPair);
+					double* second = std::get<1>(rawPair);
+					double* third = std::get<2>(rawPair);
+					parse_input<double>(iss, *first, *second, *third);
 				}
 			}
 		}

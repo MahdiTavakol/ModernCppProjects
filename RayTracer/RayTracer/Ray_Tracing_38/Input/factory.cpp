@@ -100,7 +100,6 @@ void factory::create()
 		break;
 	default:
 		throw std::invalid_argument("Unknown output mode");
-
 	}
 
 	// objects with dedicated factories

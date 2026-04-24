@@ -36,11 +36,6 @@ public:
 		this->lookfrom = _lookfrom;
 	}
 
-	void return_image_size(int& _image_width, int& _image_height) const
-	{
-		_image_width = this->image_width;
-		_image_height = this->image_height;
-	}
 
 	void print_back_ground() const
 	{

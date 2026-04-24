@@ -41,11 +41,8 @@ class renderer
 public:
 	renderer(communicator* para_, settings* settingsObj_, std::string info = "", bool verbose = false);
 
-	renderer(int argc, char** argv, int _mode, std::string _filename, 
-			 std::array<int, 2> size_config_, MPI_Comm comm_ = MPI_COMM_WORLD);
-
 	virtual ~renderer();
-	virtual void setup() {}
+	virtual void setup([[maybe_unused]] camera *cam_) {}
 	virtual void render(camera* cam_, output* writer_, hittable_list* world_);
 	void write_file(output* writer_);
 	
@@ -55,7 +52,6 @@ protected:
 	int mode;
 	std::string info = "";
 	bool verbose = false;
-	settings* settingsObj;
 	communicator* para;
 
 

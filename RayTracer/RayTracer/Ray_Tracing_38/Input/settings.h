@@ -11,6 +11,7 @@
 
 using singleVar = std::variant<int*, double*, std::string*>;
 using doubleVar = std::variant<std::pair<int*, int*>, std::pair<double*, double*>,std::pair<std::string*,std::string*>>;
+using threeVar = std::variant<std::tuple<int*, int*, int*>, std::tuple<double*, double*, double*>>;
 
 template<typename T>
 concept AllowedTypes =
@@ -91,8 +92,25 @@ protected:
 		}
 	}
 
+	template<AllowedTypes T>
+	void parse_input(std::istringstream& iss_, T& param1_, T& param2_, T& param3_)
+	{
+		std::string text1, text2, text3;
+		if (iss_ >> text1 >> text2 >> text3)
+		{
+			param1_ = convert_string<T>(text1);
+			param2_ = convert_string<T>(text2);
+			param3_ = convert_string<T>(text3);
+		}
+		else
+		{
+			std::cerr << "Invalid input arguments" << std::endl;
+		}
+	}
+
 	std::map<std::string, singleVar> singleInputMap;
 	std::map<std::string, doubleVar> doubleInputMap;
+	std::map<std::string, threeVar> threeInputMap;
 
 
 };

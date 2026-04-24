@@ -12,6 +12,17 @@ path::path(std::string _filename, int _num_seconds, int _fps): filename(_filenam
 	interpolate_points();
 }
 
+path::path(settings* pth_setting_)
+{
+	// checking the setting type
+	path_settings* sett = dynamic_cast<path_settings*>(pth_setting_);
+	if (!sett)
+		throw std::invalid_argument("Wrong settings object");
+
+	sett->return_movie_params(num_seconds, fps);
+	file_name = sett->return_file_name();
+}
+
 path::path(const path& _pth) :
 	filename(_pth.filename), fps(_pth.fps), num_seconds(_pth.num_seconds), num_init_frames(_pth.num_init_frames),
 	init_locs(_pth.init_locs), locs(_pth.locs) {}

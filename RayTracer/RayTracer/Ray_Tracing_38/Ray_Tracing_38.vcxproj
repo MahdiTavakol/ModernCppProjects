@@ -167,6 +167,7 @@
     <ClCompile Include="Input\obj_model_reader.cpp" />
     <ClCompile Include="Input\obj_model_reader_parallel.cpp" />
     <ClCompile Include="Input\output_settings.cpp" />
+    <ClCompile Include="Input\path_settings.cpp" />
     <ClCompile Include="Input\scene_factory.cpp" />
     <ClCompile Include="Input\app_settings.cpp" />
     <ClCompile Include="Input\settings.cpp" />
@@ -214,6 +215,7 @@
     <ClInclude Include="Input\obj_model_reader.h" />
     <ClInclude Include="Input\obj_model_reader_parallel.h" />
     <ClInclude Include="Input\output_settings.h" />
+    <ClInclude Include="Input\path_settings.h" />
     <ClInclude Include="Input\scene_factory.h" />
     <ClInclude Include="Input\app_settings.h" />
     <ClInclude Include="Input\settings.h" />
