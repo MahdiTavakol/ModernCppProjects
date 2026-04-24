@@ -9,16 +9,35 @@ renderer_facade::renderer_facade(int argc, char** argv, int _mode,
 	mode{ _mode },
 	filename{ _filename }
 {
-	/* cam_setting sets the default parameters for the modes,
-	 * then the input class can overwrite those parameters based on the user input
-	 */
-	settingsObj = std::make_unique<settings>(mode);
+	/*
+	* The object of the Input class
+	* first initialize the app_settings object
+	* with the default parameters for each class 
+	* and then each parameters is overwritten 
+	* based on the values read either from the 
+	* input script or the CML.
+	* 
+	* 
+	* The input class is solely in charge 
+	* of the initializig various settings objects
+	* so it is the only class that knows the implementation
+	* of various settings classes. Thus, the app_settings
+	* class cannot initialize these settings to decouple it from 
+	* the settings implementation. Thus, the input is
+	* the only class coupled to the settings classes implementations.
+	*/
+
 	// the parallel class in charge of the parallel communicator
 	para = std::make_unique<mpiComm>(comm_, size_config_);
 	// changing the camera settings based on the user input
-	in = std::make_unique<input>(argc, argv, settingsObj.get(), para);
+	in = std::make_unique<input>(argc, argv, app_set_map, para.get());
+	// getting the app_settings object from the in
+	stngs = in->return_app_settings();
+	// getting the settings for the scene_factory object
+	auto& sett = *stngs;
+	settings* scene_settings = sett["scene"];
 	// the world_factory is in charge of lazy creation of the scene.
-	world_factory = std::make_unique<scene_factory>(mode, para);
+	world_factory = std::make_unique<scene_factory>(scene_settings, para.get());
 
 	// think about how the run mode (animation vs static) 
 	// and the size should be parsed from the argv, argc
@@ -32,14 +51,14 @@ renderer_facade::renderer_facade(int argc, char** argv, int _mode,
 
 	// this part acts as a factory for the renderer.
 	// Should there be more renderers this one will have its own class.
-	auto render_mode = settingsObj->return_render_mode();
+	auto render_mode = stngs->return_render_mode();
 	switch (render_mode)
 	{
 	case renderMode::STATIC:
-		rendererObj = std::make_unique<renderer>(para.get(),settingsObj.get());
+		rendererObj = std::make_unique<renderer>(para.get(),stngs.get());
 		break;
 	case renderMode::ANIMATION:
-		rendererObj = std::make_unique<renderer_animation>(para.get(), settingsObj.get());
+		rendererObj = std::make_unique<renderer_animation>(para.get(), stngs.get());
 		break;
 	}
 }
@@ -57,18 +76,24 @@ void renderer_facade::setup()
 	// returning the hittable_list pointe from the world_factory to the renderer
 	world = world_factory->return_world();
 
-
+	// getting a reference to the app_settings object
+	auto& sett = *stngs;
 	// getting the image_settings from the settings object
-	image_settings* img_settings = settingsObj->return_img_settings();
+	settings* img_settings = sett["image"];
 	// creating the image object with the camera settings and the parallel object
-	auto img = std::make_unique<image>(img_settings, para);
+	auto img = std::make_unique<image>(img_settings, para.get());
 
 
 
 	// getting the camera_settings from the settings object
-	camera_settings* cam_settings = settingsObj->return_cam_settings();
+	settings* cam_settings = sett["camera"];
 	// building the camera object
 	cam = std::make_unique<camera>(cam_settings, std::move(img));
+
+	// getting the writer_settings from the settings object
+	settings* wrt_settings = sett["output"];
+	// building the writer object
+	writer = std::make_unique<output>(wrt_settings, para.get());
 
 	// the renderer setup 
 	rendererObj->setup();

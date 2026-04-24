@@ -7,6 +7,7 @@
 #include "../Input/obj_model_reader.h"
 #include "../Input/obj_model_reader_parallel.h"
 #include "../Algorithms/camera.h"
+#include "../Input/app_settings.h"
 #include "../Algorithms/camera_settings.h"
 #include "../Algorithms/settings.h"
 #include "../Input/scene_factory.h"
@@ -43,11 +44,20 @@ protected:
 
 	std::unique_ptr<renderer> rendererObj;
 	std::unique_ptr<scene_factory> world_factory;
-	std::unique_ptr<settings> settingsObj;
+	std::unique_ptr<app_settings> stngs;
 	std::unique_ptr<camera> cam;
 	std::unique_ptr<communicator> para;
 	std::unique_ptr<input> in;
 	std::unique_ptr<hittable_list> world;
 	std::unique_ptr<output> writer;
 	point3 camera_location;
+
+
+	std::map<std::string, int> app_set_map =
+	{
+		{"scene",0},
+		{"camera",1},
+		{"image",2},
+		{"output",3}
+	};
 };
