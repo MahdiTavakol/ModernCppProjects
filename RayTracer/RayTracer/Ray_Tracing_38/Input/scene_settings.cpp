@@ -51,17 +51,18 @@ void scene_settings::check_validity() const
 {
 	settings::check_validity();
 
-	if (obj_file_name.empty())
-		return;
-	if (mtl_file_name.empty())
-		return;
 
-	std::ifstream obj_file(obj_file_name);
-	std::ifstream mtl_file(mtl_file_name);
+	if (mode != OBJ_MODEL && mode != OBJ_MODEL_PARALLEL) {
+		if (!obj_file_name.empty() || !mtl_file_name.empty())
+			throw std::invalid_argument("The obj file name is given but the program mode is not obj reader");
+	} else {
+		std::ifstream obj_file(obj_file_name);
+		std::ifstream mtl_file(mtl_file_name);
 
-	if (!obj_file.is_open())
-		throw std::invalid_argument("the obj_file could not open");
-	if (!mtl_file.is_open())
-		throw std::invalid_argument("the mtl_file could not open");
+		if (!obj_file.is_open())
+			throw std::invalid_argument("the obj_file could not open");
+		if (!mtl_file.is_open())
+			throw std::invalid_argument("the mtl_file could not open");
+	}
 
 }

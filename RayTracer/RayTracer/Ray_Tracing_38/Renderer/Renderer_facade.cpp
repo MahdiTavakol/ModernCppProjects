@@ -47,15 +47,6 @@ renderer_facade::renderer_facade(int argc, char** argv, int _mode,
 	// the world_factory is in charge of lazy creation of the scene.
 	world_factory = std::make_unique<scene_factory>(scene_settings, para.get());
 
-	// think about how the run mode (animation vs static) 
-	// and the size should be parsed from the argv, argc
-	// May be argc, argv goes to a list of strings and
-	// each parser takes its own args from the list and removes its from the list
-	std::array<int, 2> size_config{ 4, 2 };
-	// need to think about this part.. Ideally should be set in the scene factory.
-	std::string obj_file = "../models/Simple/four_meshes.obj";
-
-
 
 	// this part acts as a factory for the renderer.
 	// Should there be more renderers this one will have its own class.
