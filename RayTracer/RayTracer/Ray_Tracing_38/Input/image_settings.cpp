@@ -4,7 +4,20 @@
 image_settings::image_settings(int mode_):
 	settings{mode_}
 {
-	set_mode(mode_);
+	set_input_map();
+}
+
+void image_settings::set_input_map()
+{
+	singleInputMap = {
+		{"-width",&image_width},
+		{"--w",&image_width}
+	};
+
+	doubleInputMap = {
+		{"-aspect_ratio",std::pair{&width_ratio,&height_ratio}},
+		{"--a",std::pair{&width_ratio,&height_ratio}},
+	};
 }
 
 void image_settings::set_mode(int mode_)
@@ -51,4 +64,14 @@ double& image_settings::get_width_ratio()
 double& image_settings::get_height_ratio()
 {
 	return height_ratio;
+}
+
+
+void image_settings::check_validity() const
+{
+	settings::check_validity();
+	if (image_width <= 0)
+		throw std::invalid_argument("Invalid argument for the image_width");
+	if (width_ratio <= 0 || height_ratio <= 0)
+		throw std::invalid_argument("Invalid argument for the height_ratio or the width_ratio");
 }

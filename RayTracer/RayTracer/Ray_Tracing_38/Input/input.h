@@ -38,7 +38,8 @@ protected:
 	void initialize(int argc, char** argv);
 	void logger_function(int argc, char** argv);
 
-
+	// parsing the input file
+	void parse_file();
 	// parsing argv
 	void parse_argv(char** argv, int argc);
 	// parsing parameters
@@ -77,15 +78,14 @@ protected:
 
 
 	void init_app_settings();
-	bool parse_scene_settings(char** argv, int argc, int& iarg);
-	bool parse_camera_settings(char** argv, int argc, int& iarg);
-	bool parse_image_settings(char** argv, int argc, int& iarg);
-	bool parse_output_settings(char** argv, int argc, int& iarg);
+	void parse_render_mode(std::stringstream& ss);
+	void fill_iostream(int argc, char** argv);
 	bool parse_render_mode(char** argv, int argc, int& iarg);
 
 
 
 private:
+	std::unique_ptr<std::iostream> input_stream;
 	std::unique_ptr<app_settings> app_set;
 	std::map<std::string, int> app_set_map;
 };

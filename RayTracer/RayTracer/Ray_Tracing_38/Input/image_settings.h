@@ -8,6 +8,8 @@ public:
 	image_settings(int mode_);
 
 	void set_mode(int mode_) override;
+	void set_input_map() override;
+	void check_validity() const override;
 
 	int& get_image_width();
 	int get_image_height();

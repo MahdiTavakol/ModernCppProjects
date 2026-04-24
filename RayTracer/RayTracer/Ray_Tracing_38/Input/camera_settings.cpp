@@ -3,7 +3,7 @@
 camera_settings::camera_settings(int mode_) :
 	settings{mode_}
 {
-	set_mode(mode_);
+	set_input_map();
 }
 
 void camera_settings::set_mode(int mode_)
@@ -66,6 +66,23 @@ void camera_settings::set_mode(int mode_)
 	}
 }
 
+void camera_settings::set_input_map()
+{
+	singleInputMap = {
+		{"-samples_per_pixel",&samples_per_pixel},
+		{"-max_depth",&max_depth},
+		{"-vfov",&vfov},
+		{"-fps",&fps},
+		{"-num_seconds",&num_seconds},
+
+		{"--s",&samples_per_pixel},
+		{"--d",&max_depth},
+		{"--v",&vfov},
+		{"--f",&fps},
+		{"--t",&num_seconds},
+	};
+}
+
 
 int& camera_settings::get_samples_per_pixel()
 {
@@ -111,4 +128,20 @@ int& camera_settings::get_fps()
 int& camera_settings::get_num_seconds()
 {
 	return num_seconds;
+}
+
+
+void camera_settings::check_validity() const
+{
+	settings::check_validity();
+	if (samples_per_pixel <= 0)
+		throw std::invalid_argument("Wrong argument for the samples_per_pixel");
+	if (max_depth <= 0)
+		throw std::invalid_argument("Wrong argument for the max_depth");
+	if (vfov <= 0)
+		throw std::invalid_argument("Wrong argument for the vfov");
+	if (fps <= 0)
+		throw std::invalid_argument("Wrong argument for the fps");
+	if (num_seconds <= 0)
+		throw std::invalid_argument("Wrong argument for the num_seconds");
 }

@@ -12,6 +12,8 @@ public:
 	camera_settings()
 	{}
 	camera_settings(int mode_);
+	void set_input_map() override;
+	void check_validity() const override;
 
 	void set_mode(int mode_) override;
 	int& get_samples_per_pixel();
