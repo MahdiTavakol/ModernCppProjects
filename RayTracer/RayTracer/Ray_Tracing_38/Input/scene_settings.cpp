@@ -66,3 +66,8 @@ void scene_settings::check_validity() const
 	}
 
 }
+
+void scene_settings::log_class_name(std::iostream& stream_) const
+{
+	stream_ << "Scene class options:" << std::endl << std::endl;
+}

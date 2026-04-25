@@ -32,6 +32,8 @@ public:
 	virtual void check_validity() const;
 	virtual void parse_commands();
 	virtual void extra_parse() {}
+	virtual void log_class_name(std::iostream& stream_) const;
+	virtual void logger(std::iostream& stream_) const;
 
 
 protected:

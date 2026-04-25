@@ -12,6 +12,8 @@ public:
 	void set_input_map() override;
 	void check_validity() const override;
 
+	void log_class_name(std::iostream& stream_) const;
+
 	int& get_image_width();
 	int get_image_height();
 	double& get_width_ratio();

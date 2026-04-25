@@ -86,3 +86,8 @@ void output_settings::check_validity() const
 			throw std::invalid_argument("Invalid output mode for PARALLEL output type! Only P3 is allowed.");
 	}
 }
+
+void output_settings::log_class_name(std::iostream& stream_) const
+{
+	stream_ << "Output class options:" << std::endl << std::endl;
+}

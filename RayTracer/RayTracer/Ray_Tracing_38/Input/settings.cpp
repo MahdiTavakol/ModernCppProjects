@@ -79,3 +79,89 @@ void settings::check_validity() const
 	if (mode < 0)
 		throw std::invalid_argument("Wrong mode value");
 }
+
+void settings::log_class_name(std::iostream& stream_) const
+{
+	stream_ << "Settings class options:" << std::endl << std::endl;
+}
+
+void settings::logger(std::iostream& stream_) const
+{
+	// the header for the log file
+	log_class_name();
+	for (auto& pair : singleInputMap)
+	{
+		auto& val = pair.second;
+		if (val.index() == 0)
+		{
+			int* ptr = std::get<int*>(val);
+			stream_ << pair.first << " " << *ptr << std::endl;
+		}
+		else if (val.index() == 1)
+		{
+			double* ptr = std::get<double*>(val);
+			stream_ << pair.first << " " << *ptr << std::endl;
+		}
+		else if (val.index() == 2)
+		{
+			std::string* ptr = std::get<2>(val);
+			stream_ << pair.first << " " << *ptr << std::endl;
+		}
+	}
+	
+	
+	for (auto& pair : doubleInputMap)
+	{
+		auto& val = pair.second;
+		if (val.index() == 0)
+		{
+			std::pair<int*,int*> value = std::get<std::pair<int*, int*>>(val);
+			int value1 = *(value.first);
+			int value2 = *(value.second);
+			stream_ << pair.first << " " << value1 << " " << value2 << std::endl;
+		}
+		else if (val.index() == 1)
+		{
+			std::pair<double*, double*> value = std::get<std::pair<double*, double*>>(val);
+			double value1 = *(value.first);
+			double value2 = *(value.second);
+			stream_ << pair.first << " " << value1 << " " << value2 << std::endl;
+		}
+		else if (val.index() == 2)
+		{
+			std::pair<std::string*, std::string*> value = std::get<std::pair<std::string*, std::string*>>(val);
+			std::string value1 = *(value.first);
+			std::string value2 = *(value.second);
+			stream_ << pair.first << " " << value1 << " " << value2 << std::endl;
+		}
+	}
+
+	for (auto& pair : threeInputMap)
+	{
+		auto& val = pair.second;
+		if (val.index() == 0)
+		{
+			std::tuple<int*, int*,int*> value = std::get<std::tuple<int*, int*, int*>>(val);
+			int value1 = *(std::get<0>(value));
+			int value2 = *(std::get<1>(value));
+			int value3 = *(std::get<2>(value));
+			stream_ << pair.first << " " << value1 << " " << value2 << " " << value3 << std::endl;
+		}
+		else if (val.index() == 1)
+		{
+			std::tuple<double*, double*, double*> value = std::get<std::tuple<double*, double*, double*>>(val);
+			double value1 = *(std::get<0>(value));
+			double value2 = *(std::get<1>(value));
+			double value3 = *(std::get<2>(value));
+			stream_ << pair.first << " " << value1 << " " << value2 << " " << value3 << std::endl;
+		}
+		else if (val.index() == 2)
+		{
+			// not implemented yet!
+		}
+	}
+
+	stream_ << std::endl << std::endl << std::endl;
+
+
+}

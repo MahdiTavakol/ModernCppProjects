@@ -15,6 +15,7 @@ public:
 	void check_validity() const override;
 	void extra_parse() override;
 	void parse_commands() override;
+	void log_class_name(std::iostream& stream_) const;
 
 private:
 	std::string file_name;

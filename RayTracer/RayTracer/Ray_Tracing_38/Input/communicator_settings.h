@@ -12,6 +12,7 @@ public:
 	{
 		// empty for now! 
 	}
+	void log_class_name(std::iostream& stream_) const;
 	void return_size_config(std::array<int, 2>& size_config_);
 
 protected:

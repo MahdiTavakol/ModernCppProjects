@@ -13,6 +13,7 @@ public:
 	camera_settings(int mode_);
 	void set_input_map() override;
 	void check_validity() const override;
+	void log_class_name(std::iostream& stream_) const;
 
 	void set_mode(int mode_) override;
 	int& get_samples_per_pixel();

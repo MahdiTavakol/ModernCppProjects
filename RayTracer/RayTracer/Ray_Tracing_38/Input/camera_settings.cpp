@@ -3,6 +3,7 @@
 camera_settings::camera_settings(int mode_) :
 	settings{mode_}
 {
+	set_mode(mode_);
 	set_input_map();
 }
 
@@ -144,4 +145,9 @@ void camera_settings::check_validity() const
 		throw std::invalid_argument("Wrong argument for the fps");
 	if (num_seconds <= 0)
 		throw std::invalid_argument("Wrong argument for the num_seconds");
+}
+
+void camera_settings::log_class_name(std::iostream& stream_) const
+{
+	stream_ << "Camera class options:" << std::endl << std::endl;
 }

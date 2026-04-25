@@ -4,6 +4,7 @@
 image_settings::image_settings(int mode_):
 	settings{mode_}
 {
+	set_mode(mode);
 	set_input_map();
 }
 
@@ -74,4 +75,9 @@ void image_settings::check_validity() const
 		throw std::invalid_argument("Invalid argument for the image_width");
 	if (width_ratio <= 0 || height_ratio <= 0)
 		throw std::invalid_argument("Invalid argument for the height_ratio or the width_ratio");
+}
+
+void image_settings::log_class_name(std::iostream& stream_) const
+{
+	stream_ << "Image class options:" << std::endl << std::endl;
 }

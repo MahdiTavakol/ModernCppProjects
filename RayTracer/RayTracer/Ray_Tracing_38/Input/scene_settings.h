@@ -11,6 +11,7 @@ public:
 	void set_obj_file_name(const std::string& obj_file_name_);
 	void set_mtl_file_name(const std::string& mtl_file_name_);
 	void check_validity() const override;
+	void log_class_name(std::iostream& stream_) const override;
 
 
 	int return_mode() const;
