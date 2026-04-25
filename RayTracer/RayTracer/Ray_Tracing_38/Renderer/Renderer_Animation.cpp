@@ -9,16 +9,13 @@ renderer_animation::renderer_animation(communicator* para_, std::unique_ptr<path
 	int rank = para->return_rank();
 	if (rank != 0)
 		verbose = false;
+
+	num_frames = pth->return_num_frames();
 }
 
 
 void renderer_animation::render(camera* cam_, output* writer_, hittable_list* world_)
 {
-	int rank = para->return_rank();
-
-	int fps, num_frames, num_seconds, num_init_frames;
-	pth->return_frame_info(fps, num_frames, num_seconds, num_init_frames);
-
 	// getting a reference to the pth resource
 	path& pth_ref = *pth;
 

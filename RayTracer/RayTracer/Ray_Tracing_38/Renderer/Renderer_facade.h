@@ -1,15 +1,13 @@
 #pragma once
 
 #include <memory>
-
+#include <mpi.h>
 
 #include "Renderer.h"
 #include "../Algorithms/camera.h"
 #include "../Algorithms/communicator.h"
 #include "../Output/output.h"
 #include "../Algorithms/hittable_list.h"
-
-
 #include "../Input/factory.hpp"
 
 
@@ -21,7 +19,7 @@ public:
 	virtual void setup();
 	void add(std::unique_ptr<hittable>& object);
 	virtual void render();
-	void write_file();
+	void write();
 
 
 
@@ -30,7 +28,7 @@ protected:
 	std::unique_ptr<factory> builder;
 
 	// resources
-	std::unique_ptr<renderer> rendererObj;
+	std::unique_ptr<renderer> rend;
 	std::unique_ptr<camera> cam;
 	std::unique_ptr<communicator> para;
 	std::unique_ptr<output> writer;

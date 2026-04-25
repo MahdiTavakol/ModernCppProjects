@@ -190,7 +190,6 @@
     <ClInclude Include="Algorithms\communicator.h" />
     <ClInclude Include="Algorithms\hittable_list.h" />
     <ClInclude Include="Algorithms\hittable_list_parallel.h" />
-    <ClInclude Include="Algorithms\hittable_list_parallel_optimized.h" />
     <ClInclude Include="Algorithms\hit_record.h" />
     <ClInclude Include="Algorithms\image.h" />
     <ClInclude Include="Algorithms\mpiComm.h" />

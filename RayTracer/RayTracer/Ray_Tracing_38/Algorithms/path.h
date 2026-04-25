@@ -24,7 +24,8 @@ public:
 		point3 output = locs[i].return_loc();
 		return output;
 	}
-	void return_frame_info(int& fps_, int& num_frames_, int& num_seconds_, int& num_init_frames_);
+
+	int return_num_frames();
 
 
 private:

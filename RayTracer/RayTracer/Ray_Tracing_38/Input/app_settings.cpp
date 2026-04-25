@@ -8,7 +8,10 @@ app_settings::app_settings(
 	settings{ mode_ },
 	settingsMap{settingsMap_},
 	settingsVec{ std::move(settingsVec_) }
-{}
+{
+	// setting the default parameters based on the chosen mode
+	this->set_mode(mode_);
+}
 
 void app_settings::set_mode(int mode_)
 {
@@ -54,6 +57,13 @@ void app_settings::check_validity() const
 	for (auto& sett : settingsVec)
 	{
 		sett->check_validity();
+	}
+}
+
+void app_settings::logger(std::iostream& stream_) const {
+	for (auto& sett : settingsVec)
+	{
+		sett->logger(stream_);
 	}
 }
 

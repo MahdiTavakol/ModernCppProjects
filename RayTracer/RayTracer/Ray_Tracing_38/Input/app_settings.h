@@ -29,6 +29,8 @@ public:
 
 	void parse_commands() override;
 
+	void logger(std::iostream& stream_) const override;
+
 	settings* operator[](const int indx) {
 		return settingsVec[indx].get();
 	}
@@ -36,7 +38,6 @@ public:
 	settings* operator[](const std::string& text_);
 
 private:
-	renderMode renderMode = renderMode::STATIC;
 
 	std::map<std::string, int> settingsMap;
 	std::vector<std::unique_ptr<settings>> settingsVec;

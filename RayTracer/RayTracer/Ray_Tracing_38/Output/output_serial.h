@@ -3,6 +3,9 @@
 
 class output_serial : public output {
 public:
+	output_serial(
+		settings* out_settings,
+		communicator* para_);
 	output_serial(std::string _file_name,
 		std::unique_ptr<image>&& img_,
 		std::unique_ptr<communicator>& para_,

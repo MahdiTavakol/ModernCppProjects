@@ -14,7 +14,6 @@
 class output {
 public:
 	output(settings* out_settings,
-		   std::unique_ptr<image>&& img_,
 		   communicator* para_);
 	output(std::string _file_name, 
 		   std::unique_ptr<image>&& img_,
@@ -40,7 +39,7 @@ protected:
 	static void remove_file(const std::string& fileName_);
 	std::streampos write_header(const int& width_, const int& height_);
 	std::streampos write_header();
-	outputMode mode = outputMode::P3;
+	outputMode outMode = outputMode::P3;
 	std::string file_name;
 	// I want it to be iostream so that output_parallel can read it 
 	// to get the begining of the binary section

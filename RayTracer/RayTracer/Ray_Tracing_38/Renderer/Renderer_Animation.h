@@ -9,5 +9,6 @@ public:
 
 
 private:
+	int num_frames;
 	void update_filename(std::string filename_);
 };

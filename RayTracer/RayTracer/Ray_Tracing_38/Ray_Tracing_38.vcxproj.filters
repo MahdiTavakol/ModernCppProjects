@@ -206,9 +206,6 @@
     <ClInclude Include="Algorithms\hittable_list_parallel.h">
       <Filter>Source Files\Algorithms</Filter>
     </ClInclude>
-    <ClInclude Include="Algorithms\hittable_list_parallel_optimized.h">
-      <Filter>Source Files\Algorithms</Filter>
-    </ClInclude>
     <ClInclude Include="Algorithms\path.h">
       <Filter>Source Files\Algorithms</Filter>
     </ClInclude>

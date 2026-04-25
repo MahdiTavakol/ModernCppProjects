@@ -55,10 +55,14 @@ public:
 		return std::move(img);
 	}
 
+
+
 	color_array* return_color_array_ptr()
 	{
 		return img->array();
 	}
+
+	void reset_image(std::unique_ptr<image>&& img_);
 
 
 

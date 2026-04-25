@@ -1,5 +1,10 @@
 #include "output_serial.h"
 
+output_serial::output_serial(
+	settings* out_settings,
+	communicator* para_) :
+	output{ out_settings,para_ }
+{}
 
 output_serial::output_serial(
 	std::string _file_name,
@@ -49,6 +54,6 @@ void output_serial::write_file()
 		// getting a pointer to the color_array object of the image
 		auto* colors = img->array();
 		// for serial writting the stride is zero
-		colors->write(*stream, mode, 0);
+		colors->write(*stream, outMode, 0);
 	}
 }

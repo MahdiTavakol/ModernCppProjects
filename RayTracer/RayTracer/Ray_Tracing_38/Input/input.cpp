@@ -11,10 +11,11 @@
 #include "camera_settings.h"
 #include "renderer_settings.h"
 
-input::input(int argc, char** argv,
+input::input(int argc, char** argv, int mode_,
 	std::map<std::string, int> app_set_map,
 	communicator* para_,
 	std::vector<std::reference_wrapper<std::ostream>> strmVec_):
+	mode{mode_},
 	para{para_}
 {
 	init_app_settings();
@@ -23,7 +24,7 @@ input::input(int argc, char** argv,
 
 std::unique_ptr<app_settings> input::return_app_settings()
 {
-	std::move(app_set);
+	return std::move(app_set);
 }
 
 void input::initialize(int argc, char** argv)
@@ -60,23 +61,11 @@ void input::logger_function(int argc, char** argv)
 				strm << "\n";
 			strm << argv[i] << " ";
 		}
+
 		strm << std::endl << std::endl;
-		camera_settings* cam_settings = settingsObj->return_cam_settings();
-		int& image_width = cam_settings->get_image_width();
-		int& samples_per_pixel = cam_settings->get_samples_per_pixel();
-		int& max_depth = cam_settings->get_max_depth();
-		int& vfov = cam_settings->get_vfov();
-		double& width_ratio = cam_settings->get_width_ratio();
-		double& height_ratio = cam_settings->get_height_ratio();
-		int& fps = cam_settings->get_fps();
-		int& num_seconds = cam_settings->get_num_seconds();
-		strm << "image_width = " << image_width << std::endl;
-		strm << "samples_per_pixel = " << samples_per_pixel << std::endl;
-		strm << "max_depth = " << max_depth << std::endl;
-		strm << "vfov = " << vfov << std::endl;
-		strm << "aspect_ratio = " << width_ratio << "/" << height_ratio << std::endl;
-		strm << "fps = " << fps << std::endl;
-		strm << "num_seconds = " << num_seconds << std::endl;
+		strm << "The parsed input:" << std::endl;
+		strm << std::endl << std::endl;
+		app_set->logger(strm);
 	}
 }
 
@@ -109,15 +98,15 @@ void input::init_app_settings()
 	for (auto& pair : app_set_map)
 	{
 		if (!pair.first.compare("scene"))
-			app_set->push_back(std::make_unique<scene_settings>());
+			app_set->push_back(std::make_unique<scene_settings>(mode));
 		else if (!pair.first.compare("camera"))
-			app_set->push_back(std::make_unique<camera_settings>());
+			app_set->push_back(std::make_unique<camera_settings>(mode));
 		else if (!pair.first.compare("image"))
-			app_set->push_back(std::make_unique<image_settings>());
+			app_set->push_back(std::make_unique<image_settings>(mode));
 		else if (!pair.first.compare("output"))
-			app_set->push_back(std::make_unique<output_settings>());
+			app_set->push_back(std::make_unique<output_settings>(mode));
 		else if (!pair.first.compare("renderer"))
-			app_set->push_back(std::make_unique<renderer_settings>());
+			app_set->push_back(std::make_unique<renderer_settings>(mode));
 		else
 			throw std::invalid_argument("Nonrecoverable error!");
 	}
@@ -156,7 +145,10 @@ void input::fill_iostream(int argc, char** argv)
 	for (int i = 1; i < argc; i++)
 	{
 		std::string text(argv[i]);
-		*input_stream >> text;
+		// if it is a setting keyword it must be written in a new line
+		if (app_set_map.find(text) != app_set_map.end())
+			*input_stream << std::endl;
+		*input_stream << text;
 	}
 
 }

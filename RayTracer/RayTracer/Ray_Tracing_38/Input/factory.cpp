@@ -1,11 +1,11 @@
 #include "factory.hpp"
 #include "../Renderer/Renderer.h"
-#include "../Renderer/Renderer_Animation.h"
+#include "../Algorithms/mpiComm.h"
 #include "../Output/output_serial.h"
 #include "../Output/output_parallel.h"
 
 factory::factory(int argc, char** argv, int mode_,
-	MPI_Comm comm_) :
+	MPI_Comm comm_):
 	mode{ mode_ }
 {
 	/*
@@ -35,7 +35,7 @@ factory::factory(int argc, char** argv, int mode_,
 
 
 	// changing the settings based on the user input
-	in = std::make_unique<input>(argc, argv, app_set_map, para.get());
+	in = std::make_unique<input>(argc, argv, mode_,app_set_map, para.get());
 	// getting the app_settings object from the in
 	stngs = in->return_app_settings();
 

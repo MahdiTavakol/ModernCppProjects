@@ -76,10 +76,7 @@ void path::interpolate_points()
 	}
 }
 
-void path::return_frame_info(int& fps_, int& num_frames_, int& num_seconds_, int& num_init_frames_)
+int path::return_num_frames()
 {
-	fps_ = fps;
-	num_frames_ = num_frames;
-	num_seconds_ = num_seconds;
-	num_init_frames_ = num_init_frames;
+	return num_frames;
 }

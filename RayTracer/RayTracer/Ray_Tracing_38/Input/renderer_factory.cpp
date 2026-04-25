@@ -75,17 +75,17 @@ std::unique_ptr<path> renderer_factory::create_and_return_path()
 	case Path_type::CIRCULAR:
 		return std::make_unique<path>(center, radius, theta, num_seconds, fps);
 	case Path_type::FILE:
-		return std::make_unique<path>(centers, num_seconds, fps);
+		return std::make_unique<path>(std::move(centers), num_seconds, fps);
 	}
 	return nullptr;
 }
 
-std::unique_ptr<renderer> renderer_factory::return_renderer()
+std::unique_ptr<renderer> renderer_factory::return_object()
 {
 	if (!renderObj)
 	{
 		std::cout << "The renderer object has already been returned\nCreating it again!" << std::endl;
 		create();
 	}
-	std::move(renderObj);
+	return std::move(renderObj);
 }

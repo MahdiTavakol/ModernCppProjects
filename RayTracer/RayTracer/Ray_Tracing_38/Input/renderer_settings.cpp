@@ -8,6 +8,7 @@ renderer_settings::renderer_settings(int mode_):
 	settings{mode_}
 {
 	set_mode(mode_);
+	set_input_map();
 }
 
 void renderer_settings::set_input_map()
@@ -183,7 +184,7 @@ void renderer_settings::check_validity() const
 	if (pth_type == Path_type::CIRCULAR)
 	{
 		if (radius <= eps)
-			throw std::invalid_argument("The raidus for the circular path must be positive");
+			throw std::invalid_argument("The radius for the circular path must be positive");
 	}
 }
 

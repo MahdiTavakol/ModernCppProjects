@@ -88,7 +88,7 @@ void settings::log_class_name(std::iostream& stream_) const
 void settings::logger(std::iostream& stream_) const
 {
 	// the header for the log file
-	log_class_name();
+	log_class_name(stream_);
 	for (auto& pair : singleInputMap)
 	{
 		auto& val = pair.second;

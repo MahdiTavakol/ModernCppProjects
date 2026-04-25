@@ -49,8 +49,6 @@ std::string scene_settings::return_mtl_file_name() const
 
 void scene_settings::check_validity() const
 {
-	settings::check_validity();
-
 
 	if (mode != OBJ_MODEL && mode != OBJ_MODEL_PARALLEL) {
 		if (!obj_file_name.empty() || !mtl_file_name.empty())

@@ -15,6 +15,7 @@ void output_settings::set_input_map()
 	singleInputMap = {
 		{"-output_type",&output_type_str},
 		{"-output_mode",&output_mode_str},
+		{"-image_file", &file_name},
 
 		{"--o",&output_type_str},
 		{"--om",&output_mode_str},
@@ -29,11 +30,11 @@ void output_settings::parse_commands()
 
 void output_settings::extra_parse()
 {
-	if (output_type_str == "SERIAL")
+	if (output_type_str == "serial")
 	{
 		type = outputType::SERIAL;
 	}
-	else if (output_type_str == "PARALLEL")
+	else if (output_type_str == "parallel")
 	{
 		type = outputType::PARALLEL;
 	}
@@ -57,11 +58,11 @@ void output_settings::extra_parse()
 }
 
 
-outputType& output_settings::return_type()
+outputType output_settings::return_type()
 {
 	return type;
 }
-outputMode& output_settings::return_outputMode()
+outputMode output_settings::return_outputMode()
 {
 	return outMode;
 }
@@ -71,15 +72,9 @@ std::string output_settings::return_file_name()
 	return file_name;
 }
 
-void output_settings::set_file_name(std::string file_name_)
-{
-	file_name = file_name_;
-}
 
 void output_settings::check_validity() const
 {
-	settings::check_validity();
-
 	if (type == outputType::PARALLEL)
 	{
 		if (outMode != outputMode::P3)

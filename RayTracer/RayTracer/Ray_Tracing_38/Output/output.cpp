@@ -6,10 +6,7 @@
 
 
 output::output(settings* out_settings_,
-	           std::unique_ptr<image>&& img_,
 	           communicator* para_):
-	mode{out_settings_->return_mode()},
-	img{std::move(img_)},
 	para{para_}
 {
 	// checking the setting type
@@ -18,14 +15,15 @@ output::output(settings* out_settings_,
 		throw std::invalid_argument("Wrong settings object");
 
 	file_name = sett->return_file_name();
+	outMode = sett->return_outputMode();
 }
 
 output::output(
 	std::string _file_name, 
 	std::unique_ptr<image>&& img_,
 	std::unique_ptr<communicator>& para_,
-	outputMode mode_) :
-	mode{mode_},
+	outputMode outMode_) :
+	outMode{outMode_},
 	file_name{ _file_name }, 
 	img{std::move(img_)},
 	para{ para_.get() }
@@ -40,8 +38,8 @@ output::output(
 	std::unique_ptr<std::iostream> _stream,
 	std::unique_ptr<image>&& img_,
 	std::unique_ptr<communicator>& para_,
-	outputMode mode_) :
-	mode{ mode_ },
+	outputMode outMode_) :
+	outMode{ outMode_ },
 	stream{ std::move(_stream)},
 	img{ std::move(img_) },
 	para{ para_.get() }
@@ -68,9 +66,9 @@ void output::open_new_file(std::string _file_name)
 	file_name = _file_name;
 	if (file && file->is_open())
 		file->close();
-	if (mode == outputMode::P3)
+	if (outMode == outputMode::P3)
 		stream = std::make_unique<std::fstream>(file_name, std::ios::out);
-	else if (mode == outputMode::P6)
+	else if (outMode == outputMode::P6)
 		stream = std::make_unique<std::fstream>(file_name,std::ios::in | std::ios::out | std::ios::binary);
 	else
 		std::cerr << "Wrong mode" << std::endl;
@@ -100,11 +98,11 @@ std::unique_ptr<std::iostream> output::return_stream()
 
 std::streampos output::write_header(const int& width_, const int& height_)
 {
-	if (mode == outputMode::P3)
+	if (outMode == outputMode::P3)
 	{
 		*stream << "P3\n";
 	}
-	else if (mode == outputMode::P6)
+	else if (outMode == outputMode::P6)
 	{
 		*stream << "P6\n";
 	}

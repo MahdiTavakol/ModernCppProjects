@@ -8,6 +8,7 @@
 #include "input.h"
 #include "../Algorithms/hittable_list.h"
 #include "../Output/output.h"
+#include <mpi.h>
 
 class factory
 {
@@ -27,8 +28,9 @@ protected:
 	std::unique_ptr<communicator> para;
 	// the parser 
 	std::unique_ptr<input> in;
-	// objects without dedicated factories
+	// the settings array for all the objects
 	std::unique_ptr<app_settings> stngs;
+	// objects without dedicated factories
 	std::unique_ptr<camera> cam;
 	std::unique_ptr<output> writer;
 	// objects with special factories

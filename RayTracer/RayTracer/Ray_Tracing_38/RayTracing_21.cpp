@@ -5,16 +5,13 @@
 
 #include "Shared/rtweekend.h"
 #include "Renderer/Renderer.h"
-#include "Renderer/Renderer_Animation.h"
+#include "Renderer/Renderer_facade.h"
 
 
 int main(int argc, char** argv)
 {
 	MPI_Init(&argc, &argv);
 	int mode;
-	std::string obj_file = "../models/56-chair/Chair.obj";
-	obj_file = "../models/Simple/four_meshes.obj";
-	std::string filename = "test.ppm";
 
 	//mode = RANDOM_SPHERES;
 	//mode = CHECKER_BOARDS;
@@ -33,14 +30,14 @@ int main(int argc, char** argv)
 	//mode = RANDOM_SPHERES_ANIMATED;
 	mode = SIMPLE_2D_PARALEL_TEST;
 
-	std::array<int, 2> size_config{ 4, 2 };
+	
+	std::unique_ptr<renderer_facade> rendFacade = 
+		std::make_unique<renderer_facade>(argc, argv, mode, MPI_COMM_WORLD);
 
-	std::unique_ptr<renderer> rendererObj = std::make_unique<renderer>(argc, argv, mode, filename, obj_file, size_config);
-	//std::unique_ptr<renderer> render = std::make_unique<renderer_animation>(argc,argv,mode,filename);
 
-	rendererObj->setup();
-	rendererObj->render();
-	rendererObj->write_file();
+	rendFacade->setup();
+	rendFacade->render();
+	rendFacade->write();
 
 
 	MPI_Finalize();

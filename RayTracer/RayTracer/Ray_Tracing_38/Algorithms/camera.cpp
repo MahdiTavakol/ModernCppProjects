@@ -114,11 +114,21 @@ void camera::render_verbose(const hittable& world_)
 {
 	// getting the color_data array from the image object
 	color_data** c_data = img->returnColorData();
+	// getting the ranges from the image object
+	std::array<int, 2> widthRange, heightRange;
+	img->returnRange(widthRange, heightRange);
+	int height_min = heightRange[0];
+	int height_max = heightRange[1];
+	int width_min = widthRange[0];
+	int width_max = widthRange[1];
 
-	for (int j = 0; j < image_height; j++)
+	int image_height = height_max - height_min;
+	int image_width = width_max - width_min;
+
+	for (int j = height_min; j < height_max; j++)
 	{
 		std::clog << "\rScanlines remaining: " << (image_height - j) << " " << std::flush;
-		for (int i = 0; i < image_width; i++)
+		for (int i = width_min; i < width_max; i++)
 		{
 			color pixel_color(0, 0, 0);
 			samples_per_pixel = 1;
@@ -186,3 +196,8 @@ color camera::ray_color(const ray& r, int depth, const hittable& world) const
 	return color_from_emission + color_from_scatter;
 }
 
+
+void camera::reset_image(std::unique_ptr<image>&& img_)
+{
+	img = std::move(img_);
+}

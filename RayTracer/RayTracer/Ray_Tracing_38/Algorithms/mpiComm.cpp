@@ -33,7 +33,7 @@ mpiComm::mpiComm(
 
 mpiComm::mpiComm(
     MPI_Comm comm_,
-    communicator_settings* stngs_) :
+    settings* stngs_) :
     communicator{ stngs_ },
     MPI_world{ comm_ }
 {

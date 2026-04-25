@@ -4,6 +4,9 @@
 
 class output_parallel : public output {
 public:
+	output_parallel(
+		settings* out_settings,
+		communicator* para_);
 	output_parallel(std::string _file_name,
 		std::unique_ptr<image>&& img_,
 		std::unique_ptr<communicator>& para_,
@@ -19,6 +22,8 @@ public:
 		outputMode mode = outputMode::P6);
 	~output_parallel();
 
+
+	void init();
 	void write_file() override;
 
 

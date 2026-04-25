@@ -21,7 +21,7 @@ void renderer_facade::setup()
 	// creating the objects
 	builder->create();
 	// returning each object
-	rendererObj = builder->return_renderer();
+	rend = builder->return_renderer();
 	cam = builder->return_camera();
 	para = builder->return_comm();
 	writer = builder->return_writer();
@@ -36,11 +36,11 @@ void renderer_facade::add(std::unique_ptr<hittable>& object)
 
 void renderer_facade::render()
 {
-	rendererObj->render(cam.get(), writer.get(), world.get());
+	rend->render(cam.get(), writer.get(), world.get());
 }
 
 
-void renderer_facade::write_file()
+void renderer_facade::write()
 {
 	// writing the file - it is the job of the writer to just write the file in the rank 0, so no need to check the rank here.
 	// also the renderer sets the filename in its render method, so the writer will always write the file with the correct name.

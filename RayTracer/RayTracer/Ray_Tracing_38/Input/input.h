@@ -12,7 +12,7 @@
 class input
 {
 public:
-	input(int argc, char** argv, 
+	input(int argc, char** argv, int mode_,
 		std::map<std::string, int> app_set_map,
 		communicator* para_,
 		std::vector<std::reference_wrapper<std::ostream>> strmVec_ = {
@@ -31,12 +31,13 @@ public:
 
 
 protected:
+	int mode;
 	template<typename T>
 	T convert_char(char* _chr);
 	communicator* para;
 
 
-	std::vector<std::reference_wrapper<std::ostream>> outStreams;
+	std::vector<std::reference_wrapper<std::iostream>> outStreams;
 	void initialize(int argc, char** argv);
 	void logger_function(int argc, char** argv);
 
