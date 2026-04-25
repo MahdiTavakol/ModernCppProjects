@@ -26,8 +26,6 @@ void renderer_facade::setup()
 	para = builder->return_comm();
 	writer = builder->return_writer();
 	world = builder->return_world();
-	// the renderer setup
-	rendererObj->setup();
 }
 
 

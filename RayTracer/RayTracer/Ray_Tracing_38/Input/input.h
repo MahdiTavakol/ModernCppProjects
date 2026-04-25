@@ -78,7 +78,6 @@ protected:
 
 
 	void init_app_settings();
-	void parse_render_mode(std::stringstream& ss);
 	void fill_iostream(int argc, char** argv);
 	// some options are not compatible so this checks their compatibility
 	void check_compatibility();

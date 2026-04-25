@@ -171,10 +171,10 @@
     <ClCompile Include="Input\factory.cpp">
       <Filter>Source Files\Input</Filter>
     </ClCompile>
-    <ClCompile Include="Input\path_settings.cpp">
+    <ClCompile Include="Input\renderer_factory.cpp">
       <Filter>Source Files\Input</Filter>
     </ClCompile>
-    <ClCompile Include="Input\renderer_factory.cpp">
+    <ClCompile Include="Input\renderer_settings.cpp">
       <Filter>Source Files\Input</Filter>
     </ClCompile>
   </ItemGroup>
@@ -260,7 +260,7 @@
     <ClInclude Include="Input\obj_model_reader_parallel.h">
       <Filter>Source Files\Input</Filter>
     </ClInclude>
-    <ClInclude Include="Input\scene_factory.h">
+    <ClInclude Include="Input\scene_factory.hpp">
       <Filter>Source Files\Input</Filter>
     </ClInclude>
     <ClInclude Include="Materials\material.h">
@@ -323,10 +323,10 @@
     <ClInclude Include="Input\factory.hpp">
       <Filter>Source Files\Input</Filter>
     </ClInclude>
-    <ClInclude Include="Input\path_settings.h">
+    <ClInclude Include="Input\renderer_factory.hpp">
       <Filter>Source Files\Input</Filter>
     </ClInclude>
-    <ClInclude Include="Input\renderer_factory.h">
+    <ClInclude Include="Input\renderer_settings.h">
       <Filter>Source Files\Input</Filter>
     </ClInclude>
   </ItemGroup>

@@ -39,21 +39,20 @@
 class renderer
 {
 public:
-	renderer(communicator* para_, settings* settingsObj_, std::string info = "", bool verbose = false);
+	renderer(communicator* para_,std::unique_ptr<path>&& pth_, std::string info_ = "", bool verbose_ = false);
 
 	virtual ~renderer();
-	virtual void setup([[maybe_unused]] camera *cam_) {}
 	virtual void render(camera* cam_, output* writer_, hittable_list* world_);
 	void write_file(output* writer_);
 	
 	
 
 protected:
-	int mode;
 	std::string info = "";
 	bool verbose = false;
 	communicator* para;
 
+	std::unique_ptr<path> pth;
 
 	void message(std::string _text);
 	std::string filename;

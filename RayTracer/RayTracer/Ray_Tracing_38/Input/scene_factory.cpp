@@ -1,4 +1,4 @@
-#include "scene_factory.h"
+#include "scene_factory.hpp"
 
 #include "../Shared/rtweekend.h"
 
@@ -102,7 +102,7 @@ void scene_factory::create()
 	}
 }
 
-std::unique_ptr<hittable_list> scene_factory::return_world()
+std::unique_ptr<hittable_list> scene_factory::return_object()
 {
 	if (world == nullptr)
 	{

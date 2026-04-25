@@ -24,15 +24,6 @@ public:
 
 	settings* return_settings(const std::string name_) const;
 
-	void set_render_mode(renderMode& renderMode_)
-	{
-		renderMode = renderMode_;
-	}
-
-	renderMode return_render_mode()
-	{
-		return renderMode;
-	}
 
 	void check_validity() const;
 

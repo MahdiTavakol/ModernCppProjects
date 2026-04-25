@@ -40,8 +40,18 @@ factory::factory(int argc, char** argv, int mode_,
 	stngs = in->return_app_settings();
 
 	// creating the dedicated factories
-	// getting the settings for the scene_factory object
+
+	// reference to the settings
 	auto& sett = *stngs;
+
+
+	// getting the settings for the renderer_factory object
+	settings* renderer_settings = sett["renderer"];
+	// the renderer factory
+	rend_factory = std::make_unique<renderer_factory>(renderer_settings,para.get());
+
+
+	// getting the settings for the scene_factory object
 	settings* scene_settings = sett["scene"];
 	// the world_factory is in charge of lazy creation of the scene.
 	world_factory = std::make_unique<scene_factory>(scene_settings, para.get());
@@ -61,21 +71,6 @@ void factory::create()
 	// creating the image object with the camera settings and the parallel object
 	auto img = std::make_unique<image>(img_settings, para.get());
 
-
-	// this part acts as a factory for the renderer.
-	// Should there be more renderers this one will have its own class.
-	auto render_mode = stngs->return_render_mode();
-	switch (render_mode)
-	{
-	case renderMode::STATIC:
-		rendererObj = std::make_unique<renderer>(para.get(), stngs.get());
-		break;
-	case renderMode::ANIMATION:
-		rendererObj = std::make_unique<renderer_animation>(para.get(), stngs.get());
-		break;
-	default:
-		throw std::invalid_argument("Unknown rendering mode");
-	}
 
 
 	// getting the camera_settings from the settings object
@@ -103,6 +98,8 @@ void factory::create()
 	}
 
 	// objects with dedicated factories
+	// building the renderer object
+	rend_factory->create();
 	// building the hittable_list
 	world_factory->create();
 }
@@ -112,13 +109,6 @@ std::unique_ptr<communicator> factory::return_comm()
 	if (para == nullptr)
 		throw std::runtime_error("This object has already been returned!");
 	return std::move(para);
-}
-
-std::unique_ptr<renderer> factory::return_renderer()
-{
-	if (rendererObj == nullptr)
-		throw std::runtime_error("This object has already been returned!");
-	return std::move(rendererObj);
 }
 
 std::unique_ptr<camera> factory::return_camera()
@@ -138,8 +128,17 @@ std::unique_ptr<output> factory::return_writer()
 std::unique_ptr<hittable_list> factory::return_world()
 {
 	// returning the hittable_list pointe from the world_factory
-	auto world = world_factory->return_world();
+	auto world = world_factory->return_object();
 	if (world == nullptr)
 		throw std::runtime_error("This object has already been returned!");
 	return std::move(world);
+}
+
+std::unique_ptr<renderer> factory::return_renderer()
+{
+	// returning the renderer object from its factory
+	auto rend = rend_factory->return_object();
+	if (rend == nullptr)
+		throw std::runtime_error("This object has already been returned!");
+	return std::move(rend);
 }

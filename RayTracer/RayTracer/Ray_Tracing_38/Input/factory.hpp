@@ -1,6 +1,7 @@
 #pragma once
 #include "../Renderer/Renderer.h"
-#include "scene_factory.h"
+#include "scene_factory.hpp"
+#include "renderer_factory.hpp"
 #include "app_settings.h"
 #include "../Algorithms/camera.h"
 #include "../Algorithms/communicator.h"
@@ -27,16 +28,15 @@ protected:
 	// the parser 
 	std::unique_ptr<input> in;
 	// objects without dedicated factories
-	std::unique_ptr<renderer> rendererObj;
 	std::unique_ptr<app_settings> stngs;
 	std::unique_ptr<camera> cam;
 	std::unique_ptr<output> writer;
-	// the path just for the animation rendering mode
-	std::unique_ptr<path> pth;
-	point3 camera_location;
 	// objects with special factories
 	// we will call their return method so 
 	// we do not need to keep a unique_ptr of those types
+	// renderer factory
+	std::unique_ptr<renderer_factory> rend_factory;
+	// hittable_list factory
 	std::unique_ptr<scene_factory> world_factory;
 	// the settings map
 	std::map<std::string, int> app_set_map =
@@ -45,8 +45,7 @@ protected:
 		{"camera",1},
 		{"image",2},
 		{"output",3},
-		{"output",3},
-		{"path",4}
+		{"renderer",4}
 	};
 
 };

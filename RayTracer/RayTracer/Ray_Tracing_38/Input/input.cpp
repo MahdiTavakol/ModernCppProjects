@@ -9,7 +9,7 @@
 #include "output_settings.h"
 #include "scene_settings.h"
 #include "camera_settings.h"
-#include "path_settings.h"
+#include "renderer_settings.h"
 
 input::input(int argc, char** argv,
 	std::map<std::string, int> app_set_map,
@@ -116,8 +116,8 @@ void input::init_app_settings()
 			app_set->push_back(std::make_unique<image_settings>());
 		else if (!pair.first.compare("output"))
 			app_set->push_back(std::make_unique<output_settings>());
-		else if (!pair.first.compare("path"))
-			app_set->push_back(std::make_unique<path_settings>());
+		else if (!pair.first.compare("renderer"))
+			app_set->push_back(std::make_unique<renderer_settings>());
 		else
 			throw std::invalid_argument("Nonrecoverable error!");
 	}
@@ -134,11 +134,6 @@ void input::parse_file()
 		std::string text;
 		ss >> text;
 
-		if (!text.compare("-render_mode"))
-		{
-			parse_render_mode(ss);
-			continue;
-		}
 
 		std::string newCmd;
 		getline(ss, newCmd);
@@ -153,26 +148,6 @@ void input::parse_file()
 
 }
 
-void input::parse_render_mode(std::stringstream& ss)
-{
-	renderMode render_mode;
-	std::string render_mode_str;
-	ss >> render_mode_str;
-
-	if (render_mode_str == "STATIC")
-	{
-		render_mode = renderMode::STATIC;
-	}
-	else if (render_mode_str == "ANIMATION")
-	{
-		render_mode = renderMode::ANIMATION;
-	}
-	else
-	{
-		throw std::invalid_argument("Wrong render mode keyword!");
-	}
-	app_set->set_render_mode(render_mode);
-}
 
 void input::fill_iostream(int argc, char** argv)
 {
@@ -208,19 +183,6 @@ void input::set_communicator_settings(int argc, char** argv, settings* com_setti
 
 void input::check_compatibility()
 {
-	// just animation mode has fps and num_seconds
-	auto renderMode = app_set->return_render_mode();
-	settings* pth_settings =  (*app_set)["path"];
-	path_settings* sett = dynamic_cast<path_settings*>(pth_settings);
-	int num_seconds;
-	int fps;
-	sett->return_movie_params(num_seconds, fps);
-	if (renderMode == renderMode::STATIC)
-		if (fps || num_seconds)
-			std::cout << "Warning the path variable will be ignored for the static rendering!" << std::endl;
-
-
-
 
 	
 }

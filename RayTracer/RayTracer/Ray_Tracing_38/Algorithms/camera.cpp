@@ -30,7 +30,6 @@ void camera::setup(camera_settings* cam_setting_)
 	int& vfov_setting = cam_setting_->get_vfov();
 	double& focus_dist_setting = cam_setting_->get_focus_dist();
 	double& defocus_angle_setting = cam_setting_->get_defocus_angle();
-	point3& lookfrom_setting = cam_setting_->get_lookfrom();
 	point3& lookat_setting = cam_setting_->get_lookat();
 	point3& vup_setting = cam_setting_->get_vup();
 	point3& background_setting = cam_setting_->get_background();
@@ -42,7 +41,6 @@ void camera::setup(camera_settings* cam_setting_)
 	this->defocus_angle = defocus_angle_setting;
 	this->focus_dist = focus_dist_setting;
 	this->defocus_angle = defocus_angle_setting;
-	this->lookfrom = lookfrom_setting;
 	this->lookat = lookat_setting;
 	this->vup = vup_setting;
 	this->background = background_setting;

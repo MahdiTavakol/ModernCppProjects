@@ -5,29 +5,14 @@
 #include "path.h"
 
 
-path::path(std::string _filename, int _num_seconds, int _fps): filename(_filename), num_seconds(_num_seconds), fps(_fps)
+path::path(std::vector<point3_animated>&& init_locs_, int& _num_seconds, int& _fps) : 
+	init_locs{std::move(init_locs_)}, num_seconds(_num_seconds), fps(_fps)
 {
 	num_frames = num_seconds * fps;
-	read_file();
 	interpolate_points();
 }
 
-path::path(settings* pth_setting_)
-{
-	// checking the setting type
-	path_settings* sett = dynamic_cast<path_settings*>(pth_setting_);
-	if (!sett)
-		throw std::invalid_argument("Wrong settings object");
-
-	sett->return_movie_params(num_seconds, fps);
-	file_name = sett->return_file_name();
-}
-
-path::path(const path& _pth) :
-	filename(_pth.filename), fps(_pth.fps), num_seconds(_pth.num_seconds), num_init_frames(_pth.num_init_frames),
-	init_locs(_pth.init_locs), locs(_pth.locs) {}
-
-path::path(point3& _center, double& _radius, int& _num_seconds, int& _fps, double& theta): num_seconds(_num_seconds), fps(_fps)
+path::path(point3& _center, double& _radius, double& theta, int& _num_seconds, int& _fps): num_seconds(_num_seconds), fps(_fps)
 {
 	double theta_radians = pi * theta / 180.0;
 	num_frames = num_seconds * fps;
@@ -44,44 +29,14 @@ path::path(point3& _center, double& _radius, int& _num_seconds, int& _fps, doubl
 	}
 }
 
-path::path(point3 _point)
+path::path(point3 _point):
+	fps{ 0 }, num_seconds{ 0 }, num_frames{ 1 }
 {
 	point3_animated _loc(_point, 0);
 	locs.push_back(_loc);
 	init_locs.push_back(_loc);
 }
 
-void path::read_file()
-{
-	std::string line;
-	double second;
-	vec3 point;
-	std::fstream file(filename);
-	num_init_frames = 0;
-
-	if (!file.is_open())
-	{
-		std::cerr << "Cannot open file " << filename << std::endl;
-	}
-
-	while (std::getline(file, line))
-	{
-		std::stringstream iss(line);
-		if (iss >> second >> point)
-		{
-			std::clog << "Reading the second " << second << " from the file " << filename << std::endl;
-			point3_animated _loc(point,second);
-			init_locs.push_back(_loc);
-			num_init_frames++;
-		}
-		else
-		{
-			std::cerr << "The format of the path file should be \"second x y z\" " << std::endl;
-		}
-	}
-	std::clog << "Finished reading the file " << filename << std::endl;
-	file.close();
-}
 
 void path::interpolate_points()
 {
@@ -92,7 +47,7 @@ void path::interpolate_points()
 	{
 		vec3 point;
 
-		double time = static_cast<double>(i);
+		double time = static_cast<double>(i) / static_cast<double>(fps);
 		double init_time = init_locs[j].return_time();
 
 		// Finding the first frame in the input file that is bigger than the frame i to be used in the interpolation 
@@ -100,17 +55,20 @@ void path::interpolate_points()
 		{
 			if (std::abs(init_time-time) < 0.001)
 			{
-				point3_animated _loc(init_locs[i]);
+				point3_animated _loc(init_locs[j]);
 				locs.push_back(_loc);
 				continue;
 			}
 			j++;
-			if (j < num_init_frames)
+			if (j < num_init_locs)
 				init_time = init_locs[j].return_time();
 			else
 				break;
 		}
-		if (j == num_init_frames) j-=2;
+		// the cases where extra polation is required
+		if (j == num_init_locs) j -= 2;
+		else if (j == 0) j++;
+		// interpolation points
 		point3_animated init_loc_a = init_locs[j - 1];
 		point3_animated init_loc_b = init_locs[j];
 		point3_animated _loc = interpolate(init_loc_a, init_loc_b, time);

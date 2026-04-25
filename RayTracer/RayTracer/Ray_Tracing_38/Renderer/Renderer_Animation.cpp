@@ -3,36 +3,14 @@
 
 
 
-renderer_animation::renderer_animation(communicator *para_, settings* settingsObj_,std::string info_) :
-	renderer{ para_, settingsObj_,info_}
+renderer_animation::renderer_animation(communicator* para_, std::unique_ptr<path>&& pth_, std::string info_, bool verbose_) :
+	renderer{ para_, std::move(pth_),info_,verbose_}
 {
-	// The default value
-	pth = std::make_unique<path>(point3(0, 0, 12));
+	int rank = para->return_rank();
+	if (rank != 0)
+		verbose = false;
 }
 
-
-void renderer_animation::setup(camera* cam_)
-{
-	switch (mode)
-	{
-	case RANDOM_SPHERES_ANIMATED:
-		// The movie setting
-		int fps, num_seconds;
-		// Creating the trajectory of the camera
-		point3 center(13, 2, 3);
-		double radius = 13.49;
-		double theta = 45.0;
-		// Get the fps and num_frames
-		fps = cam->get_fps();
-		settings* 
-		camera_settings* cam_settings = settingsObj->return_cam_settings();
-		fps = cam_settings->get_fps();
-		num_seconds = cam_settings->get_num_seconds();
-		// Creating a new path variable containing the camera locations
-		pth = std::make_unique<path>(center, radius, num_seconds, fps, theta);
-		break;
-	}
-}
 
 void renderer_animation::render(camera* cam_, output* writer_, hittable_list* world_)
 {
@@ -41,11 +19,14 @@ void renderer_animation::render(camera* cam_, output* writer_, hittable_list* wo
 	int fps, num_frames, num_seconds, num_init_frames;
 	pth->return_frame_info(fps, num_frames, num_seconds, num_init_frames);
 
+	// getting a reference to the pth resource
+	path& pth_ref = *pth;
+
 
 	for (int i = 0; i < num_frames; i++)
 	{
 		message("Moving the camera to the frame " + std::to_string(i));
-		cam_->move_camera((*pth)[i]);
+		cam_->move_camera(pth_ref[i]);
 
 		message("Updating the filename for the frame" + std::to_string(i));
 		info = "frame-" + std::to_string(i);

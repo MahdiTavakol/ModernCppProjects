@@ -1,10 +1,11 @@
 #include "Renderer.h"
 
-renderer::renderer(communicator* para_, settings* settingsObj_, std::string info_, bool verbose_):
+renderer::renderer(communicator* para_, std::unique_ptr<path>&& pth_, std::string info_, bool verbose_):
 	info{info_},
 	verbose{verbose_},
 	para{ para_ }
-{}
+{
+}
 
 
 renderer::~renderer()
@@ -16,6 +17,10 @@ void renderer::render(camera* cam_, output* writer_, hittable_list* world_)
 {
 	std::string text = "Rendering the " + info;
 	message(text);
+
+
+	path& pth_ref = *pth;
+	cam_->move_camera(pth_ref[0]);
 
 	cam_->render(*world_);
 
