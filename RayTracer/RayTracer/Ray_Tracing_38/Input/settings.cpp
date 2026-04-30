@@ -28,7 +28,7 @@ void settings::parse_commands()
 				else if (val.index() == 2)
 				{
 					std::string* raw = std::get<std::string*>(val);
-					parse_input<std::string>(iss, *raw);
+					iss >> *raw;
 				}
 			}
 			else if (iter2 != doubleInputMap.end())

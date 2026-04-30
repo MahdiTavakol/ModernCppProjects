@@ -31,7 +31,7 @@ void input::initialize(int argc, char** argv)
 {
 	if (argc <= 1)
 		throw std::runtime_error("Not enough cmd arguments");
-	else if (strcmp(argv[1], "file"))
+	else if (!strcmp(argv[1], "file"))
 	{
 		std::string file_name = argv[2];
 		std::unique_ptr<std::fstream> file_stream = std::make_unique<std::fstream>(file_name, std::ios::in);

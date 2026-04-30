@@ -8,9 +8,12 @@
 #include "Renderer/Renderer_facade.h"
 
 
+
+
 int main(int argc, char** argv)
 {
 	MPI_Init(&argc, &argv);
+
 	int mode;
 
 	//mode = RANDOM_SPHERES;
@@ -30,14 +33,24 @@ int main(int argc, char** argv)
 	//mode = RANDOM_SPHERES_ANIMATED;
 	mode = SIMPLE_2D_PARALEL_TEST;
 
-	
-	std::unique_ptr<renderer_facade> rendFacade = 
-		std::make_unique<renderer_facade>(argc, argv, mode, MPI_COMM_WORLD);
+
+	try {
+		std::unique_ptr<renderer_facade> rendFacade =
+			std::make_unique<renderer_facade>(argc, argv, mode, MPI_COMM_WORLD);
 
 
-	rendFacade->setup();
-	rendFacade->render();
-	rendFacade->write();
+		rendFacade->setup();
+		rendFacade->render();
+		rendFacade->write();
+	}
+	catch (const std::invalid_argument& e)
+	{
+		std::cout << "Invalid_argument exception " << e.what() << std::endl;
+	}
+	catch (const std::runtime_error& e)
+	{
+		std::cout << "Runtime error exception " << e.what() << std::endl;
+	}
 
 
 	MPI_Finalize();

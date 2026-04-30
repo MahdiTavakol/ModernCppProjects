@@ -26,7 +26,7 @@ factory::factory(int argc, char** argv, int mode_,
 	* the only class coupled to the settings classes implementations.
 	*/
 
-
+ 
 	// parsing the input arguments for the parallel communicator from the cml
 	std::unique_ptr<settings> comm_settings = std::make_unique<communicator_settings>();
 	input::set_communicator_settings(argc, argv, comm_settings.get());
@@ -38,6 +38,8 @@ factory::factory(int argc, char** argv, int mode_,
 	in = std::make_unique<input>(argc, argv, mode_,app_set_map, para.get());
 	// getting the app_settings object from the in
 	stngs = in->return_app_settings();
+
+
 
 	// creating the dedicated factories
 
