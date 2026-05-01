@@ -38,7 +38,6 @@ int main(int argc, char** argv)
 		std::unique_ptr<renderer_facade> rendFacade =
 			std::make_unique<renderer_facade>(argc, argv, mode, MPI_COMM_WORLD);
 
-
 		rendFacade->setup();
 		rendFacade->render();
 		rendFacade->write();

@@ -36,7 +36,7 @@ void renderer_facade::add(std::unique_ptr<hittable>& object)
 
 void renderer_facade::render()
 {
-	rend->render(cam.get(), writer.get(), world.get());
+ 	rend->render(cam.get(), writer.get(), world.get());
 }
 
 

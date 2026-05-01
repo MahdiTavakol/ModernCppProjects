@@ -3,7 +3,8 @@
 renderer::renderer(communicator* para_, std::unique_ptr<path>&& pth_, std::string info_, bool verbose_):
 	info{info_},
 	verbose{verbose_},
-	para{ para_ }
+	para{ para_ },
+	pth{std::move(pth_)}
 {
 }
 
@@ -26,7 +27,7 @@ void renderer::render(camera* cam_, output* writer_, hittable_list* world_)
 
 	auto img = cam_->return_image();
 
-	writer_->reset_image(filename, std::move(img));
+	writer_->reset_image(std::move(img));
 
 	// since the image inside the camera is null due to the return_image,
 	// the img needs to be returned to the camera so the camera is ready for

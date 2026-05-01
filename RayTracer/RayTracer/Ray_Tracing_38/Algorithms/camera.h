@@ -34,6 +34,7 @@ public:
 
 	virtual void move_camera(point3 _lookfrom) {
 		this->lookfrom = _lookfrom;
+		initialize();
 	}
 
 
@@ -63,6 +64,7 @@ public:
 	}
 
 	void reset_image(std::unique_ptr<image>&& img_);
+
 
 
 
@@ -102,7 +104,9 @@ protected:
 	vec3 sample_square() const;
 	point3 defocus_disk_sample() const;
 	virtual color ray_color(const ray& r, int depth, const hittable& world) const;
+
 	void initialize();
+
 };
 
 

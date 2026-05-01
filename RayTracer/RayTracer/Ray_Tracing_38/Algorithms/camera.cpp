@@ -92,6 +92,7 @@ void camera::render(const hittable& world_)
 	int width_min = widthRange[0];
 	int width_max = widthRange[1];
 
+
 	for (int j = height_min; j < height_max; j++)
 	{
 		for (int i = width_min; i < width_max; i++)

@@ -15,9 +15,10 @@ public:
 		std::vector<std::unique_ptr<settings>>&& settingsVec_,
 		std::map<std::string, int> settingMap_);
 
+
 	void set_mode(int mode_) override;
 
-	void push_back(std::unique_ptr<settings>&& iterm);
+	void push_back(std::unique_ptr<settings>&& item);
 
 	bool add_cmd(std::string indx_, std::string cmd_);
 
@@ -30,6 +31,8 @@ public:
 	void parse_commands() override;
 
 	void logger(std::iostream& stream_) const override;
+
+	virtual void set_input_map() override {}
 
 	settings* operator[](const int indx) {
 		return settingsVec[indx].get();

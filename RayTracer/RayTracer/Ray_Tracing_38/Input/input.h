@@ -13,7 +13,7 @@ class input
 {
 public:
 	input(int argc, char** argv, int mode_,
-		std::map<std::string, int> app_set_map,
+		std::map<std::string, int> app_set_map_,
 		communicator* para_,
 		std::vector<std::reference_wrapper<std::ostream>> strmVec_ = {
 			std::vector<std::reference_wrapper<std::ostream>>{
@@ -29,6 +29,9 @@ public:
 	// for a communicator as a special case
 	static void set_communicator_settings(int argc, char** argv, settings* com_settings);
 
+	// parsing the input file
+	void parse_file();
+
 
 protected:
 	int mode;
@@ -41,8 +44,7 @@ protected:
 	void initialize(int argc, char** argv);
 	void logger_function(int argc, char** argv);
 
-	// parsing the input file
-	void parse_file();
+
 	// parsing parameters
 	template<typename T>
 	void parse_input(char** argv, int argc, int& iarg, T& param)

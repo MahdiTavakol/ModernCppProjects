@@ -12,9 +12,10 @@
 #include "renderer_settings.h"
 
 input::input(int argc, char** argv, int mode_,
-	std::map<std::string, int> app_set_map,
+	std::map<std::string, int> app_set_map_,
 	communicator* para_,
 	std::vector<std::reference_wrapper<std::ostream>> strmVec_):
+	app_set_map{app_set_map_},
 	mode{mode_},
 	para{para_}
 {
@@ -46,8 +47,8 @@ void input::initialize(int argc, char** argv)
 	}
 
 	int rank = para->return_rank();
-	if (rank == 0)
-		logger_function(argc, argv);
+	//if (rank == 0)
+	//	logger_function(argc, argv);
 }
 
 void input::logger_function(int argc, char** argv)
@@ -94,22 +95,37 @@ T input::convert_char(char* _chr)
 
 void input::init_app_settings()
 {
+	std::vector<std::unique_ptr<settings>> app_set_vector;
+	app_set_vector.resize(app_set_map.size());
 	// initializing the app_settings object
 	for (auto& pair : app_set_map)
 	{
-		if (!pair.first.compare("scene"))
-			app_set->push_back(std::make_unique<scene_settings>(mode));
-		else if (!pair.first.compare("camera"))
-			app_set->push_back(std::make_unique<camera_settings>(mode));
-		else if (!pair.first.compare("image"))
-			app_set->push_back(std::make_unique<image_settings>(mode));
-		else if (!pair.first.compare("output"))
-			app_set->push_back(std::make_unique<output_settings>(mode));
-		else if (!pair.first.compare("renderer"))
-			app_set->push_back(std::make_unique<renderer_settings>(mode));
+		std::string keyword = pair.first;
+		std::unique_ptr<settings> current_set;
+		if (!keyword.compare("scene")) {
+			current_set = std::make_unique<scene_settings>(mode);
+		}
+		else if (!keyword.compare("camera")) {
+			current_set = std::make_unique<camera_settings>(mode);
+		}
+		else if (!keyword.compare("image")) {
+			current_set = std::make_unique<image_settings>(mode);
+		}
+		else if (!keyword.compare("output")) {
+			current_set = std::make_unique<output_settings>(mode);
+		}
+		else if (!keyword.compare("renderer")) {
+			current_set = std::make_unique<renderer_settings>(mode);
+		}
 		else
 			throw std::invalid_argument("Nonrecoverable error!");
+
+		int indx = pair.second;
+		app_set_vector[indx] = std::move(current_set);
 	}
+
+	// creating the app_set pointer
+	app_set = std::make_unique<app_settings>(mode, std::move(app_set_vector), app_set_map);
 }
 
 void input::parse_file()
@@ -123,13 +139,26 @@ void input::parse_file()
 		std::string text;
 		ss >> text;
 
+		if (!text.compare("mode"))
+		{
+			std::string mode_str;
+			if (!(ss >> mode_str))
+				throw std::invalid_argument("The mode string cannot be read");
+			
+			std::map<std::string, int> scene_map;
+			scene_settings::return_scene_map(scene_map);
+			mode = scene_map[mode_str];
+			continue;
+		}
+
 
 		std::string newCmd;
 		getline(ss, newCmd);
 		if (!app_set->add_cmd(text, newCmd) && text.compare("rank_config"))
 			throw std::invalid_argument("Wrong input argument!");
 	}
-
+	// setting the default values
+	app_set->set_mode(mode);
 	// parsing the commands
 	app_set->parse_commands();
 	// checking the validity of parameters
@@ -169,6 +198,7 @@ void input::set_communicator_settings(int argc, char** argv, settings* com_setti
 			com_settings->add_cmd(newCmd);
 			break;
 		}
+		iarg++;
 	}
 	com_settings->parse_commands();
 }

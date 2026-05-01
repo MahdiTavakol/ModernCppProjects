@@ -77,9 +77,22 @@ void renderer_settings::set_mode(int mode_)
 		theta = 45.0;
 		break;
 
+	case RANDOM_SPHERES:
+		this->location = point3{ 0,3,12 };
+		break;
+	case CHECKER_BOARDS:
+	case EARTH_SPHERE:
+	case PERLIN_SPHERE:
+	case OBJ_MODEL:
+	case OBJ_MODEL_PARALLEL:
+		this->location = point3{ 0,0,12 };
+		break;
+			
+
 
 	default:
-		throw std::invalid_argument("Wrong mode!");
+		std::string error_text = "Wrong mode! " + std::to_string(mode_);
+		throw std::invalid_argument(error_text.c_str());
 	}
 }
 
@@ -94,7 +107,7 @@ void renderer_settings::return_path_type(Path_type& pth_type_)
 	pth_type_ = pth_type;
 }
 
-void renderer_settings::return_location_param(point3 location_)
+void renderer_settings::return_location_param(point3& location_)
 {
 	location_ = location;
 }
@@ -130,6 +143,20 @@ void renderer_settings::extra_parse()
 	else
 	{
 		throw std::invalid_argument("Wrong render mode keyword!");
+	}
+	// setting the path_type string
+	pth_type = Path_type::NONE;
+	if (pth_type_str == "NONE")
+	{
+		pth_type = Path_type::NONE;
+	}
+	else if (pth_type_str == "CIRCULAR")
+	{
+		pth_type = Path_type::CIRCULAR;
+	}
+	else if (pth_type_str == "FILE")
+	{
+		pth_type = Path_type::FILE;
 	}
 
 	// setting the path_type if it exists
@@ -177,7 +204,7 @@ void renderer_settings::check_validity() const
 
 	if (pth_type != Path_type::FILE)
 	{
-		if (file_name.empty())
+		if (!file_name.empty())
 			throw std::invalid_argument("File name has been specified for a path type which is not of file type!");
 	}
 

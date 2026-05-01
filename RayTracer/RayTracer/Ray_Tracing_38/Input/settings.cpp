@@ -72,6 +72,8 @@ void settings::parse_commands()
 		}
 		
 	}
+
+	this->extra_parse();
 }
 
 void settings::check_validity() const

@@ -56,7 +56,7 @@ output::~output()
 	}
 }
 
-void output::reset(std::unique_ptr<image>&& img_)
+void output::reset_image(std::unique_ptr<image>&& img_)
 {
 	img = std::move(img_);
 }

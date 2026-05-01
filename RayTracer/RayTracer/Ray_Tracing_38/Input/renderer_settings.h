@@ -33,7 +33,7 @@ public:
 	// returning the type of the path
 	void return_path_type(Path_type& pth_type_);
 	// returning params for each path type
-	void return_location_param(point3 location_);
+	void return_location_param(point3& location_);
 	void return_circular_params(point3& center_, double& radius_, double& theta_);
 	void return_file_params(std::vector<point3_animated>& centers_);
 
@@ -47,7 +47,7 @@ protected:
 	std::string pth_type_str;
 	Path_type pth_type = Path_type::NONE;
 	// parameters for the path type none (static)
-	point3 location;
+	point3 location = point3(13.0,2.0,3.0);
 	// parameters for the path type circular
 	// geometry
 	point3 center;

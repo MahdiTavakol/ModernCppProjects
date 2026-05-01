@@ -23,7 +23,12 @@ void scene_settings::set_input_map()
 
 void scene_settings::set_scene_map()
 {
-	scene_map =
+	this->return_scene_map(scene_map);
+}
+
+void scene_settings::return_scene_map(std::map<std::string, int>& scene_map_)
+{
+	scene_map_ =
 	{
 		{"RANDOM_SPHERES",RANDOM_SPHERES},
 		{"CHECKER_BOARDS",CHECKER_BOARDS},
@@ -78,6 +83,7 @@ void scene_settings::extra_parse()
 		throw std::invalid_argument("Unknown scene mode");
 	else
 		mode = iter->second;
+
 }
 
 void scene_settings::check_validity() const

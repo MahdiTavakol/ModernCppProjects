@@ -52,6 +52,8 @@ scene_factory::scene_factory(int mode_, std::unique_ptr<communicator>& para_,
 void scene_factory::create()
 {
 	world = std::make_unique<hittable_list>();
+
+
 	switch (mode)
 	{
 	case RANDOM_SPHERES:

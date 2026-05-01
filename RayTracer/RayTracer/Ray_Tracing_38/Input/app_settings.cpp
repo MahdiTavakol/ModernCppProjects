@@ -13,6 +13,7 @@ app_settings::app_settings(
 	this->set_mode(mode_);
 }
 
+
 void app_settings::set_mode(int mode_)
 {
 	for (auto& set : settingsVec)
@@ -70,8 +71,11 @@ void app_settings::logger(std::iostream& stream_) const {
 settings* app_settings::operator[](const std::string& text_)
 {
 	auto iter = settingsMap.find(text_);
-	if (iter == settingsMap.end())
+	if (iter == settingsMap.end()) {
+		std::string error_str = "There is no variable " + std::string(text_) + " in the app_settings!";
+		throw std::runtime_error(error_str.c_str());
 		return nullptr;
+	}
 	return settingsVec[iter->second].get();
 }
 

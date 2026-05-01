@@ -36,8 +36,11 @@ factory::factory(int argc, char** argv, int mode_,
 
 	// changing the settings based on the user input
 	in = std::make_unique<input>(argc, argv, mode_,app_set_map, para.get());
+	// parsing the cmd args or the input file
+	in->parse_file();
 	// getting the app_settings object from the in
 	stngs = in->return_app_settings();
+
 
 
 
@@ -52,13 +55,10 @@ factory::factory(int argc, char** argv, int mode_,
 	// the renderer factory
 	rend_factory = std::make_unique<renderer_factory>(renderer_settings,para.get());
 
-
 	// getting the settings for the scene_factory object
 	settings* scene_settings = sett["scene"];
 	// the world_factory is in charge of lazy creation of the scene.
 	world_factory = std::make_unique<scene_factory>(scene_settings, para.get());
-
-
 
 }
 
@@ -73,8 +73,6 @@ void factory::create()
 	// creating the image object with the camera settings and the parallel object
 	auto img = std::make_unique<image>(img_settings, para.get());
 
-
-
 	// getting the camera_settings from the settings object
 	settings* cam_settings = sett["camera"];
 	// building the camera object
@@ -86,6 +84,8 @@ void factory::create()
 	// not an ideal situation since it couples the factory to the output_settings
 	output_settings* wrt_sett = dynamic_cast<output_settings*>(wrt_settings);
 	outputType wrt_type = wrt_sett->return_type();
+
+
 	// building the writer object
 	switch (wrt_type)
 	{

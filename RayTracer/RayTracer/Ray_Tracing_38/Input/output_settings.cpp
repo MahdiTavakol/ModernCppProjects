@@ -4,9 +4,7 @@
 output_settings::output_settings(int mode_):
 	settings{mode_}
 {
-	this->type = outputType::SERIAL;
-	this->outMode = outputMode::P3;
-
+	set_mode(mode);
 	set_input_map();
 }
 
@@ -20,6 +18,23 @@ void output_settings::set_input_map()
 		{"--o",&output_type_str},
 		{"--om",&output_mode_str},
 	};
+}
+
+void output_settings::set_mode(int mode_)
+{
+	mode = mode_;
+
+	switch (mode)
+	{
+	case SIMPLE_2D_PARALEL_TEST:
+		type = outputType::PARALLEL;
+		outMode = outputMode::P6;
+		break;
+	default:
+		this->type = outputType::SERIAL;
+		this->outMode = outputMode::P3;
+	}
+
 }
 
 void output_settings::parse_commands()
@@ -77,8 +92,8 @@ void output_settings::check_validity() const
 {
 	if (type == outputType::PARALLEL)
 	{
-		if (outMode != outputMode::P3)
-			throw std::invalid_argument("Invalid output mode for PARALLEL output type! Only P3 is allowed.");
+		if (outMode != outputMode::P6)
+			throw std::invalid_argument("Invalid output mode for PARALLEL output type! Only P6 is allowed.");
 	}
 }
 

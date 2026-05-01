@@ -10,6 +10,10 @@ renderer_factory::renderer_factory(settings* stngs_, communicator* para_) :
 	if (!render_sett)
 		throw std::invalid_argument("Wrong settings object");
 
+
+	// getting the path_type
+	render_sett->return_path_type(pth_type);
+	
 	// checking the render mode
 	render_sett->return_render_mode(render_mode);
 

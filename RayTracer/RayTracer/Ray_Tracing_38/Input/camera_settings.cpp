@@ -11,6 +11,9 @@ void camera_settings::set_mode(int mode_)
 {
 	switch (mode_)
 	{
+	case RANDOM_SPHERES:
+		this->vfov = 20;
+		this->lookat = point3{ 0,0,0 };
 	case QUADS:
 		this->samples_per_pixel = 100;
 		this->max_depth = 50;
@@ -54,7 +57,8 @@ void camera_settings::set_mode(int mode_)
 		this->defocus_angle = 0;
 		break;
 	default:
-		throw std::invalid_argument("Wrong mode!");
+		break;
+		
 	}
 }
 

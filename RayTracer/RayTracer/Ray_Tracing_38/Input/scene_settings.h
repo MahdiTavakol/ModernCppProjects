@@ -16,6 +16,7 @@ public:
 
 
 	int return_mode() const;
+	static void return_scene_map(std::map<std::string, int>& scene_map_);
 	std::string return_obj_file_name() const;
 	std::string return_mtl_file_name() const;
 

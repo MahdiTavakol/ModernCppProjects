@@ -11,6 +11,7 @@ public:
 	outputType return_type();
 	outputMode return_outputMode();
 	std::string return_file_name();
+	void set_mode(int mode_) override;
 	void set_file_name(std::string file_name_);
 	void check_validity() const override;
 	void extra_parse() override;
