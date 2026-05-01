@@ -44,6 +44,28 @@ private:
 
 };
 
+class create_input_file {
+	public:
+		create_input_file(
+			std::vector<std::string>& inputLines
+		)
+		{
+			auto& issObj = *iss;
+			for (std::string line : inputLines)
+			{
+				issObj << line;
+			}
+		}
+		std::unique_ptr<std::stringstream> return_input_file()
+		{
+			return std::move(iss);
+		}
+
+
+private:
+	std::unique_ptr<std::stringstream> iss;
+};
+
 TEST_CASE("Testing reading the argv with the input class")
 {
 	std::vector<std::string> argv_vec;
@@ -168,4 +190,20 @@ TEST_CASE("Testing reading the argv with the input class")
 	auto in = crt_input.return_input_ptr();
 
 	REQUIRE_THAT(&oss, StringStreamMatcher(&expectedLog));
+}
+
+TEST_CASE("Test reading the input from a file")
+{
+	std::vector<std::string> inputs;
+	std::vector<std::string> expectedLog;
+
+	SECTION("Test-1")
+	{
+		inputs.push_back("mode RANDOM_SPHERES");
+		inputs.push_back("renderer -renderer_mode STATIC");
+		inputs.push_back("scene -mode  RANDOM_SPHERES");
+		inputs.push_back("camera -samples_per_pixel 72 -max_depth 10 -vfov 45");
+		inputs.push_back("image -width 720 -aspect_ratio 16.0 9.0");
+		inputs.push_back("output -output_type parallel -output_mode P6 -image_file test_1.ppm");
+	}
 }

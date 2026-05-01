@@ -3,6 +3,8 @@
 #include "../Input/input.h"
 #include "../Geometry/triangle_mesh.h"
 #include "../Algorithms/communicator.h"
+#include "../Input/settings.h"
+#include "../Input/app_settings.h"
 #include <exception>
 
 class fake_camera_settings : public camera_settings
@@ -177,4 +179,43 @@ public:
 
 private:
 
+};
+
+class fake_settings : public settings
+{
+public:
+	fake_settings(int mode) :
+		settings{ mode }
+	{
+	}
+
+	std::vector<std::string>  return_commands()
+	{
+		return commands;
+	}
+
+};
+
+class fake_app_settings : public app_settings
+{
+public:
+	fake_app_settings(
+		const int mode_,
+		std::vector<std::unique_ptr<settings>>&& settingsVec_,
+		std::map<std::string, int> settingsMap_):
+		app_settings{mode_,std::move(settingsVec_),settingsMap_}
+	{}
+
+	bool return_cmd(std::string indx_, std::vector<std::string>& cmdVec_)
+	{
+		auto iter = settingsMap.find(indx_);
+		if (iter != settingsMap.end())
+		{
+			int indx = iter->second;
+			fake_settings* sett = dynamic_cast<fake_settings*>(settingsVec[indx].get());
+			cmdVec_ = sett->return_commands();
+			return true;
+		}
+		return false;
+	}
 };

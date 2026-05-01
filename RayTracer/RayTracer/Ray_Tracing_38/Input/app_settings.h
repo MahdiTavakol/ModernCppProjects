@@ -40,8 +40,7 @@ public:
 
 	settings* operator[](const std::string& text_);
 
-private:
-
+protected:
 	std::map<std::string, int> settingsMap;
 	std::vector<std::unique_ptr<settings>> settingsVec;
 };
