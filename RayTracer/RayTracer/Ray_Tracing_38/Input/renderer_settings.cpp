@@ -4,8 +4,9 @@
 
 constexpr double eps = 1e-8;
 
-renderer_settings::renderer_settings(int mode_):
-	settings{mode_}
+renderer_settings::renderer_settings(int mode_,bool wrong_access_):
+	settings{mode_},
+	wrong_access{wrong_access_}
 {
 	set_mode(mode_);
 	set_input_map();
@@ -91,15 +92,14 @@ void renderer_settings::set_mode(int mode_)
 
 
 	default:
-		std::string error_text = "Wrong mode! " + std::to_string(mode_);
-		throw std::invalid_argument(error_text.c_str());
+		break;
 	}
 }
 
 void renderer_settings::return_movie_params(int& num_seconds_, int& fps_)
 {
-	num_seconds = num_seconds_;
-	fps = fps_;
+	num_seconds_ = num_seconds;
+	fps_ = fps;
 }
 
 void renderer_settings::return_path_type(Path_type& pth_type_)
@@ -114,7 +114,7 @@ void renderer_settings::return_location_param(point3& location_)
 
 void renderer_settings::return_circular_params(point3& center_, double& radius_, double& theta_)
 {
-	if (pth_type != Path_type::CIRCULAR)
+	if (!wrong_access && pth_type != Path_type::CIRCULAR)
 		throw std::runtime_error("The path type is not circular");
 	center_ = center;
 	radius_ = radius;
@@ -123,7 +123,7 @@ void renderer_settings::return_circular_params(point3& center_, double& radius_,
 
 void renderer_settings::return_file_params(std::vector<point3_animated>& centers_)
 {
-	if (pth_type != Path_type::FILE)
+	if (!wrong_access && pth_type != Path_type::FILE)
 		throw std::runtime_error("The path type is not circular");
 
 	centers_ = std::move(centers);
@@ -131,6 +131,9 @@ void renderer_settings::return_file_params(std::vector<point3_animated>& centers
 
 void renderer_settings::extra_parse()
 {
+	std::transform(renderer_mode_str.begin(), renderer_mode_str.end(), renderer_mode_str.begin(), ::toupper);
+	std::transform(pth_type_str.begin(), pth_type_str.end(), pth_type_str.begin(), ::toupper);
+
 	// setting the renderer_mode
 	if (renderer_mode_str == "STATIC")
 	{
@@ -167,7 +170,7 @@ void renderer_settings::extra_parse()
 		vec3 point;
 		std::fstream file(file_name,std::ios::in);
 
-		if (!file.is_open())
+		if (!wrong_access && !file.is_open())
 		{
 			std::string error_text = "Cannot open file " + file_name;
 			throw std::invalid_argument(error_text.c_str());
@@ -188,9 +191,10 @@ void renderer_settings::extra_parse()
 				throw std::invalid_argument(error_text.c_str());
 			}
 		}
-		std::clog << "Finished reading the file " << file_name << std::endl;
-		file.close();
-
+		if (!wrong_access) {
+			std::clog << "Finished reading the file " << file_name << std::endl;
+			file.close();
+		}
 	}
 }
 

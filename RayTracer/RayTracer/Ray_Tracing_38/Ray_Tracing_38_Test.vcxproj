@@ -196,6 +196,7 @@
     <ClCompile Include="Tests\test_output_parallel.cpp" />
     <ClCompile Include="Tests\test_output_settings.cpp" />
     <ClCompile Include="Tests\test_quad.cpp" />
+    <ClCompile Include="Tests\test_render_settings.cpp" />
     <ClCompile Include="Tests\test_settings.cpp" />
     <ClCompile Include="Tests\test_triangles.cpp" />
     <ClCompile Include="Tests\test_triangle_mesh.cpp" />
