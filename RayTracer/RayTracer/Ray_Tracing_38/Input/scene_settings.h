@@ -6,7 +6,7 @@
 class scene_settings: public settings
 {
 public:
-	scene_settings(int mode_);
+	scene_settings(int mode_, bool wrong_access = false);
 	void set_input_map() override;
 	void set_obj_file_name(const std::string& obj_file_name_);
 	void set_mtl_file_name(const std::string& mtl_file_name_);
@@ -22,6 +22,7 @@ public:
 
 
 protected:
+	bool wrong_access = false;
 	std::string mode_string;
 	std::string obj_file_name = "";
 	std::string mtl_file_name = "";

@@ -1,8 +1,9 @@
 #include "scene_settings.h"
 #include <fstream>
 
-scene_settings::scene_settings(int mode_) :
-	settings{ mode_ }
+scene_settings::scene_settings(int mode_, bool wrong_access_) :
+	settings{ mode_ },
+	wrong_access{wrong_access_}
 {
 	set_scene_map();
 	set_input_map();
@@ -77,6 +78,7 @@ std::string scene_settings::return_mtl_file_name() const
 
 void scene_settings::extra_parse()
 {
+	std::transform(mode_string.begin(), mode_string.end(), mode_string.begin(), ::toupper);
 	auto iter = scene_map.find(mode_string);
 
 	if (iter == scene_map.end())
