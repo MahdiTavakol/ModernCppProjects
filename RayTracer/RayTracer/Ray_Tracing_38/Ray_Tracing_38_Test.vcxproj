@@ -182,6 +182,7 @@
     <ClCompile Include="Renderer\Renderer_Animation.cpp" />
     <ClCompile Include="Tests\catch_amalgamated.cpp" />
     <ClCompile Include="Tests\test_helpers.cpp" />
+    <ClCompile Include="Tests\test_image_settings.cpp" />
     <ClCompile Include="Tests\test_logger.cpp" />
     <ClCompile Include="Tests\Ray_Tracing_38_tests.cpp" />
     <ClCompile Include="Tests\test_hittable_list.cpp" />
