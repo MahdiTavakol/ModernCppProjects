@@ -140,7 +140,6 @@
   <ItemGroup>
     <ClCompile Include="Algorithms\bvh.cpp" />
     <ClCompile Include="Algorithms\camera.cpp" />
-    <ClCompile Include="Algorithms\camera_settings.cpp" />
     <ClCompile Include="Algorithms\image.cpp" />
     <ClCompile Include="Algorithms\hittable_list.cpp" />
     <ClCompile Include="Algorithms\hittable_list_parallel.cpp" />
@@ -150,7 +149,6 @@
     <ClCompile Include="Algorithms\path.cpp" />
     <ClCompile Include="Algorithms\rtw_stb_image.cpp" />
     <ClCompile Include="Algorithms\serialComm.cpp" />
-    <ClCompile Include="Algorithms\sphere_list.cpp" />
     <ClCompile Include="Data\color_array.cpp" />
     <ClCompile Include="Geometry\aabb.cpp" />
     <ClCompile Include="Geometry\constant_medium.cpp" />
@@ -196,6 +194,7 @@
     <ClCompile Include="Tests\test_output.cpp" />
     <ClCompile Include="Tests\test_output_parallel.cpp" />
     <ClCompile Include="Tests\test_quad.cpp" />
+    <ClCompile Include="Tests\test_settings.cpp" />
     <ClCompile Include="Tests\test_triangles.cpp" />
     <ClCompile Include="Tests\test_triangle_mesh.cpp" />
     <ClCompile Include="Tests\test_vec3.cpp" />
@@ -205,7 +204,6 @@
   <ItemGroup>
     <ClInclude Include="Algorithms\bvh.h" />
     <ClInclude Include="Algorithms\camera.h" />
-    <ClInclude Include="Algorithms\camera_settings.h" />
     <ClInclude Include="Algorithms\image.h" />
     <ClInclude Include="Algorithms\hittable_list.h" />
     <ClInclude Include="Algorithms\hittable_list_parallel.h" />
@@ -216,7 +214,6 @@
     <ClInclude Include="Algorithms\path.h" />
     <ClInclude Include="Algorithms\rtw_stb_image.h" />
     <ClInclude Include="Algorithms\serialComm.h" />
-    <ClInclude Include="Algorithms\sphere_list.h" />
     <ClInclude Include="Data\color_array.h" />
     <ClInclude Include="Geometry\aabb.h" />
     <ClInclude Include="Geometry\constant_medium.h" />

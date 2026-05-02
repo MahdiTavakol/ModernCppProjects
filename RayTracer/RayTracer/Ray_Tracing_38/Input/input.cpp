@@ -23,6 +23,20 @@ input::input(int argc, char** argv, int mode_,
 	initialize(argc, argv);
 }
 
+input::input(
+	int argc, char** argv,
+	std::map<std::string, int> app_set_map_,
+	std::unique_ptr<app_settings>&& app_set_,
+	communicator* para_,
+	std::vector<std::reference_wrapper<std::ostream>> strmVec_) :
+	    app_set_map{ app_set_map_ },
+		app_set{ std::move(app_set_) },
+		mode{ 0 },
+		para{ para_ }
+{
+	initialize(argc, argv);
+}
+
 std::unique_ptr<app_settings> input::return_app_settings()
 {
 	return std::move(app_set);
@@ -117,8 +131,10 @@ void input::init_app_settings()
 		else if (!keyword.compare("renderer")) {
 			current_set = std::make_unique<renderer_settings>(mode);
 		}
-		else
-			throw std::invalid_argument("Nonrecoverable error!");
+		else {
+			std::string error_text = "Unknown keyword " + keyword + "!";
+			throw std::invalid_argument(error_text.c_str());
+		}
 
 		int indx = pair.second;
 		app_set_vector[indx] = std::move(current_set);
@@ -154,8 +170,10 @@ void input::parse_file()
 
 		std::string newCmd;
 		getline(ss, newCmd);
-		if (!app_set->add_cmd(text, newCmd) && text.compare("rank_config"))
-			throw std::invalid_argument("Wrong input argument!");
+		if (!app_set->add_cmd(text, newCmd) && text.compare("rank_config")) {
+			std::string error_text = "Wrong input argument! " + text + " " + newCmd;
+			throw std::invalid_argument(error_text.c_str());
+		}
 	}
 	// setting the default values
 	app_set->set_mode(mode);
@@ -177,7 +195,7 @@ void input::fill_iostream(int argc, char** argv)
 		// if it is a setting keyword it must be written in a new line
 		if (app_set_map.find(text) != app_set_map.end())
 			*input_stream << std::endl;
-		*input_stream << text;
+		*input_stream << text << " ";
 	}
 
 }

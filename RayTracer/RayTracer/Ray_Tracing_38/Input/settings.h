@@ -35,11 +35,6 @@ public:
 	virtual void logger(std::iostream& stream_) const;
 
 
-protected:
-	int mode = 0;
-	std::vector<std::string> commands;
-
-
 
 	template<AllowedTypes T>
 	T convert_string(std::string str_)
@@ -108,6 +103,11 @@ protected:
 			std::cerr << "Invalid input arguments" << std::endl;
 		}
 	}
+
+protected:
+	int mode = 0;
+	std::vector<std::string> commands;
+
 
 	std::map<std::string, singleVar> singleInputMap;
 	std::map<std::string, doubleVar> doubleInputMap;

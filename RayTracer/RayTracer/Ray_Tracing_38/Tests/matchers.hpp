@@ -280,3 +280,44 @@ private:
 	const int rank;
 	std::string* expectedData;
 };
+
+class StringVecMatcher : public Catch::Matchers::MatcherGenericBase
+{
+public:
+	StringVecMatcher(const std::vector<std::string>& expected_):
+		expected{expected_}
+	{}
+	bool match(const std::vector<std::string>& value_) const
+	{
+		if (value_.size() != expected.size())
+			return false;
+
+		for (int i = 0; i < value_.size(); i++) {
+			std::stringstream expectedStream{ expected[i]};
+			std::stringstream valueStream{ value_[i]};
+
+			std::string val, exp;
+
+			while ((valueStream >> val) && (expectedStream >> exp))
+			{
+				if (val.compare(exp))
+					return false;
+			}
+			// check either of the streams have any values left
+			if ((valueStream >> val) || (expectedStream >> exp))
+				return false;
+		}
+		return true;
+	}
+
+	std::string describe() const override
+	{
+		std::string message = "Checking if two vector of strings are the same without considering whitespaces";
+		return message;
+	}
+
+
+private:
+	std::vector<std::string> expected;
+
+};

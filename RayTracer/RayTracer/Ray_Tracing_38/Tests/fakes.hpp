@@ -7,15 +7,7 @@
 #include "../Input/app_settings.h"
 #include <exception>
 
-class fake_camera_settings : public camera_settings
-{
-public:
-	fake_camera_settings(color background_,
-		color rendercolor_) :
-		camera_settings{}
-	{
-	}
-};
+
 
 
 
@@ -184,15 +176,24 @@ private:
 class fake_settings : public settings
 {
 public:
+	fake_settings():
+		settings{0}
+	{}
+
 	fake_settings(int mode) :
 		settings{ mode }
-	{
-	}
+	{}
+
+	void set_input_map() override
+	{}
 
 	std::vector<std::string>  return_commands()
 	{
 		return commands;
 	}
+
+	void parse_commands() override {}
+	void check_validity() const override {}
 
 };
 
@@ -204,7 +205,14 @@ public:
 		std::vector<std::unique_ptr<settings>>&& settingsVec_,
 		std::map<std::string, int> settingsMap_):
 		app_settings{mode_,std::move(settingsVec_),settingsMap_}
-	{}
+	{
+		for (auto& sett : settingsVec_)
+		{
+			fake_settings* sett_conv = dynamic_cast<fake_settings*>(sett.get());
+			if (sett_conv == nullptr)
+				throw std::invalid_argument("The fake_app_setting only supports the fake_settings type!");
+		}
+	}
 
 	bool return_cmd(std::string indx_, std::vector<std::string>& cmdVec_)
 	{

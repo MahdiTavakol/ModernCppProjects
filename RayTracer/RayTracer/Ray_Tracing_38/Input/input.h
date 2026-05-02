@@ -21,6 +21,18 @@ public:
 			}
 		});
 
+	input(
+		int argc, char** argv,
+		std::map<std::string, int> app_set_map_,
+		std::unique_ptr<app_settings>&& app_set_,
+		communicator* para_,
+		std::vector<std::reference_wrapper<std::ostream>> strmVec_ = {
+			std::vector<std::reference_wrapper<std::ostream>>{
+				std::ref(std::cout)
+			}
+		});
+
+
 	std::unique_ptr<app_settings> return_app_settings();
 
 
@@ -31,6 +43,12 @@ public:
 
 	// parsing the input file
 	void parse_file();
+
+	// returning the mode value
+	int return_mode() const
+	{
+		return mode;
+	}
 
 
 protected:
@@ -84,6 +102,11 @@ protected:
 	void fill_iostream(int argc, char** argv);
 	// some options are not compatible so this checks their compatibility
 	void check_compatibility();
+	// setting the app_settings
+	void set_app_settings(std::unique_ptr<app_settings>&& set_)
+	{
+		app_set = std::move(set_);
+	}
 
 
 

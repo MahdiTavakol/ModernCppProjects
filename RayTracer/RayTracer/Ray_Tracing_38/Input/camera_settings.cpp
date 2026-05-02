@@ -12,8 +12,13 @@ void camera_settings::set_mode(int mode_)
 	switch (mode_)
 	{
 	case RANDOM_SPHERES:
+		this->samples_per_pixel = 100;
+		this->max_depth = 50;
 		this->vfov = 20;
-		this->lookat = point3{ 0,0,0 };
+		this->lookat = point3(0, 0, 0);
+		this->vup = vec3(0, 1, 0);
+		this->defocus_angle = 0;
+		break;
 	case QUADS:
 		this->samples_per_pixel = 100;
 		this->max_depth = 50;
@@ -58,7 +63,6 @@ void camera_settings::set_mode(int mode_)
 		break;
 	default:
 		break;
-		
 	}
 }
 
