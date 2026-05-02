@@ -45,11 +45,13 @@ void output_settings::parse_commands()
 
 void output_settings::extra_parse()
 {
-	if (output_type_str == "serial")
+	std::transform(output_type_str.begin(), output_type_str.end(), output_type_str.begin(), ::toupper);
+	std::transform(output_mode_str.begin(), output_mode_str.end(), output_mode_str.begin(), ::toupper);
+	if (output_type_str == "SERIAL")
 	{
 		type = outputType::SERIAL;
 	}
-	else if (output_type_str == "parallel")
+	else if (output_type_str == "PARALLEL")
 	{
 		type = outputType::PARALLEL;
 	}
