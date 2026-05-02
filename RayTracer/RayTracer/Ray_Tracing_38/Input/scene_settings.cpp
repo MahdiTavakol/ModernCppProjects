@@ -73,7 +73,7 @@ std::string scene_settings::return_obj_file_name() const
 
 std::string scene_settings::return_mtl_file_name() const
 {
-	return obj_file_name;
+	return mtl_file_name;
 }
 
 void scene_settings::extra_parse()

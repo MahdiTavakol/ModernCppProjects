@@ -74,7 +74,7 @@ TEST_CASE("Testing the obj reader keywords of the scene_settings")
 			in = "scene -mode " + str + " -obj_file obj1.obj -mtl_file mtl1.mtl";
 			expectedMode = num;
 			expected_obj_file = "obj1.obj";
-			expected_mtl_file = "mtl1.obj";
+			expected_mtl_file = "mtl1.mtl";
 		}
 		SECTION(str + "-2")
 		{
