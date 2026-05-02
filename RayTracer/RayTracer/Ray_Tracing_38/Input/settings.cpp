@@ -30,6 +30,14 @@ void settings::parse_commands()
 					std::string* raw = std::get<std::string*>(val);
 					iss >> *raw;
 				}
+				else if (val.index() == 3)
+				{
+					point3* raw = std::get<point3*>(val);
+					double& x = (*raw)[0];
+					double& y = (*raw)[1];
+					double& z = (*raw)[2];
+					parse_input<double>(iss, x,y,z);
+				}
 			}
 			else if (iter2 != doubleInputMap.end())
 			{

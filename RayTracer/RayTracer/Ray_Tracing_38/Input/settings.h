@@ -6,10 +6,11 @@
 #include <concepts>
 #include <map>
 
+#include "../Types/vec3.h"
 #include "../Shared/rtweekend.h"
 
 
-using singleVar = std::variant<int*, double*, std::string*>;
+using singleVar = std::variant<int*, double*, std::string*, point3*>;
 using doubleVar = std::variant<std::pair<int*, int*>, std::pair<double*, double*>,std::pair<std::string*,std::string*>>;
 using threeVar = std::variant<std::tuple<int*, int*, int*>, std::tuple<double*, double*, double*>>;
 
@@ -39,7 +40,7 @@ public:
 	template<AllowedTypes T>
 	T convert_string(std::string str_)
 	{
-		T _t(0);
+		T _t{};
 		std::stringstream iss(str_);
 
 		if (str_.empty())

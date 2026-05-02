@@ -72,6 +72,11 @@ void camera_settings::set_input_map()
 		{"-samples_per_pixel",&samples_per_pixel},
 		{"-max_depth",&max_depth},
 		{"-vfov",&vfov},
+		{"-defocus_angle",&defocus_angle},
+		{"-focus_dist",&focus_dist},
+		{"-lookat",&lookat},
+		{"-vup",&vup},
+		{"-background",&background},
 
 		{"--s",&samples_per_pixel},
 		{"--d",&max_depth},

@@ -12,7 +12,6 @@
 class vec3 {
 public:
     double e[3];
-
     vec3() : e{ 0, 0, 0 } {}
     vec3(double _e0, double _e1, double _e2) : e{ _e0, _e1, _e2 } {}
     vec3(const vec3& rhs_):
