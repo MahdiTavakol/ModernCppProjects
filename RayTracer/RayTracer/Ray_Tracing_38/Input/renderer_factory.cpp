@@ -1,6 +1,7 @@
 #include "renderer_factory.hpp"
 
 #include "../Renderer/Renderer_Animation.h"
+#include "../Renderer/Renderer_Animation_Async.h"
 
 renderer_factory::renderer_factory(settings* stngs_, communicator* para_) :
 	para{ para_ }
@@ -65,6 +66,8 @@ void renderer_factory::create()
 	case renderMode::ANIMATION:
 		renderObj = std::make_unique<renderer_animation>(para,std::move(pth));
 		break;
+	case renderMode::ANIMATION_ASYNC:
+		renderObj = std::make_unique<renderer_animation_async>(para, std::move(pth));
 	default:
 		throw std::invalid_argument("Unknown rendering mode");
 	}

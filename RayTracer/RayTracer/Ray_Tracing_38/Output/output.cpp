@@ -95,6 +95,11 @@ std::unique_ptr<image> output::return_image()
 	return std::move(img);
 }
 
+image* output::return_image_ptr()
+{
+	return img.get();
+}
+
 std::unique_ptr<std::iostream> output::return_stream()
 {
 	if (stream == nullptr)

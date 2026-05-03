@@ -20,7 +20,6 @@ enum class outputMode {
 };
 
 
-enum { PARALLEL_CAMERA, CAMERA };
 
 
 enum {
@@ -33,7 +32,8 @@ enum {
 
 enum class renderMode {
 	STATIC,
-	ANIMATION
+	ANIMATION,
+	ANIMATION_ASYNC
 };
 
 

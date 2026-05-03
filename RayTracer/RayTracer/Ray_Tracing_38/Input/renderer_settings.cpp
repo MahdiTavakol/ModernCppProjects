@@ -143,6 +143,10 @@ void renderer_settings::extra_parse()
 	{
 		render_mode = renderMode::ANIMATION;
 	}
+	else if (renderer_mode_str == "ANIMATION_ASYNC")
+	{
+		render_mode = renderMode::ANIMATION_ASYNC;
+	}
 	else
 	{
 		throw std::invalid_argument("Wrong render mode keyword!");

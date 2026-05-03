@@ -17,7 +17,7 @@ public:
 
 	virtual ~renderer();
 	virtual void render(camera* cam_, output* writer_, hittable_list* world_);
-	void write_file(output* writer_);
+	virtual void write_file(output* writer_);
 	
 	
 

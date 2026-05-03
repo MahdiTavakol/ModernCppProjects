@@ -124,14 +124,16 @@ void output_parallel::write_file()
 	colors->write(*stream, outMode, writeStride);
 }
 
-void output_parallel::write_file_async()
+void output_parallel::write_file_async(std::string filename_, image* img_)
 {
+	// opening a new file
+	open_new_file(filename_);
 	// getting the image properties
 	int image_width, image_height;
 	std::array<int, 2> myWidthRange, myHeightRange;
 	int writeStride;
-	img->returnSize(image_width, image_height);
-	img->returnRange(myWidthRange, myHeightRange);
+	img_->returnSize(image_width, image_height);
+	img_->returnRange(myWidthRange, myHeightRange);
 	// widthMax is not inclusive
 	int myWidth = myWidthRange[1] - myWidthRange[0];
 	// when the row range for this rank 
@@ -166,7 +168,7 @@ void output_parallel::write_file_async()
 
 	stream->seekp(pos0, std::ios::cur);
 	// getting a pointer to the color_array object of the img
-	auto* colors = img->array();
+	auto* colors = img_->array();
 	// writing the data
 	colors->write_async(*stream, outMode, writeStride);
 }

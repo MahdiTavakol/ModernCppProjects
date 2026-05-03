@@ -181,6 +181,7 @@
     <ClCompile Include="RayTracing_21.cpp" />
     <ClCompile Include="Renderer\Renderer.cpp" />
     <ClCompile Include="Renderer\Renderer_Animation.cpp" />
+    <ClCompile Include="Renderer\Renderer_Animation_Async.cpp" />
     <ClCompile Include="Renderer\Renderer_facade.cpp" />
     <ClCompile Include="Types\color.cpp" />
     <ClCompile Include="Types\vec3.cpp" />
@@ -229,6 +230,7 @@
     <ClInclude Include="Output\output_serial.h" />
     <ClInclude Include="Renderer\Renderer.h" />
     <ClInclude Include="Renderer\Renderer_Animation.h" />
+    <ClInclude Include="Renderer\Renderer_Animation_Async.h" />
     <ClInclude Include="Renderer\Renderer_facade.h" />
     <ClInclude Include="Shared\rtweekend.h" />
     <ClInclude Include="Types\color.h" />

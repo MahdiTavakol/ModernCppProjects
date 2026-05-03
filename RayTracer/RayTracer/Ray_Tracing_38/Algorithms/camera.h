@@ -57,6 +57,11 @@ public:
 		return std::move(img);
 	}
 
+	image* return_image_ptr()
+	{
+		return img.get();
+	}
+
 
 
 	color_array* return_color_array_ptr()

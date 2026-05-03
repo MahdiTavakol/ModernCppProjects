@@ -177,6 +177,9 @@
     <ClCompile Include="Input\renderer_settings.cpp">
       <Filter>Source Files\Input</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer\Renderer_Animation_Async.cpp">
+      <Filter>Source Files\Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Types\color.h">
@@ -325,6 +328,9 @@
     </ClInclude>
     <ClInclude Include="Input\renderer_settings.h">
       <Filter>Source Files\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Renderer_Animation_Async.h">
+      <Filter>Source Files\Renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

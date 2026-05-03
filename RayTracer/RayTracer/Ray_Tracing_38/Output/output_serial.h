@@ -21,5 +21,5 @@ public:
 	);
 
 	void write_file() override;
-	void write_file_async() override;
+	void write_file_async(std::string filename_,image* img_) override {}
 };
