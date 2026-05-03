@@ -1,0 +1,6 @@
+mode RANDOM_SPHERES
+renderer -renderer_mode STATIC
+scene -mode  RANDOM_SPHERES
+camera -samples_per_pixel 72 -max_depth 10 -vfov 45
+image -width 80 -aspect_ratio 16.0 9.0
+output -output_type parallel  -output_mode P6 -image_file test_2.ppm

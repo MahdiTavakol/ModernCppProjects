@@ -2,6 +2,9 @@
 
 #include "../Input/communicator_settings.h"
 
+#include <thread>
+#include <chrono>
+
 
 renderer_facade::renderer_facade(int argc, char** argv, int mode_,
 	MPI_Comm comm_)

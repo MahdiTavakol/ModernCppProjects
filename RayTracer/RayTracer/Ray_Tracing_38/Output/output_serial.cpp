@@ -2,8 +2,9 @@
 
 output_serial::output_serial(
 	settings* out_settings,
+	std::unique_ptr<image>&& img_,
 	communicator* para_) :
-	output{ out_settings,para_ }
+	output{ out_settings,std::move(img_),para_ }
 {}
 
 output_serial::output_serial(
@@ -52,8 +53,31 @@ void output_serial::write_file()
 		// writting the header info
 		write_header();
 		// getting a pointer to the color_array object of the image
-		auto* colors = img->array();
+		color_array* colors = img->array();
 		// for serial writting the stride is zero
 		colors->write(*stream, outMode, 0);
+	}
+}
+
+void output_serial::write_file_async()
+{
+	// if the image is writting in a parallel manner,
+	// the color_array needs to be gathered first and then written by the rank 0.
+	std::unique_ptr<image> img_all;
+	// the parallel class is written the way
+	// that if the number of ranks is one, the gather function just copies the data from one_ to one_all.
+	image::gather(img, img_all, para);
+	// swapping the img with the gathered img
+	img.swap(img_all);
+	// getting the rank
+	int rank = para->return_rank();
+	// writing the file only in the rank 0
+	if (rank == 0) {
+		// writting the header info
+		write_header();
+		// getting a pointer to the color_array object of the image
+		color_array* colors = img->array();
+		// for serial writting the stride is zero
+		colors->write_async(*stream, outMode, 0);
 	}
 }

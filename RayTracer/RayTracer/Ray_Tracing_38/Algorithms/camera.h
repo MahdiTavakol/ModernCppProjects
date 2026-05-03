@@ -31,6 +31,7 @@ public:
 
 	virtual void render(const hittable& world);
 	virtual void render_verbose(const hittable& world);
+	virtual void render_async(const hittable& world_, image* img_);
 
 	virtual void move_camera(point3 _lookfrom) {
 		this->lookfrom = _lookfrom;

@@ -6,8 +6,10 @@
 
 
 output::output(settings* out_settings_,
+			   std::unique_ptr<image>&& img_,
 	           communicator* para_):
-	para{para_}
+	para{para_},
+	img{std::move(img_)}
 {
 	// checking the setting type
 	output_settings* sett = dynamic_cast<output_settings*>(out_settings_);
@@ -88,6 +90,10 @@ void output::remove_file(const std::string& fileName_)
 	std::remove(fileName_.c_str());
 }
 
+std::unique_ptr<image> output::return_image()
+{
+	return std::move(img);
+}
 
 std::unique_ptr<std::iostream> output::return_stream()
 {

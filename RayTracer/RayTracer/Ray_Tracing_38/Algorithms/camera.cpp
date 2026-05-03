@@ -148,6 +148,36 @@ void camera::render_verbose(const hittable& world_)
 	std::clog << "\rDone                          ";
 }
 
+void camera::render_async(const hittable& world_, image* img_)
+{
+	// getting the color_array pointer from the image object
+	color_array* c_array = img->array();
+	// getting the ranges from the image object
+	std::array<int, 2> widthRange, heightRange;
+	img->returnRange(widthRange, heightRange);
+	int height_min = heightRange[0];
+	int height_max = heightRange[1];
+	int width_min = widthRange[0];
+	int width_max = widthRange[1];
+
+
+	for (int j = height_min; j < height_max; j++)
+	{
+		for (int i = width_min; i < width_max; i++)
+		{
+			color pixel_color(0, 0, 0);
+			for (int sample = 0; sample < samples_per_pixel; sample++)
+			{
+				ray r = get_ray(i, j);
+				pixel_color += ray_color(r, max_depth, world_);
+			}
+			pixel_color = pixel_samples_scale * pixel_color;
+			color_data c_data{ pixel_color.x(),pixel_color.y(),pixel_color.z() };
+			c_array->set(i - width_min, j - height_min, c_data);
+		}
+	}
+}
+
 ray camera::get_ray(int i, int j) const
 {
 	auto offset = sample_square();

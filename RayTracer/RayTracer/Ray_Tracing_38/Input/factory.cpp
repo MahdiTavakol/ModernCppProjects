@@ -86,14 +86,15 @@ void factory::create()
 	outputType wrt_type = wrt_sett->return_type();
 
 
+	auto img2 = std::make_unique<image>(img_settings, para.get());
 	// building the writer object
 	switch (wrt_type)
 	{
 	case outputType::SERIAL:
-		writer = std::make_unique<output_serial>(wrt_settings, para.get());
+		writer = std::make_unique<output_serial>(wrt_settings, std::move(img2),para.get());
 		break;
 	case outputType::PARALLEL:
-		writer = std::make_unique<output_parallel>(wrt_settings, para.get());
+		writer = std::make_unique<output_parallel>(wrt_settings,std::move(img2), para.get());
 		break;
 	default:
 		throw std::invalid_argument("Unknown output mode");

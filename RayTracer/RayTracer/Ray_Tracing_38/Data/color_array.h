@@ -11,6 +11,7 @@
 #include <array>
 #include <algorithm>
 #include "../Geometry/interval.h"
+#include <mutex>
 
 typedef struct { double r, g, b; } color_data;
 
@@ -52,6 +53,26 @@ public:
             throw std::invalid_argument("Out of bounds access");
         return array[i_][j_];
     }
+    inline color_data get(const int& i_, const int& j_) const
+    {
+        if (i_ < 0 ||
+            j_ < 0 ||
+            i_ >= width ||
+            j_ >= height)
+            throw std::invalid_argument("Out of bounds access");
+        std::lock_guard<std::mutex> lk(mtVec[j_]);
+        return array[i_][j_];
+    }
+    inline void set(const int& i_, const int& j_, const color_data& val_)
+    {
+        if (i_ < 0 ||
+            j_ < 0 ||
+            i_ >= width ||
+            j_ >= height)
+            throw std::invalid_argument("Out of bounds access");
+        std::lock_guard<std::mutex> lk(mtVec[j_]);
+        array[i_][j_] = val_;
+    }
     bool operator!=(color_array& _rhs)
     {
         if (this == &_rhs)
@@ -70,6 +91,7 @@ public:
     }
 
     void write(std::iostream& out_, const outputMode& mode_, const int& strid_ = 0) const;
+    void write_async(std::iostream& out_, const outputMode& mode_, const int& strid_ = 0) const;
 
     inline static void write_binary(std::ostream& out_, const color_data& c_data_)
     {
@@ -90,6 +112,10 @@ protected:
 
     void allocate();
     void deallocate();
+
+
+    // experimental
+    mutable std::vector<std::mutex> mtVec;
 };
 
 inline std::ostream& operator<<(std::ostream& out, const color_data& _c_data)

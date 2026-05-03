@@ -5,8 +5,9 @@
 
 output_parallel::output_parallel(
 	settings* out_settings,
+	std::unique_ptr<image>&& img_,
 	communicator* para_):
-	output{out_settings,para_}
+	output{out_settings,std::move(img_),para_}
 { 
 	init();
 }
@@ -121,6 +122,53 @@ void output_parallel::write_file()
 	auto* colors = img->array();
 	// writing the data
 	colors->write(*stream, outMode, writeStride);
+}
+
+void output_parallel::write_file_async()
+{
+	// getting the image properties
+	int image_width, image_height;
+	std::array<int, 2> myWidthRange, myHeightRange;
+	int writeStride;
+	img->returnSize(image_width, image_height);
+	img->returnRange(myWidthRange, myHeightRange);
+	// widthMax is not inclusive
+	int myWidth = myWidthRange[1] - myWidthRange[0];
+	// when the row range for this rank 
+	// finishes being written the pointer is 
+	// at the end of the current row range.
+	// Thus the stride of image_width 
+	// moves the pointer to the end of
+	// the next row range.
+	// So there is need to go back 
+	// myWidth location.
+	writeStride = 3 * (image_width - myWidth);
+	// getting the rank number
+	int rank = para->return_rank();
+	// the begining of the binary section
+	std::streampos pos;
+	// writing the header from the rank 0
+	if (rank == 0) {
+		pos = write_header(image_width, image_height);
+	}
+
+	// broadcasting the begining of the binary section of the file
+	bcast_streampos(pos);
+
+	// moving the begining of the binary section
+	stream->seekp(pos);
+	// going to the begining of the first row
+	// of this rank.
+	// Moving with respect to the current location 
+	// which is the begining of the binary section
+
+	int pos0 = 3 * (myHeightRange[0] * image_width + myWidthRange[0]);
+
+	stream->seekp(pos0, std::ios::cur);
+	// getting a pointer to the color_array object of the img
+	auto* colors = img->array();
+	// writing the data
+	colors->write_async(*stream, outMode, writeStride);
 }
 
 void output_parallel::bcast_streampos(std::streampos& pos_)

@@ -135,6 +135,7 @@ void color_array::return_size(int& width_, int& height_)
 
 void color_array::allocate()
 {
+    mtVec = std::vector<std::mutex>(height);
     color_data* temp = (color_data*)malloc(width * height * sizeof(color_data));
     this->array = (color_data**)malloc(width * sizeof(color_data*)); // Column major allocation since we use color_data[x_index][y_index]
     for (int i = 0; i < width; i++)
@@ -143,6 +144,7 @@ void color_array::allocate()
 
 void color_array::deallocate()
 {
+    mtVec.clear();
     if (this->array != nullptr)
     {
         if (this->array[0] != nullptr) free(this->array[0]);
@@ -166,6 +168,33 @@ void color_array::write(std::iostream& out_, const outputMode& mode_, const int&
     {
         for (int j = 0; j < height; j++)
         {
+            for (int i = 0; i < width; i++)
+            {
+                color_array::write_binary(out_, array[i][j]);
+            }
+            // move the put location stride_ bytes from the current location.
+            out_.seekp(stride_, std::ios::cur);
+        }
+    }
+}
+
+void color_array::write_async(std::iostream& out_, const outputMode& mode_, const int& stride_) const
+{
+    if (mode_ == outputMode::P3) {
+        for (int j = 0; j < height; j++)
+        {
+            std::lock_guard<std::mutex> lk(mtVec[j]);
+            for (int i = 0; i < width; i++)
+            {
+                out_ << array[i][j]; //This leads to strided access ==> might need to change the indexing to [height_index][width_index]
+            }
+        }
+    }
+    else if (mode_ == outputMode::P6)
+    {
+        for (int j = 0; j < height; j++)
+        {
+            std::lock_guard<std::mutex> lk(mtVec[j]);
             for (int i = 0; i < width; i++)
             {
                 color_array::write_binary(out_, array[i][j]);
