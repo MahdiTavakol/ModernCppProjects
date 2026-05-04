@@ -11,6 +11,7 @@
 #include "image.h"
 #include "hittable_list.h"
 #include "../Materials/material.h"
+#include "../Materials/material_list.h"
 #include "../Types/ray.h"
 #include "../Types/vec3.h"
 #include "../Input/settings.h"
@@ -30,6 +31,7 @@ public:
 	virtual void setup(camera_settings* cam_setting_);
 
 	virtual void render(const hittable& world);
+	virtual void render(const hittable& world_, const material_list& list_);
 	virtual void render_verbose(const hittable& world);
 	virtual void render_async(const hittable& world_, image* img_);
 
@@ -110,6 +112,7 @@ protected:
 	vec3 sample_square() const;
 	point3 defocus_disk_sample() const;
 	virtual color ray_color(const ray& r, int depth, const hittable& world) const;
+	virtual color ray_color(const ray& r_, int depth_, const hittable& world_, const material_list& list_) const;
 
 	void initialize();
 

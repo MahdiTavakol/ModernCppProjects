@@ -4,6 +4,7 @@ aabb::aabb(const interval& _x, const interval& _y, const interval& _z)
 	:x(_x), y(_y), z(_z)
 {
 	pad_to_minimums();
+	sort_axis();
 }
 
 aabb::aabb(const point3& a, const point3& b)
@@ -13,6 +14,7 @@ aabb::aabb(const point3& a, const point3& b)
 	z = interval(std::fmin(a[2], b[2]), std::fmax(a[2], b[2]));
 
 	pad_to_minimums();
+	sort_axis();
 }
 
 aabb::aabb(const aabb& box0, const aabb& box1)
@@ -20,6 +22,8 @@ aabb::aabb(const aabb& box0, const aabb& box1)
 	x = interval(box0.x, box1.x);
 	y = interval(box0.y, box1.y);
 	z = interval(box0.z, box1.z);
+
+	sort_axis();
 }
 
 void aabb::pad_to_minimums()
@@ -40,11 +44,13 @@ bool aabb::hit(const ray& r, interval ray_t) const
 {
 	const point3& ray_orig = r.origin();
 	const vec3& ray_dir = r.direction();
+	const vec3& ray_dir_inv = r.direction_inv();
 
-	for (int axis = 0; axis < 3; axis++)
+
+	for (auto& axis : axises)
 	{
 		const interval& ax = axis_interval(axis);
-		const double adinv = 1.0 / ray_dir[axis];
+		const double adinv = ray_dir_inv[axis];
 
 		auto t0 = (ax.min - ray_orig[axis]) * adinv;
 		auto t1 = (ax.max - ray_orig[axis]) * adinv;
@@ -72,6 +78,18 @@ int aabb::longest_axis() const
 		return x.size() > z.size() ? 0 : 2;
 	else
 		return y.size() > z.size() ? 1 : 2;
+}
+
+void aabb::sort_axis()
+{
+	axises = std::array<int, 3>{ 0, 1, 2 };
+	std::array<interval, 3> intervals{x,y,z};
+
+	auto comparator = [&](int i, int j) {
+		return intervals[i].size() < intervals[j].size();
+		};
+
+	std::sort(axises.begin(), axises.end(), comparator);
 }
 
 const aabb aabb::empty = aabb(interval::empty, interval::empty, interval::empty);

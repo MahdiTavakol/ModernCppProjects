@@ -224,6 +224,7 @@
     <ClInclude Include="Input\settings.h" />
     <ClInclude Include="Input\scene_settings.h" />
     <ClInclude Include="Materials\material.h" />
+    <ClInclude Include="Materials\material_list.h" />
     <ClInclude Include="Output\Logger.h" />
     <ClInclude Include="Output\output.h" />
     <ClInclude Include="Output\output_parallel.h" />

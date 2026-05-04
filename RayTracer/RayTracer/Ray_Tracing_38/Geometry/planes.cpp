@@ -5,6 +5,11 @@ triangle::triangle(const point3& _Q, const vec3& _u, const vec3& _v,
 	quad{ _Q, _u, _v, std::move(_mat), "triangle"} {
 }
 
+triangle::triangle(const point3& _Q, const vec3& _u, const vec3& _v,
+	const int mat_indx_):
+	quad{_Q,_u,_v,mat_indx,"triangle" }
+{ }
+
 bool triangle::is_interior(double _a, double _b, hit_record& _rec) const
 {
 	return _a > 0 && _b > 0 && _a + _b < 1;
@@ -15,6 +20,11 @@ bool triangle::is_interior(double _a, double _b, hit_record& _rec) const
 circle::circle(const point3& _Q, const vec3& _u, const vec3& _v, std::unique_ptr<material> _mat) :
 	quad{ _Q, _u, _v, std::move(_mat), "circle"} {
 }
+
+circle::circle(const point3& _Q, const vec3& _u, const vec3& _v,
+	const int mat_indx):
+	quad{ _Q,_u,_v,mat_indx, "circle" }
+{}
 
 bool circle::is_interior(double _a, double _b, hit_record& _rec) const
 {

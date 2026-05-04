@@ -15,6 +15,29 @@ constant_medium::constant_medium(std::unique_ptr<hittable> _boundary, double _de
 	phase_function(std::make_unique<isotropic>(_albedo))
 {}
 
+constant_medium::constant_medium(std::unique_ptr<hittable> boundary_,
+	double density_, std::unique_ptr<texture>& tex_,
+	material_list& list_)
+	:
+	hittable{ "constant_medium" },
+	boundary{ std::move(boundary_) }, neg_inv_density(-1 / density_)
+{
+	std::unique_ptr<material> mat = std::make_unique<isotropic>(tex_);
+    mat_indx = static_cast<int>(list_.size());
+	list_.push_back("constant_medium",std::move(mat));
+}
+
+constant_medium::constant_medium(std::unique_ptr<hittable> boundary_,
+	double density_, const color& albedo_,
+	material_list& list_):
+	hittable{ "constant_medium" },
+	boundary{ std::move(boundary_) }, neg_inv_density(-1 / density_)
+{
+	std::unique_ptr<material> mat = std::make_unique<isotropic>(albedo_);
+	mat_indx = static_cast<int>(list_.size());
+	list_.push_back("constant_medium", std::move(mat));
+}
+
 bool constant_medium::hit(const ray& _r, interval _ray_t, hit_record& _rec) const  {
 	hit_record rec1, rec2;
 

@@ -14,8 +14,27 @@ mesh::mesh(const std::array<point3, 4>& _vs,
 	initialize();
 }
 
+mesh::mesh(
+	const std::array<point3, 4>& vs_,
+	const std::array<point3, 4>& vts_,
+	const std::array<point3, 4>& vns_,
+	const int mat_indx_,
+	std::string type_ = "mesh"):
+	hittable{type_,mat_indx_},
+	vs{ vs_ }, vts{ vts_ },
+	vns{ vns_ },
+	num_edges{ 4 }
+{
+	initialize();
+}
+
+
 mesh::mesh(std::unique_ptr<material> _mat, std::string type_) :
 	hittable{ type_ ,std::move(_mat)} { }
+
+mesh::mesh(const int mat_indx, std::string type_ = "mesh"):
+	hittable{type_, mat_indx}
+{}
 
 void mesh::initialize()
 {
@@ -42,6 +61,11 @@ void mesh::initialize()
 	D2 = dot(unit_n2, Q2);
 	w1 = n1 / dot(n1, n1);
 	w2 = n2 / dot(n2, n2);
+
+	vs20 = vs[2] - vs[0];
+	vs10 = vs[1] - vs[0];
+	vs13 = vs[1] - vs[3];
+	vs23 = vs[2] - vs[3];
 
 	set_bounding_box();
 }
@@ -70,8 +94,8 @@ bool mesh::hit(const ray& _r, interval _ray_t, hit_record& _rec) const
 	{
 		auto intersection = _r.at(t1);
 		vec3 planar_hitpt_vector = intersection - Q1;
-		auto alpha = dot(w1, cross(planar_hitpt_vector, vs[2]-vs[0]));
-		auto beta = dot(w1, cross(vs[1]-vs[0], planar_hitpt_vector));
+		auto alpha = dot(w1, cross(planar_hitpt_vector, vs20));
+		auto beta = dot(w1, cross(vs10, planar_hitpt_vector));
 
 		if (!is_interior(alpha, beta, _rec))
 			return false;
@@ -95,6 +119,7 @@ bool mesh::hit(const ray& _r, interval _ray_t, hit_record& _rec) const
 		_rec.u = texture[0];
 		_rec.v = texture[1];
 		_rec.w = texture[2];
+		_rec.mat_indx = mat_indx;
 		_rec.mat = mat.get();
 		_rec.set_face_normal(_r,normal);
 	}
@@ -102,8 +127,8 @@ bool mesh::hit(const ray& _r, interval _ray_t, hit_record& _rec) const
 	{
 		auto intersection = _r.at(t2);
 		vec3 planar_hitpt_vector = intersection - Q2;
-		auto alpha = dot(w1, cross(planar_hitpt_vector, vs[1] - vs[3]));
-		auto beta = dot(w1, cross(vs[2] - vs[3], planar_hitpt_vector));
+		auto alpha = dot(w1, cross(planar_hitpt_vector, vs13));
+		auto beta = dot(w1, cross(vs23, planar_hitpt_vector));
 
 		if (!is_interior(alpha, beta, _rec))
 			return false;
@@ -127,6 +152,7 @@ bool mesh::hit(const ray& _r, interval _ray_t, hit_record& _rec) const
 		_rec.v = texture[1];
 		_rec.w = texture[2];
 		_rec.mat = mat.get();
+		_rec.mat_indx = mat_indx;
 		_rec.set_face_normal(_r, normal);
 	}
 

@@ -5,6 +5,7 @@
 #include "interval.h"
 #include "../Types/vec3.h"
 #include "../Types/ray.h"
+#include <array>
 
 class aabb {
 public:
@@ -22,6 +23,7 @@ public:
 
 	bool hit(const ray& r, interval ray_t) const;
 
+
 	int longest_axis() const;
 	
 	static const aabb empty, universe;
@@ -33,6 +35,9 @@ public:
 	
 private:
 	void pad_to_minimums();
+	void sort_axis();
+
+	std::array<int, 3> axises;
 };
 
 

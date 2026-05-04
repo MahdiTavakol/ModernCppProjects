@@ -384,4 +384,6 @@ FodyWeavers.xsd
 RayTracer/RayTracer/Ray_Tracing_38/temp
 RayTracer/RayTracer/models/
 **/models/
+*VTune*
+*Profiler*
 

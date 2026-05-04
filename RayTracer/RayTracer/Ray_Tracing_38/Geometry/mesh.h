@@ -15,7 +15,14 @@ public:
 		const std::array<point3, 4>& vns,
 		std::unique_ptr<material> _mat,
 		std::string type_="mesh");
+	mesh(
+		const std::array<point3, 4>& vs,
+		const std::array<point3, 4>& vts,
+		const std::array<point3, 4>& vns,
+		const int mat_indx_,
+		std::string type_ = "mesh");
 	mesh(std::unique_ptr<material> _mat, std::string type_ = "mesh");
+	mesh(const int mat_indx, std::string type_ = "mesh");
 	virtual void initialize();
 	virtual void set_bounding_box();
 	aabb bounding_box() const override { return bbox; }
@@ -38,6 +45,9 @@ protected:
 	vec3 w1, w2;
 	point3 Q1, Q2;
 	double D1{ 0.0 }, D2{ 0.0 };
+
+	// differences
+	vec3 vs20, vs10, vs13, vs23;
 
 	static vec3 interpolate(const std::vector<point3>& _triangle, const std::vector<point3>& _normals, const vec3& _point);
 };

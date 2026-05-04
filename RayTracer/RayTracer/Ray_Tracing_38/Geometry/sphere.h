@@ -25,6 +25,17 @@ public:
            double _radius, 
            std::unique_ptr<material> _mat);
 
+    // Stationary Sphere
+    sphere(const point3& _center,
+        double _radius,
+        const int mat_indx);
+
+    // Moving Sphere
+    sphere(const point3& _center1,
+        const point3& _center2,
+        double _radius,
+        const int mat_indx);
+
     bool hit(const ray& r, interval ray_t, hit_record& rec) const override;
     virtual bool compare(hittable* rhs_, const double& tol_) const override;
     virtual bool comparator(const std::unique_ptr<hittable>& rhs_) const override;

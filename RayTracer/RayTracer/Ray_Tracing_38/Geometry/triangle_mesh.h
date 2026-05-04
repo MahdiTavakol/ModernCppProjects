@@ -10,6 +10,10 @@ public:
 		          const std::array<point3, 3>& _vts,
 		          const std::array<point3, 3>& _vns,
 		          std::unique_ptr<material> _mat);
+	triangle_mesh(const std::array<point3, 3>& vs_,
+		          const std::array<point3, 3>& vts_,
+		          const std::array<point3, 3>& vns_,
+		          const int mat_indx_);
 	virtual void initialize() override;
 	virtual void set_bounding_box() override;
 	aabb bounding_box() const override { return bbox; }

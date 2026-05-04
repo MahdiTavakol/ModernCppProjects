@@ -13,6 +13,19 @@ quad::quad(const point3& _Q, const vec3& _u, const vec3& _v,
 	set_bounding_box();
 }
 
+quad::quad(const point3& Q_, const vec3& u_, const vec3& v_,
+	const int mat_indx_, std::string type_) :
+	hittable{ type_,mat_indx_ },
+	Q{ Q_ }, u{ u_ }, v{ v_ }
+{
+	auto n = cross(u_, v_);
+	normal = unit_vector(n);
+	D = dot(normal, Q);
+	w = n / dot(n, n);
+
+	set_bounding_box();
+}
+
 void quad::set_bounding_box()
 {
 	auto bbox_diagonal1 = aabb(Q, Q + u + v);
@@ -75,6 +88,7 @@ bool quad::hit(const ray& _r, interval _ray_t, hit_record& _rec) const
 
 	_rec.t = t;
 	_rec.p = intersection;
+	_rec.mat_indx = mat_indx;
 	_rec.mat = mat.get();
 	_rec.set_face_normal(_r, normal);
 

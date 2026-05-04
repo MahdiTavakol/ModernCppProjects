@@ -9,7 +9,17 @@ triangle_mesh::triangle_mesh(
 	mesh{std::move(_mat),"triangle_mesh"},
 	vs {_vs}, vts{ _vts }, vns{ _vns }
 {
+	initialize();
+}
 
+triangle_mesh::triangle_mesh(
+	const std::array<point3, 3>& vs_,
+	const std::array<point3, 3>& vts_,
+	const std::array<point3, 3>& vns_,
+	const int mat_indx_) :
+	mesh{ mat_indx_,"triangle_mesh" },
+	vs{ vs_ }, vts{ vts_ }, vns{ vns_ }
+{
 	initialize();
 }
 
@@ -74,6 +84,7 @@ bool triangle_mesh::hit(const ray& _r, interval _ray_t, hit_record& _rec) const
 	_rec.u = texture[0];
 	_rec.v = texture[1];
 	_rec.w = texture[2];
+	_rec.mat_indx = mat_indx;
 	_rec.mat = mat.get();
 	_rec.set_face_normal(_r, normal);
 

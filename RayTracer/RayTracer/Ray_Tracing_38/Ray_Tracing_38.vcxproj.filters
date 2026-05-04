@@ -332,6 +332,9 @@
     <ClInclude Include="Renderer\Renderer_Animation_Async.h">
       <Filter>Source Files\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="Materials\material_list.h">
+      <Filter>Source Files\Materials</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md">

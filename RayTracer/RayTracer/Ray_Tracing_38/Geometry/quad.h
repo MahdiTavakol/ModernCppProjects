@@ -9,6 +9,8 @@ class quad : public hittable {
 public:
 	quad(const point3& _Q, const vec3& _u, const vec3& _v,
         std::unique_ptr<material> _mat, std::string type_="quad");
+    quad(const point3& Q_, const vec3& u_, const vec3& v_,
+        const int mat_indx_, std::string type_ = "quad");
 	virtual void set_bounding_box();
 	aabb bounding_box() const override { return bbox; }
 	bool hit(const ray& _r, interval _ray_t, hit_record& _rec) const override;

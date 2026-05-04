@@ -33,7 +33,7 @@ public:
 		             communicator* para_);
 	obj_model_reader(std::string _obj_file_name,
 		             std::string _mtl_file_name,
-		             std::unique_ptr<communicator>& _para);
+		             communicator* _para);
 	obj_model_reader(std::unique_ptr<std::iostream> _obj_file_ptr,
 					 std::unique_ptr<std::iostream> _mtl_file_ptr,
 		             communicator* _para);

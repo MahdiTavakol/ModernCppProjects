@@ -26,6 +26,32 @@ sphere::sphere(const point3& _center1,
     bbox = aabb(box1, box2);
 }
 
+sphere::sphere(
+    const point3& _center,
+    double _radius,
+    const int mat_indx_)
+    :
+    hittable{ "sphere", mat_indx_ },
+    center{ _center, vec3(0, 0, 0) }, radius{ std::fmax(0, _radius) }
+{
+    auto rvec = vec3(radius, radius, radius);
+    bbox = aabb(_center - rvec, _center + rvec);
+}
+
+sphere::sphere(const point3& _center1,
+    const point3& _center2,
+    double _radius,
+    const int mat_indx_)
+    :
+    hittable{ "sphere",mat_indx_ },
+    center{ _center1, _center2 - _center1 }, radius{ std::fmax(0, _radius) }
+{
+    auto rvec = vec3(radius, radius, radius);
+    aabb box1(center.at(0) - rvec, center.at(0) + rvec);
+    aabb box2(center.at(1) - rvec, center.at(1) + rvec);
+    bbox = aabb(box1, box2);
+}
+
 bool sphere::hit(const ray& r, interval ray_t, hit_record& rec) const {
     point3 current_center = center.at(r.time());
     vec3 oc = current_center - r.origin();
@@ -51,6 +77,7 @@ bool sphere::hit(const ray& r, interval ray_t, hit_record& rec) const {
     vec3 outward_normal = (rec.p - current_center) / radius;
     rec.set_face_normal(r, outward_normal);
     get_sphere_uv(outward_normal, rec.u, rec.v);
+    rec.mat_indx = mat_indx;
     rec.mat = mat.get();
 
     return true;

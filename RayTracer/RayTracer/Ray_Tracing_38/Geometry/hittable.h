@@ -21,6 +21,9 @@ public:
     hittable(std::string type_, std::unique_ptr<material> mat_):
         type{type_}, mat{std::move(mat_)}
     {}
+    hittable(std::string type_, const int mat_indx_):
+        type{type_}, mat_indx{mat_indx_}
+    {}
     virtual ~hittable() = default;
     virtual bool hit(const ray& r, interval ray_t, hit_record& rec) const = 0;
     virtual aabb bounding_box() const
@@ -47,6 +50,8 @@ public:
 
     const std::string type = "";
 protected:
+    int mat_indx;
+    // I will gradually remove this
     std::unique_ptr<material> mat;
     aabb bbox;
 };

@@ -20,6 +20,10 @@ void renderer_settings::set_input_map()
 
 		{"-path_type",&pth_type_str},
 
+
+		// path type none parameters
+		{"-location",&location},
+
 		// circular path parameters
 		{"-radius",&radius},
 		{"-theta",&theta},

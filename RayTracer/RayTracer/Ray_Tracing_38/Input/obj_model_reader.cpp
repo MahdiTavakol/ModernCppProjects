@@ -17,19 +17,18 @@ obj_model_reader::obj_model_reader(
 
 {
 	set_silent_status();
-	std::string dummy = obj_file_name.substr(2);
-	std::istringstream iss(dummy);
+	std::istringstream iss(obj_file_name);
 	std::string file_name;
 	std::getline(iss, file_name, '.');
-	mtl_file_name = ".." + file_name + ".mtl";
+	mtl_file_name = file_name + ".mtl";
 	obj_file_ptr = open_file(obj_file_name);
 	mtl_file_ptr = open_file(mtl_file_name);
 }
 
 obj_model_reader::obj_model_reader(std::string _obj_file_name,
 	std::string _mtl_file_name,
-	std::unique_ptr<communicator>& _para):
-	para{ _para.get()},
+	communicator* _para):
+	para{ _para},
 	obj_file_name{_obj_file_name},
 	mtl_file_name{_mtl_file_name},
 	v_num{ 0 }, vt_num{ 0 }, vn_num{ 0 },
@@ -88,7 +87,6 @@ void obj_model_reader::read()
 void obj_model_reader::read_obj_file()
 {
 	std::string line;
-	std::stringstream iss;
 
 	int file_vs_num = 0, file_vts_num = 0, file_vns_num = 0;
 	int file_polygon_num = 0, file_triangle_num = 0;
@@ -101,14 +99,12 @@ void obj_model_reader::read_obj_file()
 
 	while (std::getline(*obj_file_ptr, line))
 	{
-		iss.clear();
-		iss.str("");
 		int dummy_int;
 		std::string dummy_str;
 		vec3 point3;
 		if (line.length() >= 3)
 		{
-			iss << line;
+			std::stringstream iss(line);
 			iss >> dummy_str;
 			if (!dummy_str.compare("#"))
 			{
@@ -224,20 +220,20 @@ void obj_model_reader::read_obj_file()
 			}
 			if (iss >> point3)
 			{
-				if (!dummy_str.compare("v"))
+				if (!dummy_str.compare("vt"))
 				{
-					vs.push_back(point3);
-					v_num++;
+					vts.push_back(point3);
+					vt_num++;
 				}
 				else if (!dummy_str.compare("vn"))
 				{
 					vns.push_back(point3);
 					vn_num++;
 				}
-				else if (!dummy_str.compare("vt"))
+				else if (!dummy_str.compare("v"))
 				{
-					vts.push_back(point3);
-					vt_num++;
+					vs.push_back(point3);
+					v_num++;
 				}
 			}
 		}
@@ -256,12 +252,9 @@ void obj_model_reader::read_mtl_file()
 	std::string material_name;
 	while (std::getline(*mtl_file_ptr, line))
 	{
-		if (line.length() >= 3)
-		{
-			iss.clear();
-			iss.str("");
-			iss << line;
-		}
+		if (line.length() < 3)
+			continue;
+		std::stringstream iss(line);
 		if (iss >> dummy_str)
 		{
 			if (dummy_str == "newmtl")
@@ -280,14 +273,10 @@ void obj_model_reader::read_mtl_file()
 			else if (dummy_str == "Ns")
 			{
 				iss >> Ns;
-				iss.clear();
-				iss.str("");
 			}
 			else if (dummy_str == "d")
 			{
 				iss >> d;
-				iss.clear();
-				iss.str("");
 			}
 			else if (dummy_str == "Tr")
 			{
@@ -298,26 +287,18 @@ void obj_model_reader::read_mtl_file()
 			else if (dummy_str == "Tf")
 			{
 				iss >> Tf;
-				iss.clear();
-				iss.str("");
 			}
 			else if (dummy_str == "Ka")
 			{
 				iss >> Ka;
-				iss.clear();
-				iss.str("");
 			}
 			else if (dummy_str == "Kd")
 			{
 				iss >> Kd;
-				iss.clear();
-				iss.str("");
 			}
 			else if (dummy_str == "Ks")
 			{
 				iss >> Ks;
-				iss.clear();
-				iss.str("");
 			}
 
 		}

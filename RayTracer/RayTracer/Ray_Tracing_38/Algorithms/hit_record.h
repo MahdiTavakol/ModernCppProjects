@@ -15,6 +15,8 @@ public:
      * The object owns it!
      */
     material* mat;
+    // just material index.. Gradually I will remove the material* object from this class
+    int mat_indx;
     double t{ 0.0 };
     double u{ 0.0 };
     double v{ 0.0 };

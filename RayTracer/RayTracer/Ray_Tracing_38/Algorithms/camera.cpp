@@ -111,6 +111,37 @@ void camera::render(const hittable& world_)
 	}
 }
 
+void camera::render(const hittable& world_, const material_list& list_)
+{
+	// getting the color_data array from the image object
+	color_data** c_data = img->returnColorData();
+	// getting the ranges from the image object
+	std::array<int, 2> widthRange, heightRange;
+	img->returnRange(widthRange, heightRange);
+	int height_min = heightRange[0];
+	int height_max = heightRange[1];
+	int width_min = widthRange[0];
+	int width_max = widthRange[1];
+
+
+	for (int j = height_min; j < height_max; j++)
+	{
+		for (int i = width_min; i < width_max; i++)
+		{
+			color pixel_color(0, 0, 0);
+			for (int sample = 0; sample < samples_per_pixel; sample++)
+			{
+				ray r = get_ray(i, j);
+				pixel_color += ray_color(r, max_depth, world_, list_);
+			}
+			pixel_color = pixel_samples_scale * pixel_color;
+			c_data[i - width_min][j - height_min].r = pixel_color.x();
+			c_data[i - width_min][j - height_min].g = pixel_color.y();
+			c_data[i - width_min][j - height_min].b = pixel_color.z();
+		}
+	}
+}
+
 void camera::render_verbose(const hittable& world_)
 {
 	// getting the color_data array from the image object
@@ -227,6 +258,32 @@ color camera::ray_color(const ray& r, int depth, const hittable& world) const
 	return color_from_emission + color_from_scatter;
 }
 
+color camera::ray_color(const ray& r_, int depth_, const hittable& world_, const material_list& list_) const
+{
+	if (depth_ <= 0)
+		return color(0, 0, 0);
+
+	hit_record rec;
+
+	if (!world_.hit(r_, interval(0.001, infinity), rec))
+		return background;
+
+	int mat_indx = rec.mat_indx;
+	material* mat = list_(mat_indx);
+
+
+	ray scattered;
+	color attenuation;
+	color color_from_emission = mat->emitted(rec.u, rec.v, rec.p);
+
+	if (!mat->scatter(r_, rec, attenuation, scattered))
+		return color_from_emission;
+
+
+	color color_from_scatter = attenuation * ray_color(scattered, depth_ - 1, world_);
+
+	return color_from_emission + color_from_scatter;
+}
 
 void camera::reset_image(std::unique_ptr<image>&& img_)
 {
