@@ -11,6 +11,8 @@ renderer_facade::renderer_facade(int argc, char** argv, int mode_,
 {
 	// the factory object
 	builder = std::make_unique<factory>(argc, argv, mode_, comm_);
+	// material list
+	list = std::make_unique<material_list>();
 }
 
 

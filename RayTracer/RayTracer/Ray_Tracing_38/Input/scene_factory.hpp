@@ -15,10 +15,12 @@ public:
 		          std::string obj_file_name_);
 	void create();
 	std::unique_ptr<hittable_list> return_object();
+	std::unique_ptr<material_list> return_mat_list();
 
 protected:
 	const int mode;
 	std::unique_ptr<hittable_list> world;
+	std::unique_ptr<material_list> list;
 	communicator* para;
 	std::string obj_file_name = "../../models/Toyota_Sequoia_2023/Toyota_Sequoia_2023_2015_obj.obj";
 	std::string mtl_file_name;

@@ -28,25 +28,27 @@
 #include "../Output/output.h"
 
 scene_factory::scene_factory(settings* wld_settings_, communicator* para_):
-	mode{wld_settings_->return_mode()}, para{para_}
+	mode{wld_settings_->return_mode()}, para{para_}, list{std::make_unique<material_list>()}
 {
 	// checking the setting type
 	scene_settings* sett = dynamic_cast<scene_settings*>(wld_settings_);
 	if (!sett)
 		throw std::invalid_argument("Wrong settings object");
 
+
 	obj_file_name = sett->return_obj_file_name();
 	mtl_file_name = sett->return_mtl_file_name();
 }
 
 scene_factory::scene_factory(int mode_, std::unique_ptr<communicator>& para_) :
-	mode{ mode_ }, para{para_.get()}
+	mode{ mode_ }, para{para_.get()}, list{ std::make_unique<material_list>() }
 {}
 
 scene_factory::scene_factory(int mode_, std::unique_ptr<communicator>& para_,
 	                         std::string obj_file_name_):
 	mode{mode_}, para{para_.get()}, 
-	obj_file_name{obj_file_name_}
+	obj_file_name{obj_file_name_},
+	list{ std::make_unique<material_list>() }
 { }
 
 void scene_factory::create()
@@ -117,10 +119,12 @@ std::unique_ptr<hittable_list> scene_factory::return_object()
 
 void scene_factory::setup_random_spheres()
 {
+	int mat_indx = 0;
 
 	auto checker = std::make_unique<checker_texture>(0.32, color(0.2, 0.3, 0.1), color(0.9, 0.9, 0.9));
 	std::unique_ptr<material> mat = std::make_unique<lambertian>(std::move(checker));
-	world->add(std::make_unique<sphere>(point3(0, -1000, 0), 1000, std::move(mat)));
+	list->push_back("checker", std::move(mat));
+	world->add(std::make_unique<sphere>(point3(0, -1000, 0), 1000,mat_indx++));
 
 	for (int a = -11; a < 11; a++)
 		for (int b = -11; b < 11; b++)
@@ -135,33 +139,52 @@ void scene_factory::setup_random_spheres()
 					// diffuse
 					auto albedo = color::random() * color::random();
 					sphere_material = std::make_unique<lambertian>(albedo);
+					std::string mat_name = "diffuse-" 
+						+ std::to_string(albedo[0]) + 
+						"-" + std::to_string(albedo[1]) + 
+						"-" + std::to_string(albedo[2]);
+					mat_indx = list->push_back(mat_name, std::move(sphere_material));
 					auto center2 = center + vec3(0, random_double(0, 0.5), 0);
-					world->add(std::make_unique<sphere>(center, center2, 0.2, std::move(sphere_material)));
+					world->add(std::make_unique<sphere>(center, center2, 0.2, mat_indx));
 				}
 				else if (choose_mat < 0.95) {
 					// metal
 					auto albedo = color::random(0.5, 1);
 					auto fuzz = random_double(0, 0.5);
+					std::string mat_name = "metal-"
+						+ std::to_string(albedo[0]) +
+						"-" + std::to_string(albedo[1]) +
+						"-" + std::to_string(albedo[2]) + 
+						"--" + std::to_string(fuzz);
+					mat_indx = list->push_back(mat_name, std::move(sphere_material));
 					sphere_material = std::make_unique<metal>(albedo, fuzz);
-					world->add(std::make_unique<sphere>(center, 0.2, std::move(sphere_material)));
+					world->add(std::make_unique<sphere>(center, 0.2, mat_indx));
 				}
 				else {
 					// glass
 					sphere_material = std::make_unique<dielectric>(1.5);
-					world->add(std::make_unique<sphere>(center, 0.2, std::move(sphere_material)));
+					std::string mat_name = "dielectric-1.5";
+					mat_indx = list->push_back(mat_name, std::move(sphere_material));
+					world->add(std::make_unique<sphere>(center, 0.2, mat_indx));
 				}
 			}
 
 		}
 
 	auto material1 = std::make_unique<dielectric>(1.5);
-	world->add(std::make_unique<sphere>(point3(0, 1, 0), 1.0, std::move(material1)));
+	std::string mat_name = "dielectric-1.5";
+	mat_indx = list->push_back(mat_name, std::move(material1));
+	world->add(std::make_unique<sphere>(point3(0, 1, 0), 1.0, mat_indx));
 
 	auto material2 = std::make_unique<lambertian>(color(0.4, 0.2, 0.1));
-	world->add(std::make_unique<sphere>(point3(-4, 1, 0), 1.0, std::move(material2)));
+	mat_name = "lambertian";
+	mat_indx = list->push_back(mat_name, std::move(material2));
+	world->add(std::make_unique<sphere>(point3(-4, 1, 0), 1.0, mat_indx));
 
 	auto material3 = std::make_unique<metal>(color(0.7, 0.6, 0.5), 0.0);
-	world->add(std::make_unique<sphere>(point3(4, 1, 0), 1.0, std::move(material3)));
+	mat_name = "metal";
+	mat_indx = list->push_back(mat_name, std::move(material3));
+	world->add(std::make_unique<sphere>(point3(4, 1, 0), 1.0, mat_indx));
 
 	auto bvh = std::make_unique<bvh_node>(std::move(world));
 	world = std::make_unique<hittable_list>(std::move(bvh));
@@ -169,14 +192,23 @@ void scene_factory::setup_random_spheres()
 
 void scene_factory::setup_checker_boards()
 {
+	int mat_indx = 0;
+	std::string mat_name;
+
 	auto checker1 = std::make_unique<checker_texture>(0.32, color(0.2, 0.3, 0.1), color(0.9, 0.9, 0.9));
 	auto checker2 = std::make_unique<checker_texture>(0.32, color(0.2, 0.3, 0.1), color(0.9, 0.9, 0.9));
 
 	auto material1 = std::make_unique<lambertian>(std::move(checker1));
 	auto material2 = std::make_unique<lambertian>(std::move(checker2));
 
-	world->add(std::make_unique<sphere>(point3(0, -10, 0), 10, std::move(material1)));
-	world->add(std::make_unique<sphere>(point3(0, 10, 0), 10, std::move(material2)));
+
+	mat_name = "material1";
+	mat_indx = list->push_back(mat_name, std::move(material1));
+	world->add(std::make_unique<sphere>(point3(0, -10, 0), 10, mat_indx));
+
+	mat_name = "material2";
+	mat_indx = list->push_back(mat_name, std::move(material2));
+	world->add(std::make_unique<sphere>(point3(0, 10, 0), 10, mat_indx));
 
 	auto bvh = std::make_unique<bvh_node>(std::move(world));
 	world = std::make_unique<hittable_list>(std::move(bvh));
@@ -184,9 +216,16 @@ void scene_factory::setup_checker_boards()
 
 void scene_factory::setup_earth_sphere()
 {
+	int mat_indx = 0;
+	std::string mat_name;
+
 	auto earth_texture = std::make_unique<image_texture>("3840px-Blue_Marble_2002.png");
+
+
 	auto earth_surface = std::make_unique<lambertian>(std::move(earth_texture));
-	auto globe = std::make_unique<sphere>(point3(0, 0, 0), 2, std::move(earth_surface));
+	mat_name = "material1";
+	mat_indx = list->push_back(mat_name, std::move(earth_surface));
+	auto globe = std::make_unique<sphere>(point3(0, 0, 0), 2, mat_indx);
 
 	world->add(std::move(globe));
 
@@ -196,10 +235,20 @@ void scene_factory::setup_earth_sphere()
 
 void scene_factory::setup_perlin_sphere()
 {
+	int mat_indx = 0;
+	std::string mat_name;
+
 	auto pertext1 = std::make_unique<noise_texture>(4);
+	mat_name = "material1";
+	auto material1 = std::make_unique<lambertian>(std::move(pertext1));
+	mat_indx = list->push_back(mat_name, std::move(material1));
+	world->add(std::make_unique<sphere>(point3(0, -1000, 0), 1000, mat_indx));
+	
+	
 	auto pertext2 = std::make_unique<noise_texture>(4);
-	world->add(std::make_unique<sphere>(point3(0, -1000, 0), 1000, std::make_unique<lambertian>(std::move(pertext1))));
-	world->add(std::make_unique<sphere>(point3(0, 2, 0), 2, std::make_unique<lambertian>(std::move(pertext2))));
+	mat_name = "material2";
+	auto material1 = std::make_unique<lambertian>(std::move(pertext2));
+	world->add(std::make_unique<sphere>(point3(0, 2, 0), 2, mat_indx));
 
 	auto bvh = std::make_unique<bvh_node>(std::move(world));
 	world = std::make_unique<hittable_list>(std::move(bvh));
@@ -207,17 +256,30 @@ void scene_factory::setup_perlin_sphere()
 
 void scene_factory::setup_quads()
 {
-	auto left_red = std::make_unique<lambertian>(color(1.0, 0.2, 0.2));
-	auto back_green = std::make_unique<lambertian>(color(0.2, 1.0, 0.2));
-	auto right_blue = std::make_unique<lambertian>(color(0.2, 0.2, 1.0));
-	auto upper_orange = std::make_unique<lambertian>(color(1.0, 0.5, 0.0));
-	auto lower_teal = std::make_unique<lambertian>(color(0.2, 0.8, 0.8));
+	int mat_indx = 0;
+	std::string mat_name;
 
-	world->add(std::make_unique<quad>(point3(-3, -2, 5), vec3(0, 0, -4), vec3(0, 4, 0), std::move(left_red)));
-	world->add(std::make_unique<circle>(point3(-2, -2, 0), vec3(4, 0, 0), vec3(0, 4, 0), std::move(back_green)));
-	world->add(std::make_unique<triangle>(point3(3, -2, 1), vec3(0, 0, 4), vec3(0, 4, 0), std::move(right_blue)));
-	world->add(std::make_unique<quad>(point3(-2, 3, 1), vec3(4, 0, 0), vec3(0, 0, 4), std::move(upper_orange)));
-	world->add(std::make_unique<quad>(point3(-2, -3, 5), vec3(4, 0, 0), vec3(0, 0, -4), std::move(lower_teal)));
+	struct
+	{
+		std::string title;
+		color mat_color;
+		point3 a;
+		vec3 b, c;
+	} infos[5] = {
+		{"left_red",color(1.0, 0.2, 0.2),point3(-3, -2, 5), vec3(0, 0, -4), vec3(0, 4, 0)},
+		{"back_green",color(0.2, 1.0, 0.2),point3(-2, -2, 0), vec3(4, 0, 0), vec3(0, 4, 0)},
+		{"right_blue",color(0.2, 0.2, 1.0),point3(3, -2, 1), vec3(0, 0, 4), vec3(0, 4, 0)},
+		{"upper_orange",color(1.0, 0.5, 0.0),point3(-2, 3, 1), vec3(4, 0, 0), vec3(0, 0, 4)},
+		{"lower_teal",color(0.2, 0.8, 0.8),point3(-2, -3, 5), vec3(4, 0, 0), vec3(0, 0, -4)}
+	};
+
+	for (auto& info : infos)
+	{
+		auto mat = std::make_unique<lambertian>(info.mat_color);
+		mat_name = info.title;
+		mat_indx = list->push_back(mat_name, std::move(mat));
+		world->add(std::make_unique<quad>(info.a, info.b, info.c, mat_indx));
+	}
 
 	auto bvh = std::make_unique<bvh_node>(std::move(world));
 	world = std::make_unique<hittable_list>(std::move(bvh));
@@ -225,15 +287,25 @@ void scene_factory::setup_quads()
 
 void scene_factory::setup_simple_light()
 {
+	int mat_indx = 0;
+	std::string mat_name;
+
 	auto pertext1 = std::make_unique<noise_texture>(4);
-	auto pertext2 = std::make_unique<noise_texture>(*pertext1);
 	auto material1 = std::make_unique<lambertian>(std::move(pertext1));
+	mat_name = "material1";
+	mat_indx = list->push_back(mat_name, std::move(material1));
+	world->add(std::make_unique<sphere>(point3(0, -1000, 0), 1000, mat_indx));
+
+	auto pertext2 = std::make_unique<noise_texture>(*pertext1);
 	auto material2 = std::make_unique<lambertian>(std::move(pertext2));
-	world->add(std::make_unique<sphere>(point3(0, -1000, 0), 1000,std::move(material1)));
-	world->add(std::make_unique<sphere>(point3(0, 2, 0), 2, std::move(material2)));
+	mat_name = "material2";
+	mat_indx = list->push_back(mat_name, std::move(material2));
+	world->add(std::make_unique<sphere>(point3(0, 2, 0), 2, mat_indx));
 
 	auto difflight = std::make_unique<diffuse_light>(color(4, 4, 4));
-	world->add(std::make_unique<quad>(point3(3, 1, -2), vec3(2, 0, 0), vec3(0, 2, 0), std::move(difflight)));
+	mat_name = "diffuse";
+	mat_indx = list->push_back(mat_name, std::move(difflight));
+	world->add(std::make_unique<quad>(point3(3, 1, -2), vec3(2, 0, 0), vec3(0, 2, 0), mat_indx));
 
 	auto bvh = std::make_unique<bvh_node>(std::move(world));
 	world = std::make_unique<hittable_list>(std::move(bvh));
@@ -241,9 +313,14 @@ void scene_factory::setup_simple_light()
 
 void scene_factory::setup_two_lights()
 {
+	std::string mat_name;
+	int mat_indx;
+
 	this->setup_simple_light();
 	auto difflight = std::make_unique<diffuse_light>(color(4, 4, 4));
-	world->add(std::make_unique<sphere>(point3(0, 7, 0), 2, std::move(difflight)));
+	mat_name = "diffuse";
+	mat_indx = list->push_back(mat_name, std::move(difflight));
+	world->add(std::make_unique<sphere>(point3(0, 7, 0), 2, mat_indx));
 
 	auto bvh = std::make_unique<bvh_node>(std::move(world));
 	world = std::make_unique<hittable_list>(std::move(bvh));
@@ -252,16 +329,20 @@ void scene_factory::setup_two_lights()
 void scene_factory::setup_cornell_box()
 {
 	std::unique_ptr<material> red = std::make_unique<lambertian>(color(0.64, 0.05, 0.05));
-	std::unique_ptr<material> white1 = std::make_unique<lambertian>(color(0.73, 0.73, 0.73));
-	std::unique_ptr<material> white2 = std::make_unique<lambertian>(color(0.73, 0.73, 0.73));
+	std::unique_ptr<material> white = std::make_unique<lambertian>(color(0.73, 0.73, 0.73));
 	std::unique_ptr<material> green = std::make_unique<lambertian>(color(0.12, 0.45, 0.15));
 	std::unique_ptr<material> light = std::make_unique<diffuse_light>(color(15, 15, 15));
 
-	world->add(std::make_unique<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), std::move(green)));
-	world->add(std::make_unique<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), std::move(red)));
-	world->add(std::make_unique<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), std::move(light)));
-	world->add(std::make_unique<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), std::move(white1)));
-	world->add(std::make_unique<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), std::move(white2)));
+	int red_mat = list->push_back("red", std::move(red));
+	int white_mat = list->push_back("white", std::move(white));
+	int green_mat = list->push_back("green", std::move(green));
+	int light_mat = list->push_back("light", std::move(light));
+
+	world->add(std::make_unique<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green_mat));
+	world->add(std::make_unique<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red_mat));
+	world->add(std::make_unique<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), light_mat));
+	world->add(std::make_unique<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white_mat));
+	world->add(std::make_unique<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white_mat));
 
 
 	auto bvh = std::make_unique<bvh_node>(std::move(world));

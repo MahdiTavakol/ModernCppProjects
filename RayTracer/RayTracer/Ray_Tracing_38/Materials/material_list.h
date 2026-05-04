@@ -13,11 +13,28 @@ public:
 		list.reserve(nmax);
 	}
 
-	void push_back(std::string name_, std::unique_ptr<material> mat_)
+	int push_back(std::string name_, std::unique_ptr<material> mat_)
 	{
-		int indx = list.size();
-		list.push_back(std::move(mat_));
-		matMap[name_] = indx;
+		int indx;
+		auto iter = matMap.find(name_);
+		if (iter == matMap.end())
+		{
+			list.push_back(std::move(mat_));
+			indx = static_cast<int>(list.size()) - 1;
+		}
+		else
+		{
+			indx = matMap[name_];
+		}
+		return indx;
+	}
+
+	int push_back(std::pair<std::string, std::unique_ptr<material>> in_)
+	{
+		std::string name = in_.first;
+		std::unique_ptr<material> mat = std::move(in_.second);
+
+		push_back(name, std::move(mat));
 	}
 
 	material* operator()(const int& indx_) const

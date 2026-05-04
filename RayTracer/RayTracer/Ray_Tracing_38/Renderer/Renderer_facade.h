@@ -9,6 +9,7 @@
 #include "../Output/output.h"
 #include "../Algorithms/hittable_list.h"
 #include "../Input/factory.hpp"
+#include "../Materials/material_list.h"
 
 
 class renderer_facade
@@ -33,5 +34,6 @@ protected:
 	std::unique_ptr<communicator> para;
 	std::unique_ptr<output> writer;
 	std::unique_ptr<hittable_list> world;
+	std::unique_ptr<material_list> list;
 	
 };

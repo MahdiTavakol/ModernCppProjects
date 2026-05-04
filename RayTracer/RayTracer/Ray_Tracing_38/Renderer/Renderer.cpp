@@ -14,7 +14,7 @@ renderer::~renderer()
 
 
 
-void renderer::render(camera* cam_, output* writer_, hittable_list* world_)
+void renderer::render(camera* cam_, output* writer_, hittable_list* world_, material_list* list_)
 {
 	std::string text = "Rendering the " + info;
 	message(text);
@@ -23,7 +23,7 @@ void renderer::render(camera* cam_, output* writer_, hittable_list* world_)
 	path& pth_ref = *pth;
 	cam_->move_camera(pth_ref[0]);
 
-	cam_->render(*world_);
+	cam_->render(*world_,*list_);
 
 	auto img = cam_->return_image();
 

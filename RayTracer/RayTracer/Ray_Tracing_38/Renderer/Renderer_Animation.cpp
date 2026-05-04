@@ -14,7 +14,7 @@ renderer_animation::renderer_animation(communicator* para_, std::unique_ptr<path
 }
 
 
-void renderer_animation::render(camera* cam_, output* writer_, hittable_list* world_)
+void renderer_animation::render(camera* cam_, output* writer_, hittable_list* world_, material_list* list_)
 {
 	// getting a reference to the pth resource
 	path& pth_ref = *pth;
@@ -31,7 +31,7 @@ void renderer_animation::render(camera* cam_, output* writer_, hittable_list* wo
 
 		std::string text = "Rendering the frame " + std::to_string(i);
 		message(text);
-		cam_->render(*world_);
+		cam_->render(*world_,*list_);
 
 		std::unique_ptr<image> img = cam_->return_image();
 		writer_->reset_image(filename,std::move(img));
