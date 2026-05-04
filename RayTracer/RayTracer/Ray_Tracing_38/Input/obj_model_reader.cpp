@@ -65,20 +65,21 @@ obj_model_reader::obj_model_reader(
 
 void obj_model_reader::read()
 {
-	if (!silent)
-		std::cout << "Started reading the obj file " << std::endl;
-	read_obj_file();
 	if (!silent) {
-		std::cout << "Finished reading the obj file " << std::endl;
 		std::cout << "Started reading the mtl file " << std::endl;
 	}
 	read_mtl_file();
-	int low, hi;
-	set_range(low, hi);
 	if (!silent) {
 		std::cout << "Finished reading the mtl file " << std::endl;
+		std::cout << "Started reading the obj file " << std::endl;
+	}
+	read_obj_file();
+	if (!silent) {
+		std::cout << "Finished reading the obj file " << std::endl;
 		std::cout << "Started adding the items " << std::endl;
 	}
+	int low, hi;
+	set_range(low, hi);
 	add_item(low,hi);
 	if (!silent)
 		std::cout << "Finished adding items to the hittable_list" << std::endl;
@@ -160,12 +161,8 @@ void obj_model_reader::read_obj_file()
 			if (!dummy_str.compare("usemtl"))
 			{
 				iss >> dummy_str;
-				auto iter = std::find(obj_mat_names.begin(), obj_mat_names.end(), dummy_str);
-				current_mat_indx = std::distance(obj_mat_names.begin(), iter);
-				if (iter == obj_mat_names.end())
-				{
-					obj_mat_names.push_back(dummy_str);
-				}
+				std::string current_mat_name = dummy_str;
+				current_mat_indx = mtl_list->find(current_mat_name);
 			}
 			if (!dummy_str.compare("s"))
 			{
@@ -262,7 +259,7 @@ void obj_model_reader::read_mtl_file()
 				if (material_counter)
 				{
 					auto material_i = std::make_unique<general>(Kd, Ns, d, Tr, Tf, Ks);
-					materials_map[material_name] = std::move(material_i);
+					mtl_list->push_back(material_name, std::move(material_i));
 				}
 				iss >> dummy_str;
 				if (!silent)
@@ -306,7 +303,7 @@ void obj_model_reader::read_mtl_file()
 
 	// Since we add to the materials vector whenever we read a newmtl line the last material would not be added otherwise.
 	auto material_i = std::make_unique<general>(Kd, Ns, d, Tr, Tf, Ks);
-	materials_map[material_name] = std::move(material_i);
+	mtl_list->push_back(material_name, std::move(material_i));
 }
 
 void obj_model_reader::set_range(int& _low, int& _hi) {
@@ -366,10 +363,8 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 			vns_i[j] = vn_j;
 		}
 		// mapping from obj material into the mtl file material
-		// we ourselves set the mat_indx to it is zero based!
-		std::string material_name = obj_mat_names[face.mat_indx];
-		general* material_indx = dynamic_cast<general*>(materials_map[material_name].get());
-		mat = std::make_unique<general>(*material_indx);
+		// we ourselves set the mat_indx so it is zero based!
+		int mat_indx = face.mat_indx;
 
 		switch (num_edges)
 		{
@@ -377,10 +372,10 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 			std::copy_n(vs_i.data(), 3, vs_d.data());
 			std::copy_n(vts_i.data(), 3, vts_d.data());
 			std::copy_n(vns_i.data(), 3, vns_d.data());
-			world->add(std::make_unique<triangle_mesh>(vs_d, vts_d, vns_d, std::move(mat)));
+			world->add(std::make_unique<triangle_mesh>(vs_d, vts_d, vns_d,mat_indx));
 			break;
 		case 4:
-			world->add(std::make_unique<mesh>(vs_i, vts_i, vns_i, std::move(mat)));
+			world->add(std::make_unique<mesh>(vs_i, vts_i, vns_i, mat_indx));
 			break;
 		}
 	}
@@ -389,6 +384,11 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 std::unique_ptr<hittable_list> obj_model_reader::return_world()
 {
 	return std::move(world);
+}
+
+std::unique_ptr<material_list> obj_model_reader::return_mtl_list()
+{
+	return std::move(mtl_list);
 }
 
 std::unique_ptr<std::istream> obj_model_reader::open_file(std::string file_name_)

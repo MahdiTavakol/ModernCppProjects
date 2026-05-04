@@ -11,8 +11,6 @@ renderer_facade::renderer_facade(int argc, char** argv, int mode_,
 {
 	// the factory object
 	builder = std::make_unique<factory>(argc, argv, mode_, comm_);
-	// material list
-	list = std::make_unique<material_list>();
 }
 
 
@@ -31,6 +29,7 @@ void renderer_facade::setup()
 	para = builder->return_comm();
 	writer = builder->return_writer();
 	world = builder->return_world();
+	mtl_list = builder->return_mtl_list();
 }
 
 
@@ -41,7 +40,7 @@ void renderer_facade::add(std::unique_ptr<hittable>& object)
 
 void renderer_facade::render()
 {
- 	rend->render(cam.get(), writer.get(), world.get());
+ 	rend->render(cam.get(), writer.get(), world.get(),mtl_list.get());
 }
 
 

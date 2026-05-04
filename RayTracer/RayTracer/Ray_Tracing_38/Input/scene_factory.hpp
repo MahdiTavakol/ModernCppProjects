@@ -15,7 +15,7 @@ public:
 		          std::string obj_file_name_);
 	void create();
 	std::unique_ptr<hittable_list> return_object();
-	std::unique_ptr<material_list> return_mat_list();
+	std::unique_ptr<material_list> return_mtl_list();
 
 protected:
 	const int mode;

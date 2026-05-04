@@ -9,6 +9,7 @@
 
 #include "../Types/color.h"
 #include "../Materials/material.h"
+#include "../Materials/material_list.h"
 #include "../Algorithms/hittable_list.h"
 #include "../Algorithms/communicator.h"
 #include "../Types/vec3.h"
@@ -42,12 +43,15 @@ public:
 		             std::unique_ptr<communicator>& _para);
 	virtual void read();
 	std::unique_ptr<hittable_list> return_world();
+	std::unique_ptr<material_list> return_mtl_list();
 
 protected:
 	// the parallel object
 	communicator* para = nullptr;
 	// the object container
 	std::unique_ptr<hittable_list> world;
+	// the material list
+	std::unique_ptr<material_list> mtl_list;
 	// file names
 	std::string obj_file_name, mtl_file_name;
 	// data
@@ -60,8 +64,6 @@ protected:
 	std::vector<std::string> obj_mat_names;
 	// face indexes
 	std::vector<face_indx> face_indexes;
-	// materials
-	std::unordered_map<std::string, std::unique_ptr<material>> materials_map;
 
 	// 
 	bool silent = false;

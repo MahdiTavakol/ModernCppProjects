@@ -117,6 +117,18 @@ std::unique_ptr<hittable_list> scene_factory::return_object()
 	return std::move(world);
 }
 
+std::unique_ptr<material_list> scene_factory::return_mtl_list()
+{
+	if (list == nullptr)
+	{
+		std::cout << "Warning: the material_list has already been returned" <<
+			std::endl << "Calling the create method again!" << std::endl;
+		this->create();
+	}
+	return std::move(list);
+}
+
+
 void scene_factory::setup_random_spheres()
 {
 	int mat_indx = 0;
@@ -456,6 +468,7 @@ void scene_factory::setup_3d_obj_parallel()
 		std::make_unique<obj_model_reader_parallel>(obj_file_name,para);
 	model_reader->read();
 	world = model_reader->return_world();
+	list = model_reader->return_mtl_list();
 
 	auto bvh = std::make_unique<bvh_node>(std::move(world));
 	world = std::make_unique<hittable_list>(std::move(bvh));

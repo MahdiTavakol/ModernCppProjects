@@ -137,6 +137,15 @@ std::unique_ptr<hittable_list> factory::return_world()
 	return std::move(world);
 }
 
+std::unique_ptr<material_list> factory::return_mtl_list()
+{
+	// returning the hittable_list pointe from the world_factory
+	auto list = world_factory->return_mtl_list();
+	if (list == nullptr)
+		throw std::runtime_error("This object has already been returned!");
+	return std::move(list);
+}
+
 std::unique_ptr<renderer> factory::return_renderer()
 {
 	// returning the renderer object from its factory

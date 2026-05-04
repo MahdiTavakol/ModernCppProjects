@@ -46,6 +46,16 @@ public:
 	{
 		return list[matMap[name_]].get();
 	}
+
+	int find(const std::string name_)
+	{
+		auto iter = matMap.find(name_);
+		if (iter != matMap.end())
+			return matMap[name_];
+		else
+			return -1;
+	}
+
 	
 	size_t size() const
 	{

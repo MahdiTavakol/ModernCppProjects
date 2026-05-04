@@ -8,6 +8,7 @@
 #include "input.h"
 #include "../Algorithms/hittable_list.h"
 #include "../Output/output.h"
+#include "../Materials/material_list.h"
 #include <mpi.h>
 
 class factory
@@ -21,6 +22,8 @@ public:
 	std::unique_ptr<camera> return_camera();
 	std::unique_ptr<output> return_writer();
 	std::unique_ptr<hittable_list> return_world();
+	std::unique_ptr<material_list> return_mtl_list();
+
 protected:
 	// the mode used for various default parameters
 	int mode;

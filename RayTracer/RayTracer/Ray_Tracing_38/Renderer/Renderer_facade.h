@@ -34,6 +34,6 @@ protected:
 	std::unique_ptr<communicator> para;
 	std::unique_ptr<output> writer;
 	std::unique_ptr<hittable_list> world;
-	std::unique_ptr<material_list> list;
+	std::unique_ptr<material_list> mtl_list;
 	
 };
