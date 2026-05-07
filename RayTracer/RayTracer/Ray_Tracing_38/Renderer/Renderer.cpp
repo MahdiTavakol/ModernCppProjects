@@ -24,7 +24,6 @@ void renderer::render(camera* cam_, output* writer_, hittable_list* world_, mate
 	cam_->move_camera(pth_ref[0]);
 
 	cam_->render(*world_,*list_);
-
 	auto img = cam_->return_image();
 
 	writer_->reset_image(std::move(img));
@@ -32,7 +31,7 @@ void renderer::render(camera* cam_, output* writer_, hittable_list* world_, mate
 	// since the image inside the camera is null due to the return_image,
 	// the img needs to be returned to the camera so the camera is ready for
 	// the next image... This matters for the animation mode
-	cam_->reset_image(std::move(img));
+	//cam_->reset_image(std::move(img));
 }
 
 

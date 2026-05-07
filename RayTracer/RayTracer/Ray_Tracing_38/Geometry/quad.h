@@ -57,5 +57,29 @@ inline std::unique_ptr<hittable_list> box(const point3& a, const point3& b,
     return sides;
 }
 
+inline std::unique_ptr<hittable_list> box(const point3& a, const point3& b, const int& mat_indx_)
+{
+    auto sides = std::make_unique<hittable_list>();
+
+    // Construct the two opposite vertices with the minimum and maximum coordinates.
+    auto min = point3(std::fmin(a.x(), b.x()), std::fmin(a.y(), b.y()), std::fmin(a.z(), b.z()));
+    auto max = point3(std::fmax(a.x(), b.x()), std::fmax(a.y(), b.y()), std::fmax(a.z(), b.z()));
+
+    auto dx = vec3(max.x() - min.x(), 0, 0);
+    auto dy = vec3(0, max.y() - min.y(), 0);
+    auto dz = vec3(0, 0, max.z() - min.z());
+
+
+    sides->add(std::make_unique<quad>(point3(min.x(), min.y(), max.z()),  dx,  dy, mat_indx_)); // front
+    sides->add(std::make_unique<quad>(point3(max.x(), min.y(), max.z()), -dz,  dy, mat_indx_)); // right
+    sides->add(std::make_unique<quad>(point3(max.x(), min.y(), min.z()), -dx,  dy, mat_indx_)); // back
+    sides->add(std::make_unique<quad>(point3(min.x(), min.y(), min.z()),  dz,  dy, mat_indx_)); // left
+    sides->add(std::make_unique<quad>(point3(min.x(), max.y(), max.z()),  dx, -dz, mat_indx_)); // top
+    sides->add(std::make_unique<quad>(point3(min.x(), min.y(), min.z()),  dx,  dz, mat_indx_)); // bottom
+
+
+    return sides;
+}
+
 
 #endif

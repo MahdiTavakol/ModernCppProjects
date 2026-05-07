@@ -61,6 +61,11 @@ bool bvh_node::box_compare(
 	return a_axis_interval.min < b_axis_interval.min;
 }
 
+size_t bvh_node::size() const
+{
+	return left->size() + right->size();
+}
+
 
 
 

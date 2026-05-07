@@ -27,6 +27,7 @@ public:
 	bool compare(hittable* rhs_, const double& tol) const override;
 	virtual bool comparator(const std::unique_ptr<hittable>& rhs_) const override;
 	double get_area() const override;
+	static vec3 interpolate(double alpha_, double beta_, const std::array<point3, 3>& arr_);
 
 protected:
 	std::array<point3, 3> vs;

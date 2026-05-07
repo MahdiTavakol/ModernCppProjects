@@ -21,6 +21,7 @@ public:
 		{
 			list.push_back(std::move(mat_));
 			indx = static_cast<int>(list.size()) - 1;
+			matMap[name_] = indx;
 		}
 		else
 		{
@@ -34,7 +35,7 @@ public:
 		std::string name = in_.first;
 		std::unique_ptr<material> mat = std::move(in_.second);
 
-		push_back(name, std::move(mat));
+		return push_back(name, std::move(mat));
 	}
 
 	material* operator()(const int& indx_) const

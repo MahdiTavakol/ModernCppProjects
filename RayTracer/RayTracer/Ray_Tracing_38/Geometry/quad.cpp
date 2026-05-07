@@ -89,7 +89,6 @@ bool quad::hit(const ray& _r, interval _ray_t, hit_record& _rec) const
 	_rec.t = t;
 	_rec.p = intersection;
 	_rec.mat_indx = mat_indx;
-	_rec.mat = mat.get();
 	_rec.set_face_normal(_r, normal);
 
 	return true;

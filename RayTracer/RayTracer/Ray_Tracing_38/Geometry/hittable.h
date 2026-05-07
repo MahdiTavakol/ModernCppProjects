@@ -47,6 +47,11 @@ public:
         return 0;
     }
 
+    virtual size_t size() const
+    {
+        return static_cast<size_t>(1);
+    }
+
 
     const std::string type = "";
 protected:

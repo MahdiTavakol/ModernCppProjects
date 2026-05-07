@@ -1,6 +1,6 @@
 mode OBJ_MODEL
-renderer -renderer_mode STATIC -path_type NONE -location 35 -10.0 55.0
+renderer -renderer_mode STATIC -path_type NONE -location 0 40 180
 scene -mode OBJ_MODEL -obj_file ..\\models\\77-modern-chair-01-obj\\modern-chair.obj -mtl_file  ..\\models\\77-modern-chair-01-obj\\modern-chair.mtl
-camera -lookat 0 38.67 0 -vup 0 1 0 -samples_per_pixel 10 -max_depth 10 -vfov 35
+camera -lookat 0 35 0 -vup 0 1 0 -samples_per_pixel 10 -max_depth 10 -vfov 28.0
 image -width 130 -aspect_ratio 16.0 9.0
 output -output_type parallel  -output_mode P6 -image_file Tests\\SampleOutputs\\test_7.ppm

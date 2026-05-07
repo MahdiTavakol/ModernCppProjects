@@ -80,37 +80,6 @@ void camera::initialize()
 }
 
 
-void camera::render(const hittable& world_)
-{
-	// getting the color_data array from the image object
-	color_data** c_data = img->returnColorData();
-	// getting the ranges from the image object
-	std::array<int, 2> widthRange, heightRange;
-	img->returnRange(widthRange, heightRange);
-	int height_min = heightRange[0];
-	int height_max = heightRange[1];
-	int width_min = widthRange[0];
-	int width_max = widthRange[1];
-
-
-	for (int j = height_min; j < height_max; j++)
-	{
-		for (int i = width_min; i < width_max; i++)
-		{
-			color pixel_color(0, 0, 0);
-			for (int sample = 0; sample < samples_per_pixel; sample++)
-			{
-				ray r = get_ray(i, j);
-				pixel_color += ray_color(r, max_depth, world_);
-			}
-			pixel_color = pixel_samples_scale * pixel_color;
-			c_data[i - width_min][j - height_min].r = pixel_color.x();
-			c_data[i - width_min][j - height_min].g = pixel_color.y();
-			c_data[i - width_min][j - height_min].b = pixel_color.z();
-		}
-	}
-}
-
 void camera::render(const hittable& world_, const material_list& list_)
 {
 	// getting the color_data array from the image object
@@ -122,10 +91,11 @@ void camera::render(const hittable& world_, const material_list& list_)
 	int height_max = heightRange[1];
 	int width_min = widthRange[0];
 	int width_max = widthRange[1];
-
+	std::cout << "Here" << std::endl;
 
 	for (int j = height_min; j < height_max; j++)
 	{
+		std::cout << " j min max" << j << " " << height_min << " " << height_max << std::endl;
 		for (int i = width_min; i < width_max; i++)
 		{
 			color pixel_color(0, 0, 0);
@@ -142,7 +112,7 @@ void camera::render(const hittable& world_, const material_list& list_)
 	}
 }
 
-void camera::render_verbose(const hittable& world_)
+void camera::render_verbose(const hittable& world_, const material_list& list_)
 {
 	// getting the color_data array from the image object
 	color_data** c_data = img->returnColorData();
@@ -157,9 +127,11 @@ void camera::render_verbose(const hittable& world_)
 	int image_height = height_max - height_min;
 	int image_width = width_max - width_min;
 
+
 	for (int j = height_min; j < height_max; j++)
 	{
-		std::clog << "\rScanlines remaining: " << (image_height - j) << " " << std::flush;
+		std::clog << "\rRendering row: " << j << " " << std::endl;
+		//std::clog << "\rScanlines remaining: " << (height_max - j) << " " << std::flush;
 		for (int i = width_min; i < width_max; i++)
 		{
 			color pixel_color(0, 0, 0);
@@ -167,7 +139,7 @@ void camera::render_verbose(const hittable& world_)
 			for (int sample = 0; sample < samples_per_pixel; sample++)
 			{
 				ray r = get_ray(i, j);
-				pixel_color += ray_color(r, max_depth, world_);
+				pixel_color += ray_color(r, max_depth, world_,list_);
 			}
 			pixel_color = pixel_samples_scale * pixel_color;
 			c_data[i][j].r = pixel_color.x();
@@ -179,35 +151,6 @@ void camera::render_verbose(const hittable& world_)
 	std::clog << "\rDone                          ";
 }
 
-void camera::render_async(const hittable& world_, image* img_)
-{
-	// getting the color_array pointer from the image object
-	color_array* c_array = img->array();
-	// getting the ranges from the image object
-	std::array<int, 2> widthRange, heightRange;
-	img->returnRange(widthRange, heightRange);
-	int height_min = heightRange[0];
-	int height_max = heightRange[1];
-	int width_min = widthRange[0];
-	int width_max = widthRange[1];
-
-
-	for (int j = height_min; j < height_max; j++)
-	{
-		for (int i = width_min; i < width_max; i++)
-		{
-			color pixel_color(0, 0, 0);
-			for (int sample = 0; sample < samples_per_pixel; sample++)
-			{
-				ray r = get_ray(i, j);
-				pixel_color += ray_color(r, max_depth, world_);
-			}
-			pixel_color = pixel_samples_scale * pixel_color;
-			color_data c_data{ pixel_color.x(),pixel_color.y(),pixel_color.z() };
-			c_array->set(i - width_min, j - height_min, c_data);
-		}
-	}
-}
 
 void camera::render_async(const hittable& world_, const material_list& list_, image* img_)
 {
@@ -264,29 +207,6 @@ point3 camera::defocus_disk_sample() const
 	return center + (p[0] * defocus_disk_u) + (p[1] * defocus_disk_v);
 }
 
-color camera::ray_color(const ray& r, int depth, const hittable& world) const
-{
-	if (depth <= 0)
-		return color(0, 0, 0);
-
-	hit_record rec;
-
-	if (!world.hit(r, interval(0.001, infinity), rec))
-		return background;
-
-
-	ray scattered;
-	color attenuation;
-	color color_from_emission = rec.mat->emitted(rec.u, rec.v, rec.p);
-
-	if (!rec.mat->scatter(r, rec, attenuation, scattered))
-		return color_from_emission;
-
-
-	color color_from_scatter = attenuation * ray_color(scattered, depth - 1, world);
-
-	return color_from_emission + color_from_scatter;
-}
 
 color camera::ray_color(const ray& r_, int depth_, const hittable& world_, const material_list& list_) const
 {
@@ -310,7 +230,7 @@ color camera::ray_color(const ray& r_, int depth_, const hittable& world_, const
 		return color_from_emission;
 
 
-	color color_from_scatter = attenuation * ray_color(scattered, depth_ - 1, world_);
+	color color_from_scatter = attenuation * ray_color(scattered, depth_ - 1, world_,list_);
 
 	return color_from_emission + color_from_scatter;
 }
@@ -318,4 +238,5 @@ color camera::ray_color(const ray& r_, int depth_, const hittable& world_, const
 void camera::reset_image(std::unique_ptr<image>&& img_)
 {
 	img = std::move(img_);
+	initialize();
 }

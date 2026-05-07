@@ -11,11 +11,7 @@ class hit_record
 public:
     point3 p;
     vec3 normal;
-    /* it does not own the material
-     * The object owns it!
-     */
-    material* mat;
-    // just material index.. Gradually I will remove the material* object from this class
+    // just material index.
     int mat_indx;
     double t{ 0.0 };
     double u{ 0.0 };

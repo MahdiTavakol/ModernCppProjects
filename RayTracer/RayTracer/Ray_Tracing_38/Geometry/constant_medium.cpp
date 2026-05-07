@@ -1,19 +1,5 @@
 #include "constant_medium.h"
 
-constant_medium::constant_medium(std::unique_ptr<hittable> _boundary, 
-	double _density, std::unique_ptr<texture>& _tex)
-	:
-	hittable{"constant_medium"},
-	boundary{ std::move(_boundary) }, neg_inv_density(-1 / _density),
-	phase_function{ std::make_unique<isotropic>(_tex) }
-{}
-
-constant_medium::constant_medium(std::unique_ptr<hittable> _boundary, double _density, const color& _albedo)
-	:
-	hittable{ "constant_medium" },
-	boundary{ std::move(_boundary) }, neg_inv_density(-1 / _density),
-	phase_function(std::make_unique<isotropic>(_albedo))
-{}
 
 constant_medium::constant_medium(std::unique_ptr<hittable> boundary_,
 	double density_, std::unique_ptr<texture>& tex_,
@@ -23,8 +9,8 @@ constant_medium::constant_medium(std::unique_ptr<hittable> boundary_,
 	boundary{ std::move(boundary_) }, neg_inv_density(-1 / density_)
 {
 	std::unique_ptr<material> mat = std::make_unique<isotropic>(tex_);
-    mat_indx = static_cast<int>(list_.size());
-	list_.push_back("constant_medium",std::move(mat));
+	std::string name = "constant_medium";
+	mat_indx = list_.push_back(name,std::move(mat));
 }
 
 constant_medium::constant_medium(std::unique_ptr<hittable> boundary_,
@@ -34,8 +20,8 @@ constant_medium::constant_medium(std::unique_ptr<hittable> boundary_,
 	boundary{ std::move(boundary_) }, neg_inv_density(-1 / density_)
 {
 	std::unique_ptr<material> mat = std::make_unique<isotropic>(albedo_);
-	mat_indx = static_cast<int>(list_.size());
-	list_.push_back("constant_medium", std::move(mat));
+	std::string name = "constant_medium";
+	mat_indx = list_.push_back(name, std::move(mat));
 }
 
 bool constant_medium::hit(const ray& _r, interval _ray_t, hit_record& _rec) const  {
@@ -68,7 +54,7 @@ bool constant_medium::hit(const ray& _r, interval _ray_t, hit_record& _rec) cons
 
 	_rec.normal = vec3(1, 0, 0);
 	_rec.front_face = true;
-	_rec.mat = phase_function.get();
+	_rec.mat_indx = mat_indx;
 
 	return true;
 }

@@ -18,6 +18,8 @@ public:
 
 	material* get_material() override { return nullptr; }
 
+	size_t size() const override;
+
 private:
 	std::unique_ptr<hittable> left;
 	std::unique_ptr<hittable> right;

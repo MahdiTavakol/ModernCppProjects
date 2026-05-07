@@ -1,4 +1,4 @@
-333#ifndef PERLIN_H
+#ifndef PERLIN_H
 #define PERLIN_H
 
 #include "../Types/color.h"

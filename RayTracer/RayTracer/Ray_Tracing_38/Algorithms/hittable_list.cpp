@@ -60,3 +60,13 @@ void hittable_list::add(std::unique_ptr<hittable> object)
 	bbox = aabb(bbox, object->bounding_box());
 	objects.push_back(std::move(object));
 }
+
+size_t hittable_list::size() const
+{
+	size_t out = static_cast<size_t>(0);
+	for (auto& obj : objects)
+	{
+		out += obj->size();
+	}
+	return out;
+}

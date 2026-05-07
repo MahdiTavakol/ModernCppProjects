@@ -65,19 +65,8 @@ bool triangle_mesh::hit(const ray& _r, interval _ray_t, hit_record& _rec) const
 	if (!is_interior(alpha, beta, _rec))
 		return false;
 
-
-	std::vector<vec3> triangle, normals, textures;
-	triangle.push_back(vs[0]);
-	triangle.push_back(vs[1]);
-	triangle.push_back(vs[2]);
-	normals.push_back(vns[0]);
-	normals.push_back(vns[1]);
-	normals.push_back(vns[2]);
-	textures.push_back(vts[0]);
-	textures.push_back(vts[1]);
-	textures.push_back(vts[2]);
-	auto normal = interpolate(triangle, normals, intersection);
-	auto texture = interpolate(triangle, textures, intersection);
+	auto normal = interpolate(alpha,beta, vns);
+	auto texture = interpolate(alpha,beta,vts);
 
 	_rec.t = t1;
 	_rec.p = intersection;
@@ -85,10 +74,7 @@ bool triangle_mesh::hit(const ray& _r, interval _ray_t, hit_record& _rec) const
 	_rec.v = texture[1];
 	_rec.w = texture[2];
 	_rec.mat_indx = mat_indx;
-	_rec.mat = mat.get();
 	_rec.set_face_normal(_r, normal);
-
-
 	return true;
 }
 
@@ -102,8 +88,8 @@ void triangle_mesh::return_params(
 }
 
 bool triangle_mesh::is_interior(double _a, double _b, hit_record& _rec) const {
-
-	if (_a > 0 && _b > 0 && _a + _b < 1)
+	constexpr double eps = 1e-8;
+	if (_a >= -eps && _b >= -eps && _a + _b <= 1 + eps)
 		return true;
 
 	return false;
@@ -163,4 +149,10 @@ double triangle_mesh::get_area() const
 {
 	double area = n1.length() / 2.0;
 	return area;
+}
+
+vec3 triangle_mesh::interpolate(double alpha_, double beta_, const std::array<point3, 3>& arr_)
+{
+	double gamma = 1.0 - alpha_ - beta_;
+	return gamma * arr_[0] + alpha_ * arr_[1] + beta_ * arr_[2];
 }

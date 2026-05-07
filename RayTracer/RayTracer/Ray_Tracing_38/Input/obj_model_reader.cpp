@@ -1,11 +1,8 @@
 #include "obj_model_reader.h"
 #include <filesystem>
 #include <fstream>
+#include "../Geometry/sphere.h"
 
-obj_model_reader::obj_model_reader(std::string _obj_file_name,
-	std::unique_ptr<communicator>& _para) :
-	obj_model_reader{_obj_file_name,_para.get()}
-{}
 
 obj_model_reader::obj_model_reader(
 	std::string obj_file_name_,
@@ -13,7 +10,8 @@ obj_model_reader::obj_model_reader(
 	para{ para_ },
 	obj_file_name(obj_file_name_),
 	v_num(0), vt_num(0), vn_num(0),
-	world{ std::make_unique<hittable_list>() }
+	world{ std::make_unique<hittable_list>() },
+	mtl_list{std::make_unique<material_list>()}
 
 {
 	set_silent_status();
@@ -32,7 +30,8 @@ obj_model_reader::obj_model_reader(std::string _obj_file_name,
 	obj_file_name{_obj_file_name},
 	mtl_file_name{_mtl_file_name},
 	v_num{ 0 }, vt_num{ 0 }, vn_num{ 0 },
-	world{ std::make_unique<hittable_list>() }
+	world{ std::make_unique<hittable_list>() },
+	mtl_list{ std::make_unique<material_list>() }
 {
 	set_silent_status();
 
@@ -49,6 +48,7 @@ obj_model_reader::obj_model_reader(
 	mtl_file_name{},
 	v_num{ 0 }, vt_num{ 0 }, vn_num{ 0 },
 	world{ std::make_unique<hittable_list>() },
+	mtl_list{ std::make_unique<material_list>() },
 	obj_file_ptr{ std::move(_obj_file_ptr) },
 	mtl_file_ptr{ std::move(_mtl_file_ptr) }
 {
@@ -83,6 +83,7 @@ void obj_model_reader::read()
 	add_item(low,hi);
 	if (!silent)
 		std::cout << "Finished adding items to the hittable_list" << std::endl;
+
 }
 
 void obj_model_reader::read_obj_file()
@@ -258,8 +259,21 @@ void obj_model_reader::read_mtl_file()
 			{
 				if (material_counter)
 				{
-					auto material_i = std::make_unique<general>(Kd, Ns, d, Tr, Tf, Ks);
-					mtl_list->push_back(material_name, std::move(material_i));
+					std::array<int, 2> rank_config;
+					rank_config = para->return_rank_config();
+					if (rank_config == std::array<int, 2>{ 0,0 })
+						std::cout << "Creating material " << material_name << std::endl;
+					std::unique_ptr<material>  material_i = std::make_unique<general>(Kd, Ns, d, Tr, Tf, Ks);
+
+
+					if (rank_config == std::array<int, 2>{ 0, 0 })
+					std::cout << "Adding material " << material_name << std::endl;
+					if (mtl_list == nullptr)
+						std::cout << "Null" << std::endl;
+
+					std::unique_ptr<material> mat = std::make_unique<metal>();
+					//mtl_list->push_back(material_name, std::move(material_i));
+					mtl_list->push_back(material_name, std::move(mat));
 				}
 				iss >> dummy_str;
 				if (!silent)
@@ -302,13 +316,18 @@ void obj_model_reader::read_mtl_file()
 	}
 
 	// Since we add to the materials vector whenever we read a newmtl line the last material would not be added otherwise.
-	auto material_i = std::make_unique<general>(Kd, Ns, d, Tr, Tf, Ks);
-	mtl_list->push_back(material_name, std::move(material_i));
+	std::cout << "Creating material " << material_name << std::endl;
+	std::unique_ptr<material> material_i = std::make_unique<general>(Kd, Ns, d, Tr, Tf, Ks);
+	std::cout << "Adding material " << material_name << std::endl;
+
+	std::unique_ptr<material> mat = std::make_unique<metal>();
+	//mtl_list->push_back(material_name, std::move(material_i));
+	mtl_list->push_back(material_name, std::move(mat));
 }
 
 void obj_model_reader::set_range(int& _low, int& _hi) {
 	_low = 0;
-	_hi = face_indexes.size();
+	_hi = face_indexes.size()-1;
 }
 
 void obj_model_reader::add_item(const int& _low, const int& _hi)
@@ -318,6 +337,10 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 	int hi = _hi;
 	if (hi >= face_indexes.size())
 		hi = static_cast<int>(face_indexes.size());
+
+
+	int num_triangle = 0;
+	int num_mesh = 0;
 	
 	for (int i = _low; i < hi; i++)
 	{
@@ -366,6 +389,7 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 		// we ourselves set the mat_indx so it is zero based!
 		int mat_indx = face.mat_indx;
 
+
 		switch (num_edges)
 		{
 		case 3:
@@ -373,12 +397,20 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 			std::copy_n(vts_i.data(), 3, vts_d.data());
 			std::copy_n(vns_i.data(), 3, vns_d.data());
 			world->add(std::make_unique<triangle_mesh>(vs_d, vts_d, vns_d,mat_indx));
+			num_triangle++;
 			break;
 		case 4:
 			world->add(std::make_unique<mesh>(vs_i, vts_i, vns_i, mat_indx));
+			num_mesh++;
 			break;
 		}
 	}
+
+
+
+
+
+	//world->add(std::make_unique<sphere>(point3(0, 38, 0), 20,1));
 }
 
 std::unique_ptr<hittable_list> obj_model_reader::return_world()

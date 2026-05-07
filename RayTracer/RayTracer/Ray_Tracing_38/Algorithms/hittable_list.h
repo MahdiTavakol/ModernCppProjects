@@ -24,7 +24,7 @@ public:
 
 	void clear() { objects.clear(); }
 
-	size_t size() { return objects.size(); }
+	size_t size() const override;
 
 	hittable* operator[](const int& i) {
 		return objects[i].get();

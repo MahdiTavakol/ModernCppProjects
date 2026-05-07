@@ -5,6 +5,7 @@
 
 #include "../Algorithms/hittable_list.h"
 #include "../Algorithms/communicator.h"
+#include "../Materials/material_list.h"
 #include "scene_settings.h"
 
 class scene_factory {

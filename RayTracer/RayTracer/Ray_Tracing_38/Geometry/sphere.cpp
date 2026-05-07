@@ -78,7 +78,6 @@ bool sphere::hit(const ray& r, interval ray_t, hit_record& rec) const {
     rec.set_face_normal(r, outward_normal);
     get_sphere_uv(outward_normal, rec.u, rec.v);
     rec.mat_indx = mat_indx;
-    rec.mat = mat.get();
 
     return true;
 }

@@ -28,8 +28,6 @@ struct face_indx
 class obj_model_reader {
 public:
 	obj_model_reader(){}
-	obj_model_reader(std::string _obj_file_name,
-		             std::unique_ptr<communicator>& _para);
 	obj_model_reader(std::string obj_file_name_,
 		             communicator* para_);
 	obj_model_reader(std::string _obj_file_name,

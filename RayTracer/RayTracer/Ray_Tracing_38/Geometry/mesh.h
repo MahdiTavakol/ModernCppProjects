@@ -47,9 +47,13 @@ protected:
 	double D1{ 0.0 }, D2{ 0.0 };
 
 	// differences
-	vec3 vs20, vs10, vs13, vs23;
+	// edgeij = i the edge of j the triangle
+	vec3 edge11, edge21, edge12, edge22;
 
-	static vec3 interpolate(const std::vector<point3>& _triangle, const std::vector<point3>& _normals, const vec3& _point);
+	// the triangle indexes
+	std::array<int, 3> ind1, ind2;
+
+	static vec3 interpolate(double alpha_, double beta_, const std::array<point3,4>& arr_, std::array<int, 3> indx_);
 };
 
 

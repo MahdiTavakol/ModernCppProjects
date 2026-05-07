@@ -135,8 +135,8 @@ void scene_factory::setup_random_spheres()
 
 	auto checker = std::make_unique<checker_texture>(0.32, color(0.2, 0.3, 0.1), color(0.9, 0.9, 0.9));
 	std::unique_ptr<material> mat = std::make_unique<lambertian>(std::move(checker));
-	list->push_back("checker", std::move(mat));
-	world->add(std::make_unique<sphere>(point3(0, -1000, 0), 1000,mat_indx++));
+	mat_indx = list->push_back("checker", std::move(mat));
+	world->add(std::make_unique<sphere>(point3(0, -1000, 0), 1000,mat_indx));
 
 	for (int a = -11; a < 11; a++)
 		for (int b = -11; b < 11; b++)
@@ -259,7 +259,8 @@ void scene_factory::setup_perlin_sphere()
 	
 	auto pertext2 = std::make_unique<noise_texture>(4);
 	mat_name = "material2";
-	auto material1 = std::make_unique<lambertian>(std::move(pertext2));
+	auto material2 = std::make_unique<lambertian>(std::move(pertext2));
+	mat_indx = list->push_back(mat_name, std::move(material2));
 	world->add(std::make_unique<sphere>(point3(0, 2, 0), 2, mat_indx));
 
 	auto bvh = std::make_unique<bvh_node>(std::move(world));
@@ -345,16 +346,16 @@ void scene_factory::setup_cornell_box()
 	std::unique_ptr<material> green = std::make_unique<lambertian>(color(0.12, 0.45, 0.15));
 	std::unique_ptr<material> light = std::make_unique<diffuse_light>(color(15, 15, 15));
 
-	int red_mat = list->push_back("red", std::move(red));
-	int white_mat = list->push_back("white", std::move(white));
-	int green_mat = list->push_back("green", std::move(green));
-	int light_mat = list->push_back("light", std::move(light));
+	int red_mat_indx = list->push_back("red", std::move(red));
+	int white_mat_indx = list->push_back("white", std::move(white));
+	int green_mat_indx = list->push_back("green", std::move(green));
+	int light_mat_indx = list->push_back("light", std::move(light));
 
-	world->add(std::make_unique<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green_mat));
-	world->add(std::make_unique<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red_mat));
-	world->add(std::make_unique<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), light_mat));
-	world->add(std::make_unique<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white_mat));
-	world->add(std::make_unique<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white_mat));
+	world->add(std::make_unique<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green_mat_indx));
+	world->add(std::make_unique<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red_mat_indx));
+	world->add(std::make_unique<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), light_mat_indx));
+	world->add(std::make_unique<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white_mat_indx));
+	world->add(std::make_unique<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white_mat_indx));
 
 
 	auto bvh = std::make_unique<bvh_node>(std::move(world));
@@ -366,17 +367,16 @@ void scene_factory::setup_boxes()
 	setup_cornell_box();
 
 
-	std::vector < std::unique_ptr<material>> matVec1, matVec2;
-	for (int i = 0; i < 6; i++) {
-		matVec1.push_back(std::make_unique<lambertian>(color(0.73, 0.73, 0.73)));
-		matVec2.push_back(std::make_unique<lambertian>(color(0.73, 0.73, 0.73)));
-	}
+	std::unique_ptr<material> mat;
+	mat = std::make_unique<lambertian>(color(0.73, 0.73, 0.73));
+	int mat_indx = list->push_back("lambertian", std::move(mat));
+
 
 
 	std::unique_ptr<hittable> box1 =
-		box(point3(0, 0, 0), point3(165, 330, 165), matVec1);
+		box(point3(0, 0, 0), point3(165, 330, 165), mat_indx);
 	std::unique_ptr<hittable> box2 =
-		box(point3(0, 0, 0), point3(165, 165, 165), matVec2);
+		box(point3(0, 0, 0), point3(165, 165, 165), mat_indx);
 
 	world->add(std::move(box1));
 	world->add(std::move(box2));
@@ -388,17 +388,16 @@ void scene_factory::setup_boxes()
 void scene_factory::setup_boxes_rotated()
 {
 	setup_cornell_box();
-	std::vector < std::unique_ptr<material>> matVec1, matVec2;
-	for (int i = 0; i < 6; i++) {
-		matVec1.push_back(std::make_unique<lambertian>(color(0.73, 0.73, 0.73)));
-		matVec2.push_back(std::make_unique<lambertian>(color(0.73, 0.73, 0.73)));
-	}
+
+	std::unique_ptr<material> mat;
+	mat = std::make_unique<lambertian>(color(0.73, 0.73, 0.73));
+	int mat_indx = list->push_back("lambertian", std::move(mat));
 
 
 	std::unique_ptr<hittable> box1 =
-		box(point3(0, 0, 0), point3(165, 330, 165), matVec1);
+		box(point3(0, 0, 0), point3(165, 330, 165), mat_indx);
 	std::unique_ptr<hittable> box2 =
-		box(point3(0, 0, 0), point3(165, 165, 165), matVec2);
+		box(point3(0, 0, 0), point3(165, 165, 165), mat_indx);
 
 	box1 = std::make_unique<rotate_y>(std::move(box1), 15);
 	box1 = std::make_unique<translate>(std::move(box1), vec3(265, 0, 295));
@@ -418,17 +417,16 @@ void scene_factory::setup_cornell_smoke()
 {
 	setup_cornell_box();
 
-	std::vector < std::unique_ptr<material>> matVec1, matVec2;
-	for (int i = 0; i < 6; i++) {
-		matVec1.push_back(std::make_unique<lambertian>(color(0.73, 0.73, 0.73)));
-		matVec2.push_back(std::make_unique<lambertian>(color(0.73, 0.73, 0.73)));
-	}
+	std::unique_ptr<material> mat;
+	mat = std::make_unique<lambertian>(color(0.73, 0.73, 0.73));
+	int mat_indx = list->push_back("lambertian", std::move(mat));
+
 
 
 	std::unique_ptr<hittable> box1 =
-		box(point3(0, 0, 0), point3(165, 330, 165), matVec1);
+		box(point3(0, 0, 0), point3(165, 330, 165), mat_indx);
 	std::unique_ptr<hittable> box2 =
-		box(point3(0, 0, 0), point3(165, 165, 165), matVec2);
+		box(point3(0, 0, 0), point3(165, 165, 165), mat_indx);
 
 
 
@@ -442,8 +440,8 @@ void scene_factory::setup_cornell_smoke()
 
 
 
-	world->add(std::make_unique<constant_medium>(std::move(box1), 0.01, color(0, 0, 0)));
-	world->add(std::make_unique<constant_medium>(std::move(box2), 0.01, color(1, 1, 1)));
+	world->add(std::make_unique<constant_medium>(std::move(box1), 0.01, color(0, 0, 0),*list));
+	world->add(std::make_unique<constant_medium>(std::move(box2), 0.01, color(1, 1, 1),*list));
 
 
 	auto bvh = std::make_unique<bvh_node>(std::move(world));
@@ -457,6 +455,7 @@ void scene_factory::setup_3d_obj()
 		std::make_unique<obj_model_reader>(obj_file_name, mtl_file_name, para);
 	model_reader->read();
 	world = model_reader->return_world();
+	list = model_reader->return_mtl_list();
 	auto bvh = std::make_unique<bvh_node>(std::move(world));
 	world = std::make_unique<hittable_list>(std::move(bvh));
 }

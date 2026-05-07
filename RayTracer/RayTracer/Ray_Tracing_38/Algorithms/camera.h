@@ -30,10 +30,9 @@ public:
 
 	virtual void setup(camera_settings* cam_setting_);
 
-	virtual void render(const hittable& world);
+
 	virtual void render(const hittable& world_, const material_list& list_);
-	virtual void render_verbose(const hittable& world);
-	virtual void render_async(const hittable& world_, image* img_);
+	virtual void render_verbose(const hittable& world, const material_list& list_);
 	virtual void render_async(const hittable& world_, const material_list& list_, image* img_);
 
 	virtual void move_camera(point3 _lookfrom) {
@@ -76,7 +75,6 @@ public:
 
 
 
-
 protected:
 
 
@@ -112,7 +110,6 @@ protected:
 	ray get_ray(int i, int j) const;
 	vec3 sample_square() const;
 	point3 defocus_disk_sample() const;
-	virtual color ray_color(const ray& r, int depth, const hittable& world) const;
 	virtual color ray_color(const ray& r_, int depth_, const hittable& world_, const material_list& list_) const;
 
 	void initialize();
