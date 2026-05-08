@@ -3,6 +3,9 @@
 #include "../Algorithms/mpiComm.h"
 #include "../Output/output_serial.h"
 #include "../Output/output_parallel.h"
+#include "../Algorithms/simpleComm.h"
+#include "../Algorithms/image.h"
+#include "../Output/output_async.h"
 
 factory::factory(int argc, char** argv, int mode_,
 	MPI_Comm comm_):
@@ -50,25 +53,28 @@ factory::factory(int argc, char** argv, int mode_,
 	auto& sett = *stngs;
 
 	// image queue
-/*
-	for (int i = 0; i < size_config[0]; i++)
+	std::unique_ptr<image_queue_fg> que;
+	std::array<int, 2> domain_size = { 16,9 };
+	for (int i = 0; i < domain_size[0]; i++)
 	{
-		for (int j = 0; j < size_config[1]; j++)
+		for (int j = 0; j < domain_size[1]; j++)
 		{
-			std::array<int, 2> rank_config{ i,j };
+			std::array<int, 2> domain_config{ i,j };
 			std::unique_ptr<communicator> comm =
-				std::make_unique<simpleComm>(rank_config, size_config);
-			std::unique_ptr<image> img = std::make_unique<image>(img_setting_, comm.get());
-			std::unique_ptr<output> out = std::make_unique<output_async>(out_setting_, comm.get());
-			queue.push(std::move(img), std::move(out));
+				std::make_unique<simpleComm>(domain_config, domain_size);
+			settings* img_setting = sett["image"];
+			settings* out_setting = sett["output"];
+			std::unique_ptr<image> img = std::make_unique<image>(img_setting, comm.get());
+			std::unique_ptr<output> out = std::make_unique<output_async>(out_setting, comm.get());
+			que->push(std::move(img), std::move(out));
 		}
 	}
-	*/
+
 
 	// getting the settings for the renderer_factory object
 	settings* renderer_settings = sett["renderer"];
 	// the renderer factory
-	rend_factory = std::make_unique<renderer_factory>(renderer_settings,para.get());
+	rend_factory = std::make_unique<renderer_factory>(renderer_settings,para.get(),std::move(que));
 
 	// getting the settings for the scene_factory object
 	settings* scene_settings = sett["scene"];

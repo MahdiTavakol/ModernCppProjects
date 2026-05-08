@@ -6,14 +6,11 @@ renderer_async::renderer_async(
 	communicator* para_,
 	std::unique_ptr<path>&& pth_,
 	std::unique_ptr<image_queue_fg>&& queue_,
-	std::array<int, 2> n_domains_,
 	std::string info_,
 	bool verbose_) :
 	renderer{para_,std::move(pth_),info_,verbose_},
 	n_domains{n_domains_}, queue{std::move(queue)}
 {
-	std::array<int, 2> size_config = n_domains;
-
 }
 
 

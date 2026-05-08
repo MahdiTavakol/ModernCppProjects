@@ -24,6 +24,7 @@ renderer_factory::renderer_factory(settings* stngs_, communicator* para_,
 	switch (render_mode)
 	{
 		case renderMode::STATIC:
+		case renderMode::ASYNC:
 		{
 			// getting the camera location
 			render_sett->return_location_param(location);
@@ -72,7 +73,7 @@ void renderer_factory::create()
 		renderObj = std::make_unique<renderer_animation_async>(para, std::move(pth));
 		break;
 	case renderMode::ASYNC:
-		//renderObj = std::make_unique<renderer_async>(para, std::move(pth));
+		renderObj = std::make_unique<renderer_async>(para, std::move(pth),std::move(que));
 		break;
 	default:
 		throw std::invalid_argument("Unknown rendering mode");
