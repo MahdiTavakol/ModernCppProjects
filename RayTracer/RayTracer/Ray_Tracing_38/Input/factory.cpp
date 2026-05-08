@@ -53,7 +53,7 @@ factory::factory(int argc, char** argv, int mode_,
 	auto& sett = *stngs;
 
 	// image queue
-	std::unique_ptr<image_queue_fg> que;
+	std::unique_ptr<image_queue_fg> que = std::make_unique<image_queue_fg>();
 	std::array<int, 2> domain_size = { 16,9 };
 	for (int i = 0; i < domain_size[0]; i++)
 	{

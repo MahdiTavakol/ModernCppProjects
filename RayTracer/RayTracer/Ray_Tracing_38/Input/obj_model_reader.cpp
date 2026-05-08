@@ -174,15 +174,20 @@ void obj_model_reader::read_obj_file()
 				face.num_edges = 0;
 				while (iss >> dummy_str)
 				{
-					int v_indx, vt_indx, vn_indx;
+					int v_indx = -1, vt_indx = -1, vn_indx = -1;
+					std::string v_indx_str, vt_indx_str, vn_indx_str;
 					char delimiter = '/';
 					std::istringstream issr(dummy_str);
-					std::getline(issr, dummy_str, delimiter);
-					v_indx = std::stoi(dummy_str);
-					std::getline(issr, dummy_str, delimiter);
-					vt_indx = std::stoi(dummy_str);
-					std::getline(issr, dummy_str, delimiter);
-					vn_indx = std::stoi(dummy_str);
+					std::getline(issr, v_indx_str, delimiter);
+					std::getline(issr, v_indx_str, delimiter);
+					std::getline(issr, v_indx_str, delimiter);
+
+					if (!v_indx_str.empty())
+						v_indx = std::stoi(v_indx_str);
+					if (!vt_indx_str.empty())
+						vt_indx = std::stoi(vt_indx_str);
+					if (!vn_indx_str.empty())
+						vn_indx = std::stoi(vn_indx_str);
 
 
 
@@ -376,6 +381,8 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 				std::cerr << "Out of bounds access for edges" << std::endl;
 				continue;
 			}
+			if (face.v_indx[j] == -1 || face.vt_indx[j] == -1 || face.vn_indx[j] == -1)
+				continue;
 			if (face.v_indx[j] - 1 < 0 || face.v_indx[j] - 1 >= this->vs.size()) {
 				std::cerr << "Out of bounds access for v " << face.vt_indx[j] << "," << vs.size() << std::endl;
 				continue;

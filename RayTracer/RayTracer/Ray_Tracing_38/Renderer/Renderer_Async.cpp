@@ -9,7 +9,7 @@ renderer_async::renderer_async(
 	std::string info_,
 	bool verbose_) :
 	renderer{para_,std::move(pth_),info_,verbose_},
-	n_domains{n_domains_}, queue{std::move(queue)}
+	 queue{std::move(queue)}
 {
 }
 
