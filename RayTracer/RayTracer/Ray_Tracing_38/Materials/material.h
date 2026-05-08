@@ -44,8 +44,8 @@ class general : public material
 {
 public:
 	general(const color& _albedo, const double& _shininess,
-		const double& _d, const double& _Tr, const color& _Tf, const color _Ks) :
-		albedo(_albedo), shininess(_shininess), d(_d), Tr(_Tr), Tf(_Tf), Ks(_Ks)
+		 const double& _Tr, const color& _Tf, const color _Ks) :
+		albedo(_albedo), shininess(_shininess), Tr(_Tr), Tf(_Tf), Ks(_Ks)
 	{
 	}
 
@@ -53,10 +53,13 @@ public:
 	bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered) const override
 	{
 		// Calculate the effective transparency based on d (dissolve) and Tr (transparency)
-		double effective_transparency = (1.0 - d) * Tr;
+		double effective_transparency = Tr;
 
 		// Reflect the incoming ray based on the hit normal
-		vec3 reflected = reflect(r_in.direction(), rec.normal);
+		double roughness = std::sqrt(2.0 / (shininess + 2.0));
+		vec3 reflected =
+			reflect(unit_vector(r_in.direction()), rec.normal);
+		reflected += roughness * random_unit_vector();
 
 		// Make reflection a bit fuzzier based on `fuzz` parameter
 		//reflected += fuzz * random_unit_vector(); // Adjusted to fuzziness
@@ -77,7 +80,7 @@ public:
 	bool is_equal(const material& _second) const override {
 		const general* o = dynamic_cast<const general*>(&_second);
 		return o && (albedo == o->albedo) && (shininess == o->shininess) &&
-			(d == o->d) && (Tr == o->Tr) && (Tf == o->Tf) && (Ks == o->Ks);
+			(Tr == o->Tr) && (Tf == o->Tf) && (Ks == o->Ks);
 	}
 
 	bool compare(material* rhs_, const double tol_) const override
@@ -89,7 +92,7 @@ public:
 		}
 		if (std::abs(shininess - o->shininess) >= tol_)
 			return true;
-		if (std::abs(d - o->d) >= tol_)
+		if (std::abs(Tr - o->Tr) >= tol_)
 			return true;
 		color deltaAlb = albedo - o->albedo;
 		color deltaKa = Ka - o->Ka;
@@ -112,7 +115,7 @@ public:
 private:
 	color albedo;
 	double shininess;
-	double d, Tr;
+	double Tr;
 	color Ka, Ks, Tf;
 };
 

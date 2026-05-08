@@ -44,6 +44,8 @@ public:
 	std::unique_ptr<material_list> return_mtl_list();
 
 protected:
+	// my rank
+	std::array<int, 2> my_rank_config;
 	// the parallel object
 	communicator* para = nullptr;
 	// the object container
@@ -79,7 +81,9 @@ protected:
 	// setting the silent status
 	void set_silent_status();
 	// checking data
-	static void check_data(const int& num_file_, const int& num_read_, const std::string& title);
+	static void check_data(const int& num_file_, const int& num_read_, const std::string& title, const bool silent_ = true);
+	// triangulating a face
+	static void face_triangulate(const face_indx& input_, std::vector<face_indx>& output_);
 };
 
 

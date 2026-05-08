@@ -10,5 +10,5 @@ public:
 
 protected:
 	int num_frames;
-	void update_filename(std::string filename_);
+	void update_filename(std::string& filename_);
 };

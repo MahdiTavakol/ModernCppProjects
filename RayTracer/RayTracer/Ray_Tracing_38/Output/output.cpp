@@ -4,6 +4,21 @@
 #include <algorithm>
 #include "../Data/color_array.h"
 
+output::output(settings* out_settings_,
+	communicator* para_) :
+	para{ para_ }
+{
+	// checking the setting type
+	output_settings* sett = dynamic_cast<output_settings*>(out_settings_);
+	if (!sett)
+		throw std::invalid_argument("Wrong settings object");
+
+	file_name = sett->return_file_name();
+	outMode = sett->return_outputMode();
+
+	size = sett->return_size();
+}
+
 
 output::output(settings* out_settings_,
 			   std::unique_ptr<image>&& img_,
@@ -18,6 +33,8 @@ output::output(settings* out_settings_,
 
 	file_name = sett->return_file_name();
 	outMode = sett->return_outputMode();
+
+	size = sett->return_size();
 }
 
 output::output(
@@ -120,15 +137,10 @@ std::streampos output::write_header(const int& width_, const int& height_)
 	*stream << width_ << " " << height_ << "\n255\n";
 
 	auto pos = stream->tellp();
+	binary_pos = pos;
 	return pos;
 }
 
-std::streampos output::write_header()
-{
-	int image_width, image_height;
-	img->returnSize(image_width, image_height);
-	return this->write_header(image_width, image_height);
-}
 
 std::streampos output::return_binary_begin()
 {
@@ -146,6 +158,57 @@ std::streampos output::return_binary_begin()
 
 	// returning the pos
 	return pos;
+}
+
+void output::setup()
+{
+	if (file_name.empty())
+		return;
+
+	open_new_file(file_name);
+	if (!img)
+		return;
+
+	int image_width, image_height;
+	img->returnSize(image_width, image_height);
+	write_header(image_width, image_height);
+}
+
+void output::write_file(image* img_, std::streampos pos_)
+{
+	// getting the image properties
+	int image_width, image_height;
+	std::array<int, 2> myWidthRange, myHeightRange;
+	int writeStride;
+	img_->returnSize(image_width, image_height);
+	img_->returnRange(myWidthRange, myHeightRange);
+	// widthMax is not inclusive
+	int myWidth = myWidthRange[1] - myWidthRange[0];
+	// when the row range for this rank 
+	// finishes being written the pointer is 
+	// at the end of the current row range.
+	// Thus the stride of image_width 
+	// moves the pointer to the end of
+	// the next row range.
+	// So there is need to go back 
+	// myWidth location.
+	writeStride = 3 * (image_width - myWidth);
+
+
+	// moving the begining of the binary section
+	stream->seekp(pos_);
+	// going to the begining of the first row
+	// of this rank.
+	// Moving with respect to the current location 
+	// which is the begining of the binary section
+
+	int pos0 = 3 * (myHeightRange[0] * image_width + myWidthRange[0]);
+
+	stream->seekp(pos0, std::ios::cur);
+	// getting a pointer to the color_array object of the img
+	auto* colors = img_->array();
+	// writing the data
+	colors->write_async(*stream, outMode, writeStride);
 }
 
 

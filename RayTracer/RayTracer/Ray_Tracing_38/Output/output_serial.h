@@ -5,6 +5,9 @@ class output_serial : public output {
 public:
 	output_serial(
 		settings* out_settings,
+		communicator* para_);
+	output_serial(
+		settings* out_settings,
 		std::unique_ptr<image>&& img_,
 		communicator* para_);
 	output_serial(std::string _file_name,
@@ -20,6 +23,6 @@ public:
 		outputMode mode_ = outputMode::P3
 	);
 
-	void write_file() override;
-	void write_file_async(std::string filename_,image* img_) override {}
+	void write_file(image* img_, std::streampos pos_) override;
+
 };

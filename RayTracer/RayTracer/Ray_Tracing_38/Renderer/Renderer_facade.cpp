@@ -30,6 +30,8 @@ void renderer_facade::setup()
 	writer = builder->return_writer();
 	world = builder->return_world();
 	mtl_list = builder->return_mtl_list();
+	// objects with specific setup methods
+	writer->setup();
 }
 
 

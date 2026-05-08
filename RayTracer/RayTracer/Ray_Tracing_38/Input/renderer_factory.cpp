@@ -2,9 +2,11 @@
 
 #include "../Renderer/Renderer_Animation.h"
 #include "../Renderer/Renderer_Animation_Async.h"
+#include "../Renderer/Renderer_Async.h"
 
-renderer_factory::renderer_factory(settings* stngs_, communicator* para_) :
-	para{ para_ }
+renderer_factory::renderer_factory(settings* stngs_, communicator* para_,
+	std::unique_ptr<image_queue_fg>&& que_) :
+	para{ para_ }, que{std::move(que_)}
 {
 	// checking the setting type
 	renderer_settings* render_sett = dynamic_cast<renderer_settings*>(stngs_);
@@ -68,6 +70,10 @@ void renderer_factory::create()
 		break;
 	case renderMode::ANIMATION_ASYNC:
 		renderObj = std::make_unique<renderer_animation_async>(para, std::move(pth));
+		break;
+	case renderMode::ASYNC:
+		//renderObj = std::make_unique<renderer_async>(para, std::move(pth));
+		break;
 	default:
 		throw std::invalid_argument("Unknown rendering mode");
 	}

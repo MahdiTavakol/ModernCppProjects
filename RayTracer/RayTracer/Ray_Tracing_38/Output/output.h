@@ -14,6 +14,8 @@
 class output {
 public:
 	output(settings* out_settings,
+		communicator* para_);
+	output(settings* out_settings,
 		   std::unique_ptr<image>&& img_,
 		   communicator* para_);
 	output(std::string _file_name, 
@@ -29,20 +31,23 @@ public:
 		   outputMode mode_);
 	virtual ~output();
 
-	virtual void write_file() = 0;
-	virtual void write_file_async(std::string filename_, image* img_) = 0;
+	virtual void setup();
+
+	void write_file(image* img_) { write_file(img_, binary_pos); }
+	void write_file() { write_file(img.get(), binary_pos); }
+	virtual void write_file(image* img_, std::streampos pos_);
 	void reset_image(std::unique_ptr<image>&& img_);
 	void open_new_file(std::string _file_name);
 	void reset_image(std::string file_name_, std::unique_ptr<image>&& img_);
 	std::unique_ptr<image> return_image();
 	image* return_image_ptr();
 	std::unique_ptr<std::iostream> return_stream();
+	std::streampos return_binary_begin();
 
 protected:
-	std::streampos return_binary_begin();
+	
 	static void remove_file(const std::string& fileName_);
 	std::streampos write_header(const int& width_, const int& height_);
-	std::streampos write_header();
 	outputMode outMode = outputMode::P3;
 	std::string file_name;
 	// I want it to be iostream so that output_parallel can read it 
@@ -54,5 +59,11 @@ protected:
 
 	// running strategy
 	communicator* para;
+
+	// the begining of the binary section
+	std::streampos binary_pos;
+
+	// size
+	std::array<int, 2> size;
 };
 

@@ -1,34 +1,5 @@
 #include "image.h"
 
-image::image(std::unique_ptr<image_settings>& img_setting_,
-	std::unique_ptr<communicator>& _para) :
-	para{_para.get()},
-	image_width{ img_setting_->get_image_width()},
-	image_height{img_setting_->get_image_height()}
-{
-    int rank = _para->return_rank();
-    int size = _para->return_size();
-    auto rank_config = _para->return_rank_config();
-    auto size_config = _para->return_size_config();
-
-    if (size_config[0] == 0 || size_config[1] == 0)
-        throw std::invalid_argument("Size configuration for parallel rendering cannot be zero!");
-
-    set_range_per_node(rank_config[0], size_config[0],
-        image_width,
-		widthMin, widthMax, width_per_rank);
-	set_range_per_node(rank_config[1], size_config[1], 
-        image_height, 
-		heightMin, heightMax, height_per_rank);
-
-
-    // double check this please
-    int myWidth = widthMax - widthMin;
-    int myHeight = heightMax - heightMin;
-    // creating the color_array
-    c_array = std::make_unique<color_array>(myWidth, myHeight);
-}
-
 image::image(settings* img_setting_,
     communicator* para_) :
     para{para_}

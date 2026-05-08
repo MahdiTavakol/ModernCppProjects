@@ -91,11 +91,9 @@ void camera::render(const hittable& world_, const material_list& list_)
 	int height_max = heightRange[1];
 	int width_min = widthRange[0];
 	int width_max = widthRange[1];
-	std::cout << "Here" << std::endl;
 
 	for (int j = height_min; j < height_max; j++)
 	{
-		std::cout << " j min max" << j << " " << height_min << " " << height_max << std::endl;
 		for (int i = width_min; i < width_max; i++)
 		{
 			color pixel_color(0, 0, 0);
@@ -152,10 +150,10 @@ void camera::render_verbose(const hittable& world_, const material_list& list_)
 }
 
 
-void camera::render_async(const hittable& world_, const material_list& list_, image* img_)
+void camera::render(image* img_, const hittable& world_, const material_list& list_)
 {
 	// getting the color_array pointer from the image object
-	color_array* c_array = img->array();
+	color_array* c_array = img_->array();
 	// getting the ranges from the image object
 	std::array<int, 2> widthRange, heightRange;
 	img->returnRange(widthRange, heightRange);

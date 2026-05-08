@@ -33,7 +33,7 @@ public:
 
 	virtual void render(const hittable& world_, const material_list& list_);
 	virtual void render_verbose(const hittable& world, const material_list& list_);
-	virtual void render_async(const hittable& world_, const material_list& list_, image* img_);
+	virtual void render(image* img_, const hittable& world_, const material_list& list_);
 
 	virtual void move_camera(point3 _lookfrom) {
 		this->lookfrom = _lookfrom;

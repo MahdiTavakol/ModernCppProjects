@@ -33,7 +33,8 @@ enum {
 enum class renderMode {
 	STATIC,
 	ANIMATION,
-	ANIMATION_ASYNC
+	ANIMATION_ASYNC,
+	ASYNC
 };
 
 

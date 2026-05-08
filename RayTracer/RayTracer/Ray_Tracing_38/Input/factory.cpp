@@ -49,6 +49,21 @@ factory::factory(int argc, char** argv, int mode_,
 	// reference to the settings
 	auto& sett = *stngs;
 
+	// image queue
+/*
+	for (int i = 0; i < size_config[0]; i++)
+	{
+		for (int j = 0; j < size_config[1]; j++)
+		{
+			std::array<int, 2> rank_config{ i,j };
+			std::unique_ptr<communicator> comm =
+				std::make_unique<simpleComm>(rank_config, size_config);
+			std::unique_ptr<image> img = std::make_unique<image>(img_setting_, comm.get());
+			std::unique_ptr<output> out = std::make_unique<output_async>(out_setting_, comm.get());
+			queue.push(std::move(img), std::move(out));
+		}
+	}
+	*/
 
 	// getting the settings for the renderer_factory object
 	settings* renderer_settings = sett["renderer"];

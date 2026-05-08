@@ -52,17 +52,22 @@ void renderer_animation_async::render(camera* cam_, output* writer_, hittable_li
 		}
 
 		//cam_->render(*world_);
-		cam_thread = std::make_unique<std::thread>(&camera::render_async, cam_, std::ref(*world_),std::ref(*list_), buffer1);
+		cam_thread = std::make_unique<std::thread>(
+			static_cast<void (camera::*)(image*, const hittable&, const material_list&)>(&camera::render),
+			cam_, buffer1, std::cref(*world_),std::cref(*list_));
 
 
 		text = "Writing the frame " + std::to_string(i);
 		message(text);
 
+		writer_->open_new_file(filename);
+
 		// writing the file - it is the job of the writer to just write the file in the rank 0, so no need to check the rank here.
 		//writer_->write_file();
 		if (i)
 		{
-			writer_thread = std::make_unique<std::thread>(&output::write_file_async, writer_, filename, buffer2);
+			writer_thread = std::make_unique<std::thread>(
+				static_cast<void (output::*)(image*)>(&output::write_file), writer_, buffer2);
 		}
 	}
 
@@ -73,12 +78,12 @@ void renderer_animation_async::render(camera* cam_, output* writer_, hittable_li
 
 }
 
-void renderer_animation_async::update_filename(std::string filename_)
+void renderer_animation_async::update_filename(std::string& filename_)
 {
 #ifdef _WIN32
-	filename = "temp\\" + info + ".ppm";
+	filename = "temp\\" + filename_ + ".ppm";
 #else
-	filename = "temp/" + info + ".ppm";
+	filename = "temp/" + filename_ + ".ppm";
 #endif
 }
 

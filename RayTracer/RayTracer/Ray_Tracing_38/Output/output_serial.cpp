@@ -1,5 +1,13 @@
 #include "output_serial.h"
 
+
+output_serial::output_serial(
+	settings* out_settings,
+	communicator* para_) :
+	output{ out_settings,para_ }
+{
+}
+
 output_serial::output_serial(
 	settings* out_settings,
 	std::unique_ptr<image>&& img_,
@@ -36,8 +44,10 @@ output_serial::output_serial(
 	output{std::move(_stream),std::move(img_),para_,mode_}
 {}
 
-void output_serial::write_file()
+void output_serial::write_file(image* img_, std::streampos pos_)
 {
+	// moving the begining of the binary section
+	stream->seekp(pos_);
 	// if the image is writting in a parallel manner,
 	// the color_array needs to be gathered first and then written by the rank 0.
 	std::unique_ptr<image> img_all;
@@ -50,8 +60,6 @@ void output_serial::write_file()
 	int rank = para->return_rank();
 	// writing the file only in the rank 0
 	if (rank == 0) {
-		// writting the header info
-		write_header();
 		// getting a pointer to the color_array object of the image
 		color_array* colors = img->array();
 		// for serial writting the stride is zero

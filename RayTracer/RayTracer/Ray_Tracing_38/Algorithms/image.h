@@ -9,8 +9,6 @@
 class image
 {
 public:
-	image(std::unique_ptr<image_settings>& img_setting_,
-		std::unique_ptr<communicator>& _para);
 	image(settings* img_setting_,
 		  communicator* para_);
 	image(const int& image_width_, const int& image_height_, communicator* _para);
@@ -29,7 +27,6 @@ public:
 	void returnSize(int& width_, int& height_) const;
 	std::array<int, 2> returnSize() const;
 	std::array<int, 2> returnSizePerRank() const;
-	communicator* returnPara() { return para; }
 	color_array* array() { return c_array.get(); }
 	std::unique_ptr<color_array>& array_unique_ptr() { return c_array; }
 	color_data** returnColorData() { return c_array->return_array(); }

@@ -18,6 +18,10 @@ void output_settings::set_input_map()
 		{"--o",&output_type_str},
 		{"--om",&output_mode_str},
 	};
+
+	doubleInputMap = {
+		{"-image_size",std::pair{&size[0],&size[1]}}
+	};
 }
 
 void output_settings::set_mode(int mode_)
@@ -89,6 +93,10 @@ std::string output_settings::return_file_name()
 	return file_name;
 }
 
+std::array<int, 2> output_settings::return_size() const
+{
+	return size;
+}
 
 void output_settings::check_validity() const
 {

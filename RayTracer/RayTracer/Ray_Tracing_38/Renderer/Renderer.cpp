@@ -32,6 +32,7 @@ void renderer::render(camera* cam_, output* writer_, hittable_list* world_, mate
 	// the img needs to be returned to the camera so the camera is ready for
 	// the next image... This matters for the animation mode
 	//cam_->reset_image(std::move(img));
+
 }
 
 

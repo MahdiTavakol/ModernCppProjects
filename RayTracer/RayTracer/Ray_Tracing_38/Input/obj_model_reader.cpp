@@ -94,7 +94,6 @@ void obj_model_reader::read_obj_file()
 	int file_polygon_num = 0, file_triangle_num = 0;
 
 	face_indx faces;
-	int num_edges = 0;
 	int num_polygons = 0;
 	int num_triangles = 0;
 	int current_mat_indx = -1;
@@ -114,24 +113,24 @@ void obj_model_reader::read_obj_file()
 				{
 					if (dummy_str == "vertices") {
 						file_vs_num = dummy_int;
-						check_data(file_vs_num, v_num, "vertices");
+						check_data(file_vs_num, v_num, "vertices",silent);
 						v_num = 0;
 					}
 					if (dummy_str == "vertex") {
 						file_vns_num = dummy_int;
-						check_data(file_vns_num, vn_num, "vertex");
+						check_data(file_vns_num, vn_num, "vertex", silent);
 						vn_num = 0;
 					}
 					if (dummy_str == "texture") {
 						file_vts_num = dummy_int;
-						check_data(file_vts_num, vt_num, "texture");
+						check_data(file_vts_num, vt_num, "texture", silent);
 						vt_num = 0;
 					}
 						
 					if (dummy_str == "polygons")
 					{
 						file_polygon_num = dummy_int;
-						check_data(file_polygon_num, num_polygons, "polygons");
+						check_data(file_polygon_num, num_polygons, "polygons", silent);
 						num_polygons = 0;
 						if (iss >> dummy_str >> dummy_int >> dummy_str)
 						{
@@ -139,7 +138,7 @@ void obj_model_reader::read_obj_file()
 								file_triangle_num = dummy_int;
 							{
 								file_triangle_num = dummy_int;
-								check_data(file_triangle_num, num_triangles, "polygons");
+								check_data(file_triangle_num, num_triangles, "triangles", silent);
 								num_triangles= 0;
 							}
 						}
@@ -172,7 +171,7 @@ void obj_model_reader::read_obj_file()
 			else if (!dummy_str.compare("f"))
 			{
 				face_indx face;
-				int num_edges = 0;
+				face.num_edges = 0;
 				while (iss >> dummy_str)
 				{
 					int v_indx, vt_indx, vn_indx;
@@ -191,29 +190,39 @@ void obj_model_reader::read_obj_file()
 					face.vt_indx.push_back(vt_indx);
 					face.vn_indx.push_back(vn_indx);
 
-					num_edges++;
+					face.num_edges++;
 				}
 
-				bool isTriangle = false;
-				bool isPolygon = false;
 
-				switch (num_edges)
+				std::vector<face_indx> triangulated;
+				switch (face.num_edges)
 				{
+				case 0:
+					[[fallthrough]];
+				case 1:
+					[[fallthrough]];
+				case 2:
+					if (!silent)
+						std::cout << "Ignoring the line " << line << std::endl;
+					break;
 				case 3:
 					num_triangles++;
-					isTriangle = true;
+					face.mat_indx = current_mat_indx;
+					face_indexes.push_back(face);
 					break;
 				case 4:
 					num_polygons++;
-					isPolygon = true;
-					break;
-					/*default:
-						std::cerr << "Error in reading the object file " << line << " , " <<  num_edges << std::endl;*/
-				}
-				if (isTriangle || isPolygon) {
-					face.num_edges = num_edges;
 					face.mat_indx = current_mat_indx;
 					face_indexes.push_back(face);
+					break;
+				default:
+					face_triangulate(face, triangulated);
+					// it is a polygon considered as a series of triangles
+					num_polygons++;
+					for (auto& triangle : triangulated)
+					{
+						face_indexes.push_back(triangle);
+					}
 				}
 			}
 			if (iss >> point3)
@@ -247,33 +256,33 @@ void obj_model_reader::read_mtl_file()
 	color Ka, Kd, Ks, Tf;
 	std::string dummy_str;
 	int material_counter = 0;
+	bool read_Tr = false;
 	std::string material_name;
 	while (std::getline(*mtl_file_ptr, line))
 	{
 		if (line.length() < 3)
 			continue;
 		std::stringstream iss(line);
+
+		
 		if (iss >> dummy_str)
 		{
 			if (dummy_str == "newmtl")
 			{
 				if (material_counter)
 				{
-					std::array<int, 2> rank_config;
-					rank_config = para->return_rank_config();
-					if (rank_config == std::array<int, 2>{ 0,0 })
+					if (!read_Tr)
+						Tr = 1.0 - d;
+					read_Tr = false;
+					if (!silent)
 						std::cout << "Creating material " << material_name << std::endl;
-					std::unique_ptr<material>  material_i = std::make_unique<general>(Kd, Ns, d, Tr, Tf, Ks);
+					std::unique_ptr<material>  material_i = std::make_unique<general>(Kd, Ns, Tr, Tf, Ks);
 
 
-					if (rank_config == std::array<int, 2>{ 0, 0 })
-					std::cout << "Adding material " << material_name << std::endl;
-					if (mtl_list == nullptr)
-						std::cout << "Null" << std::endl;
+					if (!silent)
+						std::cout << "Adding material " << material_name << std::endl;
 
-					std::unique_ptr<material> mat = std::make_unique<metal>();
-					//mtl_list->push_back(material_name, std::move(material_i));
-					mtl_list->push_back(material_name, std::move(mat));
+					mtl_list->push_back(material_name, std::move(material_i));
 				}
 				iss >> dummy_str;
 				if (!silent)
@@ -291,6 +300,7 @@ void obj_model_reader::read_mtl_file()
 			}
 			else if (dummy_str == "Tr")
 			{
+				read_Tr = true;
 				iss >> Tr;
 				iss.clear();
 				iss.str("");
@@ -316,13 +326,14 @@ void obj_model_reader::read_mtl_file()
 	}
 
 	// Since we add to the materials vector whenever we read a newmtl line the last material would not be added otherwise.
-	std::cout << "Creating material " << material_name << std::endl;
-	std::unique_ptr<material> material_i = std::make_unique<general>(Kd, Ns, d, Tr, Tf, Ks);
-	std::cout << "Adding material " << material_name << std::endl;
-
-	std::unique_ptr<material> mat = std::make_unique<metal>();
-	//mtl_list->push_back(material_name, std::move(material_i));
-	mtl_list->push_back(material_name, std::move(mat));
+	if (!silent)
+		std::cout << "Creating material " << material_name << std::endl;
+	if (!read_Tr)
+		Tr = 1.0 - d;
+	std::unique_ptr<material> material_i = std::make_unique<general>(Kd, Ns, Tr, Tf, Ks);
+	if (!silent)
+		std::cout << "Adding material " << material_name << std::endl;
+	mtl_list->push_back(material_name, std::move(material_i));
 }
 
 void obj_model_reader::set_range(int& _low, int& _hi) {
@@ -403,14 +414,12 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 			world->add(std::make_unique<mesh>(vs_i, vts_i, vns_i, mat_indx));
 			num_mesh++;
 			break;
+		default:
+			throw std::invalid_argument("You should never have reached here!");
 		}
 	}
 
 
-
-
-
-	//world->add(std::make_unique<sphere>(point3(0, 38, 0), 20,1));
 }
 
 std::unique_ptr<hittable_list> obj_model_reader::return_world()
@@ -444,13 +453,64 @@ void obj_model_reader::set_silent_status()
 		silent = true;
 }
 
-void obj_model_reader::check_data(const int& num_file_, const int& num_read_, const std::string& title)
+void obj_model_reader::check_data(const int& num_file_, const int& num_read_, const std::string& title, const bool silent_)
 {
-	if (num_file_ != num_read_)
+	if (!silent_ && num_file_ != num_read_)
 		std::cout << "Inconsistency in the number of " << title 
 		<< " read vs with those in the obj file  "
-		<< num_file_ << "," << num_read_ << std::endl;
+		<< num_read_ << "," << num_file_ << std::endl;
 
+}
+
+void obj_model_reader::face_triangulate(
+	const face_indx& input_,
+	std::vector<face_indx>& output_)
+{
+	constexpr int triangle_num_edges = 3;
+	std::vector<int> v_indx = input_.v_indx;
+	std::vector<int> vt_indx = input_.vt_indx;
+	std::vector<int> vn_indx = input_.vn_indx;
+	int num_edges = input_.num_edges;
+	int mat_indx = input_.mat_indx;
+
+	// some safety check!
+	if (v_indx.size() != num_edges ||
+		vt_indx.size() != num_edges ||
+		vn_indx.size() != num_edges)
+	{
+		std::string error_text =
+			"Inconsisten input: v_size==" +
+			std::to_string(v_indx.size()) + " Vs\n" +
+			"vt_size==" +
+			std::to_string(vt_indx.size()) + " Vs\n" +
+			"vn_size==" +
+			std::to_string(vn_indx.size()) + " Vs\n" +
+			"num_edges==" + 
+			std::to_string(num_edges) + "\n";
+		throw std::invalid_argument(error_text.c_str());
+	}
+
+	output_.clear();
+	output_.reserve(num_edges - 2);
+	std::vector<int> indx_i(triangle_num_edges);
+	std::vector<int> v_indx_i(triangle_num_edges);
+	std::vector<int> vt_indx_i(triangle_num_edges);
+	std::vector<int> vn_indx_i(triangle_num_edges);
+	face_indx face_i;
+
+	for (int i = 1; i < num_edges - 1; i++)
+	{
+		indx_i = { 0,i,i + 1 };
+		v_indx_i = { v_indx[indx_i[0]],v_indx[indx_i[1]],v_indx[indx_i[2]] };
+		vt_indx_i = { vt_indx[indx_i[0]],vt_indx[indx_i[1]],vt_indx[indx_i[2]] };
+		vn_indx_i = { vn_indx[indx_i[0]],vn_indx[indx_i[1]],vn_indx[indx_i[2]] };
+		face_i.v_indx = v_indx_i;
+		face_i.vt_indx = vt_indx_i;
+		face_i.vn_indx = vn_indx_i;
+		face_i.num_edges = triangle_num_edges;
+		face_i.mat_indx = mat_indx;
+		output_.push_back(face_i);
+	}
 }
 
 
