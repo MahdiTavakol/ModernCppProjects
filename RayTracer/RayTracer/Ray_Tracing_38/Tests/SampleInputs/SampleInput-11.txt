@@ -1,6 +1,6 @@
 mode OBJ_MODEL
-renderer -renderer_mode STATIC -path_type NONE -location 0 4 10
+renderer -renderer_mode ASYNC -path_type NONE -location 0 4 10 -max_threads 8
 scene -mode OBJ_MODEL -obj_file ..\\models\\Toyota-Supra\\obj\\ToyotaSupraXS8.obj -mtl_file  ..\\models\\Toyota-Supra\\obj\\ToyotaSupraXS8.mtl
 camera -lookat 0 1.0 0 -vup 0 1 0 -samples_per_pixel 30 -max_depth 30 -vfov 45.0
 image -width 1080 -aspect_ratio 16.0 9.0
-output -output_type parallel  -output_mode P6 -image_file Tests\\SampleOutputs\\test_9.ppm
+output -output_type async  -output_mode P6 -image_file Tests\\SampleOutputs\\test_11.ppm

@@ -27,8 +27,10 @@ bvh_node::bvh_node(std::vector<std::unique_ptr<hittable>>& objects, size_t start
 		right = std::make_unique<hittable_list>();
 	}
 	else if (object_span == 2) {
-		left = std::move(objects[start]);
-		right = std::move(objects[start + 1]);
+		right = std::move(objects[start]);
+		left = std::move(objects[start + 1]);
+		//left = std::move(objects[start]);
+		//right = std::move(objects[start + 1]);
 	}
 	else {
 		std::sort(std::begin(objects) + start, std::begin(objects) + end, comparator);

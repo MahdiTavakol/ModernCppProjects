@@ -22,6 +22,8 @@ protected:
 	// renderer_mode
 	renderMode render_mode;
 
+	// async settings
+	int max_threads;
 	std::unique_ptr<image_queue_fg> que;
 
 	// movie settings

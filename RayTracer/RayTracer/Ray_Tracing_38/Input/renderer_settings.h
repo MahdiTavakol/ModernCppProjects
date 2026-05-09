@@ -26,7 +26,8 @@ public:
 	{
 		render_mode_ = render_mode;
 	}
-
+	// returning max_threads
+	void return_max_threads(int& max_threads_);
 	// returning movie settings
 	void return_movie_params(int& num_seconds_, int& fps_);
 	// returning the type of the path
@@ -47,8 +48,16 @@ protected:
 	// path type
 	std::string pth_type_str = "NONE";
 	Path_type pth_type = Path_type::NONE;
+
+	// parameters for the static mode
 	// parameters for the path type none (static)
 	point3 location = point3(13.0,2.0,3.0);
+
+	// parameters for the async mode
+	int max_threads = -1;
+
+
+	// parameters for the dynamic mode
 	// parameters for the path type circular
 	// geometry
 	point3 center;

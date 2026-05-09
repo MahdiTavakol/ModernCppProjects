@@ -16,7 +16,7 @@ public:
 	~output_async();
 
 
-	void setup() override;
+	//void setup() override;
 
 private:
 	std::mutex file_mut;

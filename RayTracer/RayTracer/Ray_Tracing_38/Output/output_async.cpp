@@ -30,6 +30,7 @@ output_async::~output_async()
 {
 }
 
+/*
 void output_async::setup()
 {
 	/*
@@ -49,6 +50,8 @@ void output_async::setup()
 	 * That is the reason why here the file is created.
 	 */
 
+/*
+
 	if (outMode == outputMode::P3)
 		throw std::invalid_argument("The text format is not supported for async writing");
 
@@ -66,8 +69,10 @@ void output_async::setup()
 
 	int image_width, image_height;
 	img->returnSize(image_width, image_height);
-	std::call_once(*header_set_ptr, &output_async::write_header, this, image_width, image_height);
+	//std::call_once(*header_set_ptr, &output_async::write_header, this, image_width, image_height);
+	write_header(image_width, image_height);
 }
+*/
 
 
 

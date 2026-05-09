@@ -1,10 +1,13 @@
 #ifndef TRIANGLE_MESH_H
 #define TRIANGLE_MESH_H
 
-#include "mesh.h"
 #include <array>
+#include "../Types/vec3.h"
+#include "../Geometry/hittable.h"
+#include "../Materials/material.h"
 
-class triangle_mesh final : public mesh {
+
+class triangle_mesh : public hittable {
 public:
 	triangle_mesh(const std::array<point3, 3>& _vs,
 		          const std::array<point3, 3>& _vts,
@@ -13,12 +16,14 @@ public:
 	triangle_mesh(const std::array<point3, 3>& vs_,
 		          const std::array<point3, 3>& vts_,
 		          const std::array<point3, 3>& vns_,
-		          const int mat_indx_);
-	virtual void initialize() override;
-	virtual void set_bounding_box() override;
+		          const int mat_indx_,
+				  std::string object_ = "",
+	              std::string subgroup = "");
+	virtual void initialize();
+	virtual void set_bounding_box();
 	aabb bounding_box() const override { return bbox; }
 	bool hit(const ray& _r, interval _ray_t, hit_record& _rec) const override;
-	virtual bool is_interior(double _a, double _b, hit_record& _rec) const override;
+	virtual bool is_interior(double _a, double _b, hit_record& _rec) const;
 	void return_params(
 		std::array<point3, 3>& vs_,
 		std::array<point3, 3>& vts_,
@@ -43,6 +48,10 @@ protected:
 	point3 Q1;
 	double D1;
 
+private:
+	// specific to the obj file
+	std::string object;
+	std::string subgroup;
 };
 
 

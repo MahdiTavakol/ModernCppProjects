@@ -11,7 +11,8 @@
 
 enum class outputType {
 	SERIAL,
-	PARALLEL
+	PARALLEL,
+	ASYNC
 };
 
 enum class outputMode {

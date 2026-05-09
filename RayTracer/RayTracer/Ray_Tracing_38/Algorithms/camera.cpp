@@ -150,13 +150,13 @@ void camera::render_verbose(const hittable& world_, const material_list& list_)
 }
 
 
-void camera::render(image* img_, const hittable& world_, const material_list& list_)
+void camera::render(image* img_, const hittable& world_, const material_list& list_) const
 {
 	// getting the color_array pointer from the image object
 	color_array* c_array = img_->array();
 	// getting the ranges from the image object
 	std::array<int, 2> widthRange, heightRange;
-	img->returnRange(widthRange, heightRange);
+	img_->returnRange(widthRange, heightRange);
 	int height_min = heightRange[0];
 	int height_max = heightRange[1];
 	int width_min = widthRange[0];
@@ -194,7 +194,7 @@ ray camera::get_ray(int i, int j) const
 	return ray(ray_origin, ray_direction, ray_time);
 }
 
-vec3 camera::sample_square() const
+vec3 camera::sample_square()
 {
 	return vec3(random_double() - 0.5, random_double() - 0.5, 0);
 }

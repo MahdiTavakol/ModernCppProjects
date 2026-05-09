@@ -1,4 +1,6 @@
 #include "Renderer_facade.h"
+#include "../Renderer/Renderer_Async.h"
+#include "../Output/output_async.h"
 
 #include "../Input/communicator_settings.h"
 
@@ -32,6 +34,15 @@ void renderer_facade::setup()
 	mtl_list = builder->return_mtl_list();
 	// objects with specific setup methods
 	writer->setup();
+
+	// checking compatibility requirements
+	renderer_async* rend_conv = dynamic_cast<renderer_async*>(rend.get());
+	if (rend_conv)
+	{
+		output_async* writer_conv = dynamic_cast<output_async*>(writer.get());
+		if (writer_conv == nullptr)
+			std::cerr << "The async rendered only supports async output!" << std::endl;
+	}
 }
 
 

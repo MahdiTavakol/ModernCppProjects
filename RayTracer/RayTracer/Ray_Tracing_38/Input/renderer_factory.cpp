@@ -23,15 +23,13 @@ renderer_factory::renderer_factory(settings* stngs_, communicator* para_,
 
 	switch (render_mode)
 	{
-		case renderMode::STATIC:
 		case renderMode::ASYNC:
-		{
+			render_sett->return_max_threads(max_threads);
+		case renderMode::STATIC:
 			// getting the camera location
 			render_sett->return_location_param(location);
 			break;
-		}
 		case renderMode::ANIMATION:
-		{
 			// getting movie parameters
 			render_sett->return_movie_params(num_seconds, fps);
 			// getting the path parameters
@@ -52,7 +50,6 @@ renderer_factory::renderer_factory(settings* stngs_, communicator* para_,
 			{
 				throw std::invalid_argument("Invalid path type");
 			}
-		}
 		default:
 			throw std::invalid_argument("Unrecoverable error!");
 	}
@@ -73,7 +70,7 @@ void renderer_factory::create()
 		renderObj = std::make_unique<renderer_animation_async>(para, std::move(pth));
 		break;
 	case renderMode::ASYNC:
-		renderObj = std::make_unique<renderer_async>(para, std::move(pth),std::move(que));
+		renderObj = std::make_unique<renderer_async>(para, std::move(pth),max_threads,std::move(que));
 		break;
 	default:
 		throw std::invalid_argument("Unknown rendering mode");

@@ -31,6 +31,9 @@ void renderer_settings::set_input_map()
 		// file path parameters
 		{"-file",&file_name},
 
+		// number of threads exlusive for the async case
+		{"-max_threads",&max_threads},
+
 
 		// movie settings 
 		{"-num_seconds",&num_seconds},
@@ -100,6 +103,11 @@ void renderer_settings::set_mode(int mode_)
 	}
 }
 
+void renderer_settings::return_max_threads(int& max_threads_)
+{
+	max_threads_ = max_threads;
+}
+
 void renderer_settings::return_movie_params(int& num_seconds_, int& fps_)
 {
 	num_seconds_ = num_seconds;
@@ -150,6 +158,10 @@ void renderer_settings::extra_parse()
 	else if (renderer_mode_str == "ANIMATION_ASYNC")
 	{
 		render_mode = renderMode::ANIMATION_ASYNC;
+	}
+	else if (renderer_mode_str == "ASYNC")
+	{
+		render_mode = renderMode::ASYNC;
 	}
 	else
 	{
@@ -212,6 +224,11 @@ void renderer_settings::check_validity() const
 	{
 		if (pth_type != Path_type::NONE)
 			throw std::invalid_argument("The path is just defined for the animation mode");
+	}
+	if (render_mode != renderMode::ASYNC)
+	{
+		if (max_threads != -1)
+			std::cout << "Warning: the max_threads is ignored!" << std::endl;
 	}
 
 	if (pth_type != Path_type::FILE)

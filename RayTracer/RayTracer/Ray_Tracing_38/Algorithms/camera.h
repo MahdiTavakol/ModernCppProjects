@@ -33,7 +33,7 @@ public:
 
 	virtual void render(const hittable& world_, const material_list& list_);
 	virtual void render_verbose(const hittable& world, const material_list& list_);
-	virtual void render(image* img_, const hittable& world_, const material_list& list_);
+	virtual void render(image* img_, const hittable& world_, const material_list& list_) const;
 
 	virtual void move_camera(point3 _lookfrom) {
 		this->lookfrom = _lookfrom;
@@ -86,8 +86,8 @@ protected:
 	point3 lookfrom = point3(0, 0, 0);
 	point3 lookat = point3(0, 0, -1);
 	vec3 vup = vec3(0, 1, 0);
-	double defocus_angle = 0;
 	double focus_dist = 10;
+	double defocus_angle = 0;
 
 
 
@@ -108,7 +108,7 @@ protected:
 
 	// the rest of functions
 	ray get_ray(int i, int j) const;
-	vec3 sample_square() const;
+	static vec3 sample_square();
 	point3 defocus_disk_sample() const;
 	virtual color ray_color(const ray& r_, int depth_, const hittable& world_, const material_list& list_) const;
 

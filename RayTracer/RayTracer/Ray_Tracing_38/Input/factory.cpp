@@ -117,6 +117,9 @@ void factory::create()
 	case outputType::PARALLEL:
 		writer = std::make_unique<output_parallel>(wrt_settings,std::move(img2), para.get());
 		break;
+	case outputType::ASYNC:
+		writer = std::make_unique<output_async>(wrt_settings, std::move(img2), para.get());
+		break;
 	default:
 		throw std::invalid_argument("Unknown output mode");
 	}

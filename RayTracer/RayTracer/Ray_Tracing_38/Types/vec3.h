@@ -9,6 +9,38 @@
 
 #include "../Shared/rtweekend.h"
 
+class vec2 {
+public:
+    double e[2];
+    vec2() : e{ 0, 0 } {}
+    vec2(double _e0, double _e1) : e{ _e0, _e1 } {}
+    vec2(const vec2& rhs_) :
+        e{ rhs_[0],rhs_[1] } {
+    }
+    vec2& operator=(const vec2& rhs_) {
+        e[0] = rhs_[0]; e[1] = rhs_[1];
+        return *this;
+    }
+
+    double x() const { return e[0]; }
+    double y() const { return e[1]; }
+
+    vec2 operator-() const { return vec2(-e[0], -e[1]); }
+    double operator[](int i) const { return e[i]; }
+    double& operator[](int i) { return e[i]; }
+
+    //vec2& operator*=(double t);
+    //vec2& operator+=(vec2 v);
+    //vec2& operator/=(double t);
+
+    //double length() const;
+    //double length_squared() const;
+    //bool near_zero() const;
+
+    //static vec2 random();
+    //static vec2 random(double min, double max);
+};
+
 class vec3 {
 public:
     double e[3];
@@ -16,6 +48,8 @@ public:
     vec3(double _e0, double _e1, double _e2) : e{ _e0, _e1, _e2 } {}
     vec3(const vec3& rhs_):
         e{rhs_[0],rhs_[1],rhs_[2]}{}
+    vec3(const vec2& rhs_):
+        e{rhs_[0],rhs_[1],0.0}{}
     vec3& operator=(const vec3& rhs_) {
         e[0] = rhs_[0]; e[1] = rhs_[1]; e[2] = rhs_[2];
         return *this;
@@ -41,7 +75,10 @@ public:
     static vec3 random(double min, double max);
 };
 
+
+
 using point3 = vec3;
+using point2 = vec2;
 
 inline std::ostream& operator<<(std::ostream& out, const vec3& v) {
     return out << v.e[0] << " " << v.e[1] << " " << v.e[2];
@@ -49,6 +86,16 @@ inline std::ostream& operator<<(std::ostream& out, const vec3& v) {
 
 inline std::istream& operator>>(std::istream& in, vec3& v) {
     return in >> v.e[0] >> v.e[1] >> v.e[2];
+}
+
+inline std::ostream& operator<<(std::ostream& out, const vec2& v)
+{
+    return out << v.e[0] << " " << v.e[1];
+}
+
+inline std::istream& operator>>(std::istream& in, vec2& v)
+{
+    return in >> v.e[0] >> v.e[1];
 }
 
 inline vec3 operator+(const vec3& u, const vec3& v) {

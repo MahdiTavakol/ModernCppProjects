@@ -6,7 +6,7 @@ triangle_mesh::triangle_mesh(
 	const std::array<point3, 3>& _vns,
 	std::unique_ptr<material> _mat)
 	:
-	mesh{std::move(_mat),"triangle_mesh"},
+	hittable{"triangle_mesh",std::move(_mat)},
 	vs {_vs}, vts{ _vts }, vns{ _vns }
 {
 	initialize();
@@ -16,9 +16,12 @@ triangle_mesh::triangle_mesh(
 	const std::array<point3, 3>& vs_,
 	const std::array<point3, 3>& vts_,
 	const std::array<point3, 3>& vns_,
-	const int mat_indx_) :
-	mesh{ mat_indx_,"triangle_mesh" },
-	vs{ vs_ }, vts{ vts_ }, vns{ vns_ }
+	const int mat_indx_,
+	std::string object_,
+	std::string subgroup_) :
+	hittable{"triangle_mesh",mat_indx_ },
+	vs{ vs_ }, vts{ vts_ }, vns{ vns_ },
+	object{object_}, subgroup{subgroup_}
 {
 	initialize();
 }
@@ -67,6 +70,8 @@ bool triangle_mesh::hit(const ray& _r, interval _ray_t, hit_record& _rec) const
 
 	auto normal = interpolate(alpha,beta, vns);
 	auto texture = interpolate(alpha,beta,vts);
+
+	normal = unit_vector(normal);
 
 	_rec.t = t1;
 	_rec.p = intersection;

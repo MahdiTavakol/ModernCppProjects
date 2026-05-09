@@ -52,9 +52,11 @@ void renderer_animation_async::render(camera* cam_, output* writer_, hittable_li
 		}
 
 		//cam_->render(*world_);
+		/*
 		cam_thread = std::make_unique<std::thread>(
 			static_cast<void (camera::*)(image*, const hittable&, const material_list&)>(&camera::render),
 			cam_, buffer1, std::cref(*world_),std::cref(*list_));
+			*/
 
 
 		text = "Writing the frame " + std::to_string(i);

@@ -97,16 +97,19 @@ void obj_model_reader::read_obj_file()
 	int num_polygons = 0;
 	int num_triangles = 0;
 	int current_mat_indx = -1;
+	std::string current_obj_name = "";
+	std::string current_group = "";
 
 	while (std::getline(*obj_file_ptr, line))
 	{
 		int dummy_int;
 		std::string dummy_str;
-		vec3 point3;
-		if (line.length() >= 3)
+		vec2 pnt2;
+		vec3 pnt3;
+		std::stringstream iss(line);
+		if (iss >> dummy_str)
 		{
-			std::stringstream iss(line);
-			iss >> dummy_str;
+			// reading the comments section
 			if (!dummy_str.compare("#"))
 			{
 				if (iss >> dummy_int >> dummy_str)
@@ -145,18 +148,22 @@ void obj_model_reader::read_obj_file()
 					}
 				}
 			}
-			if (!dummy_str.compare("mtllib"))
+			// material library file
+			else if (!dummy_str.compare("mtllib"))
 			{
 				iss >> dummy_str;
 				mtl_file_name = std::string(dummy_str);
 			}
-			if (!dummy_str.compare("o"))
+			// object name
+			else if (!dummy_str.compare("o"))
 			{
 				iss >> dummy_str;
+				current_obj_name = dummy_str;
 			}
-			if (!dummy_str.compare("g"))
+			else if (!dummy_str.compare("g"))
 			{
 				iss >> dummy_str;
+				current_group = dummy_str;
 			}
 			if (!dummy_str.compare("usemtl"))
 			{
@@ -178,9 +185,9 @@ void obj_model_reader::read_obj_file()
 					std::string v_indx_str, vt_indx_str, vn_indx_str;
 					char delimiter = '/';
 					std::istringstream issr(dummy_str);
-					std::getline(issr, v_indx_str, delimiter);
-					std::getline(issr, v_indx_str, delimiter);
-					std::getline(issr, v_indx_str, delimiter);
+					std::getline(issr, v_indx_str,  delimiter);
+					std::getline(issr, vt_indx_str, delimiter);
+					std::getline(issr, vn_indx_str, delimiter);
 
 					if (!v_indx_str.empty())
 						v_indx = std::stoi(v_indx_str);
@@ -213,11 +220,8 @@ void obj_model_reader::read_obj_file()
 				case 3:
 					num_triangles++;
 					face.mat_indx = current_mat_indx;
-					face_indexes.push_back(face);
-					break;
-				case 4:
-					num_polygons++;
-					face.mat_indx = current_mat_indx;
+					face.object = current_obj_name;
+					face.group = current_group;
 					face_indexes.push_back(face);
 					break;
 				default:
@@ -226,27 +230,31 @@ void obj_model_reader::read_obj_file()
 					num_polygons++;
 					for (auto& triangle : triangulated)
 					{
+						triangle.object = current_obj_name;
+						triangle.group = current_group;
+						triangle.mat_indx = current_mat_indx;
 						face_indexes.push_back(triangle);
 					}
 				}
 			}
-			if (iss >> point3)
+			else if (!dummy_str.compare("v"))
 			{
-				if (!dummy_str.compare("vt"))
-				{
-					vts.push_back(point3);
-					vt_num++;
-				}
-				else if (!dummy_str.compare("vn"))
-				{
-					vns.push_back(point3);
-					vn_num++;
-				}
-				else if (!dummy_str.compare("v"))
-				{
-					vs.push_back(point3);
-					v_num++;
-				}
+				iss >> pnt3;
+				vs.push_back(pnt3);
+				v_num++;
+			}
+			else if (!dummy_str.compare("vt"))
+			{
+				iss >> pnt2;
+				pnt3 = vec3(pnt2);
+				vts.push_back(pnt3);
+				vt_num++;
+			}
+			else if (!dummy_str.compare("vn"))
+			{
+				iss >> pnt3;
+				vns.push_back(pnt3);
+				vn_num++;
 			}
 		}
 	}
@@ -259,6 +267,7 @@ void obj_model_reader::read_mtl_file()
 
 	double Ns, d, Tr;
 	color Ka, Kd, Ks, Tf;
+	std::string texture_path = "";
 	std::string dummy_str;
 	int material_counter = 0;
 	bool read_Tr = false;
@@ -281,9 +290,23 @@ void obj_model_reader::read_mtl_file()
 					read_Tr = false;
 					if (!silent)
 						std::cout << "Creating material " << material_name << std::endl;
-					std::unique_ptr<material>  material_i = std::make_unique<general>(Kd, Ns, Tr, Tf, Ks);
+					
+					std::unique_ptr<material> material_i;
+					std::unique_ptr<image_texture> texture;
+					std::unique_ptr<std::istream> file_stream;
 
-
+					file_stream = open_file(texture_path, true);
+					
+					if (file_stream)
+					{
+						texture = std::make_unique<image_texture>(texture_path.c_str());
+						material_i = std::make_unique<lambertian>(std::move(texture));
+					}
+					else
+					{
+						//std::cout << "The file was not found reverting to simple rendering" << std::endl;
+						material_i = std::make_unique<general>(Kd, Ns, Tr, Tf, Ks);
+					}
 					if (!silent)
 						std::cout << "Adding material " << material_name << std::endl;
 
@@ -326,7 +349,10 @@ void obj_model_reader::read_mtl_file()
 			{
 				iss >> Ks;
 			}
-
+			else if (dummy_str == "map_Kd")
+			{
+				iss >> texture_path;
+			}
 		}
 	}
 
@@ -357,18 +383,36 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 
 	int num_triangle = 0;
 	int num_mesh = 0;
+	std::string current_group = "";
+	std::string current_obj = "";
 	
 	for (int i = _low; i < hi; i++)
 	{
-		if (counter % 100 == 0 && !silent)
-			std::cout << "item " << counter << " out of " << face_indexes.size() << std::endl;
-		std::array<point3, 4> vs_i, vts_i, vns_i;
-		std::array<point3, 3> vs_d, vts_d, vns_d;
-		vs_d = std::array<point3, 3>{ point3{0.0,0.0,0.0} };
-		vts_d = vs_d;
-		vns_d = vs_d;
+		std::string group = face_indexes[0].group;
+		std::string object = face_indexes[0].object;
+		if (!silent && !object.empty() && object.compare(current_obj))
+		{
+			current_obj = object;
+			std::cout << "\t adding object " << object << std::endl;
+		}
+		if (!silent && !group.empty() && group.compare(current_group))
+		{
+			current_group = group;
+			std::cout << "\t\t adding group " + group << std::endl;
+		}
+		else if (!silent && group.empty() && counter % 100 == 0)
+		{
+			std::cout << "\t adding item " << i << " out of " << face_indexes.size() << std::endl;
+		}
+		std::array<point3, 3> vs_i, vts_i, vns_i;
+		std::array<bool, 3> set_vn_i = { true,true,true };
+		bool any_missing_vn = false;
+
 
 		auto& face = face_indexes[i];
+
+		object = face.object;
+		group = face.group;
 
 		counter++;
 		//std::cout << "Adding the face " << counter << std::endl;
@@ -377,53 +421,63 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 
 		for (int j = 0; j < num_edges; j++)
 		{
+			int v_indx_j = face.v_indx[j];
+			int vt_indx_j = face.vt_indx[j];
+			int vn_indx_j = face.vn_indx[j];
+
 			if (j >= face.v_indx.size() || j >= face.vt_indx.size() || j >= face.vn_indx.size()) {
 				std::cerr << "Out of bounds access for edges" << std::endl;
 				continue;
 			}
-			if (face.v_indx[j] == -1 || face.vt_indx[j] == -1 || face.vn_indx[j] == -1)
-				continue;
-			if (face.v_indx[j] - 1 < 0 || face.v_indx[j] - 1 >= this->vs.size()) {
-				std::cerr << "Out of bounds access for v " << face.vt_indx[j] << "," << vs.size() << std::endl;
-				continue;
+			if (v_indx_j != -1) {
+				if (v_indx_j - 1 < 0 || v_indx_j - 1 >= this->vs.size()) {
+					std::cerr << "Out of bounds access for v " << v_indx_j << "," << vs.size() << std::endl;
+					continue;
+				}
 			}
-			if (face.vt_indx[j] - 1 < 0 || face.vt_indx[j] - 1 >= this->vts.size()) {
-				std::cerr << "Out of bounds access for vt " << face.vt_indx[j] << "," << vts.size() << std::endl;
-				continue;
+			if (vt_indx_j != -1) {
+				if (vt_indx_j - 1 < 0 || vt_indx_j - 1 >= this->vts.size()) {
+					std::string error_text =
+						"Out of bounds access for vt " +
+						std::to_string(vt_indx_j) +
+						" out of " +
+						std::to_string(vts.size());
+					std::cerr << error_text << std::endl;
+					continue;
+				}
 			}
-			if (face.vn_indx[j] - 1 < 0 || face.vn_indx[j] - 1 >= this->vns.size()) {
-				std::cout << "Out of bounds access for vn " << face.vn_indx[j] << "," << vns.size() << std::endl;
-				std::cout << face.vt_indx[j] << ">=" << this->vns.size() << std::endl;
-				continue;
+			if (vn_indx_j != -1) {
+				if (vn_indx_j - 1 < 0 || vn_indx_j - 1 >= this->vns.size()) {
+					std::cout << "Out of bounds access for vn " << vn_indx_j << "," << vns.size() << std::endl;
+					continue;
+				}
 			}
-			point3 v_j = this->vs[face.v_indx[j] - 1]; // 1 based indexing in the obj file
-			point3 vt_j = this->vts[face.vt_indx[j] - 1];
-			point3 vn_j = this->vns[face.vn_indx[j] - 1];
-			vs_i[j] = v_j;
-			vts_i[j] = vt_j;
-			vns_i[j] = vn_j;
+			else
+			{
+				// we estimate it later
+				set_vn_i[j] = false;
+				any_missing_vn = true;
+			}
+			
+			// if we do not have the vs so there is nothing in this edge!
+			vs_i[j] = this->vs[v_indx_j - 1];
+			// if the vt has not been mentioned so we do not care about possibly!
+			vts_i[j] = (vt_indx_j == -1) ? point3() : this->vts[vt_indx_j - 1];
+			// we estimate the vn from the cross section
+			vns_i[j] = (vn_indx_j == -1) ? point3() : this->vns[vn_indx_j - 1];
 		}
 		// mapping from obj material into the mtl file material
 		// we ourselves set the mat_indx so it is zero based!
 		int mat_indx = face.mat_indx;
 
-
-		switch (num_edges)
+		// estimating missing vt vectors
+		if (any_missing_vn)
 		{
-		case 3:
-			std::copy_n(vs_i.data(), 3, vs_d.data());
-			std::copy_n(vts_i.data(), 3, vts_d.data());
-			std::copy_n(vns_i.data(), 3, vns_d.data());
-			world->add(std::make_unique<triangle_mesh>(vs_d, vts_d, vns_d,mat_indx));
-			num_triangle++;
-			break;
-		case 4:
-			world->add(std::make_unique<mesh>(vs_i, vts_i, vns_i, mat_indx));
-			num_mesh++;
-			break;
-		default:
-			throw std::invalid_argument("You should never have reached here!");
+			estimate_vns( vs_i, set_vn_i, vns_i);
 		}
+
+		world->add(std::make_unique<triangle_mesh>(vs_i, vts_i, vns_i, mat_indx,object,group));
+		num_triangle++;
 	}
 
 
@@ -439,15 +493,18 @@ std::unique_ptr<material_list> obj_model_reader::return_mtl_list()
 	return std::move(mtl_list);
 }
 
-std::unique_ptr<std::istream> obj_model_reader::open_file(std::string file_name_)
+std::unique_ptr<std::istream> obj_model_reader::open_file(std::string file_name_, bool silent_)
 {
 	auto file_ptr =
 		std::make_unique<std::ifstream>(file_name_);
-	if (!file_ptr->is_open())
-		std::cout << "The file " << std::endl
-		<< file_name_ << std::endl
-		<< "does not exists in the path " << std::endl
-		<< std::filesystem::current_path() << std::endl;
+	if (!file_ptr->is_open()) {
+		if (!silent_)
+			std::cout << "The file " << std::endl
+				<< file_name_ << std::endl
+				<< "does not exists in the path " << std::endl
+				<< std::filesystem::current_path() << std::endl;
+		return nullptr;
+	}
 	return std::move(file_ptr);
 }
 
@@ -505,6 +562,7 @@ void obj_model_reader::face_triangulate(
 	std::vector<int> vn_indx_i(triangle_num_edges);
 	face_indx face_i;
 
+
 	for (int i = 1; i < num_edges - 1; i++)
 	{
 		indx_i = { 0,i,i + 1 };
@@ -517,6 +575,26 @@ void obj_model_reader::face_triangulate(
 		face_i.num_edges = triangle_num_edges;
 		face_i.mat_indx = mat_indx;
 		output_.push_back(face_i);
+	}
+}
+
+void obj_model_reader::estimate_vns(
+	const std::array<point3, 3>& vs_,
+	const std::array<bool, 3>& set_vn_,
+	std::array<point3, 3>& vns_)
+{
+	constexpr int num_edges = 3;
+	for (int i = 0; i < num_edges; i++)
+	{
+		if (set_vn_[i] == true)
+			continue;
+		int prev = i ? i - 1 : num_edges - 1;
+		int next = (i != num_edges - 1) ? i + 1 : 0;
+		vec3 a = vs_[next] - vs_[i];
+		vec3 b = vs_[prev] - vs_[i];
+		vec3 normal = cross(a, b);
+		vec3 unit_normal = unit_vector(normal);
+		vns_[i] = unit_normal;
 	}
 }
 

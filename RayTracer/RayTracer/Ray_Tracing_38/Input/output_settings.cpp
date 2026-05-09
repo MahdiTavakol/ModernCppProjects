@@ -59,6 +59,10 @@ void output_settings::extra_parse()
 	{
 		type = outputType::PARALLEL;
 	}
+	else if (output_type_str == "ASYNC")
+	{
+		type = outputType::ASYNC;
+	}
 	else
 	{
 		std::cerr << "Invalid output mode: " << output_type_str << std::endl;

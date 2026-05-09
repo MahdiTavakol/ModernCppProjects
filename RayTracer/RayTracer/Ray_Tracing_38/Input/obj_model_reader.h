@@ -21,6 +21,8 @@ struct face_indx
 	std::vector<int> v_indx;
 	std::vector<int> vt_indx;
 	std::vector<int> vn_indx;
+	std::string object;
+	std::string group;
 	int num_edges;
 	int mat_indx;
 };
@@ -76,7 +78,7 @@ protected:
 	void read_mtl_file();
 	virtual void set_range(int& _low, int& _hi);
 	virtual void add_item(const int& _low, const int& _hi);
-	static std::unique_ptr<std::istream> open_file(std::string file_name_);
+	static std::unique_ptr<std::istream> open_file(std::string file_name_, bool silent = false);
 
 	// setting the silent status
 	void set_silent_status();
@@ -84,6 +86,11 @@ protected:
 	static void check_data(const int& num_file_, const int& num_read_, const std::string& title, const bool silent_ = true);
 	// triangulating a face
 	static void face_triangulate(const face_indx& input_, std::vector<face_indx>& output_);
+	// calculating the vn values from the edges
+	static void estimate_vns(
+		const std::array<point3,3>& vs_,
+		const std::array<bool, 3>& set_vn_,
+		std::array<point3,3>& vns_);
 };
 
 
