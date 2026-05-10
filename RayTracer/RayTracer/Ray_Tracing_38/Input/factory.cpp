@@ -64,6 +64,8 @@ factory::factory(int argc, char** argv, int mode_,
 				std::make_unique<simpleComm>(domain_config, domain_size);
 			settings* img_setting = sett["image"];
 			settings* out_setting = sett["output"];
+			output_settings* out_sett_conv = dynamic_cast<output_settings*>(out_setting);
+			std::string file_name = out_sett_conv->return_file_name();
 			std::unique_ptr<image> img = std::make_unique<image>(img_setting, comm.get());
 			std::unique_ptr<output> out = std::make_unique<output_async>(out_setting, comm.get());
 			que->push(std::move(img), std::move(out));

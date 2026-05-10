@@ -204,3 +204,21 @@ void color_array::write_async(std::iostream& out_, const outputMode& mode_, cons
         }
     }
 }
+
+color_data color_array::average() const
+{
+    color_data output;
+    for (int i = 0; i < width; i++)
+    {
+        for (int j = 0; j < height; j++)
+        {
+            output.r += array[i][j].r;
+            output.g += array[i][j].g;
+            output.b += array[i][j].b;
+        }
+    }
+    output.r /= static_cast<double>(width * height);
+    output.g /= static_cast<double>(width * height);
+    output.b /= static_cast<double>(width * height);
+    return output;
+}

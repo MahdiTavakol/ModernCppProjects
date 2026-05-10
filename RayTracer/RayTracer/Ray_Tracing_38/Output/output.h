@@ -36,13 +36,16 @@ public:
 	void write_file(image* img_) { write_file(img_, binary_pos); }
 	void write_file() { write_file(img.get(), binary_pos); }
 	virtual void write_file(image* img_, std::streampos pos_);
+	virtual void write_file(std::streampos pos_) { write_file(img.get(), pos_); }
 	void reset_image(std::unique_ptr<image>&& img_);
 	void open_new_file(std::string _file_name);
+	void open_file() { open_new_file(file_name); }
 	void reset_image(std::string file_name_, std::unique_ptr<image>&& img_);
 	std::unique_ptr<image> return_image();
 	image* return_image_ptr();
 	std::unique_ptr<std::iostream> return_stream();
 	std::streampos return_binary_begin();
+	std::string return_file_name();
 
 protected:
 	

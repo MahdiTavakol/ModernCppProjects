@@ -88,13 +88,17 @@ void output::open_new_file(std::string _file_name)
 	if (outMode == outputMode::P3)
 		stream = std::make_unique<std::fstream>(file_name, std::ios::out);
 	else if (outMode == outputMode::P6)
-		stream = std::make_unique<std::fstream>(file_name,std::ios::in | std::ios::out | std::ios::binary);
+	{
+		stream = std::make_unique<std::fstream>(file_name, std::ios::in | std::ios::out | std::ios::binary);
+		file = dynamic_cast<std::fstream*>(stream.get());
+	}
 	else
 		std::cerr << "Wrong mode" << std::endl;
 	file = dynamic_cast<std::fstream*>(stream.get());
 	if (!file->is_open())
 		std::cerr << "Cannot open the file " << file_name << std::endl << "That is all we know at the moment!" << std::endl;
 }
+
 
 void output::reset_image(std::string file_name_, std::unique_ptr<image>&& img_)
 {
@@ -138,6 +142,8 @@ std::streampos output::write_header(const int& width_, const int& height_)
 
 	auto pos = stream->tellp();
 	binary_pos = pos;
+
+	std::cout << "Penis" << binary_pos << std::endl;
 	return pos;
 }
 
@@ -147,31 +153,20 @@ std::streampos output::return_binary_begin()
 	std::string type;
 	int width, height, maxvel;
 
-	*stream >> type >> width >> height >> maxvel;
 
-	// seeking to the begining of the binary section.
-	stream->get();
-
-
-	// getting the g position (read)
-	std::streampos pos = stream->tellg();
-
-	// returning the pos
-	return pos;
+	return binary_pos;
 }
 
 void output::setup()
 {
-	if (file_name.empty())
-		return;
-
-	open_new_file(file_name);
-	if (!img)
-		return;
-
+	// writing the header file 
+	stream = std::make_unique<std::fstream>(file_name, std::ios::out);
 	int image_width, image_height;
 	img->returnSize(image_width, image_height);
 	write_header(image_width, image_height);
+
+	stream = std::make_unique<std::fstream>(file_name, std::ios::in | std::ios::out | std::ios::binary);
+	file = dynamic_cast<std::fstream*>(stream.get());
 }
 
 void output::write_file(image* img_, std::streampos pos_)
@@ -182,7 +177,7 @@ void output::write_file(image* img_, std::streampos pos_)
 	int writeStride;
 	img_->returnSize(image_width, image_height);
 	img_->returnRange(myWidthRange, myHeightRange);
-	// widthMax is not inclusive
+	// widthMax is not inclusives
 	int myWidth = myWidthRange[1] - myWidthRange[0];
 	// when the row range for this rank 
 	// finishes being written the pointer is 
@@ -208,7 +203,12 @@ void output::write_file(image* img_, std::streampos pos_)
 	// getting a pointer to the color_array object of the img
 	auto* colors = img_->array();
 	// writing the data
-	colors->write_async(*stream, outMode, writeStride);
+	colors->write(*stream, outMode, writeStride);
+}
+
+std::string output::return_file_name()
+{
+	return file_name;
 }
 
 

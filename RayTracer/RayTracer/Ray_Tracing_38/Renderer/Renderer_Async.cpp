@@ -28,10 +28,14 @@ void renderer_async::render(camera* cam_, output* writer_, hittable_list* world_
 	path& pth_ref = *pth;
 	cam_->move_camera(pth_ref[0]);
 
+
+	max_threads = 1;
+
 	std::vector<std::thread> thread_pool;
 	thread_pool.reserve(max_threads);
 
-	max_threads = 1;
+
+
 	std::cout << "Motherfucker " << static_cast<std::streamoff>(npos) << std::endl;
 
 	for (int i = 0; i < max_threads; i++)
@@ -39,9 +43,9 @@ void renderer_async::render(camera* cam_, output* writer_, hittable_list* world_
 		thread_pool.emplace_back(
 			&renderer_async::render_thread,
 			this,
-			std::ref(*cam_),
-			std::cref(*world_),
-			std::cref(*list_),
+			cam_,
+			world_,
+			list_,
 			npos
 		);
 	}
@@ -61,14 +65,13 @@ void renderer_async::write_file(output* writer_)
 }
 
 void renderer_async::render_thread(
-	camera& cam_,
-	const hittable_list& world_,
-	const material_list& list_,
+	camera* cam_,
+	hittable_list* world_,
+	material_list* list_,
 	const std::streampos npos_)
 {
 	static int number = 0;
-	std::cout << "Fuck " << (queue->empty()==true) << std::endl;
-	std::cout << "Fuckeeer " << (queue->empty() == false) << std::endl;
+
 
 	while (true)
 	{
@@ -81,18 +84,13 @@ void renderer_async::render_thread(
 		if (!img_thread || !wrt_thread)
 			break;
 
-		std::cout << "before render\n";
-		cam_.render(img_thread.get(), world_, list_);
 
-		std::cout << "after render\n";
-		wrt_thread->write_file(img_thread.get(), npos_);
+		cam_->render(img_thread.get(), *world_, *list_);
+		wrt_thread->reset_image(std::move(img_thread));
+		wrt_thread->open_file();
+		wrt_thread->write_file( npos_);
 
-		std::cout << "after write\n";
-		bool try_i = queue->try_pop(img_thread, wrt_thread);
-		std::cout << "chose " << try_i << std::endl;
 	}
-
-	std::cout << "Fart\n";
 }
 
 

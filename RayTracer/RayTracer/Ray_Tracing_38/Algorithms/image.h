@@ -36,6 +36,8 @@ public:
 		std::unique_ptr<image>& one_all_,
 		communicator* para_
 	);
+	
+	color_data average() { return c_array->average(); }
 
 protected:
 	communicator* para;

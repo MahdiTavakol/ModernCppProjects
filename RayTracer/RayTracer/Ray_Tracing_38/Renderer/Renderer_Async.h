@@ -23,8 +23,8 @@ private:
 	std::unique_ptr<image_queue_fg> queue;
 	int max_threads;
 
-	void render_thread(camera& cam_,
-		               const hittable_list& world_, 
-		               const material_list& list_, 
+	void render_thread(camera* cam_,
+		               hittable_list* world_, 
+		               material_list* list_, 
 		               const std::streampos npos_);
 };

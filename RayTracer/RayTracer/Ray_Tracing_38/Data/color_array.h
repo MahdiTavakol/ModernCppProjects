@@ -106,6 +106,8 @@ public:
         out_.write(reinterpret_cast<char*>(&b), 1);
     }
 
+    color_data average() const;
+
 protected:
     int width, height;
     color_data** array;
