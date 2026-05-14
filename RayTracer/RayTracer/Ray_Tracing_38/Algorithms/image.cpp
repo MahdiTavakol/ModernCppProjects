@@ -1,5 +1,9 @@
 #include "image.h"
 
+image::image(communicator* para_) :
+    para{ para_ }
+{}
+
 image::image(settings* img_setting_,
     communicator* para_) :
     para{para_}

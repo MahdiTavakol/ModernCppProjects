@@ -1,13 +1,14 @@
 #pragma once
 #include "output.h"
 #include <thread>
+#include <queue>
 
 
 class output_async : public output
 {
 public:
 	output_async(
-		settings* out_settings,
+		settings* out_settings_,
 		communicator* para_);
 	output_async(
 		settings* out_settings,
@@ -16,11 +17,12 @@ public:
 	~output_async();
 
 
-	//void setup() override;
+	void setup() override;
+
+
+	bool try_pop(std::unique_ptr<output>& out_);
 
 private:
-	std::mutex file_mut;
+	settings* out_settings;
 	std::atomic<std::streampos> pos;
-
-
 };

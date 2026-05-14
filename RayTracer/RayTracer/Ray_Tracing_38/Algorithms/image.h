@@ -9,6 +9,7 @@
 class image
 {
 public:
+	image(communicator* para_);
 	image(settings* img_setting_,
 		  communicator* para_);
 	image(const int& image_width_, const int& image_height_, communicator* _para);
@@ -38,6 +39,7 @@ public:
 	);
 	
 	color_data average() { return c_array->average(); }
+
 
 protected:
 	communicator* para;

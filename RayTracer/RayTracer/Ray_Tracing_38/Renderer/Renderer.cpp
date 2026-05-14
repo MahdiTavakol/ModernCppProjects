@@ -25,6 +25,7 @@ void renderer::render(camera* cam_, output* writer_, hittable_list* world_, mate
 
 	auto img = cam_->return_image();
 
+
 	cam_->render(img.get(),*world_,*list_);
 	//auto img = cam_->return_image();
 

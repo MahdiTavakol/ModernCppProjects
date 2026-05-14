@@ -180,7 +180,7 @@
     <ClCompile Include="Renderer\Renderer_Animation_Async.cpp">
       <Filter>Source Files\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="Algorithms\image_queue.cpp">
+    <ClCompile Include="Algorithms\queue.cpp">
       <Filter>Source Files\Algorithms</Filter>
     </ClCompile>
     <ClCompile Include="Renderer\Renderer_Async.cpp">
@@ -191,6 +191,9 @@
     </ClCompile>
     <ClCompile Include="Output\output_async.cpp">
       <Filter>Source Files\Output</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithms\image_async.cpp">
+      <Filter>Source Files\Algorithms</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -347,7 +350,7 @@
     <ClInclude Include="Materials\material_list.h">
       <Filter>Source Files\Materials</Filter>
     </ClInclude>
-    <ClInclude Include="Algorithms\image_queue.h">
+    <ClInclude Include="Algorithms\queue.h">
       <Filter>Source Files\Algorithms</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\Renderer_Async.h">
@@ -358,6 +361,9 @@
     </ClInclude>
     <ClInclude Include="Output\output_async.h">
       <Filter>Source Files\Output</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithms\image_async.h">
+      <Filter>Source Files\Algorithms</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

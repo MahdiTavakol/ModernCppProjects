@@ -1,32 +1,27 @@
 #pragma once
-#include "image.h"
 #include <mutex>
 #include <queue>
 #include <condition_variable>
 
-// at this moment as there is not any useful
-// methods or objects inside the image to be
-// used in the image_queue.
-// So currently I do not inherite that from the image.
-// This might change in the future
 
 
 // cg ==>> coarse grained
 
-class image_queue_cg_strategy1 
+template<typename T>
+class queue_1 
 {
 public:
-	image_queue_cg_strategy1() = default;
+	queue_1() = default;
 
-
-	void push(image new_image_)
+	
+	void push(T new_value_)
 	{
 		std::lock_guard<std::mutex> lk(mut);
-		que.push(std::move(new_image_));
+		que.push(std::move(new_value_));
 		cond.notify_one();
 	}
 
-	void wait_and_pop(image& value_)
+	void wait_and_pop(T& value_)
 	{
 		std::unique_lock<std::mutex> lk(mut);
 		cond.wait(lk, [this] {return !que.empty(); });
@@ -34,18 +29,18 @@ public:
 		que.pop();
 	}
 
-	std::shared_ptr<image> wait_and_pop()
+	std::shared_ptr<T> wait_and_pop()
 	{
 		std::unique_lock<std::mutex> lk(mut);
 		cond.wait(lk, [this] {return !que.empty(); });
-		std::shared_ptr<image> res{
-			std::make_shared<image>(std::move(que.front()))
+		std::shared_ptr<T> res{
+			std::make_shared<T>(std::move(que.front()))
 		};
 		que.pop();
 		return res;
 	}
 
-	bool try_pop(image& value_)
+	bool try_pop(T& value_)
 	{
 		std::lock_guard<std::mutex> lk(mut);
 		if (que.empty())
@@ -55,13 +50,13 @@ public:
 		return true;
 	}
 
-	std::shared_ptr<image> try_pop()
+	std::shared_ptr<T> try_pop()
 	{
 		std::lock_guard<std::mutex> lk(mut);
 		if (que.empty())
-			return std::shared_ptr<image>();
-		std::shared_ptr<image> res{
-			std::make_shared<image>(
+			return std::shared_ptr<T>();
+		std::shared_ptr<T> res{
+			std::make_shared<T>(
 				std::move(que.front())) };
 		que.pop();
 		return res;
@@ -75,28 +70,30 @@ public:
 	}
 
 protected:
-	std::queue<image> que;
+	std::queue<T> que;
 	mutable std::mutex mut;
 	std::condition_variable cond;
 };
 
-class image_queue_cg_strategy2
+
+template<typename T>
+class queue_2
 {
 public:
-	image_queue_cg_strategy2() = default;
+	queue_2() = default;
 
 
-	void push(image new_image_)
+	void push(T new_value_)
 	{
-		std::shared_ptr<image> data{
-			std::make_shared<image>(std::move(new_image_))
+		std::shared_ptr<T> data{
+			std::make_shared<T>(std::move(new_value_))
 		};
 		std::lock_guard<std::mutex> lk(mut);
 		que.push(data);
 		cond.notify_one();
 	}
 
-	void wait_and_pop(image& value_)
+	void wait_and_pop(T& value_)
 	{
 		std::unique_lock<std::mutex> lk(mut);
 		cond.wait(lk, [this] {return !que.empty(); });
@@ -104,16 +101,16 @@ public:
 		que.pop();
 	}
 
-	std::shared_ptr<image> wait_and_pop()
+	std::shared_ptr<T> wait_and_pop()
 	{
 		std::unique_lock<std::mutex> lk(mut);
 		cond.wait(lk, [this] {return !que.empty(); });
-		std::shared_ptr<image> res = que.front();
+		std::shared_ptr<T> res = que.front();
 		que.pop();
 		return res;
 	}
 
-	bool try_pop(image& value_)
+	bool try_pop(T& value_)
 	{
 		std::lock_guard<std::mutex> lk(mut);
 		if (que.empty())
@@ -123,12 +120,12 @@ public:
 		return true;
 	}
 
-	std::shared_ptr<image> try_pop()
+	std::shared_ptr<T> try_pop()
 	{
 		std::lock_guard<std::mutex> lk(mut);
 		if (que.empty())
-			return std::shared_ptr<image>();
-		std::shared_ptr<image> res = que.front();
+			return std::shared_ptr<T>();
+		std::shared_ptr<T> res = que.front();
 		que.pop();
 		return res;
 
@@ -141,29 +138,29 @@ public:
 	}
 
 protected:
-	std::queue<shared_ptr<image>> que;
+	std::queue<shared_ptr<T>> que;
 	mutable std::mutex mut;
 	std::condition_variable cond;
 };
 
-
-class image_queue_cg_strategy3
+template<typename T>
+class queue_3
 {
 public:
-	image_queue_cg_strategy3() = default;
+	queue_3() = default;
 
 
-	void push(image new_image_)
+	void push(T new_value_)
 	{
-		std::unique_ptr<image> data{
-			std::make_unique<image>(std::move(new_image_))
+		std::unique_ptr<T> data{
+			std::make_unique<T>(std::move(new_value_))
 		};
 		std::lock_guard<std::mutex> lk(mut);
 		que.push(std::move(data));
 		cond.notify_one();
 	}
 
-	void wait_and_pop(image& value_)
+	void wait_and_pop(T& value_)
 	{
 		std::unique_lock<std::mutex> lk(mut);
 		cond.wait(lk, [this] {return !que.empty(); });
@@ -171,17 +168,17 @@ public:
 		que.pop();
 	}
 
-	std::unique_ptr<image> wait_and_pop()
+	std::unique_ptr<T> wait_and_pop()
 	{
 		std::unique_lock<std::mutex> lk(mut);
 		cond.wait(lk, [this] {return !que.empty(); });
-		std::unique_ptr<image> res;
+		std::unique_ptr<T> res;
 		res = std::move(que.front());
 		que.pop();
 		return res;
 	}
 
-	bool try_pop(image& value_)
+	bool try_pop(T& value_)
 	{
 		std::lock_guard<std::mutex> lk(mut);
 		if (que.empty())
@@ -191,12 +188,12 @@ public:
 		return true;
 	}
 
-	std::unique_ptr<image> try_pop()
+	std::unique_ptr<T> try_pop()
 	{
 		std::lock_guard<std::mutex> lk(mut);
 		if (que.empty())
-			return std::unique_ptr<image>();
-		std::unique_ptr<image> res;
+			return std::unique_ptr<T>();
+		std::unique_ptr<T> res;
 		res = std::move(que.front());
 		que.pop();
 		return res;
@@ -209,29 +206,31 @@ public:
 	}
 
 protected:
-	std::queue<std::unique_ptr<image>> que;
+	std::queue<std::unique_ptr<T>> que;
 	mutable std::mutex mut;
 	std::condition_variable cond;
 };
 
-class image_queue_fg
+
+template<typename T>
+class queue_4
 {
 public:
-	image_queue_fg():
+	queue_4():
 		head(new node), tail(head.get())
 	{}
-	image_queue_fg(const image_queue_fg& other_) = delete;
-	image_queue_fg& operator=(const image_queue_fg& other_) = delete;
+	queue_4(const queue_4& other_) = delete;
+	queue_4& operator=(const queue_4& other_) = delete;
 
-	bool try_pop(std::unique_ptr<image>& img_, std::unique_ptr<output>& wrt_)
+	bool try_pop(std::unique_ptr<T>& value_)
 	{
-		std::unique_ptr<node> old_head = try_pop_head(img_, wrt_);
+		std::unique_ptr<node> old_head = try_pop_head(value_);
 		return old_head.get();
 	}
 
-	void wait_and_pop(std::unique_ptr<image>& img_, std::unique_ptr<output>& wrt_)
+	void wait_and_pop(std::unique_ptr<T>& value_)
 	{
-		std::unique_ptr<node> old_head = wait_pop_head(img_,wrt_);
+		std::unique_ptr<node> old_head = wait_pop_head(value_);
 	}
 
 	bool empty()
@@ -240,13 +239,12 @@ public:
 		return (head.get() == get_tail());
 	}
 
-	void push(std::unique_ptr<image> img_, std::unique_ptr<output> wrt_)
+	void push(std::unique_ptr<T> value_)
 	{
 		std::unique_ptr<node> p(new node);
 		{
 			std::lock_guard<std::mutex> tail_lock(tail_mutex);
-			tail->img = std::move(img_);
-			tail->wrt = std::move(wrt_);
+			tail->value = std::move(value_);
 			node* const new_tail = p.get();
 			tail->next = std::move(p);
 			tail = new_tail;
@@ -258,8 +256,7 @@ public:
 private:
 	struct node
 	{
-		std::unique_ptr<image> img;
-		std::unique_ptr<output> wrt;
+		std::unique_ptr<T> value;
 		std::unique_ptr<node> next;
 	};
 	std::unique_ptr<node> head;
@@ -285,15 +282,14 @@ private:
 		return pop_head();
 	}
 
-	std::unique_ptr<node> try_pop_head(std::unique_ptr<image>& img_, std::unique_ptr<output>& wrt_)
+	std::unique_ptr<node> try_pop_head(std::unique_ptr<T>& value_)
 	{
 		std::lock_guard<std::mutex> head_lock(head_mutex);
 		if (head.get() == get_tail())
 		{
 			return std::unique_ptr<node>();
 		}
-		img_ = std::move(head->img);
-		wrt_ = std::move(head->wrt);
+		value_ = std::move(head->value);
 		return pop_head();
 	}
 	
@@ -314,11 +310,10 @@ private:
 		std::unique_lock<std::mutex>head_lock{ wait_for_data() };
 		return pop_head();
 	}
-	std::unique_ptr<node> wait_pop_head(std::unique_ptr<image>& img_, std::unique_ptr<output>& wrt_)
+	std::unique_ptr<node> wait_pop_head(std::unique_ptr<T>& value_)
 	{
 		std::unique_lock<std::mutex> head_lock{ wait_for_data() };
-		img_ = std::move(head->img);
-		wrt_ = std::move(head->wrt);
+		value_ = std::move(head->value);
 		return pop_head();
 	}
 };

@@ -3,14 +3,11 @@
 #include "renderer_settings.h"
 #include "../Algorithms/path.h"
 #include "../Algorithms/communicator.h"
-#include "../Algorithms/image_queue.h"
 
 class renderer_factory
 {
 public:
-	renderer_factory(settings* stngs_, communicator* para_,
-		std::unique_ptr<image_queue_fg>&& que_ = nullptr
-	);
+	renderer_factory(settings* stngs_, communicator* para_);
 	void create();
 	std::unique_ptr<path> create_and_return_path();
 	std::unique_ptr<renderer> return_object();
@@ -24,7 +21,6 @@ protected:
 
 	// async settings
 	int max_threads;
-	std::unique_ptr<image_queue_fg> que;
 
 	// movie settings
 	int num_seconds = 0;

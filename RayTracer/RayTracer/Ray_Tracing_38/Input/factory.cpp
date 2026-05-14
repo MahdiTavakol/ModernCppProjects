@@ -5,6 +5,7 @@
 #include "../Output/output_parallel.h"
 #include "../Algorithms/simpleComm.h"
 #include "../Algorithms/image.h"
+#include "../Algorithms/image_async.h"
 #include "../Output/output_async.h"
 
 factory::factory(int argc, char** argv, int mode_,
@@ -64,29 +65,10 @@ factory::factory(int argc, char** argv, int mode_,
 	// reference to the settings
 	auto& sett = *stngs;
 
-	// image queue
-	std::unique_ptr<image_queue_fg> que = std::make_unique<image_queue_fg>();
-	std::array<int, 2> domain_size = { 16,9 };
-	for (int i = 0; i < domain_size[0]; i++)
-	{
-		for (int j = 0; j < domain_size[1]; j++)
-		{
-			std::array<int, 2> domain_config{ i,j };
-			std::unique_ptr<communicator> comm =
-				std::make_unique<simpleComm>(domain_config, domain_size);
-			settings* img_setting = sett["image"];
-			settings* out_setting = sett["output"];
-			std::unique_ptr<image> img = std::make_unique<image>(img_setting, comm.get());
-			std::unique_ptr<output> out = std::make_unique<output_async>(out_setting, comm.get());
-			que->push(std::move(img), std::move(out));
-		}
-	}
-
-
 	// getting the settings for the renderer_factory object
 	settings* renderer_settings = sett["renderer"];
 	// the renderer factory
-	rend_factory = std::make_unique<renderer_factory>(renderer_settings,para.get(),std::move(que));
+	rend_factory = std::make_unique<renderer_factory>(renderer_settings,para.get());
 
 }
 
@@ -96,18 +78,9 @@ void factory::create()
 	auto& sett = *stngs;
 	
 
-
-
 	// objects without dedicated factories
 	// getting the image_settings from the settings object
 	settings* img_settings = sett["image"];
-	// creating the image object with the camera settings and the parallel object
-	auto img = std::make_unique<image>(img_settings, para.get());
-
-	// getting the camera_settings from the settings object
-	settings* cam_settings = sett["camera"];
-	// building the camera object
-	cam = std::make_unique<camera>(cam_settings, std::move(img));
 
 	// getting the writer_settings from the settings object
 	settings* wrt_settings = sett["output"];
@@ -116,8 +89,36 @@ void factory::create()
 	output_settings* wrt_sett = dynamic_cast<output_settings*>(wrt_settings);
 	outputType wrt_type = wrt_sett->return_type();
 
+	// creating two images one for the camera and another for the output class object
+	// so when the camera is rendering the output can write ..
+	// creating the image object with the camera settings and the parallel object
 
-	auto img2 = std::make_unique<image>(img_settings, para.get());
+	std::unique_ptr<image> img1, img2;
+
+	switch (wrt_type)
+	{
+	case outputType::SERIAL:
+	case outputType::PARALLEL:
+		img1 = std::make_unique<image>(img_settings,para.get());
+		img2 = std::make_unique<image>(img_settings, para.get());
+		break;
+	case outputType::ASYNC:
+		img1 = std::make_unique<image_async>(img_settings, para.get());
+		img2 = std::make_unique<image_async>(img_settings, para.get());
+		break;
+	default:
+		throw std::invalid_argument("Unknown output mode");
+	}
+
+
+	// getting the camera_settings from the settings object
+	settings* cam_settings = sett["camera"];
+	// building the camera object
+	cam = std::make_unique<camera>(cam_settings, std::move(img1));
+
+
+
+
 	// building the writer object
 	switch (wrt_type)
 	{

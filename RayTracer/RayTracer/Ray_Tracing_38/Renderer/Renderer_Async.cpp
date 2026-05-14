@@ -7,11 +7,9 @@ renderer_async::renderer_async(
 	communicator* para_,
 	std::unique_ptr<path>&& pth_,
 	int max_threads_,
-	std::unique_ptr<image_queue_fg>&& queue_,
 	std::string info_,
 	bool verbose_) :
 	renderer{ para_,std::move(pth_),info_,verbose_ },
-	queue{ std::move(queue_) },
 	max_threads{max_threads_}
 {
 	if (max_threads <= 0)
@@ -28,8 +26,17 @@ void renderer_async::render(camera* cam_, output* writer_, hittable_list* world_
 	path& pth_ref = *pth;
 	cam_->move_camera(pth_ref[0]);
 
+
+	auto img = cam_->return_image();
+
 	std::vector<std::thread> thread_pool;
 	thread_pool.reserve(max_threads);
+
+	image_async* img_async = dynamic_cast<image_async*>(img.get());
+	output_async* out_async = dynamic_cast<output_async*>(writer_);
+
+	if (!img_async || !out_async)
+		throw std::invalid_argument("The output and image must be of async type for the async_renderer!");
 
 
 	for (int i = 0; i < max_threads; i++)
@@ -40,6 +47,8 @@ void renderer_async::render(camera* cam_, output* writer_, hittable_list* world_
 			cam_,
 			world_,
 			list_,
+			img_async,
+			out_async,
 			npos
 		);
 	}
@@ -62,14 +71,19 @@ void renderer_async::render_thread(
 	camera* cam_,
 	hittable_list* world_,
 	material_list* list_,
+	image_async* img_async_,
+	output_async* out_async_,
 	const std::streampos npos_)
 {
+	std::atomic<int> number = 0;
 	while (true)
 	{
 		std::unique_ptr<image> img_thread;
 		std::unique_ptr<output> wrt_thread;
 
-		if (!queue->try_pop(img_thread, wrt_thread))
+		if (!img_async_->try_pop(img_thread))
+			break;
+		if (!out_async_->try_pop(wrt_thread))
 			break;
 
 		if (!img_thread || !wrt_thread)
@@ -80,6 +94,7 @@ void renderer_async::render_thread(
 		wrt_thread->reset_image(std::move(img_thread));
 		wrt_thread->open_file();
 		wrt_thread->write_file( npos_);
+		number++;
 
 	}
 }
