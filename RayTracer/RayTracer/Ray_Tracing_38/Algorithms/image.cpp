@@ -13,8 +13,6 @@ image::image(settings* img_setting_,
     image_width = sett->get_image_width();
     image_height = sett->get_image_height();
 
-    int rank = para->return_rank();
-    int size = para->return_size();
     auto rank_config = para->return_rank_config();
     auto size_config = para->return_size_config();
 
@@ -29,6 +27,8 @@ image::image(settings* img_setting_,
         heightMin, heightMax, height_per_rank);
 
 
+    
+ 
     // double check this please
     int myWidth = widthMax - widthMin;
     int myHeight = heightMax - heightMin;

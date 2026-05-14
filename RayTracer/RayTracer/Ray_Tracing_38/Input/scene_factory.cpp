@@ -279,11 +279,11 @@ void scene_factory::setup_quads()
 		point3 a;
 		vec3 b, c;
 	} infos[5] = {
-		{"left_red",color(1.0, 0.2, 0.2),point3(-3, -2, 5), vec3(0, 0, -4), vec3(0, 4, 0)},
-		{"back_green",color(0.2, 1.0, 0.2),point3(-2, -2, 0), vec3(4, 0, 0), vec3(0, 4, 0)},
-		{"right_blue",color(0.2, 0.2, 1.0),point3(3, -2, 1), vec3(0, 0, 4), vec3(0, 4, 0)},
-		{"upper_orange",color(1.0, 0.5, 0.0),point3(-2, 3, 1), vec3(4, 0, 0), vec3(0, 0, 4)},
-		{"lower_teal",color(0.2, 0.8, 0.8),point3(-2, -3, 5), vec3(4, 0, 0), vec3(0, 0, -4)}
+		{"left_red",color(1.0, 0.2, 0.2),point3(-4, -4, 5), vec3(0, 0, -8), vec3(0, 8, 0)},
+		{"back_green",color(0.2, 1.0, 0.2),point3(-4, -4, 0), vec3(8, 0, 0), vec3(0, 8, 0)},
+		{"right_blue",color(0.2, 0.2, 1.0),point3(4, -4, 0), vec3(0, 0, 8), vec3(0, 8, 0)},
+		{"upper_orange",color(1.0, 0.5, 0.0),point3(-4, 4, 0), vec3(8, 0, 0), vec3(0, 0, 8)},
+		{"lower_teal",color(0.2, 0.8, 0.8),point3(-4, -4, 5), vec3(8, 0, 0), vec3(0, 0, -8)}
 	};
 
 	for (auto& info : infos)
@@ -309,11 +309,14 @@ void scene_factory::setup_simple_light()
 	mat_indx = list->push_back(mat_name, std::move(material1));
 	world->add(std::make_unique<sphere>(point3(0, -1000, 0), 1000, mat_indx));
 
-	auto pertext2 = std::make_unique<noise_texture>(*pertext1);
+	
+	auto pertext2 = std::make_unique<noise_texture>(4);
 	auto material2 = std::make_unique<lambertian>(std::move(pertext2));
 	mat_name = "material2";
 	mat_indx = list->push_back(mat_name, std::move(material2));
 	world->add(std::make_unique<sphere>(point3(0, 2, 0), 2, mat_indx));
+
+
 
 	auto difflight = std::make_unique<diffuse_light>(color(4, 4, 4));
 	mat_name = "diffuse";
@@ -351,11 +354,13 @@ void scene_factory::setup_cornell_box()
 	int green_mat_indx = list->push_back("green", std::move(green));
 	int light_mat_indx = list->push_back("light", std::move(light));
 
-	world->add(std::make_unique<quad>(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green_mat_indx));
-	world->add(std::make_unique<quad>(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red_mat_indx));
+
+	double size = 556;
+	world->add(std::make_unique<quad>(point3(size, 0, 0), vec3(0, size, 0), vec3(0, 0, size), green_mat_indx));
+	world->add(std::make_unique<quad>(point3(0, 0, 0), vec3(0, size, 0), vec3(0, 0, size), red_mat_indx));
 	world->add(std::make_unique<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), light_mat_indx));
-	world->add(std::make_unique<quad>(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), white_mat_indx));
-	world->add(std::make_unique<quad>(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white_mat_indx));
+	world->add(std::make_unique<quad>(point3(size, size, size), vec3(-size, 0, 0), vec3(0, 0, -size), white_mat_indx));
+	world->add(std::make_unique<quad>(point3(0, 0, size), vec3(size, 0, 0), vec3(0, size, 0), white_mat_indx));
 
 
 	auto bvh = std::make_unique<bvh_node>(std::move(world));
@@ -456,6 +461,44 @@ void scene_factory::setup_3d_obj()
 	model_reader->read();
 	world = model_reader->return_world();
 	list = model_reader->return_mtl_list();
+
+
+	bool set = false;
+	aabb bbox = world->bounding_box("main", set);
+
+	vec3 com = world->com();
+	double xLength = bbox.axis_interval(0).size();
+	double yLength = bbox.axis_interval(1).size();
+	double zLength = bbox.axis_interval(2).size();
+	vec3 min = vec3(bbox.axis_interval(0).min, bbox.axis_interval(1).min, bbox.axis_interval(2).min);
+
+
+	double diag = std::sqrt(
+		xLength * xLength +
+		yLength * yLength +
+		zLength * zLength
+	);
+
+	vec3 light_location = com + vec3(diag, 1.5 * diag, 1.5 * diag);
+	double light_size = 0.5 * diag;
+
+	auto difflight = std::make_unique<diffuse_light>(color(15, 15,15));
+	std::string mat_name = "diffuse";
+	int mat_indx = list->push_back(mat_name, std::move(difflight));
+	world->add(std::make_unique<sphere>(light_location, light_size, mat_indx));
+
+
+	std::unique_ptr<material> red = std::make_unique<lambertian>(color(0.64, 0.05, 0.05));
+	int red_mat_indx = list->push_back("red", std::move(red));
+	double floor_size = 3.0 * diag;
+	double y_floor = min[1] -0.02*diag;
+	world->add(std::make_unique<quad>(
+		point3(com[0] - floor_size / 2.0, y_floor, com[2] - floor_size / 2.0),
+		vec3(floor_size, 0, 0),
+		vec3(0, 0, floor_size),
+		red_mat_indx));
+
+
 	auto bvh = std::make_unique<bvh_node>(std::move(world));
 	world = std::make_unique<hittable_list>(std::move(bvh));
 }

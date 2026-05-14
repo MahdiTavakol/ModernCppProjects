@@ -9,6 +9,7 @@
 #include "../Types/vec3.h"
 #include "../Algorithms/hit_record.h"
 #include <memory>
+#include <unordered_set>
 
 
 
@@ -52,6 +53,9 @@ public:
         return static_cast<size_t>(1);
     }
 
+    
+    virtual aabb bounding_box(std::string label_, bool& set_);
+    virtual void add_label(std::string label_);
 
     const std::string type = "";
 protected:
@@ -59,6 +63,9 @@ protected:
     // I will gradually remove this
     std::unique_ptr<material> mat;
     aabb bbox;
+
+    // labels for selection
+    std::unordered_set<std::string> labels = {"all"};
 };
 
 class translate : public hittable

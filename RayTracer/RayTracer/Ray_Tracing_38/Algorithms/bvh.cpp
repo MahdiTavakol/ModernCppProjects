@@ -51,6 +51,31 @@ bool bvh_node::hit(const ray& r, interval ray_t, hit_record& rec) const
 	return hit_left || hit_right;
 }
 
+aabb bvh_node::bounding_box(std::string label_, bool& set_)
+{
+	bool leftSet = false;
+	bool rightSet = false;
+	aabb leftBox = left->bounding_box(label_, leftSet);
+	aabb rightBox = right->bounding_box(label_, rightSet);
+
+	set_ = leftSet || rightSet;
+	if (!set_)
+		return aabb();
+	if (leftSet && rightSet)
+	{
+		return aabb(rightBox, leftBox);
+	}
+	else if (leftSet)
+	{
+		return leftBox;
+	}
+	else if (rightSet)
+	{
+		return rightBox;
+	}
+	return aabb();
+}
+
 
 bool bvh_node::box_compare(
 	const std::unique_ptr<hittable>& a,

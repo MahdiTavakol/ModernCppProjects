@@ -45,6 +45,18 @@ factory::factory(int argc, char** argv, int mode_,
 	stngs = in->return_app_settings();
 
 
+	// getting the settings for the scene_factory object
+	settings* scene_settings = (*stngs)["scene"];
+	// the world_factory is in charge of lazy creation of the scene.
+	world_factory = std::make_unique<scene_factory>(scene_settings, para.get());
+	// since settings in some classes are dependent on hittable_list
+	// we first create that.
+	// building the hittable_list
+	world_factory->create();
+	world = world_factory->return_object();
+
+	// setting scene dependent settings
+	stngs->set_from_scene(*world);
 
 
 	// creating the dedicated factories
@@ -64,8 +76,6 @@ factory::factory(int argc, char** argv, int mode_,
 				std::make_unique<simpleComm>(domain_config, domain_size);
 			settings* img_setting = sett["image"];
 			settings* out_setting = sett["output"];
-			output_settings* out_sett_conv = dynamic_cast<output_settings*>(out_setting);
-			std::string file_name = out_sett_conv->return_file_name();
 			std::unique_ptr<image> img = std::make_unique<image>(img_setting, comm.get());
 			std::unique_ptr<output> out = std::make_unique<output_async>(out_setting, comm.get());
 			que->push(std::move(img), std::move(out));
@@ -78,17 +88,15 @@ factory::factory(int argc, char** argv, int mode_,
 	// the renderer factory
 	rend_factory = std::make_unique<renderer_factory>(renderer_settings,para.get(),std::move(que));
 
-	// getting the settings for the scene_factory object
-	settings* scene_settings = sett["scene"];
-	// the world_factory is in charge of lazy creation of the scene.
-	world_factory = std::make_unique<scene_factory>(scene_settings, para.get());
-
 }
 
 void factory::create()
 {
 	// getting a reference to the app_settings object
 	auto& sett = *stngs;
+	
+
+
 
 	// objects without dedicated factories
 	// getting the image_settings from the settings object
@@ -129,8 +137,7 @@ void factory::create()
 	// objects with dedicated factories
 	// building the renderer object
 	rend_factory->create();
-	// building the hittable_list
-	world_factory->create();
+
 }
 
 std::unique_ptr<communicator> factory::return_comm()
@@ -156,8 +163,6 @@ std::unique_ptr<output> factory::return_writer()
 
 std::unique_ptr<hittable_list> factory::return_world()
 {
-	// returning the hittable_list pointe from the world_factory
-	auto world = world_factory->return_object();
 	if (world == nullptr)
 		throw std::runtime_error("This object has already been returned!");
 	return std::move(world);

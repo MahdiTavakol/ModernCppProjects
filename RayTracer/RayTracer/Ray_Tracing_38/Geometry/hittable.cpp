@@ -21,6 +21,22 @@ int hittable::typeCompare(const hittable& rhs_) const
     return 0;
 }
 
+aabb hittable::bounding_box(std::string label_, bool& set_)
+{
+    if (labels.find(label_) == labels.end())
+    {
+        set_ = false;
+        return aabb::empty;
+    }
+    set_ = true;
+    return bbox;
+}
+
+void hittable::add_label(std::string label_)
+{
+    labels.insert(label_);
+}
+
 translate::translate(std::unique_ptr<hittable> _object, const vec3& _offset)
     :hittable{object->type}, object{std::move(_object)}, offset(_offset)
 {

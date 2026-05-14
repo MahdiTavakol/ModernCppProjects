@@ -16,12 +16,9 @@ triangle_mesh::triangle_mesh(
 	const std::array<point3, 3>& vs_,
 	const std::array<point3, 3>& vts_,
 	const std::array<point3, 3>& vns_,
-	const int mat_indx_,
-	std::string object_,
-	std::string subgroup_) :
+	const int mat_indx_):
 	hittable{"triangle_mesh",mat_indx_ },
-	vs{ vs_ }, vts{ vts_ }, vns{ vns_ },
-	object{object_}, subgroup{subgroup_}
+	vs{ vs_ }, vts{ vts_ }, vns{ vns_ }
 {
 	initialize();
 }

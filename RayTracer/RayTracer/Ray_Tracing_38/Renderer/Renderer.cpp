@@ -23,8 +23,10 @@ void renderer::render(camera* cam_, output* writer_, hittable_list* world_, mate
 	path& pth_ref = *pth;
 	cam_->move_camera(pth_ref[0]);
 
-	cam_->render(*world_,*list_);
 	auto img = cam_->return_image();
+
+	cam_->render(img.get(),*world_,*list_);
+	//auto img = cam_->return_image();
 
 	writer_->reset_image(std::move(img));
 

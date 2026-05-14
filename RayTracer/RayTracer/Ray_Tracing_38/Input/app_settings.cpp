@@ -22,6 +22,16 @@ void app_settings::set_mode(int mode_)
 	}
 }
 
+bool app_settings::set_from_scene(hittable_list& world_)
+{
+	bool output = false;
+	for (auto& set : settingsVec)
+	{
+		output |= set->set_from_scene(world_);
+	}
+	return output;
+}
+
 bool app_settings::add_cmd(std::string indx_, std::string cmd_)
 {
 	auto iter = settingsMap.find(indx_);

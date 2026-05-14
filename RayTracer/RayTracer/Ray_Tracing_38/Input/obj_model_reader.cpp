@@ -476,9 +476,16 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 			estimate_vns( vs_i, set_vn_i, vns_i);
 		}
 
-		world->add(std::make_unique<triangle_mesh>(vs_i, vts_i, vns_i, mat_indx,object,group));
+		auto trngle = std::make_unique<triangle_mesh>(vs_i, vts_i, vns_i, mat_indx);
+		trngle->add_label(object);
+		trngle->add_label(group);
+		world->add(std::move(trngle));
 		num_triangle++;
 	}
+
+
+	// setting all the read objects as main label
+	world->add_label("main");
 
 
 }

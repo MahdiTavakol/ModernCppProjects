@@ -5,10 +5,11 @@
 #include <variant>
 #include <concepts>
 #include <map>
+#include <unordered_set>
 
 #include "../Types/vec3.h"
 #include "../Shared/rtweekend.h"
-
+#include "../Algorithms/hittable_list.h"
 
 using singleVar = std::variant<int*, double*, std::string*, point3*>;
 using doubleVar = std::variant<std::pair<int*, int*>, std::pair<double*, double*>,std::pair<std::string*,std::string*>>;
@@ -19,6 +20,8 @@ concept AllowedTypes =
 	std::same_as<T, int> ||
 	std::same_as<T, double> ||
 	std::same_as<T, float>;
+
+enum {MANUAL = 0, SCENE=1};
 
 class settings
 {
@@ -34,6 +37,8 @@ public:
 	virtual void extra_parse() {}
 	virtual void log_class_name(std::iostream& stream_) const;
 	virtual void logger(std::iostream& stream_) const;
+	virtual bool set_from_scene(hittable_list& world_) { return false; }
+
 
 
 
@@ -113,6 +118,9 @@ protected:
 	std::map<std::string, singleVar> singleInputMap;
 	std::map<std::string, doubleVar> doubleInputMap;
 	std::map<std::string, threeVar> threeInputMap;
+
+	std::unordered_set<std::string> inputSet;
+
 
 
 };

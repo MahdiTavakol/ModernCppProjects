@@ -18,6 +18,8 @@ public:
 
 	void set_mode(int mode_) override;
 
+	bool set_from_scene(hittable_list& world_) override;
+
 	void push_back(std::unique_ptr<settings>&& item);
 
 	bool add_cmd(std::string indx_, std::string cmd_);

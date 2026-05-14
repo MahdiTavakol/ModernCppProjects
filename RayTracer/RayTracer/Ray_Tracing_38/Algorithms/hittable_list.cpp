@@ -70,3 +70,58 @@ size_t hittable_list::size() const
 	}
 	return out;
 }
+
+vec3 hittable_list::com()
+{
+	// each individual objects 
+	// has a different com so for now
+	// I am ignoring that 
+	interval x = bbox.x;
+	interval y = bbox.y;
+	interval z = bbox.z;
+
+	vec3 out{ (x.min + x.max) / 2.0,(y.min + y.max) / 2.0,(z.min + z.max) / 2.0 };
+	return out;
+}
+
+vec3 hittable_list::com(std::string label_, bool& set_)
+{
+	aabb labelBox = bounding_box(label_, set_);
+
+	if (set_ == false)
+		return vec3();
+
+	interval x = labelBox.x;
+	interval y = labelBox.y;
+	interval z = labelBox.z;
+
+	vec3 out{ (x.min + x.max) / 2.0,(y.min + y.max) / 2.0,(z.min + z.max) / 2.0 };
+	return out;
+}
+
+aabb hittable_list::bounding_box(std::string label_, bool& set_)
+{
+	aabb boxLabel = aabb::empty;
+	for (auto& object : objects)
+	{
+		bool setObj = false;
+		aabb boxObj = object->bounding_box(label_, setObj);
+		set_ = set_ || setObj;
+		if (setObj == true)
+		{
+			boxLabel = aabb(boxLabel, boxObj);
+		}
+	}
+
+	if (set_ == true)
+		return boxLabel;
+	return aabb::empty;
+}
+
+void hittable_list::add_label(std::string label_)
+{
+	for (auto& object : objects)
+	{
+		object->add_label(label_);
+	}
+}

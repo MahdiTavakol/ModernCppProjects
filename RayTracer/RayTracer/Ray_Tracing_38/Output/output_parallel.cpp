@@ -72,9 +72,7 @@ void output_parallel::setup()
 	}
 	// barrier 
 	para->barrier();
-	// if string is empty which is the case
-	// for the constructor of the render_animation
-	// do not open any new files
+
 	if (outMode == outputMode::P3)
 		throw std::invalid_argument("The text format is not supported for parallel writing");
 

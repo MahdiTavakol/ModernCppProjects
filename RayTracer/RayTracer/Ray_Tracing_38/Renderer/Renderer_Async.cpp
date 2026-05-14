@@ -28,15 +28,9 @@ void renderer_async::render(camera* cam_, output* writer_, hittable_list* world_
 	path& pth_ref = *pth;
 	cam_->move_camera(pth_ref[0]);
 
-
-	max_threads = 1;
-
 	std::vector<std::thread> thread_pool;
 	thread_pool.reserve(max_threads);
 
-
-
-	std::cout << "Motherfucker " << static_cast<std::streamoff>(npos) << std::endl;
 
 	for (int i = 0; i < max_threads; i++)
 	{
@@ -70,9 +64,6 @@ void renderer_async::render_thread(
 	material_list* list_,
 	const std::streampos npos_)
 {
-	static int number = 0;
-
-
 	while (true)
 	{
 		std::unique_ptr<image> img_thread;

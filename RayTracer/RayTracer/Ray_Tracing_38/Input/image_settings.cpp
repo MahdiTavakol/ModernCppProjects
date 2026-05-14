@@ -26,6 +26,8 @@ void image_settings::set_mode(int mode_)
 	if (mode_ == QUADS)
 	{
 		this->image_width = 1080;
+		this->width_ratio = 1.0;
+		this->height_ratio = 1.0;
 	}
 	else if (mode_ == TWO_LIGHTS || mode_ == SIMPLE_LIGHT)
 	{
@@ -48,6 +50,7 @@ void image_settings::set_mode(int mode_)
 		this->image_width = 1080;
 	}
 }
+
 
 int& image_settings::get_image_width()
 {

@@ -20,6 +20,7 @@ public:
 	void extra_parse() override;
 	void check_validity() const override;
 	void log_class_name(std::iostream& stream_) const override;
+	bool set_from_scene(hittable_list& world_) override;
 
 	// returning the render types
 	void return_render_mode(renderMode& render_mode_) const

@@ -63,7 +63,7 @@ void renderer_facade::write()
 	// also the renderer sets the filename in its render method, so the writer will always write the file with the correct name.
 	// also the renderer is in the charge of updating the file contents in its render method, 
 	// so the writer just needs to write the file with the current contents.
-	writer->write_file();
+	rend->write_file(writer.get());
 }
 
 

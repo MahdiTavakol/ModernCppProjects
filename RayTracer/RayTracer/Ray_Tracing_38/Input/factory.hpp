@@ -43,6 +43,7 @@ protected:
 	std::unique_ptr<renderer_factory> rend_factory;
 	// hittable_list factory
 	std::unique_ptr<scene_factory> world_factory;
+	std::unique_ptr<hittable_list> world;
 	// the settings map
 	std::map<std::string, int> app_set_map =
 	{

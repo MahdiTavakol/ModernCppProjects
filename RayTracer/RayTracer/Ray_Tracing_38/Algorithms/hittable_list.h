@@ -9,6 +9,7 @@
 
 
 #include <vector>
+#include <unordered_set>
 
 
 
@@ -44,8 +45,16 @@ public:
 	}
 
 
+	vec3 com();
+	vec3 com(std::string label_, bool& set_);
+
+	aabb bounding_box(std::string label_, bool& set_) override;
+
+	void add_label(std::string label_) override;
+
 
 protected:
+
 };
 
 #endif

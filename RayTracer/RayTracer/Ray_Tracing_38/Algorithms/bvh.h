@@ -16,6 +16,8 @@ public:
 
 	bool hit(const ray& r, interval ray_t, hit_record& rec) const override;
 
+	aabb bounding_box(std::string label_, bool& set_) override;
+
 	material* get_material() override { return nullptr; }
 
 	size_t size() const override;

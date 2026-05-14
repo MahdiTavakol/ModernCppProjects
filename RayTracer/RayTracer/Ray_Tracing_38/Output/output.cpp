@@ -143,30 +143,31 @@ std::streampos output::write_header(const int& width_, const int& height_)
 	auto pos = stream->tellp();
 	binary_pos = pos;
 
-	std::cout << "Penis" << binary_pos << std::endl;
 	return pos;
 }
 
 
 std::streampos output::return_binary_begin()
 {
-	std::string type;
-	int width, height, maxvel;
-
-
 	return binary_pos;
 }
 
 void output::setup()
 {
-	// writing the header file 
-	stream = std::make_unique<std::fstream>(file_name, std::ios::out);
+	// removing the file if it exist
+	remove_file(file_name);
+	// creating the file
+	std::ofstream temp{ file_name };
+	temp.close();
+
+	// reopening the file in a proper mode
+	open_new_file(file_name);
+
+	// writing the header
 	int image_width, image_height;
 	img->returnSize(image_width, image_height);
-	write_header(image_width, image_height);
 
-	stream = std::make_unique<std::fstream>(file_name, std::ios::in | std::ios::out | std::ios::binary);
-	file = dynamic_cast<std::fstream*>(stream.get());
+	write_header(image_width, image_height);
 }
 
 void output::write_file(image* img_, std::streampos pos_)

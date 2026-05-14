@@ -34,6 +34,10 @@ void camera_settings::set_mode(int mode_)
 		this->vfov = 20;
 		this->background = color(0, 0, 0);
 		break;
+	case OBJ_MODEL:
+	case OBJ_MODEL_PARALLEL:
+		this->background = color(0, 0, 0);
+		break;
 	case CORNELL_BOX:
 	case TWO_BOXES:
 	case TWO_BOXES_ROTATED:
@@ -64,6 +68,21 @@ void camera_settings::set_mode(int mode_)
 	default:
 		break;
 	}
+}
+
+bool camera_settings::set_from_scene(hittable_list& world_)
+{
+	// the user has set the lookat parameter
+	if (inputSet.find("-lookat") != inputSet.end() ||
+		(mode != OBJ_MODEL && mode != OBJ_MODEL_PARALLEL))
+		return false;
+
+	bool set = false;
+	vec3 com = world_.com("main",set);
+
+	lookat = com;
+
+	return true;
 }
 
 void camera_settings::set_input_map()

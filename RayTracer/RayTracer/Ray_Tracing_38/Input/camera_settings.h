@@ -16,6 +16,7 @@ public:
 	void log_class_name(std::iostream& stream_) const;
 
 	void set_mode(int mode_) override;
+	bool set_from_scene(hittable_list& world_) override;
 	int& get_samples_per_pixel();
 	int& get_max_depth();
 	int& get_vfov();

@@ -9,6 +9,7 @@ void settings::parse_commands()
 		std::string text;
 
 		while (iss >> text) {
+			inputSet.insert(text);
 			auto iter = singleInputMap.find(text);
 			auto iter2 = doubleInputMap.find(text);
 			auto iter3 = threeInputMap.find(text);

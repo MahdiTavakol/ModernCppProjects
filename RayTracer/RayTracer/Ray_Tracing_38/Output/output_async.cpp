@@ -7,9 +7,7 @@
 output_async::output_async(
 	settings* out_settings,
 	communicator* para_) :
-	output{ out_settings,para_ },
-	file_set_ptr{ std::make_unique<std::once_flag>() },
-	header_set_ptr{ std::make_unique<std::once_flag>() }
+	output{ out_settings,para_ }
 {
 }
 
@@ -18,9 +16,7 @@ output_async::output_async(
 	settings* out_settings,
 	std::unique_ptr<image>&& img_,
 	communicator* para_) :
-	output{ out_settings,std::move(img_),para_ },
-	file_set_ptr{ std::make_unique<std::once_flag>() },
-	header_set_ptr{ std::make_unique<std::once_flag>() }
+	output{ out_settings,std::move(img_),para_ }
 {
 }
 
@@ -50,37 +46,26 @@ void output_async::setup()
 	 * That is the reason why here the file is created.
 	 */
 
-/*
+	 /*
 
-	if (outMode == outputMode::P3)
-		throw std::invalid_argument("The text format is not supported for async writing");
+		 if (outMode == outputMode::P3)
+			 throw std::invalid_argument("The text format is not supported for async writing");
 
-	auto setfile = [](std::string file_name_)
-		{
-			remove_file(file_name_);
-			std::ofstream temp{ file_name_ };
-		};
-	
-	std::call_once(*file_set_ptr, setfile, file_name);
-	open_new_file(file_name);
+		 auto setfile = [](std::string file_name_)
+			 {
+				 remove_file(file_name_);
+				 std::ofstream temp{ file_name_ };
+			 };
 
-	if (!img)
-		return;
+		 std::call_once(*file_set_ptr, setfile, file_name);
+		 open_new_file(file_name);
 
-	int image_width, image_height;
-	img->returnSize(image_width, image_height);
-	//std::call_once(*header_set_ptr, &output_async::write_header, this, image_width, image_height);
-	write_header(image_width, image_height);
-}
-*/
+		 if (!img)
+			 return;
 
-
-
-
-
-
-
-
-
-
-
+		 int image_width, image_height;
+		 img->returnSize(image_width, image_height);
+		 //std::call_once(*header_set_ptr, &output_async::write_header, this, image_width, image_height);
+		 write_header(image_width, image_height);
+	 }
+	 */

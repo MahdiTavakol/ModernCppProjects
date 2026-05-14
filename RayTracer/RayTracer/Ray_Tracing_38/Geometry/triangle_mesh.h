@@ -16,12 +16,9 @@ public:
 	triangle_mesh(const std::array<point3, 3>& vs_,
 		          const std::array<point3, 3>& vts_,
 		          const std::array<point3, 3>& vns_,
-		          const int mat_indx_,
-				  std::string object_ = "",
-	              std::string subgroup = "");
+		          const int mat_indx_);
 	virtual void initialize();
 	virtual void set_bounding_box();
-	aabb bounding_box() const override { return bbox; }
 	bool hit(const ray& _r, interval _ray_t, hit_record& _rec) const override;
 	virtual bool is_interior(double _a, double _b, hit_record& _rec) const;
 	void return_params(
@@ -41,17 +38,12 @@ protected:
 
 	int num_edges;
 
-	aabb bbox;
+
 	vec3 n1;
 	vec3 unit_n1;
 	vec3 w1;
 	point3 Q1;
 	double D1;
-
-private:
-	// specific to the obj file
-	std::string object;
-	std::string subgroup;
 };
 
 

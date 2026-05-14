@@ -65,7 +65,7 @@ void renderer_settings::set_mode(int mode_)
 	case CORNELL_BOX:
 	case TWO_BOXES:
 	case TWO_BOXES_ROTATED:
-		this->location = point3(278, 278, -800);
+		this->location = point3(278, 278, -700);
 		break;
 	case CORNELL_SMOKE:
 		this->location = point3(278, 278, -800);
@@ -101,6 +101,32 @@ void renderer_settings::set_mode(int mode_)
 	default:
 		break;
 	}
+}
+
+bool renderer_settings::set_from_scene(hittable_list& world_)
+{
+	if (inputSet.find("-location") != inputSet.end() ||
+		(mode != OBJ_MODEL && mode != OBJ_MODEL_PARALLEL))
+		return false;
+	
+	bool set1 = false;
+	vec3 com = world_.com("main",set1);
+	bool set2 = false;
+	aabb mainBox = world_.bounding_box("main", set2);
+	if (set1 == false || set2 == false)
+		std::cout << "Warning: there is nothing in the scene!" << std::endl;
+
+	double maxLen = std::max({ mainBox.x.size(),mainBox.y.size(),mainBox.z.size() });
+
+	vec3 viewDir = unit_vector(vec3{ 0.7,0.50,1.2 });
+
+	double cameraDistance = 1.8 * maxLen;
+
+	point3 lookfrom = com + cameraDistance*viewDir;
+	location = lookfrom;
+
+
+	return true;
 }
 
 void renderer_settings::return_max_threads(int& max_threads_)

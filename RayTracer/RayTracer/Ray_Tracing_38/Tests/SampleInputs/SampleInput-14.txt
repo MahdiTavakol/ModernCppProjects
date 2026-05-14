@@ -1,0 +1,5 @@
+mode SIMPLE_LIGHT
+renderer -renderer_mode STATIC -path_type NONE 5
+scene -mode SIMPLE_LIGHT
+image -width 1080
+output -output_type parallel  -output_mode P6 -image_file Tests\\SampleOutputs\\test_14.ppm

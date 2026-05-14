@@ -20,9 +20,6 @@ public:
 
 private:
 	std::mutex file_mut;
-	std::unique_ptr<std::once_flag> file_set_ptr;
-	std::unique_ptr<std::once_flag> header_set_ptr;
-	std::condition_variable file_cond;
 	std::atomic<std::streampos> pos;
 
 
