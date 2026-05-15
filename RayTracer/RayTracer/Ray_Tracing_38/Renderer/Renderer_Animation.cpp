@@ -14,7 +14,7 @@ renderer_animation::renderer_animation(communicator* para_, std::unique_ptr<path
 }
 
 
-void renderer_animation::render(camera* cam_, output* writer_, hittable_list* world_, material_list* list_)
+void renderer_animation::render(image* img_, camera* cam_, output* writer_)
 {
 	// getting a reference to the pth resource
 	path& pth_ref = *pth;
@@ -31,22 +31,16 @@ void renderer_animation::render(camera* cam_, output* writer_, hittable_list* wo
 
 		std::string text = "Rendering the frame " + std::to_string(i);
 		message(text);
-		cam_->render(*world_,*list_);
+		cam_->render(img_,*world,*mtls);
 
-		std::unique_ptr<image> img = cam_->return_image();
-		writer_->reset_image(filename,std::move(img));
+		writer_->reset_filename(filename);
+		writer_->setup(img_);
 
 		text = "Writing the frame " + std::to_string(i);
 		message(text);
 
 		// writing the file - it is the job of the writer to just write the file in the rank 0, so no need to check the rank here.
-		writer_->write_file();
-
-		// since the image inside the camera is null due to the return_image,
-		// the img needs to be returned to the camera so the camera is ready for
-		// the next image...
-		img = writer_->return_image();
-		cam_->reset_image(std::move(img));
+		writer_->write_file(img_);
 	}
 }
 
@@ -60,7 +54,7 @@ void renderer_animation::update_filename(std::string filename_)
 #endif
 }
 
-void renderer_animation::write_file(output* writer_)
+void renderer_animation::write_file(output* writer_, image* img_)
 {
 
 }

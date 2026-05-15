@@ -1,7 +1,6 @@
 #include "renderer_factory.hpp"
 
 #include "../Renderer/Renderer_Animation.h"
-#include "../Renderer/Renderer_Animation_Async.h"
 #include "../Renderer/Renderer_Async.h"
 
 renderer_factory::renderer_factory(settings* stngs_, communicator* para_) :
@@ -64,9 +63,6 @@ void renderer_factory::create()
 		break;
 	case renderMode::ANIMATION:
 		renderObj = std::make_unique<renderer_animation>(para,std::move(pth));
-		break;
-	case renderMode::ANIMATION_ASYNC:
-		renderObj = std::make_unique<renderer_animation_async>(para, std::move(pth));
 		break;
 	case renderMode::ASYNC:
 		renderObj = std::make_unique<renderer_async>(para, std::move(pth),max_threads);

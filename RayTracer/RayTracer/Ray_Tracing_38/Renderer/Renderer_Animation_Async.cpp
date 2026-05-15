@@ -17,7 +17,7 @@ renderer_animation_async::renderer_animation_async(
 	num_frames = pth->return_num_frames();
 }
 
-void renderer_animation_async::render(camera* cam_, output* writer_, hittable_list* world_, material_list* list_)
+void renderer_animation_async::render(image* img_, camera* cam_, output* writer_, hittable_list* world_, material_list* list_)
 {
 	// getting a reference to the pth resource
 	path& pth_ref = *pth;

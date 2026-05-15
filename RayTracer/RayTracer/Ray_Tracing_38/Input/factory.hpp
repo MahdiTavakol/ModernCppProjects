@@ -23,6 +23,7 @@ public:
 	std::unique_ptr<output> return_writer();
 	std::unique_ptr<hittable_list> return_world();
 	std::unique_ptr<material_list> return_mtl_list();
+	std::unique_ptr<image> return_image();
 
 protected:
 	// the mode used for various default parameters

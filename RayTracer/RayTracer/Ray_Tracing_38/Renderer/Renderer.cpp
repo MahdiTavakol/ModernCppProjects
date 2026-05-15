@@ -13,8 +13,14 @@ renderer::~renderer()
 {}
 
 
+void renderer::setup(hittable_list* world_, material_list* mtls_)
+{
+	world = world_;
+	mtls = mtls_;
+}
 
-void renderer::render(camera* cam_, output* writer_, hittable_list* world_, material_list* list_)
+
+void renderer::render(image* img_, camera* cam_, output* writer_)
 {
 	std::string text = "Rendering the " + info;
 	message(text);
@@ -23,13 +29,10 @@ void renderer::render(camera* cam_, output* writer_, hittable_list* world_, mate
 	path& pth_ref = *pth;
 	cam_->move_camera(pth_ref[0]);
 
-	auto img = cam_->return_image();
 
-
-	cam_->render(img.get(),*world_,*list_);
+	cam_->render(img_,*world,*mtls);
 	//auto img = cam_->return_image();
 
-	writer_->reset_image(std::move(img));
 
 	// since the image inside the camera is null due to the return_image,
 	// the img needs to be returned to the camera so the camera is ready for
@@ -39,13 +42,13 @@ void renderer::render(camera* cam_, output* writer_, hittable_list* world_, mate
 }
 
 
-void renderer::write_file(output* writer_)
+void renderer::write_file(output* writer_, image* img_)
 {
 	std::string text = "Writing the data for " + info;
 	message(text);
 
 	// writing the file - it is the job of the writer to just write the file in the rank 0, so no need to check the rank here.
-	writer_->write_file();
+	writer_->write_file(img_);
 }
 
 void renderer::message(std::string _text)

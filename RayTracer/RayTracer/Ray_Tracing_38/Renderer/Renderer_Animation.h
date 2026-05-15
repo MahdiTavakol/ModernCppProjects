@@ -5,8 +5,8 @@ class renderer_animation final : public renderer
 {
 public:
 	renderer_animation(communicator* para_, std::unique_ptr<path>&& pth_, std::string info_ = "", bool verbose_ = false);
-	void render(camera* cam_, output* writer_, hittable_list* world_, material_list* list_) override;
-	virtual void write_file(output* writer_) override;
+	void render(image* img_, camera* cam_, output* writer_) override;
+	virtual void write_file(output* writer_, image* img_) override;
 
 
 private:

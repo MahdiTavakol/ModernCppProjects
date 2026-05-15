@@ -32,17 +32,10 @@ void renderer_facade::setup()
 	writer = builder->return_writer();
 	world = builder->return_world();
 	mtl_list = builder->return_mtl_list();
+	img = builder->return_image();
 	// objects with specific setup methods
-	writer->setup();
-
-	// checking compatibility requirements
-	renderer_async* rend_conv = dynamic_cast<renderer_async*>(rend.get());
-	if (rend_conv)
-	{
-		output_async* writer_conv = dynamic_cast<output_async*>(writer.get());
-		if (writer_conv == nullptr)
-			std::cerr << "The async rendered only supports async output!" << std::endl;
-	}
+	writer->setup(img.get());
+	rend->setup(world.get(), mtl_list.get());
 }
 
 
@@ -53,7 +46,7 @@ void renderer_facade::add(std::unique_ptr<hittable>& object)
 
 void renderer_facade::render()
 {
- 	rend->render(cam.get(), writer.get(), world.get(),mtl_list.get());
+ 	rend->render(img.get(),cam.get(), writer.get(), world.get(),mtl_list.get());
 }
 
 

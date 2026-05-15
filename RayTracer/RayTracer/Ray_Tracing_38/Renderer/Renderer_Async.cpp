@@ -19,7 +19,7 @@ renderer_async::renderer_async(
 	}
 }
 
-void renderer_async::render(camera* cam_, output* writer_, hittable_list* world_, material_list* list_)
+void renderer_async::render(image* img_, camera* cam_, output* writer_)
 {
 	auto npos = writer_->return_binary_begin();
 
@@ -27,12 +27,10 @@ void renderer_async::render(camera* cam_, output* writer_, hittable_list* world_
 	cam_->move_camera(pth_ref[0]);
 
 
-	auto img = cam_->return_image();
-
 	std::vector<std::thread> thread_pool;
 	thread_pool.reserve(max_threads);
 
-	image_async* img_async = dynamic_cast<image_async*>(img.get());
+	image_async* img_async = dynamic_cast<image_async*>(img_);
 	output_async* out_async = dynamic_cast<output_async*>(writer_);
 
 	if (!img_async || !out_async)
@@ -61,7 +59,7 @@ void renderer_async::render(camera* cam_, output* writer_, hittable_list* world_
 }
 
 
-void renderer_async::write_file(output* writer_)
+void renderer_async::write_file(output* writer_, image* img_)
 {
 	// writing is done at the same time as the rendering
 	// so there is nothing to do here!
@@ -69,13 +67,10 @@ void renderer_async::write_file(output* writer_)
 
 void renderer_async::render_thread(
 	camera* cam_,
-	hittable_list* world_,
-	material_list* list_,
 	image_async* img_async_,
 	output_async* out_async_,
 	const std::streampos npos_)
 {
-	std::atomic<int> number = 0;
 	while (true)
 	{
 		std::unique_ptr<image> img_thread;
@@ -90,11 +85,9 @@ void renderer_async::render_thread(
 			break;
 
 
-		cam_->render(img_thread.get(), *world_, *list_);
-		wrt_thread->reset_image(std::move(img_thread));
+		cam_->render(img_thread.get(), *world, *mtls);
 		wrt_thread->open_file();
-		wrt_thread->write_file( npos_);
-		number++;
+		wrt_thread->write_file(img_thread.get(), npos_);
 
 	}
 }

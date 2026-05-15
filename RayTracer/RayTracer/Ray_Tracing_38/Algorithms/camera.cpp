@@ -4,24 +4,17 @@
 
 #include "camera.h"
 
-camera::camera(std::unique_ptr<camera_settings>& cam_setting_, std::unique_ptr<image>&& img_):
-	img{std::move(img_)}
-{
-	setup(cam_setting_.get());
-	initialize();
-}
-
-camera::camera(settings* cam_setting_, std::unique_ptr<image>&& img_) :
-	img{ std::move(img_) }
+camera::camera(settings* cam_setting_)
 {
 	// checking the setting type
 	camera_settings* sett = dynamic_cast<camera_settings*>(cam_setting_);
 	if (!sett)
 		throw std::invalid_argument("Wrong settings object");
-
+	
 	setup(sett);
 	initialize();
 }
+
 
 void camera::setup(camera_settings* cam_setting_)
 {
@@ -79,77 +72,6 @@ void camera::initialize()
 	defocus_disk_v = v * defocus_radius;
 }
 
-
-void camera::render(const hittable& world_, const material_list& list_)
-{
-	// getting the color_data array from the image object
-	color_data** c_data = img->returnColorData();
-	// getting the ranges from the image object
-	std::array<int, 2> widthRange, heightRange;
-	img->returnRange(widthRange, heightRange);
-	int height_min = heightRange[0];
-	int height_max = heightRange[1];
-	int width_min = widthRange[0];
-	int width_max = widthRange[1];
-
-	for (int j = height_min; j < height_max; j++)
-	{
-		for (int i = width_min; i < width_max; i++)
-		{
-			color pixel_color(0, 0, 0);
-			for (int sample = 0; sample < samples_per_pixel; sample++)
-			{
-				ray r = get_ray(i, j);
-				pixel_color += ray_color(r, max_depth, world_, list_);
-			}
-			pixel_color = pixel_samples_scale * pixel_color;
-			c_data[i - width_min][j - height_min].r = pixel_color.x();
-			c_data[i - width_min][j - height_min].g = pixel_color.y();
-			c_data[i - width_min][j - height_min].b = pixel_color.z();
-		}
-	}
-}
-
-void camera::render_verbose(const hittable& world_, const material_list& list_)
-{
-	// getting the color_data array from the image object
-	color_data** c_data = img->returnColorData();
-	// getting the ranges from the image object
-	std::array<int, 2> widthRange, heightRange;
-	img->returnRange(widthRange, heightRange);
-	int height_min = heightRange[0];
-	int height_max = heightRange[1];
-	int width_min = widthRange[0];
-	int width_max = widthRange[1];
-
-	int image_height = height_max - height_min;
-	int image_width = width_max - width_min;
-
-
-	for (int j = height_min; j < height_max; j++)
-	{
-		std::clog << "\rRendering row: " << j << " " << std::endl;
-		//std::clog << "\rScanlines remaining: " << (height_max - j) << " " << std::flush;
-		for (int i = width_min; i < width_max; i++)
-		{
-			color pixel_color(0, 0, 0);
-			samples_per_pixel = 1;
-			for (int sample = 0; sample < samples_per_pixel; sample++)
-			{
-				ray r = get_ray(i, j);
-				pixel_color += ray_color(r, max_depth, world_,list_);
-			}
-			pixel_color = pixel_samples_scale * pixel_color;
-			c_data[i][j].r = pixel_color.x();
-			c_data[i][j].g = pixel_color.y();
-			c_data[i][j].b = pixel_color.z();
-		}
-	}
-
-	std::clog << "\rDone                          ";
-}
-
-
 void camera::render(image* img_, const hittable& world_, const material_list& list_) const
 {
 	// getting the color_array pointer from the image object
@@ -178,6 +100,46 @@ void camera::render(image* img_, const hittable& world_, const material_list& li
 			c_array->set(i - width_min, j - height_min, c_data);
 		}
 	}
+}
+
+void camera::render_verbose(image* img_, const hittable& world_, const material_list& list_) const
+{
+	// getting the color_data array from the image object
+	color_data** c_data = img_->returnColorData();
+	// getting the ranges from the image object
+	std::array<int, 2> widthRange, heightRange;
+	img_->returnRange(widthRange, heightRange);
+	int height_min = heightRange[0];
+	int height_max = heightRange[1];
+	int width_min = widthRange[0];
+	int width_max = widthRange[1];
+
+	int image_height = height_max - height_min;
+	int image_width = width_max - width_min;
+
+	int my_samples_per_pixel = 1;
+
+
+	for (int j = height_min; j < height_max; j++)
+	{
+		std::clog << "\rRendering row: " << j << " " << std::endl;
+		//std::clog << "\rScanlines remaining: " << (height_max - j) << " " << std::flush;
+		for (int i = width_min; i < width_max; i++)
+		{
+			color pixel_color(0, 0, 0);
+			for (int sample = 0; sample < my_samples_per_pixel; sample++)
+			{
+				ray r = get_ray(i, j);
+				pixel_color += ray_color(r, max_depth, world_, list_);
+			}
+			pixel_color = pixel_samples_scale * pixel_color;
+			c_data[i][j].r = pixel_color.x();
+			c_data[i][j].g = pixel_color.y();
+			c_data[i][j].b = pixel_color.z();
+		}
+	}
+
+	std::clog << "\rDone                          ";
 }
 
 ray camera::get_ray(int i, int j) const

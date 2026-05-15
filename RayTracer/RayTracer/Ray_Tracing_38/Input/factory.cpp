@@ -79,6 +79,55 @@ void factory::create()
 	
 
 	// objects without dedicated factories
+
+	// getting the writer_settings from the settings object
+	settings* wrt_settings = sett["output"];
+	// getting the output writer type
+	// not an ideal situation since it couples the factory to the output_settings
+	output_settings* wrt_sett = dynamic_cast<output_settings*>(wrt_settings);
+	outputType wrt_type = wrt_sett->return_type();
+
+
+
+	// getting the camera_settings from the settings object
+	settings* cam_settings = sett["camera"];
+	// building the camera object
+	cam = std::make_unique<camera>(cam_settings);
+
+
+
+
+	// building the writer object
+	switch (wrt_type)
+	{
+	case outputType::SERIAL:
+		writer = std::make_unique<output_serial>(wrt_settings, para.get());
+		break;
+	case outputType::PARALLEL:
+		writer = std::make_unique<output_parallel>(wrt_settings, para.get());
+		break;
+	case outputType::ASYNC:
+		writer = std::make_unique<output_async>(wrt_settings, para.get());
+		break;
+	default:
+		throw std::invalid_argument("Unknown output mode");
+	}
+
+	// objects with dedicated factories
+	// building the renderer object
+	rend_factory->create();
+
+}
+
+// since we do not know how many images
+// will be requested we generate images on the fly
+// whenever the return_image method is called
+std::unique_ptr<image> factory::return_image()
+{
+	// getting a reference to the app_settings object
+	auto& sett = *stngs;
+
+
 	// getting the image_settings from the settings object
 	settings* img_settings = sett["image"];
 
@@ -89,56 +138,22 @@ void factory::create()
 	output_settings* wrt_sett = dynamic_cast<output_settings*>(wrt_settings);
 	outputType wrt_type = wrt_sett->return_type();
 
-	// creating two images one for the camera and another for the output class object
-	// so when the camera is rendering the output can write ..
-	// creating the image object with the camera settings and the parallel object
-
-	std::unique_ptr<image> img1, img2;
+	std::unique_ptr<image> img;
 
 	switch (wrt_type)
 	{
 	case outputType::SERIAL:
 	case outputType::PARALLEL:
-		img1 = std::make_unique<image>(img_settings,para.get());
-		img2 = std::make_unique<image>(img_settings, para.get());
+		img = std::make_unique<image>(img_settings, para.get());
 		break;
 	case outputType::ASYNC:
-		img1 = std::make_unique<image_async>(img_settings, para.get());
-		img2 = std::make_unique<image_async>(img_settings, para.get());
+		img = std::make_unique<image_async>(img_settings, para.get());
 		break;
 	default:
 		throw std::invalid_argument("Unknown output mode");
 	}
 
-
-	// getting the camera_settings from the settings object
-	settings* cam_settings = sett["camera"];
-	// building the camera object
-	cam = std::make_unique<camera>(cam_settings, std::move(img1));
-
-
-
-
-	// building the writer object
-	switch (wrt_type)
-	{
-	case outputType::SERIAL:
-		writer = std::make_unique<output_serial>(wrt_settings, std::move(img2),para.get());
-		break;
-	case outputType::PARALLEL:
-		writer = std::make_unique<output_parallel>(wrt_settings,std::move(img2), para.get());
-		break;
-	case outputType::ASYNC:
-		writer = std::make_unique<output_async>(wrt_settings, std::move(img2), para.get());
-		break;
-	default:
-		throw std::invalid_argument("Unknown output mode");
-	}
-
-	// objects with dedicated factories
-	// building the renderer object
-	rend_factory->create();
-
+	return std::move(img);
 }
 
 std::unique_ptr<communicator> factory::return_comm()

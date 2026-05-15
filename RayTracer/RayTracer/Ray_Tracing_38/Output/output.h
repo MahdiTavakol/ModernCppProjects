@@ -15,34 +15,21 @@ class output {
 public:
 	output(settings* out_settings,
 		communicator* para_);
-	output(settings* out_settings,
-		   std::unique_ptr<image>&& img_,
-		   communicator* para_);
-	output(std::string _file_name, 
-		   std::unique_ptr<image>&& img_,
-		   std::unique_ptr<communicator>& para_,
-		   outputMode mode_ );
 	output(std::string _file_name,
-		   std::unique_ptr<communicator>& para_,
+		   communicator* para_,
 		   outputMode mode_);
 	output(std::unique_ptr<std::iostream> _stream,
-		   std::unique_ptr<image>&& img_,
-		   std::unique_ptr<communicator>& para_,
+		   communicator* para_,
 		   outputMode mode_);
 	virtual ~output();
 
-	virtual void setup();
+	virtual void setup(image* img_);
 
 	void write_file(image* img_) { write_file(img_, binary_pos); }
-	void write_file() { write_file(img.get(), binary_pos); }
 	virtual void write_file(image* img_, std::streampos pos_);
-	virtual void write_file(std::streampos pos_) { write_file(img.get(), pos_); }
-	void reset_image(std::unique_ptr<image>&& img_);
+	void reset_filename(std::string file_name_) { file_name = file_name_; }
 	void open_new_file(std::string _file_name);
 	void open_file() { open_new_file(file_name); }
-	void reset_image(std::string file_name_, std::unique_ptr<image>&& img_);
-	std::unique_ptr<image> return_image();
-	image* return_image_ptr();
 	std::unique_ptr<std::iostream> return_stream();
 	std::streampos return_binary_begin();
 	std::string return_file_name();
@@ -58,10 +45,11 @@ protected:
 	std::unique_ptr<std::iostream> stream;
 	std::fstream* file = nullptr;
 
-	std::unique_ptr<image> img;
 
 	// running strategy
 	communicator* para;
+
+
 
 	// the begining of the binary section
 	std::streampos binary_pos;

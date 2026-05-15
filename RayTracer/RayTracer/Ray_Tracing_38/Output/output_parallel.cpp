@@ -11,43 +11,25 @@ output_parallel::output_parallel(
 }
 
 output_parallel::output_parallel(
-	settings* out_settings,
-	std::unique_ptr<image>&& img_,
-	communicator* para_):
-	output{out_settings,std::move(img_),para_}
-{ 
-}
-
-output_parallel::output_parallel(
 	std::string _file_name,
-	std::unique_ptr<image>&& img_,
-	std::unique_ptr<communicator>& para_,
+	communicator* para_,
 	outputMode mode_) :
-	output{_file_name,std::move(img_),para_,mode_}
+	output{_file_name,para_,mode_}
 {
 }
 
 output_parallel::output_parallel(
-	std::string _file_name,
-	std::unique_ptr<communicator>& para_,
-	outputMode mode_) :
-	output_parallel{_file_name,nullptr,para_,mode_}
-{}
-
-
-output_parallel::output_parallel(
 	std::unique_ptr<std::iostream> _stream,
-	std::unique_ptr<image>&& img_,
-	std::unique_ptr<communicator>& para_,
+	communicator* para_,
 	outputMode mode_) :
-	output{std::move(_stream),std::move(img_),para_,mode_}
+	output{std::move(_stream),para_,mode_}
 {}
 
 
 output_parallel::~output_parallel()
 {}
 
-void output_parallel::setup()
+void output_parallel::setup(image* img_)
 {
 	/*
 	 * First, the rank 0 checks if the file exists
@@ -78,11 +60,11 @@ void output_parallel::setup()
 
 	open_new_file(file_name);
 
-	if (!img)
+	if (!img_)
 		return;
 
 	int image_width, image_height;
-	img->returnSize(image_width, image_height);
+	img_->returnSize(image_width, image_height);
 
 	if (rank == 0) {
 		write_header(image_width, image_height);

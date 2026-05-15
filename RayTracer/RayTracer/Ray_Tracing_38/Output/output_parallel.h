@@ -8,28 +8,19 @@ public:
 		settings* out_settings,
 		communicator* para_);
 	output_parallel(
-		settings* out_settings,
-		std::unique_ptr<image>&& img_,
-		communicator* para_);
-	output_parallel(std::string _file_name,
-		std::unique_ptr<image>&& img_,
-		std::unique_ptr<communicator>& para_,
-		outputMode mode = outputMode::P6);
-	output_parallel(
 		std::string _file_name,
-		std::unique_ptr<communicator>& para_,
+		communicator* para_,
 		outputMode mode = outputMode::P6);
 	output_parallel(
 		std::unique_ptr<std::iostream> _stream,
-		std::unique_ptr<image>&& img_,
-		std::unique_ptr<communicator>& para_,
+		communicator* para_,
 		outputMode mode = outputMode::P6);
 	~output_parallel();
 
 
 
 protected:
-	virtual void setup() override;
+	virtual void setup(image* img_) override;
 
 private:
 

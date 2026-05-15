@@ -30,14 +30,13 @@ output_async::~output_async()
 }
 
 
-void output_async::setup()
+void output_async::setup(image* img_)
 {
-	output::setup();
+	output::setup(img_);
 	// closing the file to assure the header has been written
 	std::fstream* filestream = dynamic_cast<std::fstream*>(stream.get());
 	if (filestream)
 		filestream->close();
-
 }
 
 

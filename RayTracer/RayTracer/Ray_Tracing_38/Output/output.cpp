@@ -20,48 +20,24 @@ output::output(settings* out_settings_,
 }
 
 
-output::output(settings* out_settings_,
-			   std::unique_ptr<image>&& img_,
-	           communicator* para_):
-	para{para_},
-	img{std::move(img_)}
-{
-	// checking the setting type
-	output_settings* sett = dynamic_cast<output_settings*>(out_settings_);
-	if (!sett)
-		throw std::invalid_argument("Wrong settings object");
-
-	file_name = sett->return_file_name();
-	outMode = sett->return_outputMode();
-
-	size = sett->return_size();
-}
-
 output::output(
 	std::string _file_name, 
-	std::unique_ptr<image>&& img_,
-	std::unique_ptr<communicator>& para_,
+	communicator* para_,
 	outputMode outMode_) :
 	outMode{outMode_},
-	file_name{ _file_name }, 
-	img{std::move(img_)},
-	para{ para_.get() }
+	file_name{ _file_name },
+	para{ para_ }
 {}
 
-output::output(std::string _file_name,
-			   std::unique_ptr<communicator>& para_,
-	           outputMode mode_) :
-	output{ _file_name, nullptr, para_, mode_} {}
+
 
 output::output(
 	std::unique_ptr<std::iostream> _stream,
-	std::unique_ptr<image>&& img_,
-	std::unique_ptr<communicator>& para_,
+	communicator* para_,
 	outputMode outMode_) :
 	outMode{ outMode_ },
 	stream{ std::move(_stream)},
-	img{ std::move(img_) },
-	para{ para_.get() }
+	para{ para_}
 {}
 
 	
@@ -75,10 +51,6 @@ output::~output()
 	}
 }
 
-void output::reset_image(std::unique_ptr<image>&& img_)
-{
-	img = std::move(img_);
-}
 
 void output::open_new_file(std::string _file_name)
 {
@@ -100,26 +72,13 @@ void output::open_new_file(std::string _file_name)
 }
 
 
-void output::reset_image(std::string file_name_, std::unique_ptr<image>&& img_)
-{
-	open_new_file(file_name_);
-	img = std::move(img_);
-}
 
 void output::remove_file(const std::string& fileName_)
 {
 	std::remove(fileName_.c_str());
 }
 
-std::unique_ptr<image> output::return_image()
-{
-	return std::move(img);
-}
 
-image* output::return_image_ptr()
-{
-	return img.get();
-}
 
 std::unique_ptr<std::iostream> output::return_stream()
 {
@@ -152,7 +111,7 @@ std::streampos output::return_binary_begin()
 	return binary_pos;
 }
 
-void output::setup()
+void output::setup(image* img_)
 {
 	// removing the file if it exist
 	remove_file(file_name);
@@ -165,7 +124,7 @@ void output::setup()
 
 	// writing the header
 	int image_width, image_height;
-	img->returnSize(image_width, image_height);
+	img_->returnSize(image_width, image_height);
 
 	write_header(image_width, image_height);
 }

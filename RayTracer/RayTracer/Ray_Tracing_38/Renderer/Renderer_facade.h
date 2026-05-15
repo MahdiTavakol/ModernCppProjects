@@ -29,6 +29,7 @@ protected:
 	std::unique_ptr<factory> builder;
 
 	// resources
+	std::unique_ptr<image> img;
 	std::unique_ptr<renderer> rend;
 	std::unique_ptr<camera> cam;
 	std::unique_ptr<communicator> para;

@@ -24,16 +24,14 @@ class camera {
 public:
 
 	camera() = default;
-	camera(std::unique_ptr<camera_settings>& cam_setting_, std::unique_ptr<image>&& img_);
-	camera(settings* cam_setting_, std::unique_ptr<image>&& img_);
+	camera(settings* cam_setting_);
 
 
 	virtual void setup(camera_settings* cam_setting_);
 
 
-	virtual void render(const hittable& world_, const material_list& list_);
-	virtual void render_verbose(const hittable& world, const material_list& list_);
 	virtual void render(image* img_, const hittable& world_, const material_list& list_) const;
+	virtual void render_verbose(image* img_, const hittable& world_, const material_list& list_) const;
 
 	virtual void move_camera(point3 _lookfrom) {
 		this->lookfrom = _lookfrom;

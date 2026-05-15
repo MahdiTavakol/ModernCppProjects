@@ -8,19 +8,12 @@ output_serial::output_serial(
 {
 }
 
-output_serial::output_serial(
-	settings* out_settings,
-	std::unique_ptr<image>&& img_,
-	communicator* para_) :
-	output{ out_settings,std::move(img_),para_ }
-{}
 
 output_serial::output_serial(
 	std::string _file_name,
-	std::unique_ptr<image>&& img_,
-	std::unique_ptr<communicator>& para_,
+	communicator* para_,
 	outputMode mode_) :
-	output{_file_name,std::move(img_),para_,mode_}
+	output{_file_name,para_,mode_}
 {
 	// if string is empty which is the case
 	// for the constructor of the render_animation
@@ -30,19 +23,11 @@ output_serial::output_serial(
 
 output_serial::output_serial(
 	std::string _file_name,
-	std::unique_ptr<communicator>& para_,
+	communicator* para_,
 	outputMode mode_) :
-	output_serial{ _file_name, nullptr,para_, mode_ } {
+	output_serial{ _file_name, para_, mode_ } {
 }
 
-
-output_serial::output_serial(
-	std::unique_ptr<std::iostream> _stream,
-	std::unique_ptr<image>&& img_,
-	std::unique_ptr<communicator>& para_,
-	outputMode mode_) :
-	output{std::move(_stream),std::move(img_),para_,mode_}
-{}
 
 void output_serial::write_file(image* img_, std::streampos pos_)
 {
@@ -53,15 +38,15 @@ void output_serial::write_file(image* img_, std::streampos pos_)
 	std::unique_ptr<image> img_all;
 	// the parallel class is written the way
 	// that if the number of ranks is one, the gather function just copies the data from one_ to one_all.
-	image::gather(img, img_all, para);
+	image::gather(img_, img_all, para);
 	// swapping the img with the gathered img
-	img.swap(img_all);
+	//img_.swap(img_all);
 	// getting the rank
 	int rank = para->return_rank();
 	// writing the file only in the rank 0
 	if (rank == 0) {
 		// getting a pointer to the color_array object of the image
-		color_array* colors = img->array();
+		color_array* colors = img_all->array();
 		// for serial writting the stride is zero
 		colors->write(*stream, outMode, 0);
 	}
