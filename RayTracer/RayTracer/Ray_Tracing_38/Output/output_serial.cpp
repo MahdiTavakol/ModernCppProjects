@@ -22,10 +22,11 @@ output_serial::output_serial(
 }
 
 output_serial::output_serial(
-	std::string _file_name,
+	std::unique_ptr<std::iostream> _stream,
 	communicator* para_,
 	outputMode mode_) :
-	output_serial{ _file_name, para_, mode_ } {
+	output{ std::move(_stream),para_,mode_}
+{
 }
 
 

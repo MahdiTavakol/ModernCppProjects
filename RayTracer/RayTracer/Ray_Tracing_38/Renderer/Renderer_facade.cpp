@@ -46,7 +46,7 @@ void renderer_facade::add(std::unique_ptr<hittable>& object)
 
 void renderer_facade::render()
 {
- 	rend->render(img.get(),cam.get(), writer.get(), world.get(),mtl_list.get());
+ 	rend->render(img.get(),cam.get(), writer.get());
 }
 
 
@@ -56,7 +56,7 @@ void renderer_facade::write()
 	// also the renderer sets the filename in its render method, so the writer will always write the file with the correct name.
 	// also the renderer is in the charge of updating the file contents in its render method, 
 	// so the writer just needs to write the file with the current contents.
-	rend->write_file(writer.get());
+	rend->write_file(writer.get(),img.get());
 }
 
 

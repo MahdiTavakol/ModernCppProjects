@@ -43,8 +43,6 @@ void renderer_async::render(image* img_, camera* cam_, output* writer_)
 			&renderer_async::render_thread,
 			this,
 			cam_,
-			world_,
-			list_,
 			img_async,
 			out_async,
 			npos

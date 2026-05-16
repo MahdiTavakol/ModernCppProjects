@@ -88,11 +88,15 @@ void factory::create()
 	outputType wrt_type = wrt_sett->return_type();
 
 
+	// creating the image
+	create_image();
+
+
 
 	// getting the camera_settings from the settings object
 	settings* cam_settings = sett["camera"];
 	// building the camera object
-	cam = std::make_unique<camera>(cam_settings);
+	cam = std::make_unique<camera>(cam_settings,img.get());
 
 
 
@@ -119,10 +123,8 @@ void factory::create()
 
 }
 
-// since we do not know how many images
-// will be requested we generate images on the fly
-// whenever the return_image method is called
-std::unique_ptr<image> factory::return_image()
+
+void factory::create_image()
 {
 	// getting a reference to the app_settings object
 	auto& sett = *stngs;
@@ -138,7 +140,6 @@ std::unique_ptr<image> factory::return_image()
 	output_settings* wrt_sett = dynamic_cast<output_settings*>(wrt_settings);
 	outputType wrt_type = wrt_sett->return_type();
 
-	std::unique_ptr<image> img;
 
 	switch (wrt_type)
 	{
@@ -152,7 +153,18 @@ std::unique_ptr<image> factory::return_image()
 	default:
 		throw std::invalid_argument("Unknown output mode");
 	}
+}
 
+// since we do not know how many images
+// will be requested we generate images on the fly
+// whenever the return_image method is called
+std::unique_ptr<image> factory::return_image()
+{
+	if (img == nullptr)
+	{
+		std::cout << "The image has already been returned, recreating it!";
+		create_image();
+	}
 	return std::move(img);
 }
 

@@ -14,17 +14,6 @@ output_async::output_async(
 }
 
 
-output_async::output_async(
-	settings* out_settings_,
-	std::unique_ptr<image>&& img_,
-	communicator* para_) :
-	output{ out_settings_,std::move(img_),para_ },
-	out_settings{ out_settings_ }
-{
-}
-
-
-
 output_async::~output_async()
 {
 }

@@ -24,7 +24,7 @@ class camera {
 public:
 
 	camera() = default;
-	camera(settings* cam_setting_);
+	camera(settings* cam_setting_,const image* img_);
 
 
 	virtual void setup(camera_settings* cam_setting_);
@@ -50,26 +50,6 @@ public:
 		// so that the setup in the parallel class can have generic input of camera* type
 	}
 
-	std::unique_ptr<image> return_image()
-	{
-		if (img == nullptr)
-			throw std::runtime_error("The image has already been returned!");
-		return std::move(img);
-	}
-
-	image* return_image_ptr()
-	{
-		return img.get();
-	}
-
-
-
-	color_array* return_color_array_ptr()
-	{
-		return img->array();
-	}
-
-	void reset_image(std::unique_ptr<image>&& img_);
 
 
 
@@ -91,6 +71,7 @@ protected:
 
 
 	// secondary parameters set by the initialize method
+	int image_width, image_height;
 	double pixel_samples_scale = 1;
 	point3 center;
 	point3 pixel00_loc;
@@ -100,8 +81,6 @@ protected:
 	vec3 defocus_disk_u;
 	vec3 defocus_disk_v;
 
-	// the rendered image
-	std::unique_ptr<image> img;
 
 
 	// the rest of functions

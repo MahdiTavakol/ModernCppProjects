@@ -17,6 +17,7 @@ public:
 	factory(int argc, char** argv, int mode_,
 		MPI_Comm comm_);
 	void create();
+	void create_image();
 	std::unique_ptr<communicator> return_comm();
 	std::unique_ptr<renderer> return_renderer();
 	std::unique_ptr<camera> return_camera();
@@ -35,6 +36,7 @@ protected:
 	// the settings array for all the objects
 	std::unique_ptr<app_settings> stngs;
 	// objects without dedicated factories
+	std::unique_ptr<image> img;
 	std::unique_ptr<camera> cam;
 	std::unique_ptr<output> writer;
 	// objects with special factories

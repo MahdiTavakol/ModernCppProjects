@@ -4,13 +4,18 @@
 
 #include "camera.h"
 
-camera::camera(settings* cam_setting_)
+camera::camera(settings* cam_setting_, const image* img_)
 {
 	// checking the setting type
 	camera_settings* sett = dynamic_cast<camera_settings*>(cam_setting_);
 	if (!sett)
 		throw std::invalid_argument("Wrong settings object");
 	
+
+
+	// setting the image_width and height
+	img_->returnSize(image_width, image_height);
+
 	setup(sett);
 	initialize();
 }
@@ -43,8 +48,7 @@ void camera::initialize()
 {
 	pixel_samples_scale = 1.0 / samples_per_pixel;
 
-	int image_width, image_height;
-	img->returnSize(image_width, image_height);
+
 
 	center = lookfrom;
 
@@ -195,8 +199,3 @@ color camera::ray_color(const ray& r_, int depth_, const hittable& world_, const
 	return color_from_emission + color_from_scatter;
 }
 
-void camera::reset_image(std::unique_ptr<image>&& img_)
-{
-	img = std::move(img_);
-	initialize();
-}
