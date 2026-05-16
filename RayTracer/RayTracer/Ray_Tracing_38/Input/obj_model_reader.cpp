@@ -21,6 +21,7 @@ obj_model_reader::obj_model_reader(
 	mtl_file_name = file_name + ".mtl";
 	obj_file_ptr = open_file(obj_file_name);
 	mtl_file_ptr = open_file(mtl_file_name);
+	path = extract_path(obj_file_name);
 }
 
 obj_model_reader::obj_model_reader(std::string _obj_file_name,
@@ -37,6 +38,7 @@ obj_model_reader::obj_model_reader(std::string _obj_file_name,
 
 	obj_file_ptr = open_file(obj_file_name);
 	mtl_file_ptr = open_file(mtl_file_name);
+	path = extract_path(obj_file_name);
 }
 
 obj_model_reader::obj_model_reader(
@@ -272,6 +274,13 @@ void obj_model_reader::read_mtl_file()
 	int material_counter = 0;
 	bool read_Tr = false;
 	std::string material_name;
+
+
+
+	std::unique_ptr<material> material_i;
+	std::unique_ptr<image_texture> texture;
+	std::unique_ptr<std::istream> file_stream;
+
 	while (std::getline(*mtl_file_ptr, line))
 	{
 		if (line.length() < 3)
@@ -291,11 +300,8 @@ void obj_model_reader::read_mtl_file()
 					if (!silent)
 						std::cout << "Creating material " << material_name << std::endl;
 					
-					std::unique_ptr<material> material_i;
-					std::unique_ptr<image_texture> texture;
-					std::unique_ptr<std::istream> file_stream;
 
-					file_stream = open_file(texture_path, true);
+					file_stream = open_file(texture_path, path,false);
 					
 					if (file_stream)
 					{
@@ -359,11 +365,26 @@ void obj_model_reader::read_mtl_file()
 	// Since we add to the materials vector whenever we read a newmtl line the last material would not be added otherwise.
 	if (!silent)
 		std::cout << "Creating material " << material_name << std::endl;
+
 	if (!read_Tr)
 		Tr = 1.0 - d;
-	std::unique_ptr<material> material_i = std::make_unique<general>(Kd, Ns, Tr, Tf, Ks);
+
+
+	file_stream = open_file(texture_path, path, false);
+
+	if (file_stream)
+	{
+		texture = std::make_unique<image_texture>(texture_path.c_str());
+		material_i = std::make_unique<lambertian>(std::move(texture));
+	}
+	else
+	{
+		//std::cout << "The file was not found reverting to simple rendering" << std::endl;
+		material_i = std::make_unique<general>(Kd, Ns, Tr, Tf, Ks);
+	}
 	if (!silent)
 		std::cout << "Adding material " << material_name << std::endl;
+
 	mtl_list->push_back(material_name, std::move(material_i));
 }
 
@@ -500,17 +521,28 @@ std::unique_ptr<material_list> obj_model_reader::return_mtl_list()
 	return std::move(mtl_list);
 }
 
-std::unique_ptr<std::istream> obj_model_reader::open_file(std::string file_name_, bool silent_)
+std::unique_ptr<std::istream> obj_model_reader::open_file(std::string& file_name_, std::string path_, bool silent_)
 {
+	char delimiter;
+#ifdef _WIN32
+	delimiter = '\\';
+#else
+	delimiter = '/';
+#endif
 	auto file_ptr =
 		std::make_unique<std::ifstream>(file_name_);
 	if (!file_ptr->is_open()) {
-		if (!silent_)
-			std::cout << "The file " << std::endl
+		file_name_ = path_ + file_name_;
+		file_ptr = std::make_unique<std::ifstream>(file_name_);
+		std::cout << "Trying opening " << file_name_ << std::endl;
+		if (!file_ptr->is_open()) {
+			if (!silent_)
+				std::cout << "The file " << std::endl
 				<< file_name_ << std::endl
 				<< "does not exists in the path " << std::endl
 				<< std::filesystem::current_path() << std::endl;
 		return nullptr;
+		}
 	}
 	return std::move(file_ptr);
 }
@@ -603,6 +635,36 @@ void obj_model_reader::estimate_vns(
 		vec3 unit_normal = unit_vector(normal);
 		vns_[i] = unit_normal;
 	}
+}
+
+std::string obj_model_reader::extract_path(std::string file_name_)
+{
+	std::stringstream iss(file_name_);
+	std::string path;
+
+	char delimiter;
+
+#ifdef _WIN32
+	delimiter = '\\';
+#else
+	delimiter = '/';
+#endif
+	
+	std::vector<std::string> folders;
+	std::string folder;
+
+	while (std::getline(iss, folder, delimiter))
+	{
+		folders.push_back(folder);
+	}
+
+	folders.pop_back();
+
+	for (auto& folder : folders)
+		path += folder + delimiter;
+
+
+	return path;
 }
 
 

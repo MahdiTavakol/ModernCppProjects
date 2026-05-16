@@ -125,3 +125,12 @@ void hittable_list::add_label(std::string label_)
 		object->add_label(label_);
 	}
 }
+
+void hittable_list::scale(const vec3& center_, const double& factor_)
+{
+	for (auto& object : objects)
+	{
+		object->scale(center_, factor_);
+	}
+	bbox.scale(center_, factor_);
+}

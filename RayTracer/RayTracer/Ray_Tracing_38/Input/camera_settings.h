@@ -25,6 +25,7 @@ public:
 	point3& get_lookat();
 	point3& get_vup();
 	color& get_background();
+	std::string return_HDRI_name();
 
 protected:
 
@@ -37,7 +38,9 @@ protected:
 	point3 lookat = point3(0, 0, 0);
 	point3 vup = point3(0, 1, 0);
 
+
 	color background = color(0.7, 0.8, 1.00);
+	std::string HDRI_name = "";
 
 
 };

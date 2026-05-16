@@ -27,11 +27,11 @@ rtw_image::~rtw_image()
 
 bool rtw_image::load(const std::string& filename)
 {
-	auto n = bytes_per_pixel;
-	fdata = stbi_loadf(filename.c_str(), &image_width, &image_height, &n, bytes_per_pixel);
+	int channels;
+	fdata = stbi_loadf(filename.c_str(), &image_width, &image_height, &channels, 0);
 	if (fdata == nullptr) return false;
 
-	bytes_per_scanline = image_width * bytes_per_pixel;
+	channels_per_scanline = image_width * channels;
 	convert_to_bytes();
 	return true;
 }
@@ -44,7 +44,19 @@ const unsigned char* rtw_image::pixel_data(int x, int y) const
 	x = clamp(x, 0, image_width);
 	y = clamp(y, 0, image_height);
 
-	return bdata + y * bytes_per_scanline + x * bytes_per_pixel;
+	return bdata + y * channels_per_scanline + x * channels;
+}
+
+const float* rtw_image::pixel_raw(int x, int y) const
+{
+	static float magenta[] = { 255,0,255 };
+	if (fdata == nullptr) return magenta;
+
+
+	x = clamp(x, 0, image_width);
+	y = clamp(y, 0, image_height);
+
+	return fdata + y * channels_per_scanline + x * channels;
 }
 
 int rtw_image::clamp(int _x, int _low, int _high)
@@ -66,11 +78,12 @@ unsigned char rtw_image::float_to_byte(float _value)
 
 void rtw_image::convert_to_bytes()
 {
-	int total_bytes = image_width * image_height * bytes_per_pixel;
-	bdata = new unsigned char[total_bytes];
+	// we use just one byte for each channel
+	int total_chars = image_width * image_height * channels;
+	bdata = new unsigned char[total_chars];
 
 	auto* bptr = bdata;
 	auto* fptr = fdata;
-	for (auto i = 0; i < total_bytes; i++, fptr++, bptr++)
+	for (auto i = 0; i < total_chars; i++, fptr++, bptr++)
 		*bptr = float_to_byte(*fptr);
 }

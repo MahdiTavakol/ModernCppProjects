@@ -1,4 +1,5 @@
 #include <fstream>
+#include <numbers>
 
 #include "../Shared/rtweekend.h"
 
@@ -32,6 +33,8 @@ void camera::setup(camera_settings* cam_setting_)
 	point3& vup_setting = cam_setting_->get_vup();
 	point3& background_setting = cam_setting_->get_background();
 
+	std::string background_image_name = cam_setting_->return_HDRI_name();
+
 
 	this->samples_per_pixel = samples_per_pixel_setting;
 	this->max_depth = max_depth_setting;
@@ -42,6 +45,11 @@ void camera::setup(camera_settings* cam_setting_)
 	this->lookat = lookat_setting;
 	this->vup = vup_setting;
 	this->background = background_setting;
+
+	if (!background_image_name.empty())
+	{
+		background_image = std::make_unique<HDRI_texture>(background_image_name);
+	}
 }
 
 void camera::initialize()
@@ -180,7 +188,7 @@ color camera::ray_color(const ray& r_, int depth_, const hittable& world_, const
 	hit_record rec;
 
 	if (!world_.hit(r_, interval(0.001, infinity), rec))
-		return background;
+		return background_color(r_);
 
 	int mat_indx = rec.mat_indx;
 	material* mat = list_(mat_indx);
@@ -197,5 +205,24 @@ color camera::ray_color(const ray& r_, int depth_, const hittable& world_, const
 	color color_from_scatter = attenuation * ray_color(scattered, depth_ - 1, world_,list_);
 
 	return color_from_emission + color_from_scatter;
+}
+
+color camera::background_color(const ray& r_) const
+{
+	if (background_image == nullptr)
+	{
+		return background;
+	}
+
+	vec3 dir = unit_vector(r_.direction());
+	// cartesian to spherical coordinates
+	double theta = std::acos(dir[1]);
+	double phi = std::atan2(dir[0], dir[2]);
+
+	double u = (phi + std::numbers::pi) / (2.0 * pi);
+	double v = theta * std::numbers::inv_pi;
+
+	point3 p;
+	return background_image->value(u, v, p);
 }
 

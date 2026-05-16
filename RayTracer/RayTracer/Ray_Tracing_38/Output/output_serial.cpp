@@ -49,7 +49,7 @@ void output_serial::write_file(image* img_, std::streampos pos_)
 		// getting a pointer to the color_array object of the image
 		color_array* colors = img_all->array();
 		// for serial writting the stride is zero
-		colors->write(*stream, outMode, 0);
+		colors->write(*stream, outMode, clmp_function, 0, exp_factor);
 	}
 }
 

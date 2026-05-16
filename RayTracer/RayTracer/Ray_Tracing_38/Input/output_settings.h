@@ -4,6 +4,13 @@
 #include <array>
 
 
+enum class ClampMode
+{
+	SIMPLE,
+	REINHARD,
+	EXPONENTIAL
+};
+
 class output_settings : public settings
 {
 public:
@@ -21,6 +28,11 @@ public:
 	void log_class_name(std::iostream& stream_) const;
 	std::string get_file_name() const { return file_name; }
 
+	void return_clamp_settings(ClampMode& mode_, double& exp_factor_) {
+		mode_ = clmp_mode;
+		exp_factor_ = exp_factor;
+	}
+
 private:
 	std::string file_name;
 	std::string output_type_str = "SERIAL";
@@ -28,4 +40,8 @@ private:
 	std::array<int, 2> size;
 	outputType type;
 	outputMode outMode;
+
+	std::string clmp_mode_str = "SIMPLE";
+	ClampMode clmp_mode = ClampMode::SIMPLE;
+	double exp_factor = 0.45;
 };

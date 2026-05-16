@@ -27,14 +27,16 @@ constant_medium::constant_medium(std::unique_ptr<hittable> boundary_,
 bool constant_medium::hit(const ray& _r, interval _ray_t, hit_record& _rec) const  {
 	hit_record rec1, rec2;
 
+	// entering the boundary
 	if (!boundary->hit(_r, interval::universe, rec1))
 		return false;
 
+	// leaving the boundary
 	if (!boundary->hit(_r, interval(rec1.t + 0.0001, infinity), rec2))
 		return false;
 
 	if (rec1.t < _ray_t.min) rec1.t = _ray_t.min;
-	if (rec2.t < _ray_t.max) rec2.t = _ray_t.max;
+	if (rec2.t > _ray_t.max) rec2.t = _ray_t.max;
 
 	if (rec1.t >= rec2.t)
 		return false;

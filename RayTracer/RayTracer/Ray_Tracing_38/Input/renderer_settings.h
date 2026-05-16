@@ -38,6 +38,7 @@ public:
 	void return_circular_params(point3& center_, double& radius_, double& theta_);
 	void return_file_params(std::vector<point3_animated>& centers_);
 	void return_file_name(std::string& file_name_) { file_name_ = file_name; }
+	void return_zoom(double& zoom_) { zoom_ = zoom; }
 
 
 
@@ -57,6 +58,9 @@ protected:
 	// parameters for the async mode
 	int max_threads = -1;
 
+
+	// zoom
+	double zoom = 1.0;
 
 	// parameters for the dynamic mode
 	// parameters for the path type circular

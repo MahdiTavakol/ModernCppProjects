@@ -30,6 +30,7 @@ public:
 	virtual bool comparator(const std::unique_ptr<hittable>& rhs_) const override;
 	double get_area() const override;
 	static vec3 interpolate(double alpha_, double beta_, const std::array<point3, 3>& arr_);
+	void scale(const vec3& center_, const double& factor_) override;
 
 protected:
 	std::array<point3, 3> vs;

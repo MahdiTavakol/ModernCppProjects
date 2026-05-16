@@ -22,6 +22,8 @@ public:
 
 	size_t size() const override;
 
+	void scale(const vec3& center_, const double& factor_) override;
+
 private:
 	std::unique_ptr<hittable> left;
 	std::unique_ptr<hittable> right;

@@ -93,6 +93,13 @@ size_t bvh_node::size() const
 	return left->size() + right->size();
 }
 
+void bvh_node::scale(const vec3& center_, const double& factor_)
+{
+	left->scale(center_, factor_);
+	right->scale(center_, factor_);
+	bbox.scale(center_, factor_);
+}
+
 
 
 

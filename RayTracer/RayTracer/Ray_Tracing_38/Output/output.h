@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fstream>
+#include <functional>
 
 #include "../Shared/rtweekend.h"
 
@@ -56,5 +57,35 @@ protected:
 
 	// size
 	std::array<int, 2> size;
+
+
+	// clamping mode
+	ClampMode clmp_mode;
+	double exp_factor;
+
+	// clamping functions
+	std::function<void(color_data&, double&)> clmp_function;
+
+	// clamping functions
+	inline static void simple_clamp(color_data& c_data_, [[maybe_unused]] double& exp_factor_)
+	{
+		c_data_.r = std::clamp(c_data_.r, 0.0, 0.999);
+		c_data_.g = std::clamp(c_data_.g, 0.0, 0.999);
+		c_data_.b = std::clamp(c_data_.b, 0.0, 0.999);
+	}
+
+	inline static void reinhard(color_data& c_data_, [[maybe_unused]] double& exp_factor_)
+	{
+		c_data_.r = c_data_.r / (1.0 + c_data_.r);
+		c_data_.g = c_data_.g / (1.0 + c_data_.g);
+		c_data_.b = c_data_.b / (1.0 + c_data_.b);
+	}
+
+	inline static void exponential_tm(color_data& c_data_, double exp_factor_)
+	{
+		c_data_.r = 1.0 - std::exp(-exp_factor_ * c_data_.r);
+		c_data_.g = 1.0 - std::exp(-exp_factor_ * c_data_.g);
+		c_data_.b = 1.0 - std::exp(-exp_factor_ * c_data_.b);
+	}
 };
 

@@ -14,6 +14,8 @@ void output_settings::set_input_map()
 		{"-output_type",&output_type_str},
 		{"-output_mode",&output_mode_str},
 		{"-image_file", &file_name},
+		{"-clamp_mode",&clmp_mode_str},
+		{"-exp_factor",&exp_factor},
 
 		{"--o",&output_type_str},
 		{"--om",&output_mode_str},
@@ -51,6 +53,9 @@ void output_settings::extra_parse()
 {
 	std::transform(output_type_str.begin(), output_type_str.end(), output_type_str.begin(), ::toupper);
 	std::transform(output_mode_str.begin(), output_mode_str.end(), output_mode_str.begin(), ::toupper);
+	std::transform(clmp_mode_str.begin(), clmp_mode_str.end(), clmp_mode_str.begin(), ::toupper);
+
+
 	if (output_type_str == "SERIAL")
 	{
 		type = outputType::SERIAL;
@@ -80,6 +85,22 @@ void output_settings::extra_parse()
 	{
 		std::cerr << "Invalid output mode: " << output_mode_str << std::endl;
 	}
+
+	if (clmp_mode_str == "SIMPLE")
+	{
+		clmp_mode = ClampMode::SIMPLE;
+	}
+	else if (clmp_mode_str == "REINHARD")
+	{
+		clmp_mode = ClampMode::REINHARD;
+	}
+	else if (clmp_mode_str == "EXPONENTIAL")
+	{
+		clmp_mode = ClampMode::EXPONENTIAL;
+	}
+
+
+
 }
 
 

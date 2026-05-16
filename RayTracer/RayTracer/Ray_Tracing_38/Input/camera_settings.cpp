@@ -96,6 +96,7 @@ void camera_settings::set_input_map()
 		{"-lookat",&lookat},
 		{"-vup",&vup},
 		{"-background",&background},
+		{"-HDRI",&HDRI_name},
 
 		{"--s",&samples_per_pixel},
 		{"--d",&max_depth},
@@ -154,4 +155,9 @@ void camera_settings::check_validity() const
 void camera_settings::log_class_name(std::iostream& stream_) const
 {
 	stream_ << "Camera class options:" << std::endl << std::endl;
+}
+
+std::string camera_settings::return_HDRI_name()
+{
+	return HDRI_name;
 }

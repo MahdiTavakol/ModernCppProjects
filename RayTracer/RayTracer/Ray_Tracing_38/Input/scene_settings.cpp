@@ -7,6 +7,7 @@ scene_settings::scene_settings(int mode_, bool wrong_access_) :
 {
 	set_scene_map();
 	set_input_map();
+	set_special_map();
 }
 
 void scene_settings::set_input_map()
@@ -16,9 +17,34 @@ void scene_settings::set_input_map()
 		{"-obj_file",&obj_file_name},
 		{"-mtl_file",&mtl_file_name},
 
+		// floor
+		{"-floor",&floor_string},
+		{"-floor_size",&floor_size},
+
+		// light
+		{"-diffuse_light",&diffuse_light_string},
+		{"-light_size",&light_size},
+
+		// scale
+		{"-scale",&scale_string},
+		{"-scale_factor",&scale_factor},
+
+		// fog
+		{"-fog",&fog_string},
+		{"-fog_density",&fog_density},
+
 		{"--m",&mode_string},
 		{"--obj",&obj_file_name},
 		{"--mtl",&mtl_file_name}
+	};
+
+	threeInputMap = {
+		// floor
+		{"-floor_color",std::tuple(&floor_color[0],&floor_color[1],&floor_color[2])},
+		// diffuse light
+		{"-light_color",std::tuple(&light_color[0],&light_color[1],&light_color[2])},
+		// fog color
+		{ "-fog_color",std::tuple(&fog_color[0],&fog_color[1],&fog_color[2]) }
 	};
 }
 
@@ -86,6 +112,13 @@ void scene_settings::extra_parse()
 	else
 		mode = iter->second;
 
+
+	for (auto& [str, num] : specialStrToInt)
+	{
+		std::transform(str->begin(), str->end(), str->begin(), ::toupper);
+		if (!str->compare("ON") || !str->compare("TRUE"))
+			specials.insert(num);
+	}
 }
 
 void scene_settings::check_validity() const
@@ -106,7 +139,48 @@ void scene_settings::check_validity() const
 
 }
 
+bool scene_settings::specialCheck(specialEnum effect_) const
+{
+	if (specials.find(effect_) == specials.end())
+		return false;
+	return true;
+}
+
 void scene_settings::log_class_name(std::iostream& stream_) const
 {
 	stream_ << "Scene class options:" << std::endl << std::endl;
+}
+
+void scene_settings::set_special_map()
+{
+	specialStrToInt =
+	{
+		{&floor_string,specialEnum::FLOOR},
+		{&diffuse_light_string,specialEnum::DIFFUSE_LIGHT},
+		{&scale_string,specialEnum::SCALE},
+		{&fog_string,specialEnum::FOG}
+	};
+}
+
+// floor 
+void scene_settings::floor_settings(color& floor_color_, double& floor_size_) const {
+	floor_color_ = floor_color;
+	floor_size_ = floor_size;
+}
+
+// diffuse light
+void scene_settings::light_settings(color& light_color_, double& light_size_) const {
+	light_color_ = light_color;
+	light_size_ = light_size;
+}
+// scaling
+void scene_settings::scale_settings(double& factor_) const
+{
+	factor_ = scale_factor;
+}
+
+void scene_settings::fog_settings(double& density_, color fog_color_) const
+{
+	density_ = fog_density;
+	fog_color_ = fog_color;
 }

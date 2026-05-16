@@ -167,6 +167,10 @@ void input::parse_file()
 			continue;
 		}
 
+		// skipping comments
+		if (text[0] == '#')
+			continue;
+
 
 		std::string newCmd;
 		getline(ss, newCmd);

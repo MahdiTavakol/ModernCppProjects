@@ -16,6 +16,7 @@
 #include "../Types/vec3.h"
 #include "../Input/settings.h"
 #include "../Input/camera_settings.h"
+#include "../Algorithms/rtw_stb_image.h"
 
 
 
@@ -66,6 +67,8 @@ protected:
 	vec3 vup = vec3(0, 1, 0);
 	double focus_dist = 10;
 	double defocus_angle = 0;
+	// background HDRI image
+	std::unique_ptr<HDRI_texture> background_image = nullptr;
 
 
 
@@ -88,6 +91,7 @@ protected:
 	static vec3 sample_square();
 	point3 defocus_disk_sample() const;
 	virtual color ray_color(const ray& r_, int depth_, const hittable& world_, const material_list& list_) const;
+	color background_color(const ray& r_) const;
 
 	void initialize();
 

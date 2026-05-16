@@ -153,13 +153,18 @@ void color_array::deallocate()
     this->array = nullptr;
 }
 
-void color_array::write(std::iostream& out_, const outputMode& mode_, const int& stride_) const
+void color_array::write(std::iostream& out_, 
+    const outputMode& mode_,
+    std::function<void(color_data&, double&)>& clmp_func_,
+    const int& stride_,
+    double exp_factor_) const
 {
     if (mode_ == outputMode::P3) {
         for (int j = 0; j < height; j++)
         {
             for (int i = 0; i < width; i++)
             {
+                clmp_func_(array[i][j], exp_factor_);
                 out_ << array[i][j]; //This leads to strided access ==> might need to change the indexing to [height_index][width_index]
             }
         }
@@ -170,6 +175,7 @@ void color_array::write(std::iostream& out_, const outputMode& mode_, const int&
         {
             for (int i = 0; i < width; i++)
             {
+                clmp_func_(array[i][j], exp_factor_);
                 color_array::write_binary(out_, array[i][j]);
             }
             // move the put location stride_ bytes from the current location.

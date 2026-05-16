@@ -31,13 +31,13 @@ scene_factory::scene_factory(settings* wld_settings_, communicator* para_):
 	mode{wld_settings_->return_mode()}, para{para_}, list{std::make_unique<material_list>()}
 {
 	// checking the setting type
-	scene_settings* sett = dynamic_cast<scene_settings*>(wld_settings_);
-	if (!sett)
+	stngs = dynamic_cast<scene_settings*>(wld_settings_);
+	if (!stngs)
 		throw std::invalid_argument("Wrong settings object");
 
 
-	obj_file_name = sett->return_obj_file_name();
-	mtl_file_name = sett->return_mtl_file_name();
+	obj_file_name = stngs->return_obj_file_name();
+	mtl_file_name = stngs->return_mtl_file_name();
 }
 
 scene_factory::scene_factory(int mode_, std::unique_ptr<communicator>& para_) :
@@ -104,6 +104,42 @@ void scene_factory::create()
 		setup_simple_2d_parallel_test();
 		break;
 	}
+
+
+	// adding special effects
+	if (stngs->specialCheck(specialEnum::SCALE))
+	{
+		bool set = false;
+		double scale_factor;
+		vec3 center = world->com("main", set);
+		if (set == false)
+			throw std::invalid_argument("There is nothing here to be scaled!");
+		stngs->scale_settings(scale_factor);
+		world->scale(center, scale_factor);
+	}
+	if (stngs->specialCheck(specialEnum::FLOOR))
+	{
+		color floor_color;
+		double floor_size;
+		stngs->floor_settings(floor_color, floor_size);
+		add_floor_mat(floor_color, floor_size);
+	}
+	if (stngs->specialCheck(specialEnum::DIFFUSE_LIGHT))
+	{
+		color light_color;
+		double size_factor;
+		stngs->light_settings(light_color, size_factor);
+		add_diffuse_light(light_color, size_factor);
+	}
+	if (stngs->specialCheck(specialEnum::FOG))
+	{
+		color fog_color;
+		double fog_density;
+		stngs->fog_settings(fog_density, fog_color);
+		add_fog(fog_density, fog_color);
+	}
+
+	set_bvh();
 }
 
 std::unique_ptr<hittable_list> scene_factory::return_object()
@@ -461,46 +497,6 @@ void scene_factory::setup_3d_obj()
 	model_reader->read();
 	world = model_reader->return_world();
 	list = model_reader->return_mtl_list();
-
-
-	bool set = false;
-	aabb bbox = world->bounding_box("main", set);
-
-	vec3 com = world->com();
-	double xLength = bbox.axis_interval(0).size();
-	double yLength = bbox.axis_interval(1).size();
-	double zLength = bbox.axis_interval(2).size();
-	vec3 min = vec3(bbox.axis_interval(0).min, bbox.axis_interval(1).min, bbox.axis_interval(2).min);
-
-
-	double diag = std::sqrt(
-		xLength * xLength +
-		yLength * yLength +
-		zLength * zLength
-	);
-
-	vec3 light_location = com + vec3(diag, 1.5 * diag, 1.5 * diag);
-	double light_size = 0.5 * diag;
-
-	auto difflight = std::make_unique<diffuse_light>(color(15, 15,15));
-	std::string mat_name = "diffuse";
-	int mat_indx = list->push_back(mat_name, std::move(difflight));
-	world->add(std::make_unique<sphere>(light_location, light_size, mat_indx));
-
-
-	std::unique_ptr<material> red = std::make_unique<lambertian>(color(0.64, 0.05, 0.05));
-	int red_mat_indx = list->push_back("red", std::move(red));
-	double floor_size = 3.0 * diag;
-	double y_floor = min[1] -0.02*diag;
-	world->add(std::make_unique<quad>(
-		point3(com[0] - floor_size / 2.0, y_floor, com[2] - floor_size / 2.0),
-		vec3(floor_size, 0, 0),
-		vec3(0, 0, floor_size),
-		red_mat_indx));
-
-
-	auto bvh = std::make_unique<bvh_node>(std::move(world));
-	world = std::make_unique<hittable_list>(std::move(bvh));
 }
 
 void scene_factory::setup_3d_obj_parallel()
@@ -511,9 +507,6 @@ void scene_factory::setup_3d_obj_parallel()
 	model_reader->read();
 	world = model_reader->return_world();
 	list = model_reader->return_mtl_list();
-
-	auto bvh = std::make_unique<bvh_node>(std::move(world));
-	world = std::make_unique<hittable_list>(std::move(bvh));
 }
 
 void scene_factory::setup_random_spheres_animated()
@@ -568,4 +561,76 @@ void scene_factory::setup_simple_2d_parallel_test()
 	}
 	//auto bvh = std::make_unique<bvh_node>(std::move(world));
 	//world = std::make_unique<hittable_list>(std::move(bvh));
+}
+
+void scene_factory::add_floor_mat(color& floor_color_, int size_factor_)
+{
+	bool set = false;
+	aabb bbox = world->bounding_box("main", set);
+
+	vec3 com = world->com();
+	double xLength = bbox.axis_interval(0).size();
+	double yLength = bbox.axis_interval(1).size();
+	double zLength = bbox.axis_interval(2).size();
+	vec3 min = vec3(bbox.axis_interval(0).min, bbox.axis_interval(1).min, bbox.axis_interval(2).min);
+
+
+	double diag = std::sqrt(
+		xLength * xLength +
+		yLength * yLength +
+		zLength * zLength
+	);
+
+
+	double floor_size = size_factor_ * diag;
+	double y_floor = min[1] - 0.02 * diag;
+
+	std::unique_ptr<material> floor_mat = std::make_unique<lambertian>(floor_color_);
+	int red_mat_indx = list->push_back("floor", std::move(floor_mat));
+	world->add(std::make_unique<quad>(
+		point3(com[0] - floor_size / 2.0, y_floor, com[2] - floor_size / 2.0),
+		vec3(floor_size, 0, 0),
+		vec3(0, 0, floor_size),
+		red_mat_indx));
+}
+
+void scene_factory::add_diffuse_light(color& light_color_, int size_factor_)
+{
+	bool set = false;
+	aabb bbox = world->bounding_box("main", set);
+
+
+	vec3 com = world->com();
+	double xLength = bbox.axis_interval(0).size();
+	double yLength = bbox.axis_interval(1).size();
+	double zLength = bbox.axis_interval(2).size();
+	vec3 min = vec3(bbox.axis_interval(0).min, bbox.axis_interval(1).min, bbox.axis_interval(2).min);
+
+
+	double diag = std::sqrt(
+		xLength * xLength +
+		yLength * yLength +
+		zLength * zLength
+	);
+
+	vec3 light_location = com + vec3(diag, size_factor_ * diag, size_factor_ * diag);
+	double light_size = 0.5 * diag;
+
+	auto difflight = std::make_unique<diffuse_light>(light_color_);
+	std::string mat_name = "diffuse";
+	int mat_indx = list->push_back(mat_name, std::move(difflight));
+	world->add(std::make_unique<sphere>(light_location, light_size, mat_indx));
+}
+
+void scene_factory::add_fog(double& fog_density_, color& fog_color_)
+{
+	std::unique_ptr<hittable> fog = 
+		std::make_unique<constant_medium>(std::move(world), fog_density_, fog_color_, *list);
+	world = std::make_unique<hittable_list>(std::move(world));
+}
+
+void scene_factory::set_bvh()
+{
+	auto bvh = std::make_unique<bvh_node>(std::move(world));
+	world = std::make_unique<hittable_list>(std::move(bvh));
 }

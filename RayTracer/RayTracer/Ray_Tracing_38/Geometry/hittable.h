@@ -56,6 +56,7 @@ public:
     
     virtual aabb bounding_box(std::string label_, bool& set_);
     virtual void add_label(std::string label_);
+    virtual void scale(const vec3& center_, const double& factor_);
 
     const std::string type = "";
 protected:

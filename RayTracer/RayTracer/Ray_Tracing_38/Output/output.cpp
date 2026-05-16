@@ -17,6 +17,24 @@ output::output(settings* out_settings_,
 	outMode = sett->return_outputMode();
 
 	size = sett->return_size();
+
+	sett->return_clamp_settings(clmp_mode, exp_factor);
+
+
+	switch (clmp_mode)
+	{
+	case ClampMode::SIMPLE:
+		clmp_function = &output::simple_clamp;
+		break;
+	case ClampMode::REINHARD:
+		clmp_function = &output::reinhard;
+		break;
+	case ClampMode::EXPONENTIAL:
+		clmp_function = &output::exponential_tm;
+		break;
+	default:
+		throw std::invalid_argument("Unknown clamp type!");
+	}
 }
 
 
@@ -163,7 +181,7 @@ void output::write_file(image* img_, std::streampos pos_)
 	// getting a pointer to the color_array object of the img
 	auto* colors = img_->array();
 	// writing the data
-	colors->write(*stream, outMode, writeStride);
+	colors->write(*stream, outMode, clmp_function,writeStride,exp_factor);
 }
 
 std::string output::return_file_name()

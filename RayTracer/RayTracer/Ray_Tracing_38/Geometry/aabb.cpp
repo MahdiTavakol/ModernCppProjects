@@ -92,6 +92,22 @@ void aabb::sort_axis()
 	std::sort(axises.begin(), axises.end(), comparator);
 }
 
+void aabb::scale(const vec3 center_, double factor_)
+{
+	vec3 max = vec3{
+		x.max,
+		y.max,
+		z.max
+	};
+	vec3 min = vec3{
+		(x.min),
+		(y.min),
+		(z.min)
+	};
+	max = center_ + factor_ * (max - center_);
+	min = center_ - factor_ * (center_ - min);
+}
+
 const aabb aabb::empty = aabb(interval::empty, interval::empty, interval::empty);
 const aabb aabb::universe = aabb(interval::universe, interval::universe, interval::universe);
 

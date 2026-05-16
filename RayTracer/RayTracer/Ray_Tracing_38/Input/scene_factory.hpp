@@ -26,6 +26,9 @@ protected:
 	std::string obj_file_name = "../../models/Toyota_Sequoia_2023/Toyota_Sequoia_2023_2015_obj.obj";
 	std::string mtl_file_name;
 
+	// settings
+	scene_settings* stngs;
+
 private:
 	void setup_random_spheres();
 	void setup_checker_boards();
@@ -42,5 +45,14 @@ private:
 	void setup_3d_obj_parallel();
 	void setup_random_spheres_animated();
 	void setup_simple_2d_parallel_test();
+
+
+	void set_bvh();
+
+
+	// special effects
+	void add_floor_mat(color& floor_color_, int size_factor_);
+	void add_diffuse_light(color& light_color, int size_factor_);
+	void add_fog(double& fog_density, color& fog_color);
 
 };

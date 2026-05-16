@@ -158,3 +158,16 @@ vec3 triangle_mesh::interpolate(double alpha_, double beta_, const std::array<po
 	double gamma = 1.0 - alpha_ - beta_;
 	return gamma * arr_[0] + alpha_ * arr_[1] + beta_ * arr_[2];
 }
+
+void triangle_mesh::scale(const vec3& center_, const double& factor_)
+{
+	for (auto& v : vs)
+	{
+		vec3 delta = v - center_;
+		v = center_ + factor_ * delta;
+	}
+
+	bbox.scale(center_, factor_);
+
+	initialize();
+}

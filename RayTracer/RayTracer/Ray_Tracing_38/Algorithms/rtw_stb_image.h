@@ -22,14 +22,15 @@ public:
 	int width() const { return (fdata == nullptr) ? 0 : image_width; }
 	int height() const { return (fdata == nullptr) ? 0 : image_height; }
 	const unsigned char* pixel_data(int x, int y) const;
-
+	const float* pixel_raw(int x, int y) const;
+ 
 private:
-	const int bytes_per_pixel = 3;
+	int channels = 3;
 	float* fdata = nullptr;
 	unsigned char* bdata = nullptr;
 	int image_width = 0;
-	int image_height = 0; 
-	int bytes_per_scanline = 0;
+	int image_height = 0;
+	int channels_per_scanline = 0;
 
 	static int clamp(int _x, int _low, int _high);
 	static unsigned char float_to_byte(float _value);

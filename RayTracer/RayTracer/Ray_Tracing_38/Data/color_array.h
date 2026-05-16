@@ -9,8 +9,10 @@
 #include <iostream>
 #include <vector>
 #include <array>
+#include <functional>
 #include <algorithm>
 #include "../Geometry/interval.h"
+#include "../Input/output_settings.h"
 #include <mutex>
 
 typedef struct { double r, g, b; } color_data;
@@ -90,21 +92,34 @@ public:
         return false;
     }
 
-    void write(std::iostream& out_, const outputMode& mode_, const int& strid_ = 0) const;
+    void write(std::iostream& out_, 
+        const outputMode& mode_,
+        std::function<void(color_data&, double&)>& clmp_func_,
+        const int& strid_ = 0, 
+        double exp_factor_ = 0.0) const;
+
     void write_async(std::iostream& out_, const outputMode& mode_, const int& strid_ = 0) const;
 
-    inline static void write_binary(std::ostream& out_, const color_data& c_data_)
+
+
+
+
+    inline static void write_binary(
+        std::ostream& out_,
+        color_data& c_data_)
     {
         std::uint8_t r =
-            static_cast<std::uint8_t>(256 * std::clamp(c_data_.r, 0.0, 0.999));
+            static_cast<std::uint8_t>(256 * c_data_.r);
         std::uint8_t g =
-            static_cast<std::uint8_t>(256 * std::clamp(c_data_.g, 0.0, 0.999));
+            static_cast<std::uint8_t>(256 * c_data_.g);
         std::uint8_t b =
-            static_cast<std::uint8_t>(256 * std::clamp(c_data_.b, 0.0, 0.999));
+            static_cast<std::uint8_t>(256 * c_data_.b);
         out_.write(reinterpret_cast<char*>(&r), 1);
         out_.write(reinterpret_cast<char*>(&g), 1);
         out_.write(reinterpret_cast<char*>(&b), 1);
     }
+
+
 
     color_data average() const;
 
@@ -118,6 +133,9 @@ protected:
 
     // experimental
     mutable std::vector<std::mutex> mtVec;
+
+    // default clamp
+    void fake_clamp(color_data& c_data_, double& exp_) {}
 };
 
 inline std::ostream& operator<<(std::ostream& out, const color_data& _c_data)
@@ -131,5 +149,7 @@ inline std::ostream& operator<<(std::ostream& out, const color_data& _c_data)
     int bbyte = int(256 * intensity.clamp(b));
     return out << rbyte << " " << gbyte << " " << bbyte << std::endl;
 }
+
+
 
 #endif

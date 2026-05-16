@@ -80,6 +80,28 @@ private:
 	rtw_image image;
 };
 
+class HDRI_texture : public texture
+{
+public:
+	HDRI_texture(std::string _filename) :image(_filename.c_str()) {}
+
+	color value(double u, double v, const point3& p) const override
+	{
+		if (image.height() <= 0) return color(0, 1, 1);
+
+		u = interval(0, 1).clamp(u);
+		v = interval(0, 1).clamp(v);
+
+		auto i = int(u * image.width());
+		auto j = int(v * image.height());
+		const float* pixel = image.pixel_raw(i, j);
+
+		return color(pixel[0],pixel[1],pixel[2]);
+	}
+private:
+	rtw_image image;
+};
+
 class noise_texture : public texture
 {
 public:

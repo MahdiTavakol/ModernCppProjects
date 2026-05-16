@@ -37,6 +37,12 @@ void hittable::add_label(std::string label_)
     labels.insert(label_);
 }
 
+void hittable::scale(const vec3& center_, const double& factor_)
+{
+    std::string error_text = "The scale has not been implemented for " + type + " yet!";
+    throw std::invalid_argument(error_text);
+}
+
 translate::translate(std::unique_ptr<hittable> _object, const vec3& _offset)
     :hittable{object->type}, object{std::move(_object)}, offset(_offset)
 {

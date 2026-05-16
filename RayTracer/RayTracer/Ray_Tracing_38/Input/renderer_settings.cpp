@@ -23,6 +23,7 @@ void renderer_settings::set_input_map()
 
 		// path type none parameters
 		{"-location",&location},
+		{"-zoom",&zoom},
 
 		// circular path parameters
 		{"-radius",&radius},
@@ -120,7 +121,7 @@ bool renderer_settings::set_from_scene(hittable_list& world_)
 
 	vec3 viewDir = unit_vector(vec3{ 0.7,0.50,1.2 });
 
-	double cameraDistance = 1.8 * maxLen;
+	double cameraDistance = 1.8 * maxLen / zoom;
 
 	point3 lookfrom = com + cameraDistance*viewDir;
 	location = lookfrom;

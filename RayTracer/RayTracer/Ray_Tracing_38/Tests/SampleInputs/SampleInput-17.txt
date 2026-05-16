@@ -1,0 +1,9 @@
+mode OBJ_MODEL
+renderer -renderer_mode ASYNC -path_type NONE -max_threads 8 -zoom 1.7
+scene -mode OBJ_MODEL -obj_file ..\\models\\Mustang1965\\Mustang1965.obj -mtl_file  ..\\models\\Mustang1965\\Mustang1965.mtl
+#scene -floor on -floor_color 0.64 0.05 0.05 -floor_size 1.5
+camera -vup 0 1 0 -samples_per_pixel 30 -max_depth 30 -vfov 45.0
+camera -HDRI ..\\HDRI\\sundowner_overlook_4k.hdr
+image -width 1080 -aspect_ratio 16.0 9.0
+output -output_type async  -output_mode P6 -image_file Tests\\SampleOutputs\\test_17.ppm
+output -clamp_mode EXPONENTIAL -exp_factor 0.95

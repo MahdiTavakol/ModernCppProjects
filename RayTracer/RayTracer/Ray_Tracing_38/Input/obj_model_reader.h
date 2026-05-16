@@ -78,7 +78,7 @@ protected:
 	void read_mtl_file();
 	virtual void set_range(int& _low, int& _hi);
 	virtual void add_item(const int& _low, const int& _hi);
-	static std::unique_ptr<std::istream> open_file(std::string file_name_, bool silent = false);
+	static std::unique_ptr<std::istream> open_file(std::string& file_name_, std::string path_="", bool silent = false);
 
 	// setting the silent status
 	void set_silent_status();
@@ -91,6 +91,10 @@ protected:
 		const std::array<point3,3>& vs_,
 		const std::array<bool, 3>& set_vn_,
 		std::array<point3,3>& vns_);
+
+
+	static std::string extract_path(std::string obj_file_name);
+	std::string path;
 };
 
 
