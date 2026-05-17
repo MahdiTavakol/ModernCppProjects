@@ -81,5 +81,25 @@ inline std::unique_ptr<hittable_list> box(const point3& a, const point3& b, cons
     return sides;
 }
 
+inline std::unique_ptr<hittable_list> box(const aabb& bbox, const int& mat_indx_)
+{
+    double dx = bbox.x.size();
+    double dy = bbox.y.size();
+    double dz = bbox.z.size();
+
+    auto sides = std::make_unique<hittable_list>();
+
+    sides->add(std::make_unique<quad>(point3(bbox.x.min, bbox.y.min, bbox.z.max), dx, dy, mat_indx_)); // front
+    sides->add(std::make_unique<quad>(point3(bbox.x.max, bbox.y.min, bbox.z.max), -dz, dy, mat_indx_)); // right
+    sides->add(std::make_unique<quad>(point3(bbox.x.max, bbox.y.min, bbox.z.min), -dx, dy, mat_indx_)); // back
+    sides->add(std::make_unique<quad>(point3(bbox.x.min, bbox.y.min, bbox.z.min), dz, dy, mat_indx_)); // left
+    sides->add(std::make_unique<quad>(point3(bbox.x.min, bbox.y.max, bbox.z.max), dx, -dz, mat_indx_)); // top
+    sides->add(std::make_unique<quad>(point3(bbox.x.min, bbox.y.min, bbox.z.min), dx, dz, mat_indx_)); // bottom
+
+
+    return sides;
+
+}
+
 
 #endif

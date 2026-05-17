@@ -1,4 +1,5 @@
 #include "constant_medium.h"
+#include <iostream>
 
 
 constant_medium::constant_medium(std::unique_ptr<hittable> boundary_,
@@ -6,7 +7,7 @@ constant_medium::constant_medium(std::unique_ptr<hittable> boundary_,
 	material_list& list_)
 	:
 	hittable{ "constant_medium" },
-	boundary{ std::move(boundary_) }, neg_inv_density(-1 / density_)
+	boundary{ std::move(boundary_) }, neg_inv_density(-1.0 / density_)
 {
 	std::unique_ptr<material> mat = std::make_unique<isotropic>(tex_);
 	std::string name = "constant_medium";
@@ -60,3 +61,9 @@ bool constant_medium::hit(const ray& _r, interval _ray_t, hit_record& _rec) cons
 
 	return true;
 }
+
+aabb constant_medium::bounding_box(std::string label_, bool& set_)
+{
+	aabb out =  boundary->bounding_box(label_, set_);
+	return out;
+ }

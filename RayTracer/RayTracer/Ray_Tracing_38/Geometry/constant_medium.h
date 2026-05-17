@@ -17,11 +17,12 @@ public:
 		material_list& list_);
 	bool hit(const ray& _r, interval _ray_t, hit_record& _rec) const override;
 
+	aabb bounding_box(std::string label_, bool& set_) override;
+
 
 private:
 	std::unique_ptr<hittable> boundary;
 	double neg_inv_density;
-	int mat_indx;
 };
 
 #endif

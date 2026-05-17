@@ -131,6 +131,14 @@ void scene_factory::create()
 		stngs->light_settings(light_color, size_factor);
 		add_diffuse_light(light_color, size_factor);
 	}
+
+
+	set_bvh();
+	// any special effect that 
+	// wraps the world should come after bvh
+	// otherwise the bvh would have just
+	// one object (the wrapper) and so it is
+	// not effective
 	if (stngs->specialCheck(specialEnum::FOG))
 	{
 		color fog_color;
@@ -139,7 +147,6 @@ void scene_factory::create()
 		add_fog(fog_density, fog_color);
 	}
 
-	set_bvh();
 }
 
 std::unique_ptr<hittable_list> scene_factory::return_object()
@@ -624,9 +631,13 @@ void scene_factory::add_diffuse_light(color& light_color_, int size_factor_)
 
 void scene_factory::add_fog(double& fog_density_, color& fog_color_)
 {
+	bool set = false;
+	aabb boundary = world->bounding_box("main", set);
+	if (set == false)
+		throw std::invalid_argument("There is nothing to be wrapped in the fog");
 	std::unique_ptr<hittable> fog = 
-		std::make_unique<constant_medium>(std::move(world), fog_density_, fog_color_, *list);
-	world = std::make_unique<hittable_list>(std::move(world));
+		std::make_unique<constant_medium>(std::move(boundary), fog_density_, fog_color_, *list);
+	world = std::make_unique<hittable_list>(std::move(fog));
 }
 
 void scene_factory::set_bvh()
