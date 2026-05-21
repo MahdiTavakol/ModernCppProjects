@@ -83,9 +83,9 @@ inline std::unique_ptr<hittable_list> box(const point3& a, const point3& b, cons
 
 inline std::unique_ptr<hittable_list> box(const aabb& bbox, const int& mat_indx_)
 {
-    double dx = bbox.x.size();
-    double dy = bbox.y.size();
-    double dz = bbox.z.size();
+    vec3 dx = vec3{ bbox.x.size(),0.0,0.0 };
+    vec3 dy = vec3{ 0.0,bbox.y.size(),0.0 };
+    vec3 dz = vec3{ 0.0,0.0,bbox.z.size() };
 
     auto sides = std::make_unique<hittable_list>();
 

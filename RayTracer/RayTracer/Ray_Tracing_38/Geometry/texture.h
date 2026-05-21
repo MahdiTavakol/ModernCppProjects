@@ -61,6 +61,7 @@ class image_texture : public texture
 {
 public:
 	image_texture(const char* _filename) :image(_filename) {}
+	image_texture(std::string filename_) : image(filename_.c_str()) {}
 
 	color value(double u, double v, const point3& p) const override
 	{

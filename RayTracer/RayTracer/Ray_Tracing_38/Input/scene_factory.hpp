@@ -54,5 +54,6 @@ private:
 	void add_floor_mat(color& floor_color_, int size_factor_);
 	void add_diffuse_light(color& light_color, int size_factor_);
 	void add_fog(double& fog_density, color& fog_color);
+	void change_material(std::string name_, std::unique_ptr<material> mat_);
 
 };

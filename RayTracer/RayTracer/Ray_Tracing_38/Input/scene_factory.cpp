@@ -131,6 +131,13 @@ void scene_factory::create()
 		stngs->light_settings(light_color, size_factor);
 		add_diffuse_light(light_color, size_factor);
 	}
+	if (stngs->specialCheck(specialEnum::FOG))
+	{
+		color fog_color;
+		double fog_density;
+		stngs->fog_settings(fog_density, fog_color);
+		add_fog(fog_density, fog_color);
+	}
 
 
 	set_bvh();
@@ -139,13 +146,7 @@ void scene_factory::create()
 	// otherwise the bvh would have just
 	// one object (the wrapper) and so it is
 	// not effective
-	if (stngs->specialCheck(specialEnum::FOG))
-	{
-		color fog_color;
-		double fog_density;
-		stngs->fog_settings(fog_density, fog_color);
-		add_fog(fog_density, fog_color);
-	}
+
 
 }
 
@@ -512,8 +513,15 @@ void scene_factory::setup_3d_obj_parallel()
 	std::unique_ptr<obj_model_reader_parallel> model_reader =
 		std::make_unique<obj_model_reader_parallel>(obj_file_name,para);
 	model_reader->read();
+
 	world = model_reader->return_world();
 	list = model_reader->return_mtl_list();
+
+	std::unique_ptr<material> blue_glass =
+		std::make_unique<dielectric>(1.45, color(0.80, 0.90, 1.00));
+	std::unique_ptr<material> glass =
+		std::make_unique<dielectric>(1.0);
+	change_material("Glass", std::move(glass));
 }
 
 void scene_factory::setup_random_spheres_animated()
@@ -632,12 +640,30 @@ void scene_factory::add_diffuse_light(color& light_color_, int size_factor_)
 void scene_factory::add_fog(double& fog_density_, color& fog_color_)
 {
 	bool set = false;
-	aabb boundary = world->bounding_box("main", set);
+	aabb bbox = world->bounding_box("main", set);
 	if (set == false)
 		throw std::invalid_argument("There is nothing to be wrapped in the fog");
+	std::unique_ptr<material> mat = std::make_unique<lambertian>(color(0,0,0));
+	int mat_indx = list->push_back("null_material", std::move(mat));
+
+	double xLength = bbox.x.size();
+	double yLength = bbox.y.size();
+	double zLength = bbox.z.size();
+	double xmid = bbox.x.mid();
+	double ymid = bbox.y.mid();
+	double zmid = bbox.x.mid();
+	bbox.x.expand(0.2 * xLength);
+	bbox.y.expand(0.2 * yLength);
+	bbox.z.expand(0.2 * zLength);
+	std::unique_ptr<hittable> boundary = box(bbox,mat_indx);
 	std::unique_ptr<hittable> fog = 
 		std::make_unique<constant_medium>(std::move(boundary), fog_density_, fog_color_, *list);
-	world = std::make_unique<hittable_list>(std::move(fog));
+	world->add(std::move(fog));
+}
+
+void scene_factory::change_material(std::string name_, std::unique_ptr<material> mat_)
+{
+	list->replace_material(name_, std::move(mat_));
 }
 
 void scene_factory::set_bvh()

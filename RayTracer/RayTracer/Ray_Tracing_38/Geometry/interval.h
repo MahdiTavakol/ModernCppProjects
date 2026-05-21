@@ -22,6 +22,11 @@ public:
 		return max - min;
 	}
 
+	double mid() const
+	{
+		return (max + min) / 2.0;
+	}
+
 	bool contains(double x) const {
 		return min <= x && x <= max;
 	}

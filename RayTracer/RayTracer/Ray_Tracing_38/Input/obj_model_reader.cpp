@@ -208,6 +208,7 @@ void obj_model_reader::read_obj_file()
 				}
 
 
+
 				std::vector<face_indx> triangulated;
 				switch (face.num_edges)
 				{
@@ -269,6 +270,7 @@ void obj_model_reader::read_mtl_file()
 
 	double Ns, d, Tr;
 	color Ka, Kd, Ks, Tf;
+	double Ni = 1.5;
 	std::string texture_path = "";
 	std::string dummy_str;
 	int material_counter = 0;
@@ -300,8 +302,8 @@ void obj_model_reader::read_mtl_file()
 					if (!silent)
 						std::cout << "Creating material " << material_name << std::endl;
 					
-
-					file_stream = open_file(texture_path, path,false);
+					//if (!texture_path.empty())
+						file_stream = open_file(texture_path, path,false);
 					
 					if (file_stream)
 					{
@@ -311,13 +313,18 @@ void obj_model_reader::read_mtl_file()
 					else
 					{
 						//std::cout << "The file was not found reverting to simple rendering" << std::endl;
-						material_i = std::make_unique<general>(Kd, Ns, Tr, Tf, Ks);
+						material_i = std::make_unique<general>(Kd, Ns, Tr, Tf, Ks,Ni);
 					}
 					if (!silent)
 						std::cout << "Adding material " << material_name << std::endl;
 
+
+					// adding the material
 					mtl_list->push_back(material_name, std::move(material_i));
 				}
+				// resetting the texture_path
+				texture_path.clear();
+
 				iss >> dummy_str;
 				if (!silent)
 					std::cout << "Reading the material " << dummy_str << std::endl;
@@ -355,6 +362,10 @@ void obj_model_reader::read_mtl_file()
 			{
 				iss >> Ks;
 			}
+			else if (dummy_str == "Ni")
+			{
+				iss >> Ni;
+			}
 			else if (dummy_str == "map_Kd")
 			{
 				iss >> texture_path;
@@ -374,13 +385,13 @@ void obj_model_reader::read_mtl_file()
 
 	if (file_stream)
 	{
-		texture = std::make_unique<image_texture>(texture_path.c_str());
+		texture = std::make_unique<image_texture>(texture_path);
 		material_i = std::make_unique<lambertian>(std::move(texture));
 	}
 	else
 	{
 		//std::cout << "The file was not found reverting to simple rendering" << std::endl;
-		material_i = std::make_unique<general>(Kd, Ns, Tr, Tf, Ks);
+		material_i = std::make_unique<general>(Kd, Ns, Tr, Tf, Ks, Ni);
 	}
 	if (!silent)
 		std::cout << "Adding material " << material_name << std::endl;
@@ -529,6 +540,8 @@ std::unique_ptr<std::istream> obj_model_reader::open_file(std::string& file_name
 #else
 	delimiter = '/';
 #endif
+	if (file_name_.empty())
+		return nullptr;
 	auto file_ptr =
 		std::make_unique<std::ifstream>(file_name_);
 	if (!file_ptr->is_open()) {

@@ -27,6 +27,9 @@ public:
 	std::string return_obj_file_name() const;
 	std::string return_mtl_file_name() const;
 
+	// special parser
+	void parse_material_change(std::istringstream& iss_);
+
 
 	// related to special effects
 	// floor
@@ -38,6 +41,8 @@ public:
 	void scale_settings(double& factor_) const;
 	// fog
 	void fog_settings(double& density_, color fog_color_) const;
+
+
 
 
 protected:

@@ -44,8 +44,8 @@ class general : public material
 {
 public:
 	general(const color& _albedo, const double& _shininess,
-		 const double& _Tr, const color& _Tf, const color _Ks) :
-		albedo(_albedo), shininess(_shininess), Tr(_Tr), Tf(_Tf), Ks(_Ks)
+		 const double& _Tr, const color& _Tf, const color _Ks, const double _Ni) :
+		albedo(_albedo), shininess(_shininess), Tr(_Tr), Tf(_Tf), Ks(_Ks), Ni(_Ni)
 	{
 	}
 
@@ -65,7 +65,7 @@ public:
 		//reflected += fuzz * random_unit_vector(); // Adjusted to fuzziness
 
 		// Control sharpness of reflection based on shininess (Ns)
-		reflected = reflected * (1.0 - shininess / 100.0) + rec.normal * (shininess / 100.0);
+		reflected = reflected * (1.0 - shininess / 1000.0) + rec.normal * (shininess / 1000.0);
 
 		// Scatter the ray with the adjusted direction
 		scattered = ray(rec.p, reflected, r_in.time());
@@ -117,6 +117,7 @@ private:
 	double shininess;
 	double Tr;
 	color Ka, Ks, Tf;
+	double Ni;
 };
 
 
@@ -187,12 +188,15 @@ private:
 class dielectric : public material
 {
 public:
-	dielectric(double _refraction_index) : refraction_index(_refraction_index) {}
+	dielectric(double _refraction_index, color attenuation_ = color(1.0, 1.0, 1.0)) : 
+		refraction_index(_refraction_index),
+		attenuation{ attenuation_ }
+	{}
 
 
-	bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered) const override
+	bool scatter(const ray& r_in, const hit_record& rec, color& attenuation_, ray& scattered) const override
 	{
-		attenuation = color(1.0, 1.0, 1.0);
+		attenuation_ = attenuation;
 		double ri = rec.front_face ? (1.0 / refraction_index) : refraction_index;
 
 		vec3 unit_direction = unit_vector(r_in.direction());
@@ -222,6 +226,7 @@ public:
 	}
 
 private:
+	color attenuation;
 	double refraction_index;
 
 	static double reflectance(double cosine, double refraction_index)

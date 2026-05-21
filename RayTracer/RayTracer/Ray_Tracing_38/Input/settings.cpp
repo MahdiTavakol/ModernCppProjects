@@ -13,6 +13,7 @@ void settings::parse_commands()
 			auto iter = singleInputMap.find(text);
 			auto iter2 = doubleInputMap.find(text);
 			auto iter3 = threeInputMap.find(text);
+			//auto iter4 = parserInputMap.find(text);
 			if (iter != singleInputMap.end())
 			{
 				auto& val = iter->second;
@@ -78,6 +79,11 @@ void settings::parse_commands()
 					parse_input<double>(iss, *first, *second, *third);
 				}
 			}
+			/*
+			else if (iter4 != parserInputMap.end())
+			{
+				//(iter4->second)(iss);
+			}*/
 		}
 		
 	}

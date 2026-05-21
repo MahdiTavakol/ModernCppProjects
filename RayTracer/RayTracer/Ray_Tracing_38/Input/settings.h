@@ -6,6 +6,7 @@
 #include <concepts>
 #include <map>
 #include <unordered_set>
+#include <functional>
 
 #include "../Types/vec3.h"
 #include "../Shared/rtweekend.h"
@@ -14,6 +15,7 @@
 using singleVar = std::variant<int*, double*, std::string*, point3*>;
 using doubleVar = std::variant<std::pair<int*, int*>, std::pair<double*, double*>,std::pair<std::string*,std::string*>>;
 using threeVar = std::variant<std::tuple<int*, int*, int*>, std::tuple<double*, double*, double*>>;
+//using parserVar = void(settings::*)(std::istringstream&);
 
 template<typename T>
 concept AllowedTypes =
@@ -118,9 +120,7 @@ protected:
 	std::map<std::string, singleVar> singleInputMap;
 	std::map<std::string, doubleVar> doubleInputMap;
 	std::map<std::string, threeVar> threeInputMap;
+	//std::map<std::string, parserVar> parserInputMap;
 
 	std::unordered_set<std::string> inputSet;
-
-
-
 };

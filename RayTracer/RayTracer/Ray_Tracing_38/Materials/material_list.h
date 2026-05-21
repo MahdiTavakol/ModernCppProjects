@@ -63,6 +63,21 @@ public:
 		return list.size();
 	}
 
+	void replace_material(std::string name_, std::unique_ptr<material> mat_)
+	{
+		int loc = find(name_);
+		if (loc == -1)
+		{
+			std::string error_text = "material " + name_ + " was not found!";
+			throw std::invalid_argument(error_text);
+
+		}
+		else
+		{
+			list[loc] = std::move(mat_);
+		}
+	}
+
 
 private:
 	int nmax;
