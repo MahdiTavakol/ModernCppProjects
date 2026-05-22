@@ -192,6 +192,9 @@
     <ClCompile Include="Algorithms\image_async.cpp">
       <Filter>Source Files\Algorithms</Filter>
     </ClCompile>
+    <ClCompile Include="Input\read_gltf.cpp">
+      <Filter>Source Files\Input</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Types\color.h">
@@ -358,6 +361,12 @@
     </ClInclude>
     <ClInclude Include="Algorithms\image_async.h">
       <Filter>Source Files\Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="Input\read_gltf.h">
+      <Filter>Source Files\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Input\tiny_gltf_v3.h">
+      <Filter>Source Files\Input</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

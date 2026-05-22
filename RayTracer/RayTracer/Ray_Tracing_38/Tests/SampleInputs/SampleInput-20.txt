@@ -7,4 +7,4 @@ camera -vup 0 1 0 -samples_per_pixel 30 -max_depth 30 -vfov 45.0
 camera -HDRI ..\\HDRI\\sundowner_overlook_4k.hdr
 image -width 1080 -aspect_ratio 16.0 9.0
 output -output_type async  -output_mode P6 -image_file Tests\\SampleOutputs\\test_20.ppm
-output -clamp_mode EXPONENTIAL -exp_factor 0.8
+#output -clamp_mode EXPONENTIAL -exp_factor 0.8

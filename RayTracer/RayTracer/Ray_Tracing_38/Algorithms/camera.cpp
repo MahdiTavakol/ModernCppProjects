@@ -198,11 +198,33 @@ color camera::ray_color(const ray& r_, int depth_, const hittable& world_, const
 	color attenuation;
 	color color_from_emission = mat->emitted(rec.u, rec.v, rec.p);
 
-	if (!mat->scatter(r_, rec, attenuation, scattered))
+	std::array<scatter_record, 3> srec;
+	for (auto& s : srec)
+	{
+		s.scattered_ray = scattered;
+		s.attenuation = attenuation;
+	}
+
+	mat->scatter(r_, rec, srec);
+	
+	if (!srec[0].scattered && !srec[1].scattered && !srec[2].scattered)
 		return color_from_emission;
 
+	color color_from_scatter;
 
-	color color_from_scatter = attenuation * ray_color(scattered, depth_ - 1, world_,list_);
+	//for (auto& s : srec)
+	{
+		//diffusive scatter
+		if (srec[0].scattered)
+			color_from_scatter += srec[0].weight * srec[0].attenuation * simple_direct_lighting(rec);
+		// specular scatter
+		if (srec[1].scattered)
+			color_from_emission += srec[1].weight * srec[1].attenuation * ray_color(srec[1].scattered_ray, depth_ - 1, world_, list_);
+		// transmit scatter
+		if (srec[2].scattered)
+			color_from_emission += srec[2].weight * srec[2].attenuation * ray_color(srec[2].scattered_ray, depth_ - 1, world_, list_);
+	}
+
 
 	return color_from_emission + color_from_scatter;
 }
@@ -226,3 +248,19 @@ color camera::background_color(const ray& r_) const
 	return background_image->value(u, v, p);
 }
 
+color camera::simple_direct_lighting(const hit_record& rec_) const
+{
+	vec3 light_dir = vec3{ 1.0,1.0,1.0 };
+	double ndotl = dot(rec_.normal, light_dir);
+	if (ndotl < 0)
+	{
+		light_dir = vec3{ -1.0,1.0,1.0 };
+		ndotl = std::max(dot(rec_.normal, light_dir), 0.0);
+	}
+
+	color ambient{ 0.15,0.15,0.15 };
+	color light_color{ 1.0,1.0,1.0 };
+
+	return ambient + ndotl * light_color;
+
+}

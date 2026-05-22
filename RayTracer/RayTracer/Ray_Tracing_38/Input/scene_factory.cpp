@@ -505,6 +505,14 @@ void scene_factory::setup_3d_obj()
 	model_reader->read();
 	world = model_reader->return_world();
 	list = model_reader->return_mtl_list();
+
+	/*
+	std::unique_ptr<material> blue_glass =
+		std::make_unique<dielectric>(1.45, color(0.80, 0.90, 1.00));
+	std::unique_ptr<material> glass =
+		std::make_unique<dielectric>(1.5);
+	change_material("Glass", std::move(glass));
+	*/
 }
 
 void scene_factory::setup_3d_obj_parallel()
@@ -516,12 +524,6 @@ void scene_factory::setup_3d_obj_parallel()
 
 	world = model_reader->return_world();
 	list = model_reader->return_mtl_list();
-
-	std::unique_ptr<material> blue_glass =
-		std::make_unique<dielectric>(1.45, color(0.80, 0.90, 1.00));
-	std::unique_ptr<material> glass =
-		std::make_unique<dielectric>(1.0);
-	change_material("Glass", std::move(glass));
 }
 
 void scene_factory::setup_random_spheres_animated()

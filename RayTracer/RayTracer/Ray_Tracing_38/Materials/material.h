@@ -8,7 +8,15 @@
 #include "../Types/color.h"
 #include "../Geometry/texture.h"
 #include "../Algorithms/hit_record.h"
+#include <array>
 
+struct scatter_record
+{
+	ray scattered_ray;
+	color attenuation;
+	double weight;
+	bool scattered = false;
+};
 
 
 class material
@@ -22,9 +30,8 @@ public:
 		return color(0, 0, 0);
 	}
 
-	virtual bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered) const
+	virtual void scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_) const
 	{
-		return false;
 	}
 
 	virtual bool is_equal( const material& _second) const = 0;
@@ -38,6 +45,7 @@ public:
 	bool operator==(const material& _second) {
 		return (typeid(*this) == typeid(_second)) && (is_equal(_second));
 	}
+
 };
 
 class general : public material
@@ -50,31 +58,94 @@ public:
 	}
 
 
-	bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered) const override
+	void scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_) const override
 	{
-		// Calculate the effective transparency based on d (dissolve) and Tr (transparency)
-		double effective_transparency = Tr;
+		double transparency = std::clamp(Tr, 0.0, 1.0);
+		double opacity = 1.0 - transparency;
+		double specular_strength = std::clamp(std::max(Ks.x(), std::max(Ks.y(), Ks.z())), 0.0, 1.0);
+			
+		double diffuse_weight = opacity * (1.0 - specular_strength);
+		double specular_weight = opacity * specular_strength;
+		double transmit_weight = transparency;
 
-		// Reflect the incoming ray based on the hit normal
+		// setting the srec to all zeros
+		srec_[0] = srec_[1] = srec_[2] = { ray(rec.p, vec3(0, 0, 0), r_in.time()), color(0, 0, 0), 0.0, false };
+
+		if (Tr > 0.7)
+		{
+			transmit_weight = 1.0;
+			transmit_scatter(r_in, rec, srec_[2], transmit_weight);
+		}
+		else if (specular_strength > 0.5)
+		{
+			specular_strength = 1.0;
+			specular_scatter(r_in, rec, srec_[1], specular_weight);
+		}
+		else
+		{
+			if (diffuse_weight > 0.05)
+			{
+				diffuse_scatter(r_in, rec, srec_[0], diffuse_weight);
+			}
+
+
+			if (specular_weight > 0.05)
+			{
+				specular_scatter(r_in, rec, srec_[1], specular_weight);
+			}
+
+			if (transmit_weight > 0.05)
+			{
+				transmit_scatter(r_in, rec, srec_[2], transmit_weight);
+			}
+		}
+
+		return;
+	}
+
+	void diffuse_scatter(const ray& r_in, const hit_record& rec, scatter_record& srec_, double& weight_) const
+	{
+		vec3 diffuse_dir = rec.normal + random_unit_vector();
+		if (diffuse_dir.near_zero())
+		{
+			diffuse_dir = rec.normal;
+		}
+		srec_ = scatter_record{ ray(rec.p, diffuse_dir, r_in.time()), albedo, weight_, true };
+	}
+
+	void specular_scatter(const ray& r_in, const hit_record& rec, scatter_record& srec_, double& weight_) const
+	{
+		vec3 unit_dir = unit_vector(r_in.direction());
 		double roughness = std::sqrt(2.0 / (shininess + 2.0));
-		vec3 reflected =
-			reflect(unit_vector(r_in.direction()), rec.normal);
-		reflected += roughness * random_unit_vector();
+		roughness = std::clamp(roughness, 0.0, 1.0);
 
-		// Make reflection a bit fuzzier based on `fuzz` parameter
-		//reflected += fuzz * random_unit_vector(); // Adjusted to fuzziness
+		vec3 reflected = reflect(unit_dir, rec.normal);
+		reflected = unit_vector(reflected);
+		srec_ = scatter_record{ ray(rec.p, unit_vector(reflected), r_in.time()), Ks, weight_, true};
+	}
 
-		// Control sharpness of reflection based on shininess (Ns)
-		reflected = reflected * (1.0 - shininess / 1000.0) + rec.normal * (shininess / 1000.0);
+	void transmit_scatter(const ray& r_in, const hit_record& rec, scatter_record& srec_, double& weight_) const
+	{
+		vec3 unit_dir = unit_vector(r_in.direction());
+		double refraction_ratio = rec.front_face ? (1.0 / Ni) : Ni;
 
-		// Scatter the ray with the adjusted direction
-		scattered = ray(rec.p, reflected, r_in.time());
+		vec3 direction;
 
-		// Apply attenuation based on effective transparency
-		// You may choose to mix the albedo and some transparency effect
-		attenuation = albedo * (1.0 - effective_transparency) + Tf * effective_transparency;
+		double cos_theta = std::min(dot(-unit_dir, rec.normal), 1.0);
+		double sin_theta = std::sqrt(1.0 - cos_theta * cos_theta);
 
-		return true;
+		bool cannot_refract = refraction_ratio * sin_theta > 1.0;
+
+
+		if (cannot_refract)
+		{
+			direction = reflect(unit_dir, rec.normal);
+		}
+		else
+		{
+			direction = refract(unit_dir, rec.normal, refraction_ratio);
+		}
+		srec_ = { ray(rec.p, direction, r_in.time()), Tf, weight_, true };
 	}
 
 	bool is_equal(const material& _second) const override {
@@ -130,15 +201,14 @@ public:
 	{}
 
 
-	bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered) const override
+	void scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_) const override
 	{
 		auto scatter_direction = rec.normal + random_unit_vector();
 
 		if (scatter_direction.near_zero())
 			scatter_direction = rec.normal;
-		scattered = ray(rec.p, scatter_direction, r_in.time());
-		attenuation = tex->value(rec.u, rec.v, rec.p);
-		return true;
+		srec_[0] = { ray(rec.p, scatter_direction, r_in.time()), tex->value(rec.u, rec.v, rec.p), 1.0, true };
+		srec_[1] = srec_[2] = { ray(rec.p, vec3(0, 0, 0), r_in.time()), color(0, 0, 0), 0.0, false };
 	}
 
 	bool is_equal(const material& _second) const override {
@@ -160,13 +230,12 @@ public:
 
 
 
-	bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered) const override
+	void scatter(const ray& r_in, const hit_record& rec,  std::array<scatter_record, 3>& srec_) const override
 	{
 		vec3 reflected = reflect(r_in.direction(), rec.normal);
 		reflected = unit_vector(reflected) + fuzz * random_unit_vector();
-		scattered = ray(rec.p, reflected, r_in.time());
-		attenuation = albedo;
-		return true;
+		srec_[1] = { ray(rec.p, reflected, r_in.time()), albedo, 1.0, true };
+		srec_[0] = srec_[2] = { ray(rec.p, vec3(0, 0, 0), r_in.time()), color(0, 0, 0), 0.0, false };
 	}
 
 	void return_params(color& _albedo, double& _fuzz)
@@ -194,9 +263,8 @@ public:
 	{}
 
 
-	bool scatter(const ray& r_in, const hit_record& rec, color& attenuation_, ray& scattered) const override
+	void scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_) const override
 	{
-		attenuation_ = attenuation;
 		double ri = rec.front_face ? (1.0 / refraction_index) : refraction_index;
 
 		vec3 unit_direction = unit_vector(r_in.direction());
@@ -211,8 +279,8 @@ public:
 		else
 			direction = refract(unit_direction, rec.normal, ri);
 
-		scattered = ray(rec.p, direction, r_in.time());
-		return true;
+		srec_[2] = { ray(rec.p + 1e-4 * direction, direction, r_in.time()), attenuation, 1.0, true };
+		srec_[0] = srec_[1] = { ray(rec.p, vec3(0, 0, 0), r_in.time()), color(0, 0, 0), 0.0, false };
 	}
 
 	void return_params(double& _ref)
@@ -265,11 +333,11 @@ public:
 
 
 
-	bool scatter(const ray& _r_in, const hit_record& _rec, color& _attenuation, ray& _scattered) const override
+	void scatter(const ray& _r_in, const hit_record& _rec, std::array<scatter_record, 3>& srec_) const override
 	{
-		_scattered = ray(_rec.p, random_unit_vector(), _r_in.time());
-		_attenuation = tex->value(_rec.u, _rec.v, _rec.p);
-		return true;
+		srec_[1] = { ray(_rec.p, random_unit_vector(), _r_in.time()), tex->value(_rec.u, _rec.v, _rec.p), 1.0, true };
+		srec_[0] = srec_[2] = { ray(_rec.p, vec3(0, 0, 0), _r_in.time()), color(0, 0, 0), 0.0, false };
+		return;
 	}
 
 	bool is_equal(const material& _second) const override {

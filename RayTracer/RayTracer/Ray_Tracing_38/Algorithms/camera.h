@@ -92,6 +92,7 @@ protected:
 	point3 defocus_disk_sample() const;
 	virtual color ray_color(const ray& r_, int depth_, const hittable& world_, const material_list& list_) const;
 	color background_color(const ray& r_) const;
+	color simple_direct_lighting(const hit_record& rec_) const;
 
 	void initialize();
 
