@@ -1,5 +1,5 @@
 /*
- * tiny_gltf_v3.h - C-first glTF 2.0 loader and writer API (v3)
+ * tiny_gltf_v3.h - C-first glTF 2.0 loader and wriconst tg3_primitive* primitivester API (v3)
  *
  * The MIT License (MIT)
  * Copyright (c) 2026 - Present: Syoyo Fujita
@@ -81,7 +81,7 @@
 /* #define TINYGLTF3_IMPLEMENTATION */
 
 /* Opt-in features (OFF by default) */
-/* #define TINYGLTF3_ENABLE_FS */
+#define TINYGLTF3_ENABLE_FS
 /* #define TINYGLTF3_ENABLE_STB_IMAGE */
 /* #define TINYGLTF3_ENABLE_STB_IMAGE_WRITE */
 

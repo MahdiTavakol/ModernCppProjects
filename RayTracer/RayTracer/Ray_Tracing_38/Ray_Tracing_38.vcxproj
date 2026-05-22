@@ -203,7 +203,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Program Files\Microsoft MPI\Include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp23</LanguageStandard>
@@ -221,7 +221,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Program Files\Microsoft MPI\Include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp23</LanguageStandard>
@@ -261,7 +261,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp23</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
@@ -315,6 +315,7 @@
     <ClCompile Include="Input\app_settings.cpp" />
     <ClCompile Include="Input\settings.cpp" />
     <ClCompile Include="Input\scene_settings.cpp" />
+    <ClCompile Include="Input\tiny_gltf_v3.c" />
     <ClCompile Include="Output\Logger.cpp" />
     <ClCompile Include="Output\output.cpp" />
     <ClCompile Include="Output\output_async.cpp" />
@@ -369,6 +370,7 @@
     <ClInclude Include="Input\app_settings.h" />
     <ClInclude Include="Input\settings.h" />
     <ClInclude Include="Input\scene_settings.h" />
+    <ClInclude Include="Input\tinygltf_json_c.h" />
     <ClInclude Include="Input\tiny_gltf_v3.h" />
     <ClInclude Include="Materials\material.h" />
     <ClInclude Include="Materials\material_list.h" />
