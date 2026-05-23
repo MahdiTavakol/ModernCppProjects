@@ -3,8 +3,10 @@
 #include "../Materials/material_list.h"
 #include "tiny_gltf_v3.h"
 #include <string>
+#include <iomanip>
 
-struct face_indx
+
+struct face_indx2
 {
 	std::vector<int> indx;
 	std::string object;
@@ -36,7 +38,7 @@ protected:
 	std::unique_ptr<material_list> mtl_list;
 
 	// data
-	std::vector<face_indx> faces;
+	std::vector<face_indx2> faces;
 	std::vector<vec3> vs, vns;
 	std::vector<vec2> vts;
 
@@ -49,6 +51,12 @@ protected:
 
 
 private:
+	// The messaging interface.. 
+	// should have its own class at the end
+	void print_message(const std::string& message_, int level_ = 0, char delimiter = ' ')
+	{
+		std::cout << std::string(level_, delimiter) << message_ << "\n";
+	}
 
 	// tinygltf data structures
 	tg3_parse_options opts;

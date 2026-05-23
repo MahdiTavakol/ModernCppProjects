@@ -22,6 +22,14 @@ read_gltf::~read_gltf()
 
 void read_gltf::parse()
 {
+	int msg_level = 0;
+	std::string message = std::string(52, '=');
+	print_message(message, msg_level);
+	message = "Reading the glTF file...";
+	print_message(message, msg_level);
+	message = std::string(52, '=');
+	print_message(message, msg_level);
+
 	tg3_error_code err = tg3_parse_file(&model, &errors, file_path.c_str(), 10, &opts);
 	if (err != TG3_OK)
 	{
@@ -36,36 +44,79 @@ void read_gltf::parse()
 		throw std::runtime_error("Failed to parse the glTF file!");
 	}
 
+	message = std::string(52, '=');
+	print_message(message, msg_level);
+	message = "Finished reading the glTF file.";
+	print_message(message, msg_level);
+	message = "The number of errors is " + std::to_string(errors.count);
+	print_message(message, msg_level);
+	message = std::string(52, '=');
+	print_message(message, msg_level);
+
 	read_objects();
 	read_materials();
 
-	uint32_t material_count = model.materials_count;
-	std::cout << "The number of materials is " << material_count << std::endl;
-	uint32_t mesh_count = model.meshes_count;
-	std::cout << "The number of meshes is " << mesh_count << std::endl; 
 
-	std::cout << "the number of errors is " << errors.count << std::endl;
+
 }
 
 void read_gltf::read_objects()
 {
+	std::string message;
+	int msg_level = 0;
+	message = std::string(52, '=');
+	print_message(message, msg_level);
+	message = "Reading objects from the glTF file...";
+	print_message(message, msg_level);
+	message = std::string(52, '=');
+	print_message(message, msg_level);
+
 	int mesh_count = model.meshes_count;
+
+	std::string object;
+	std::string group;
+	int32_t material_id;
+	int group_id = 0;
 
 	// looping through meshes
 	for (int i = 0; i < mesh_count; i++)
 	{
+		// some debugging variables
+		msg_level = 1;
+		int32_t face_count_i = 0;
+		int32_t v_count_i = 0;
+		int32_t vt_count_i = 0;
+		int32_t vn_count_i = 0;
+
+
 		const tg3_mesh& mesh_i = model.meshes[i];
 		uint32_t primitive_count = mesh_i.primitives_count;
-		std::cout << "Reading mesh " << i;
-		std::cout << " with name " << std::string(mesh_i.name.data, mesh_i.name.len) << std::endl;
+		object = std::string(mesh_i.name.data, mesh_i.name.len);
+		message = "Reading object " + std::to_string(i) + ": " + object;
+		print_message(message, msg_level);
+
 
 		// looping through primitives
 		for (int j = 0; j < primitive_count; j++)
 		{
+			// some debugging variables
+			msg_level = 2;
+			int32_t face_count_j = 0;
+			int32_t v_count_j = 0;
+			int32_t vt_count_j = 0;
+			int32_t vn_count_j = 0;
+
+			group = std::to_string(group_id++);
+			message = "Reading group " + group;
+			print_message(message, msg_level);
 			// Boolean used to check if we have converted the vertex buffer format
 			bool convertedToTriangleList = false;
-
 			const tg3_primitive& primitive_j = mesh_i.primitives[j];
+			material_id = primitive_j.material;
+
+
+
+
 			std::unique_ptr<intArrayBase> indices_array;
 			{
 				const tg3_accessor& accessor_j = model.accessors[primitive_j.indices];
@@ -121,11 +172,12 @@ void read_gltf::read_objects()
 			std::vector<int> index_vector;
 			index_vector.reserve(indices_array->size());
 			if (indices_array) {
-				std::cout << "\tindices: " << indices_array->size() << std::endl;;
+				msg_level = 3;
+				message = "Reading indices with count " + std::to_string(indices_array->size());
+				print_message(message, msg_level);
 				for (int k = 0; k < indices_array->size(); ++k) {
 					index_vector.push_back(indices[k]);
 				}
-				std::cout << '\n';
 
 			}
 
@@ -133,55 +185,70 @@ void read_gltf::read_objects()
 			{
 			case TG3_MODE_TRIANGLE_FAN:
 				if (!convertedToTriangleList) {
-					std::cout << "TRIANGLE_FAN\n";
+					msg_level = 4;
+					message = "Primitive mode is TRIANGLE_FAN, converting to triangle list";
+					print_message(message, msg_level);
 					// This only has to be done once per primitive
 					convertedToTriangleList = true;
 
 					// We steal the guts of the vector
 					auto triangleFan = std::move(index_vector);
-					faces.resize(triangleFan.size()-2);
+
 
 					// Push back the indices that describe just one triangle one by one
-					for (size_t i = 2 ; i < triangleFan.size(); ++i) {
-						faces[i-2].indx.push_back(std::move(triangleFan[0]));
-						faces[i-2].indx.push_back(std::move(triangleFan[i - 1]));
-						faces[i-2].indx.push_back(std::move(triangleFan[i]));
+					for (size_t k = 2 ; k < triangleFan.size(); ++k) {
+						std::vector<int> ind = { triangleFan[0],triangleFan[k - 1],triangleFan[k] };
+						int ind_size = static_cast<int>(ind.size());
+						faces.emplace_back(ind, object, group, ind_size, material_id);
+						face_count_j++;
 					}
 				}
 			case TG3_MODE_TRIANGLE_STRIP:
 				if (!convertedToTriangleList) {
-					std::cout << "TRIANGLE_STRIP\n";
+					message = "Primitive mode is TRIANGLE_STRIP, converting to triangle list";
+					print_message(message, msg_level);
 					// This only has to be done once per primitive
 					convertedToTriangleList = true;
 
 					auto triangleStrip = std::move(index_vector);
-					faces.reserve(triangleStrip.size());
 
-					for (size_t i = 2 ; i < triangleStrip.size(); ++i) {
-						faces[i-2].indx.push_back(triangleStrip[i - 2]);
-						faces[i-2].indx.push_back(triangleStrip[i - 1]);
-						faces[i-2].indx.push_back(triangleStrip[i]);
+
+					for (size_t k = 2 ; k < triangleStrip.size(); ++k) {
+						std::vector<int> ind = { triangleStrip[k - 2],triangleStrip[k - 1],triangleStrip[k] };
+						int ind_size = static_cast<int>(ind.size());
+						faces.emplace_back(ind, object, group, ind_size, material_id);
+						face_count_j++;
 					}
 				}
 
 			case TG3_MODE_TRIANGLES:
 				if (!convertedToTriangleList) {
-					std::cout << "TRIANGLES\n";
-					faces.resize(index_vector.size() / 3);
+					message = "Primitive mode is TRIANGLES";
+					print_message(message, msg_level);
+					// This only has to be done once per primitive
+					convertedToTriangleList = true;
 
-					for (size_t i = 0; i < index_vector.size(); i += 3) {
-						faces[i / 3].indx.push_back(index_vector[i]);
-						faces[i / 3].indx.push_back(index_vector[i + 1]);
-						faces[i / 3].indx.push_back(index_vector[i + 2]);
+
+					for (size_t k = 0; k < index_vector.size(); k += 3) {
+						std::vector<int> ind = { index_vector[k],index_vector[k+1],index_vector[k+2] };
+						int ind_size = static_cast<int>(ind.size());
+						face_indx2 face_i = { ind, object, group, ind_size, material_id };
+						faces.push_back(face_i);
+						face_count_j++;
 					}
 
 				}
 				uint32_t attribute_count = primitive_j.attributes_count;
 				for (int k = 0; k < attribute_count; k++)
 				{
+					msg_level=5;
 					const tg3_str_int_pair& attribute_k = primitive_j.attributes[k];
 					const tg3_str& attribute_key = attribute_k.key;
 					const int32_t attribute_value = attribute_k.value;
+					std::string attribute_name{ attribute_key.data, attribute_key.len };
+
+					message = "Reading the attribute with name " + attribute_name;
+					print_message(message, msg_level);
 
 
 					const tg3_accessor& accessor_k = model.accessors[attribute_value];
@@ -192,15 +259,17 @@ void read_gltf::read_objects()
 					int32_t byteStride = tg3_accessor_byte_stride(&accessor_k, &buffer_view_k);
 					const auto count = accessor_k.count;
 
-					std::cout << "\tcurrent attribute has count " << count
-						<< " and stride " << byteStride << " bytes\n";
+					message = "Current attribute has count " + std::to_string(count) +
+						" and stride " + std::to_string(byteStride) + " bytes";
+					msg_level=6;
+					print_message(message, msg_level);
 
-					std::string attribute_name{ attribute_key.data, attribute_key.len };
-					std::cout << "\tattribute string is : " <<
-						attribute_name << '\n';
+					
 
+					msg_level=7;
 					if (!attribute_name.compare("POSITION")) {
-						std::cout << "found position attribute\n";
+						message = "Parsing positions";
+						print_message(message, msg_level);
 
 						// get the position min/max for computing the boundingbox
 						const double* minValues = accessor_k.min_values;
@@ -215,38 +284,40 @@ void read_gltf::read_objects()
 						min = vec3{ minValues[0], minValues[1], minValues[2] };
 						max = vec3{ maxValues[0], maxValues[1], maxValues[2] };
 
+						msg_level=8;
 						switch (accessor_k.type) {
 						case TG3_TYPE_VEC3: {
+							message = "Type is vec3 ";
 							switch (accessor_k.component_type) {
 							case TG3_COMPONENT_TYPE_FLOAT:
 							{
-								std::cout << "Type is FLOAT\n";
+								message += "and component type is float";
+								print_message(message, msg_level);
 								v3fArray positions(
 									arrayAdapter<v3f>(dataAddress, count, byteStride));
 
-								std::cout << "positions's size : " << positions.size()
-									<< '\n';
+
 
 								for (size_t i = 0; i < positions.size(); ++i) {
 									const auto& v = positions[i];
 
 									vs.push_back(vec3{ v.x * scale,v.y * scale,v.z * scale });
+									v_count_j++;
 								}
 								break;
 							}
 							case TG3_COMPONENT_TYPE_DOUBLE: {
-								std::cout << "Type is DOUBLE\n";
+								message += "and component type is double";
+								print_message(message, msg_level);
 								// 3D vector of float
 								v3dArray positions(
 									arrayAdapter<v3d>(dataAddress, count, byteStride));
 
-								std::cout << "positions's size : " << positions.size()
-									<< '\n';
 
 								for (size_t i = 0; i < positions.size(); ++i) {
 									const auto& v = positions[i];
-
 									vs.push_back(vec3{ v.x * scale,v.y * scale,v.z * scale });
+									v_count_j++;
 								}
 								break;
 							}
@@ -259,36 +330,45 @@ void read_gltf::read_objects()
 						}
 					}
 					else if (!attribute_name.compare("NORMAL")) {
-						std::cout << "found normal attribute\n";
+						msg_level=7;
+						message = "Parsing normals";
+						print_message(message, msg_level);
+						msg_level=8;
 
 						switch (accessor_k.type) {
 						case TG3_TYPE_VEC3: {
-							std::cout << "Normal is VEC3\n";
+							message = "Type is vec3 ";
 							switch (accessor_k.component_type) {
-							case TG3_COMPONENT_TYPE_FLOAT: {
-								std::cout << "Normal is FLOAT\n";
+							case TG3_COMPONENT_TYPE_FLOAT:
+							{
+								message += "and component type is float";
+								print_message(message, msg_level);
 								v3fArray normals(
 									arrayAdapter<v3f>(dataAddress, count, byteStride));
 
 								// For each triangle :
 								for (size_t i = 0; i < normals.size(); ++i) {
 									const auto& vn = normals[i];
-
 									vns.push_back(vec3{ vn.x,vn.y,vn.z });
+									vn_count_j++;
 								}
-							} break;
-							case TG3_COMPONENT_TYPE_DOUBLE: {
-								std::cout << "Normal is DOUBLE\n";
+							}
+							break;
+							case TG3_COMPONENT_TYPE_DOUBLE:
+							{
+								message += "and component type is double";
+								print_message(message, msg_level);
 								v3dArray normals(
 									arrayAdapter<v3d>(dataAddress, count, byteStride));
 
 								// For each triangle :
 								for (size_t i = 0; i < normals.size(); ++i) {
 									const auto& vn = normals[i];
-
 									vns.push_back(vec3{ vn.x,vn.y,vn.z });
+									vn_count_j++;
 								}
-							} break;
+							}
+							break;
 							default:
 								std::cerr << "Unhandeled componant type for normal\n";
 							}
@@ -300,14 +380,18 @@ void read_gltf::read_objects()
 					}
 					else if (!attribute_name.compare("TEXCOORD_0"))
 					{
-						std::cout << "Found texture coordinates\n";
+						msg_level=7;
+						message = "Parsing texture coordinates";
+						print_message(message, msg_level);
+						msg_level=8;
 						switch (accessor_k.type) {
 						case TG3_TYPE_VEC2: {
-							std::cout << "TEXTCOORD is VEC2\n";
+							message = "Type is vec2 ";
 
 							switch (accessor_k.component_type) {
 							case TG3_COMPONENT_TYPE_FLOAT: {
-								std::cout << "Normal is FLOAT\n";
+								message += "and component type is float";
+								print_message(message, msg_level);
 								v2fArray uvs(
 									arrayAdapter<v2f>(dataAddress, count, byteStride));
 
@@ -315,10 +399,13 @@ void read_gltf::read_objects()
 								for (size_t i = 0; i < uvs.size(); ++i) {
 									const auto& uv = uvs[i];
 									vts.push_back(vec2{ uv.x,uv.y });
+									vt_count_j++;
 								}
+								break;
 							}
 							case TG3_COMPONENT_TYPE_DOUBLE: {
-								std::cout << "Normal is DOUBLE\n";
+								message += "and component type is double";
+								print_message(message, msg_level);
 								v2dArray uvs(
 									arrayAdapter<v2d>(dataAddress, count, byteStride));
 
@@ -326,7 +413,9 @@ void read_gltf::read_objects()
 								for (size_t i = 0; i < uvs.size(); ++i) {
 									const auto& uv = uvs[i];
 									vts.push_back(vec2{ uv.x,uv.y });
+									vt_count_j++;
 								}
+								break;
 							}
 							default:
 							}
@@ -340,36 +429,77 @@ void read_gltf::read_objects()
 				break;
 			}
 
+			msg_level = 2;
+			message = "Finished reading primitive " + std::to_string(j);
+			print_message(message, msg_level);
+			message = "The number of faces is " + std::to_string(face_count_j);
+			print_message(message, msg_level + 1);
+			message = "The number of vertices is " + std::to_string(v_count_j);
+			print_message(message, msg_level + 1);
+			message = "The number of texture coordinates is " + std::to_string(vt_count_j);
+			print_message(message, msg_level + 1);
+			message = "The number of normals is " + std::to_string(vn_count_j);
+			print_message(message, msg_level + 1);
 
-			int32_t material_indx = primitive_j.material;
-			int32_t mode = primitive_j.mode;
-			if (mode != -1 && mode != TG3_MODE_TRIANGLES)
-			{
-				std::cout << "Warning: Only triangle meshes are supported for now! Skipping primitive " << j << " in mesh " << i << std::endl;
-				continue;
-			}
-			uint32_t arribute_count = primitive_j.attributes_count;
-
-			// looping through attributes
-			for (int k = 0; k < arribute_count; k++)
-			{
-				const tg3_str_int_pair& attribute_k = primitive_j.attributes[k];
-				const tg3_str& attribute_key = attribute_k.key;
-				const int32_t attribute_value = attribute_k.value;
-			}
+			face_count_i += face_count_j;
+			v_count_i += v_count_j;
+			vt_count_i += vt_count_j;
+			vn_count_i += vn_count_j;
 		}
+		msg_level = 1;
+		message = "Finished reading object " + std::to_string(i) + ": " + object;
+		print_message(message, msg_level);
+		message = "The number of faces is " + std::to_string(face_count_i);
+		print_message(message, msg_level+1);
+		message = "The number of vertices is " + std::to_string(v_count_i);
+		print_message(message, msg_level + 1);
+		message = "The number of texture coordinates is " + std::to_string(vt_count_i);
+		print_message(message, msg_level + 1);
+		message = "The number of normals is " + std::to_string(vn_count_i);
+		print_message(message, msg_level + 1);
 	}
+
+	message = "Finished reading all meshes";
+	print_message(message, 0);
+	message = "The total number of faces is " + std::to_string(faces.size());
+	print_message(message, 1);
+	message = "The total number of vertices is " + std::to_string(vs.size());
+	print_message(message, 1);
+	message = "The total number of texture coordinates is " + std::to_string(vts.size());
+	print_message(message, 1);
+	message = "The total number of normals is " + std::to_string(vns.size());
+	print_message(message, 1);
+
+
+	message = std::string(52, '=');
+	print_message(message, 0);
+	message = "Finished reading objects from the glTF file.";
+	print_message(message, 0);
+	message = std::string(52, '=');
+	print_message(message, 0);
 }
 
 void read_gltf::read_materials()
 {
+	std::string message;
+	int msg_level = 0;
+	message = std::string(52, '=');
+	print_message(message, msg_level);
+	message = "Reading materials from the glTF file...";
+	print_message(message, msg_level);
+	message = std::string(52, '=');
+	print_message(message, msg_level);
+
 	uint32_t material_count = model.materials_count;
 
 	for (int i = 0; i < material_count; i++)
 	{
 		const tg3_material& material_i = model.materials[i];
 		tg3_str material_name = material_i.name;
-		std::cout << "Reading material " << i << " with name " << std::string(material_name.data, material_name.len) << std::endl;
+		msg_level = 1;
+		message = "Reading material " + std::to_string(i) +
+			": " + std::string(material_name.data, material_name.len);
+		print_message(message, msg_level);
 		double emmissive_factor[3];
 		emmissive_factor[0] = material_i.emissive_factor[0];
 		emmissive_factor[1] = material_i.emissive_factor[1];
@@ -381,4 +511,16 @@ void read_gltf::read_materials()
 		tg3_occlusion_texture_info occlusion_texture_i = material_i.occlusion_texture;
 		tg3_texture_info emissive_texture_i = material_i.emissive_texture;
 	}
+
+	msg_level = 0;
+	message = "Finished reading all materials"; 
+	print_message(message, msg_level);
+	message = "The total number of materials is " + std::to_string(material_count);
+	print_message(message, msg_level + 1);
+	message = std::string(52, '=');
+	print_message(message, msg_level);
+	message = "Finished reading materials from the glTF file.";
+	print_message(message, msg_level);
+	message = std::string(52, '=');
+	print_message(message, msg_level);
 }
