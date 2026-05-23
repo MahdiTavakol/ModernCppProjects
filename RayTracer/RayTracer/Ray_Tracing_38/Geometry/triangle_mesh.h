@@ -10,11 +10,11 @@
 class triangle_mesh : public hittable {
 public:
 	triangle_mesh(const std::array<point3, 3>& _vs,
-		          const std::array<point3, 3>& _vts,
+		          const std::array<point2, 3>& _vts,
 		          const std::array<point3, 3>& _vns,
 		          std::unique_ptr<material> _mat);
 	triangle_mesh(const std::array<point3, 3>& vs_,
-		          const std::array<point3, 3>& vts_,
+		          const std::array<point2, 3>& vts_,
 		          const std::array<point3, 3>& vns_,
 		          const int mat_indx_);
 	virtual void initialize();
@@ -23,18 +23,19 @@ public:
 	virtual bool is_interior(double _a, double _b, hit_record& _rec) const;
 	void return_params(
 		std::array<point3, 3>& vs_,
-		std::array<point3, 3>& vts_,
+		std::array<point2, 3>& vts_,
 		std::array<point3, 3>& vns_,
 		material* mat_);
 	bool compare(hittable* rhs_, const double& tol) const override;
 	virtual bool comparator(const std::unique_ptr<hittable>& rhs_) const override;
 	double get_area() const override;
 	static vec3 interpolate(double alpha_, double beta_, const std::array<point3, 3>& arr_);
+	static vec2 interpolate(double alpha_, double beta_, const std::array<point2, 3>& arr_);
 	void scale(const vec3& center_, const double& factor_) override;
 
 protected:
 	std::array<point3, 3> vs;
-	std::array<point3, 3> vts;
+	std::array<point2, 3> vts;
 	std::array<point3, 3> vns;
 
 	int num_edges;

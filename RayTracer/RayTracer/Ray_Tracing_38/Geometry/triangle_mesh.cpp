@@ -2,7 +2,7 @@
 
 triangle_mesh::triangle_mesh(
 	const std::array<point3, 3>& _vs,
-	const std::array<point3, 3>& _vts,
+	const std::array<point2, 3>& _vts,
 	const std::array<point3, 3>& _vns,
 	std::unique_ptr<material> _mat)
 	:
@@ -14,7 +14,7 @@ triangle_mesh::triangle_mesh(
 
 triangle_mesh::triangle_mesh(
 	const std::array<point3, 3>& vs_,
-	const std::array<point3, 3>& vts_,
+	const std::array<point2, 3>& vts_,
 	const std::array<point3, 3>& vns_,
 	const int mat_indx_):
 	hittable{"triangle_mesh",mat_indx_ },
@@ -82,7 +82,7 @@ bool triangle_mesh::hit(const ray& _r, interval _ray_t, hit_record& _rec) const
 
 void triangle_mesh::return_params(
 	std::array<point3, 3>& vs_,
-	std::array<point3, 3>& vts_,
+	std::array<point2, 3>& vts_,
 	std::array<point3, 3>& vns_,
 	material* mat_)
 {
@@ -111,7 +111,7 @@ bool triangle_mesh::compare(hittable* rhs_, const double& tol) const
 	for (int i = 0; i < 3; i++)
 	{
 		point3 datavsi  =  vs[i] - rhsConv->vs[i];
-		point3 datavtsi = vts[i] - rhsConv->vts[i];
+		point2 datavtsi = vts[i] - rhsConv->vts[i];
 		point3 datavnsi = vns[i] - rhsConv->vns[i];
 		if (datavsi.length() >= tol)
 		{
@@ -157,6 +157,16 @@ vec3 triangle_mesh::interpolate(double alpha_, double beta_, const std::array<po
 {
 	double gamma = 1.0 - alpha_ - beta_;
 	return gamma * arr_[0] + alpha_ * arr_[1] + beta_ * arr_[2];
+}
+
+vec2 triangle_mesh::interpolate(double alpha_, double beta_, const std::array<point2, 3>& arr_)
+{
+	std::array<point3, 3> arr3;
+	arr3[0] = point3(arr_[0]);
+	arr3[1] = point3(arr_[1]);
+	arr3[2] = point3(arr_[2]);
+	vec3 output = interpolate(alpha_, beta_, arr3);
+	return vec2{ output.x(), output.y() };
 }
 
 void triangle_mesh::scale(const vec3& center_, const double& factor_)

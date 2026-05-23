@@ -33,13 +33,17 @@ public:
     //vec2& operator+=(vec2 v);
     //vec2& operator/=(double t);
 
-    //double length() const;
-    //double length_squared() const;
+    double length() const;
+    double length_squared() const;
     //bool near_zero() const;
 
     //static vec2 random();
     //static vec2 random(double min, double max);
 };
+
+inline vec2 operator-(const vec2& u, const vec2& v) {
+    return vec2(u.e[0] - v.e[0], u.e[1] - v.e[1]);
+}
 
 class vec3 {
 public:

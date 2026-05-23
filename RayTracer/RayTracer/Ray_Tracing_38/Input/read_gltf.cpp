@@ -1,5 +1,7 @@
 #include "read_gltf.h"
+#include "../Geometry/triangle_mesh.h"
 #include <iostream>
+#include <sstream>
 
 read_gltf::read_gltf(const std::string& file_path_) : 
 	file_path{ file_path_ },
@@ -48,6 +50,24 @@ void read_gltf::parse()
 	print_message(message, msg_level);
 	message = "Finished reading the glTF file.";
 	print_message(message, msg_level);
+	std::stringstream iss;
+	iss << "loaded glTF file has:\n"
+		<< model.accessors_count << " accessors\n"
+		<< model.animations_count << " animations\n"
+		<< model.buffers_count << " buffers\n"
+		<< model.buffer_views_count << " bufferViews\n"
+		<< model.materials_count << " materials\n"
+		<< model.meshes_count << " meshes\n"
+		<< model.nodes_count << " nodes\n"
+		<< model.textures_count << " textures\n"
+		<< model.images_count << " images\n"
+		<< model.skins_count << " skins\n"
+		<< model.samplers_count << " samplers\n"
+		<< model.cameras_count << " cameras\n"
+		<< model.scenes_count << " scenes\n"
+		<< model.lights_count << " lights\n";
+	message = iss.str();
+	print_message(message, msg_level);
 	message = "The number of errors is " + std::to_string(errors.count);
 	print_message(message, msg_level);
 	message = std::string(52, '=');
@@ -55,8 +75,9 @@ void read_gltf::parse()
 
 	read_objects();
 	read_materials();
-
-
+	int low = 0;
+	int high = static_cast<int>(faces.size()-1);
+	add_item(low, high);
 
 }
 
@@ -523,4 +544,141 @@ void read_gltf::read_materials()
 	print_message(message, msg_level);
 	message = std::string(52, '=');
 	print_message(message, msg_level);
+}
+
+
+void read_gltf::add_item(const int& _low, const int& _hi)
+{
+	std::string message;
+	int msg_level = 0;
+	message = std::string(52, '=');
+	print_message(message, msg_level);
+	message = "Adding objects to the hittable_list...";
+	print_message(message, msg_level);
+	message = std::string(52, '=');
+	print_message(message, msg_level);
+
+
+	int low = _low;
+	if (low < 0)
+		low = 0;
+	int hi = _hi;
+	if (hi >= faces.size())
+		hi = static_cast<int>(faces.size());
+
+
+	int num_triangles = 0;
+	std::string current_group;
+	std::string current_obj;
+
+	for (int i = _low; i < hi; i++)
+	{
+		std::string group = faces[i].group;
+		std::string object = faces[i].object;
+		std::array<point3, 3> vs_i, vns_i;
+		std::array<point2, 3> vts_i;
+
+
+
+		if (!silent && !object.empty() && object.compare(current_obj))
+		{
+			current_obj = object;
+			msg_level = 1;
+			print_message("Adding object " + object, msg_level);
+		}
+		if (!silent && !group.empty() && group.compare(current_group))
+		{
+			current_group = group;
+			msg_level = 2;
+			print_message("Adding group " + group, msg_level);
+		}
+		else if (!silent && group.empty() && (i-low) % 100 == 0)
+		{
+			msg_level = 1;
+			print_message("Adding item " + 
+				std::to_string(i) + 
+				" out of " + 
+				std::to_string(faces.size()), msg_level);
+		}
+
+		auto& face = faces[i];
+		object = face.object;
+		group = face.group;
+
+		int num_edges = static_cast<int>(face.indx.size());
+
+		for (int j = 0; j < num_edges; j++)
+		{
+			int indx_j = face.indx[j];
+
+			// bound checking for the indices
+			// as vts and vns are optional we check them only if they are mentioned in the face
+			if (j < 0 ||
+				j >= vs.size() ||
+				(j >= vts.size() && vts.size() > 0) ||
+				(j >= vns.size() && vns.size() > 0)) {
+				throw std::invalid_argument("Face index out of bounds for edge " + std::to_string(j));
+			}
+
+			// if we do not have the vs so there is nothing in this edge!
+			vs_i[j] = vs[indx_j];
+			// if the vt has not been mentioned so we do not care about possibly!
+			if (vts.size() > 0) {
+				vts_i[j] = vts[indx_j];
+			}
+			else {
+				vts_i[j] = point2{ 0, 0 };
+			}
+			if (vns.size() > 0) {
+				vns_i[j] = vns[indx_j];
+			}
+			else {
+				vns_i[j] = point3();
+			}
+		}
+		// mapping from obj material into the mtl file material
+		// we ourselves set the mat_indx so it is zero based!
+		int mat_indx = face.mat_indx;
+
+		// estimating missing vt vectors
+		if (!vns.size())
+		{
+			estimate_vns(vs_i,vns_i);
+		}
+
+		auto trngle = std::make_unique<triangle_mesh>(vs_i, vts_i, vns_i, mat_indx);
+		trngle->add_label(object);
+		trngle->add_label(group);
+		world->add(std::move(trngle));
+	}
+
+
+	// setting all the read objects as main label
+	world->add_label("main");
+
+
+	msg_level = 0;
+	message = std::string(52, '=');
+	print_message(message, msg_level);
+	message = "Finished adding objects to the hittable_list.";
+	print_message(message, msg_level);
+	message = std::string(52, '=');
+	print_message(message, msg_level);
+}
+
+void read_gltf::estimate_vns(
+	const std::array<point3, 3>& vs_,
+	std::array<point3, 3>& vns_)
+{
+	constexpr int num_edges = 3;
+	for (int i = 0; i < num_edges; i++)
+	{
+		int prev = i ? i - 1 : num_edges - 1;
+		int next = (i != num_edges - 1) ? i + 1 : 0;
+		vec3 a = vs_[next] - vs_[i];
+		vec3 b = vs_[prev] - vs_[i];
+		vec3 normal = cross(a, b);
+		vec3 unit_normal = unit_vector(normal);
+		vns_[i] = unit_normal;
+	}
 }

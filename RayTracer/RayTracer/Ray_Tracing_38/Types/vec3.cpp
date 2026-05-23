@@ -1,6 +1,14 @@
 #include "vec3.h"
 #include "../Shared/rtweekend.h"
 
+double vec2::length() const {
+    return std::sqrt(length_squared());
+}
+
+double vec2::length_squared() const {
+    return pow(e[0], 2) + pow(e[1], 2);
+}
+
 vec3& vec3::operator*=(double t) {
     e[0] *= t;
     e[1] *= t;

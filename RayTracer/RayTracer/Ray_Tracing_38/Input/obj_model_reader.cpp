@@ -249,8 +249,7 @@ void obj_model_reader::read_obj_file()
 			else if (!dummy_str.compare("vt"))
 			{
 				iss >> pnt2;
-				pnt3 = vec3(pnt2);
-				vts.push_back(pnt3);
+				vts.push_back(pnt2);
 				vt_num++;
 			}
 			else if (!dummy_str.compare("vn"))
@@ -420,8 +419,8 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 	
 	for (int i = _low; i < hi; i++)
 	{
-		std::string group = face_indexes[0].group;
-		std::string object = face_indexes[0].object;
+		std::string group = face_indexes[i].group;
+		std::string object = face_indexes[i].object;
 		if (!silent && !object.empty() && object.compare(current_obj))
 		{
 			current_obj = object;
@@ -436,7 +435,8 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 		{
 			std::cout << "\t adding item " << i << " out of " << face_indexes.size() << std::endl;
 		}
-		std::array<point3, 3> vs_i, vts_i, vns_i;
+		std::array<point3, 3> vs_i,  vns_i;
+		std::array<point2, 3> vts_i;
 		std::array<bool, 3> set_vn_i = { true,true,true };
 		bool any_missing_vn = false;
 
@@ -490,11 +490,11 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 				set_vn_i[j] = false;
 				any_missing_vn = true;
 			}
-			
+
 			// if we do not have the vs so there is nothing in this edge!
 			vs_i[j] = this->vs[v_indx_j - 1];
 			// if the vt has not been mentioned so we do not care about possibly!
-			vts_i[j] = (vt_indx_j == -1) ? point3() : this->vts[vt_indx_j - 1];
+			vts_i[j] = (vt_indx_j == -1) ? point2{0, 0} : this->vts[vt_indx_j - 1];
 			// we estimate the vn from the cross section
 			vns_i[j] = (vn_indx_j == -1) ? point3() : this->vns[vn_indx_j - 1];
 		}

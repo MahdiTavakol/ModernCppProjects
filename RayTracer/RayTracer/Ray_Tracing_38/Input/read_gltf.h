@@ -25,12 +25,15 @@ public:
 	std::unique_ptr<material_list> return_mtl_list();
 
 protected:
+	bool silent = false;
 	std::string file_path;
+	int max_message_level = 4;
 
 	// the min and max of the simulation box
 	vec3 min, max;
 	// scaling the file
 	double scale = 1.0;
+
 
 	// the object container
 	std::unique_ptr<hittable_list> world;
@@ -44,17 +47,26 @@ protected:
 
 
 	// helper functions
+	// reading objects from the gltf
 	void read_objects();
+	// reading materials from the gltf
 	void read_materials();
-	void add_item(const int& _low, const int& _hi){}
+	// adding items to the world
+	virtual void add_item(const int& _low, const int& _hi);
+	// estimating the normal vectors if they are not given in the file
+	void estimate_vns(
+		const std::array<point3, 3>& vs_,
+		std::array<point3, 3>& vns_);
 
 
 
 private:
 	// The messaging interface.. 
 	// should have its own class at the end
-	void print_message(const std::string& message_, int level_ = 0, char delimiter = ' ')
+	void print_message(const std::string message_, int level_ = 0, char delimiter = ' ')
 	{
+		if (level_ > max_message_level)
+			return;
 		std::cout << std::string(level_, delimiter) << message_ << "\n";
 	}
 

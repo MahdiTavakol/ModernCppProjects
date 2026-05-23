@@ -57,7 +57,8 @@ protected:
 	// file names
 	std::string obj_file_name, mtl_file_name;
 	// data
-	std::vector<vec3> vs, vts, vns;
+	std::vector<vec3> vs, vns;
+	std::vector<vec2> vts;
 	// number of data
 	int v_num = 0, vt_num = 0, vn_num = 0;
 	int polygon_num = 0, triangle_num = 0;
