@@ -1,9 +1,10 @@
-#include "read_gltf.h"
+#include "gltf_reader.h"
 #include "../Geometry/triangle_mesh.h"
 #include <iostream>
 #include <sstream>
 
-read_gltf::read_gltf(const std::string& file_path_) : 
+gltf_reader::gltf_reader(const std::string& file_path_, communicator* para_) :
+	para{para_},
 	file_path{ file_path_ },
 	world{ std::make_unique<hittable_list>() },
 	mtl_list{ std::make_unique<material_list>() }
@@ -16,13 +17,13 @@ read_gltf::read_gltf(const std::string& file_path_) :
 	// I would prefer lazy parsing
 }
 
-read_gltf::~read_gltf()
+gltf_reader::~gltf_reader()
 {
 	tg3_model_free(&model);
 	tg3_error_stack_free(&errors);
 }
 
-void read_gltf::parse()
+void gltf_reader::read()
 {
 	int msg_level = 0;
 	std::string message = std::string(52, '=');
@@ -81,7 +82,7 @@ void read_gltf::parse()
 
 }
 
-void read_gltf::read_objects()
+void gltf_reader::read_objects()
 {
 	std::string message;
 	int msg_level = 0;
@@ -399,10 +400,34 @@ void read_gltf::read_objects()
 						}
 
 					}
-					else if (!attribute_name.compare("TEXCOORD_0"))
+					else if (!attribute_name.rfind("TEXTCOORD_",0) == 0)
 					{
 						msg_level=7;
-						message = "Parsing texture coordinates";
+						int coord_i;
+						{
+							std::stringstream ss(attribute_name);
+							std::string str;
+							// TEXCOORD
+							std::getline(ss, str, '_');
+							// NUMBER
+							std::getline(ss, str, '_');
+							// clearing the stringstream
+							ss.str("");
+							ss.clear();
+							// putting str into the ss
+							ss << str;
+							// putting it into the coord_i
+							ss >> coord_i;
+							// checking it
+							if (coord_i < 0)
+								throw std::invalid_argument("This should never have happened!");
+							if (coord_i >= MAX_COORD)
+								throw std::invalid_argument("There is a " + attribute_name);
+						}
+
+
+
+						message = "Parsing texture coordinates " + std::to_string(coord_i);
 						print_message(message, msg_level);
 						msg_level=8;
 						switch (accessor_k.type) {
@@ -419,7 +444,7 @@ void read_gltf::read_objects()
 								// For each triangle :
 								for (size_t i = 0; i < uvs.size(); ++i) {
 									const auto& uv = uvs[i];
-									vts.push_back(vec2{ uv.x,uv.y });
+									vts_array[coord_i].push_back(vec2{uv.x,uv.y});
 									vt_count_j++;
 								}
 								break;
@@ -433,7 +458,7 @@ void read_gltf::read_objects()
 								// For each triangle :
 								for (size_t i = 0; i < uvs.size(); ++i) {
 									const auto& uv = uvs[i];
-									vts.push_back(vec2{ uv.x,uv.y });
+									vts_array[coord_i].push_back(vec2{ uv.x,uv.y });
 									vt_count_j++;
 								}
 								break;
@@ -486,7 +511,12 @@ void read_gltf::read_objects()
 	print_message(message, 1);
 	message = "The total number of vertices is " + std::to_string(vs.size());
 	print_message(message, 1);
-	message = "The total number of texture coordinates is " + std::to_string(vts.size());
+	int num_texture_coords = 0;
+	for (auto& v : vts_array)
+	{
+		num_texture_coords += static_cast<int>(v.size());
+	}
+	message = "The total number of texture coordinates is " + std::to_string(num_texture_coords);
 	print_message(message, 1);
 	message = "The total number of normals is " + std::to_string(vns.size());
 	print_message(message, 1);
@@ -500,7 +530,7 @@ void read_gltf::read_objects()
 	print_message(message, 0);
 }
 
-void read_gltf::read_materials()
+void gltf_reader::read_materials()
 {
 	std::string message;
 	int msg_level = 0;
@@ -511,26 +541,26 @@ void read_gltf::read_materials()
 	message = std::string(52, '=');
 	print_message(message, msg_level);
 
-	uint32_t material_count = model.materials_count;
+	message = "Adding images to the material list";
+	msg_level = 1;
+	print_message(message, msg_level);
+	PBR::add_images(model.images, model.images_count);
 
+	message = "Adding materials to the material list";
+	msg_level = 1;
+	print_message(message, msg_level);
+
+	uint32_t material_count = model.materials_count;
 	for (int i = 0; i < material_count; i++)
 	{
 		const tg3_material& material_i = model.materials[i];
-		tg3_str material_name = material_i.name;
-		msg_level = 1;
-		message = "Reading material " + std::to_string(i) +
-			": " + std::string(material_name.data, material_name.len);
+		std::string material_name = std::string(material_i.name.data,material_i.name.len);
+		msg_level = 2;
+		message = "Creating material " + std::to_string(i) +
+			": " + material_name;
 		print_message(message, msg_level);
-		double emmissive_factor[3];
-		emmissive_factor[0] = material_i.emissive_factor[0];
-		emmissive_factor[1] = material_i.emissive_factor[1];
-		emmissive_factor[2] = material_i.emissive_factor[2];
-		std::string alpha_mode = std::string(material_i.alpha_mode.data, material_i.alpha_mode.len);
-		int32_t double_sided = material_i.double_sided;
-		tg3_pbr_metallic_roughness pbr_metallic_roughness_i = material_i.pbr_metallic_roughness;
-		tg3_normal_texture_info normal_texture_i = material_i.normal_texture;
-		tg3_occlusion_texture_info occlusion_texture_i = material_i.occlusion_texture;
-		tg3_texture_info emissive_texture_i = material_i.emissive_texture;
+		std::unique_ptr<material> mat_i = std::make_unique<PBR>(material_i);
+		mtl_list->push_back(material_name,std::move(mat_i));
 	}
 
 	msg_level = 0;
@@ -547,7 +577,7 @@ void read_gltf::read_materials()
 }
 
 
-void read_gltf::add_item(const int& _low, const int& _hi)
+void gltf_reader::add_item(const int& _low, const int& _hi)
 {
 	std::string message;
 	int msg_level = 0;
@@ -576,7 +606,8 @@ void read_gltf::add_item(const int& _low, const int& _hi)
 		std::string group = faces[i].group;
 		std::string object = faces[i].object;
 		std::array<point3, 3> vs_i, vns_i;
-		std::array<point2, 3> vts_i;
+		std::array<point2, 3> vts_i, vts_1_i;
+
 
 
 
@@ -615,20 +646,47 @@ void read_gltf::add_item(const int& _low, const int& _hi)
 			// as vts and vns are optional we check them only if they are mentioned in the face
 			if (j < 0 ||
 				j >= vs.size() ||
-				(j >= vts.size() && vts.size() > 0) ||
 				(j >= vns.size() && vns.size() > 0)) {
 				throw std::invalid_argument("Face index out of bounds for edge " + std::to_string(j));
 			}
 
+			for (int k = 0; k < MAX_COORD; k++)
+			{
+				int vts_array_k_size = static_cast<int>(vts_array[k].size());
+				if (vts_array_k_size > 0)
+				{
+					if (j >= vts_array_k_size)
+						throw std::invalid_argument("Face index out of bounds for edge " + std::to_string(j));
+				}
+				else if (vts_array_k_size == 0)
+				{
+					break;
+				}
+			}
+
+
 			// if we do not have the vs so there is nothing in this edge!
 			vs_i[j] = vs[indx_j];
-			// if the vt has not been mentioned so we do not care about possibly!
-			if (vts.size() > 0) {
-				vts_i[j] = vts[indx_j];
+
+			if (vts_array[0].size() > 0)
+			{
+				vts_i[j] = vts_array[0][indx_j];
 			}
-			else {
-				vts_i[j] = point2{ 0, 0 };
+			else
+			{
+				vts_i[j] = point2{};
 			}
+			if (vts_array[1].size() > 0)
+			{
+				vts_1_i[j] = vts_array[1][indx_j];
+			}
+			else
+			{
+				vts_1_i[j] = point2{};
+			}
+
+	
+			
 			if (vns.size() > 0) {
 				vns_i[j] = vns[indx_j];
 			}
@@ -646,7 +704,7 @@ void read_gltf::add_item(const int& _low, const int& _hi)
 			estimate_vns(vs_i,vns_i);
 		}
 
-		auto trngle = std::make_unique<triangle_mesh>(vs_i, vts_i, vns_i, mat_indx);
+		auto trngle = std::make_unique<triangle_mesh>(vs_i, vts_i,vts_1_i, vns_i, mat_indx);
 		trngle->add_label(object);
 		trngle->add_label(group);
 		world->add(std::move(trngle));
@@ -662,11 +720,14 @@ void read_gltf::add_item(const int& _low, const int& _hi)
 	print_message(message, msg_level);
 	message = "Finished adding objects to the hittable_list.";
 	print_message(message, msg_level);
+	message = "The total number of items in the hittable_list is "
+		+ std::to_string(world->size());
+	print_message(message, msg_level);
 	message = std::string(52, '=');
 	print_message(message, msg_level);
 }
 
-void read_gltf::estimate_vns(
+void gltf_reader::estimate_vns(
 	const std::array<point3, 3>& vs_,
 	std::array<point3, 3>& vns_)
 {
@@ -681,4 +742,27 @@ void read_gltf::estimate_vns(
 		vec3 unit_normal = unit_vector(normal);
 		vns_[i] = unit_normal;
 	}
+}
+
+
+std::unique_ptr<hittable_list> gltf_reader::return_world()
+{
+	if (world == nullptr)
+		throw std::invalid_argument("The world is empty!");
+	return std::move(world);
+}
+
+std::unique_ptr<material_list> gltf_reader::return_mtl_list()
+{
+	//
+	//if (mtl_list == nullptr)
+	//	throw std::invalid_argument("The material list is empty!");
+	//
+	for (int i = 0; i < material_num; i++)
+	{
+		std::string name = "material_" + std::to_string(i);
+		std::unique_ptr<material> mat = std::make_unique<metal>(color(0.8, 0.8, 0.8),0.25);
+		mtl_list->push_back(name, std::move(mat));
+	}
+	return std::move(mtl_list);
 }

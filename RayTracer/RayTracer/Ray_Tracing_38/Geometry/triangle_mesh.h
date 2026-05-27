@@ -17,6 +17,11 @@ public:
 		          const std::array<point2, 3>& vts_,
 		          const std::array<point3, 3>& vns_,
 		          const int mat_indx_);
+	triangle_mesh(const std::array<point3,3>& v_,
+		          const std::array<point2,3>& vts_,
+				  const std::array<point2,3>& vts_1_,
+		          const std::array<point3,3>& vn_,
+		          const int mat_indx_);
 	virtual void initialize();
 	virtual void set_bounding_box();
 	bool hit(const ray& _r, interval _ray_t, hit_record& _rec) const override;
@@ -36,6 +41,7 @@ public:
 protected:
 	std::array<point3, 3> vs;
 	std::array<point2, 3> vts;
+	std::array<point2, 3> vts_1;
 	std::array<point3, 3> vns;
 
 	int num_edges;

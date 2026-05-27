@@ -19,5 +19,9 @@ public:
     double w{ 0.0 };
     bool front_face = false;
 
+    // texcoord_1. pissibly deterioriate the cache locality
+    double u1{ 0.0 };
+    double v1{ 0.0 };
+
     void set_face_normal(const ray& r, const vec3& outward_normal);
 };

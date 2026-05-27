@@ -73,8 +73,11 @@ void camera_settings::set_mode(int mode_)
 bool camera_settings::set_from_scene(hittable_list& world_)
 {
 	// the user has set the lookat parameter
-	if (inputSet.find("-lookat") != inputSet.end() ||
-		(mode != OBJ_MODEL && mode != OBJ_MODEL_PARALLEL))
+	if (inputSet.find("-lookat") != inputSet.end())
+		return false;
+	if (mode != OBJ_MODEL && 
+		mode != OBJ_MODEL_PARALLEL && 
+		mode != GLTF_MODEL)
 		return false;
 
 	bool set = false;

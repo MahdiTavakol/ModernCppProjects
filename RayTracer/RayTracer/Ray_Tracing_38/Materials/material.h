@@ -10,6 +10,8 @@
 #include "../Algorithms/hit_record.h"
 #include <array>
 
+#include "../Input/tiny_gltf_v3.h"
+
 struct scatter_record
 {
 	ray scattered_ray;
@@ -48,6 +50,7 @@ public:
 
 };
 
+// general material class for mtl format material
 class general : public material
 {
 public:
@@ -78,7 +81,7 @@ public:
 		}
 		else if (specular_strength > 0.5)
 		{
-			specular_strength = 1.0;
+			specular_weight = 1.0;
 			specular_scatter(r_in, rec, srec_[1], specular_weight);
 		}
 		else
@@ -121,6 +124,7 @@ public:
 
 		vec3 reflected = reflect(unit_dir, rec.normal);
 		reflected = unit_vector(reflected);
+		reflected += roughness * random_unit_vector();
 		srec_ = scatter_record{ ray(rec.p, unit_vector(reflected), r_in.time()), Ks, weight_, true};
 	}
 
@@ -189,6 +193,218 @@ private:
 	double Tr;
 	color Ka, Ks, Tf;
 	double Ni;
+};
+
+// PBR material for gltf 
+class PBR : public material
+{
+public:
+	PBR(const tg3_material prop_):
+		prop{prop_}
+	{
+		// deep copies is not possible since member functions are const pointer!
+
+		// returning warnings for ignored extras
+		tg3_extras_ext mat_ext = prop.ext;
+		if (mat_ext.extras != NULL)
+			std::cout << "warning: ignoring the extras for the material" << std::endl;
+		tg3_extras_ext pbr_ext = prop.pbr_metallic_roughness.ext;
+		if (pbr_ext.extras != NULL)
+			std::cout << "Warning: ignoring extras for the pbr_metallic_roughness" << std::endl;
+		tg3_extras_ext base_color_ext = prop.pbr_metallic_roughness.base_color_texture.ext;
+		if (base_color_ext.extras != NULL)
+			std::cout << "Warning: ignoring extras for the pbr_metallic_roughness base_color_texture" << std::endl;
+		tg3_extras_ext met_rough_ext = prop.pbr_metallic_roughness.metallic_roughness_texture.ext;
+		if (met_rough_ext.extras != NULL)
+			std::cout << "Warning: ignoring extras for the pbr_metallic_roughness metall_roughness" << std::endl;
+		tg3_extras_ext norm_ext = prop.normal_texture.ext;
+		if (norm_ext.extras != NULL)
+			std::cout << "Warning: ignoring the extras for the normal_texture" << std::endl;
+		tg3_extras_ext occl_ext = prop.occlusion_texture.ext;
+		if (occl_ext.extras != NULL)
+			std::cout << "Warning: ignoring the extras for the occlusion_texture" << std::endl;
+		tg3_extras_ext emmi_ext = prop.emissive_texture.ext;
+		if (emmi_ext.extras != NULL)
+			std::cout << "Warning: ignoring the extras for the emission_texture" << std::endl;
+
+	}
+
+	void scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_) const override
+	{
+		srec_[0] = { ray(rec.p, vec3(0, 0, 0), r_in.time()), color(0, 0, 0), 0.0, false };
+
+		// getting u, v coordinates
+		double u = rec.u, v = rec.v;
+		double u1 = rec.u1, v1 = rec.v1;
+		// getting the base color
+		const double* base_col = prop.pbr_metallic_roughness.base_color_factor;
+		const tg3_texture_info* texture = &prop.pbr_metallic_roughness.base_color_texture;
+		int32_t tex_coord = texture->tex_coord;
+
+		vec4 vc = tg3_texture_info_to_color(texture, u, v,u1, v1);
+		vec3 albedo = vec3{ vc[0]*base_col[0],vc[1]*base_col[1],vc[2]*base_col[2]};
+
+		// reflected part
+		// reading the roughness texture
+		texture = &prop.pbr_metallic_roughness.metallic_roughness_texture;
+		vc = tg3_texture_info_to_color(texture, u, v, u1, v1);
+		double metallic_weight = vc[2]; // the blue channel
+		double roughness = vc[1]; // the green channel
+		// metallic 
+		vec3 reflected = reflect(r_in.direction(), rec.normal);
+		double metallic_factor = prop.pbr_metallic_roughness.metallic_factor;
+		metallic_weight *= metallic_factor;
+		metallic_weight = std::clamp(metallic_weight, 0.0,1.0);
+		double diffuse_weight = 1.0 - metallic_weight;
+
+		// roughness 
+
+		vec3 random_vector = random_unit_vector();
+		double roughness_factor = prop.pbr_metallic_roughness.roughness_factor;
+		vec3 roughReflected = roughness *
+			vec3{ random_vector[0],
+				  random_vector[1],
+			      random_vector[2] };
+
+		reflected += roughness_factor * roughReflected;
+		reflected = unit_vector(reflected);
+
+		srec_[1] = { ray(rec.p, reflected, r_in.time()), albedo, metallic_weight, true };
+
+
+		// diffusive part
+		vec3 diffuse = random_unit_vector() + rec.normal;
+		diffuse = unit_vector(diffuse);
+		srec_[2] = { ray(rec.p,diffuse,r_in.time()),albedo,diffuse_weight,true };
+	}
+
+	color emitted(double _u, double _v, const point3& _p)  const override
+	{
+		const double* emissive_factor = prop.emissive_factor;
+		const tg3_texture_info* texture = &prop.emissive_texture;
+		vec4 vc = tg3_texture_info_to_color(texture, _u, _v);
+
+		vc[0] *= emissive_factor[0];
+		vc[1] *= emissive_factor[1];
+		vc[2] *= emissive_factor[2];
+
+		color clr{ vc[0],vc[1],vc[2] };
+		return clr;
+	}
+
+	bool is_equal(const material& _second) const override
+	{
+		return false;
+	}
+
+	static void add_images(const tg3_image* imagePtr_, const int& image_count_)
+	{
+		for (int i = 0; i < image_count_; i++)
+		{
+			images.push_back(imagePtr_[i]);
+		}
+	}
+
+	vec4 tg3_texture_info_to_color(
+		const tg3_texture_info* texture_,
+		const double& u_,
+		const double& v_
+	) const
+	{
+		int32_t index = texture_->index;
+		int32_t coord = texture_->tex_coord;
+		if (coord != 0)
+		{
+			std::cout << "Warning: currently coords higher than 0 is not supported!";
+		}
+		if (index >= images.size())
+		{
+			std::cout << "Warning: currently coords higher than 0 is not supported!";
+		}
+
+		tg3_image* img = &images[index];
+		vec4 vc{ 1.0,1.0,1.0,1.0 };
+		if (index != -1)
+		{
+			int x = static_cast<int>(u_ * (img->width - 1));
+			int y = static_cast<int>((1.0 - v_) * (img->height - 1));
+			vc = tg3_image_to_color(img, x, y);
+		}
+		return vc;
+	}
+
+	vec4 tg3_texture_info_to_color(
+		const tg3_texture_info* texture_,
+		const double& u_, 
+		const double& v_,
+		const double& u1_, 
+		const double& v1_) const
+	{
+		int32_t index = texture_->index;
+		int32_t coord = texture_->tex_coord;
+
+		if (coord != 0)
+		{
+			std::cout << "Warning: currently coords higher than 0 is not supported!";
+		}
+		if (index >= images.size())
+		{
+			throw std::runtime_error("Out of range access for images!");
+		}
+
+		tg3_image* img = &images[index];
+		vec4 vc{ 1.0,1.0,1.0,1.0 };
+		if (index != -1)
+		{
+			int x, y;
+			if (coord == 0) {
+				x = static_cast<int>(u_ * (img->width - 1));
+				y = static_cast<int>((1.0 - v_) * (img->height - 1));
+			}
+			else if (coord == 1)
+			{
+				x = static_cast<int>(u1_ * (img->width - 1));
+				y = static_cast<int>((1.0 - v1_) * (img->height - 1));
+			}
+			else
+			{
+				std::cout << "Warning: currently coords higher than 0 is not supported!";
+				x = static_cast<int>(u_ * (img->width - 1));
+				y = static_cast<int>((1.0 - v_) * (img->height - 1));
+			}
+			vc = tg3_image_to_color(img, x, y);
+		}
+		return vc;
+	}
+
+	static vec4 tg3_image_to_color(
+		const tg3_image* image_, 
+		const int& x_,
+		const int& y_)
+	{
+		tg3_span_u8 image_raw = image_->image;
+		int dataPerPixel = image_->component;
+		int dataPerRow = image_->component * image_->width;
+		int ind1 = y_ * dataPerRow + x_ * dataPerPixel;
+		int ind2 = ind1 + 1;
+		int ind3 = ind1 + 2;
+		int ind4 = ind1 + 3;
+		if (ind4 >= image_raw.count)
+			throw std::runtime_error("Out of range access!");
+
+		vec4 vc{ 
+			image_raw.data[ind1]/255.0,
+			image_raw.data[ind2]/255.0,
+			image_raw.data[ind3]/255.0,
+			image_raw.data[ind4]/255.0};
+
+		return vc;
+	}
+
+
+private:
+	tg3_material prop;
+	static std::vector<tg3_image> images;
 };
 
 

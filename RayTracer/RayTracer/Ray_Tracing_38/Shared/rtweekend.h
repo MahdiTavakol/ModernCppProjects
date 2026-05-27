@@ -25,15 +25,15 @@ enum class outputMode {
 
 enum {
 	RANDOM_SPHERES, CHECKER_BOARDS, EARTH_SPHERE,
-	PERLIN_SPHERE, QUADS, SIMPLE_LIGHT, TWO_LIGHTS,
-	CORNELL_BOX, TWO_BOXES, TWO_BOXES_ROTATED,
-	CORNELL_SMOKE,
-	RANDOM_SPHERES_ANIMATED, SIMPLE_2D_PARALEL_TEST
-};
+	PERLIN_SPHERE, QUADS, SIMPLE_LIGHT, 
+	TWO_LIGHTS,CORNELL_BOX, TWO_BOXES,
+	TWO_BOXES_ROTATED,CORNELL_SMOKE, RANDOM_SPHERES_ANIMATED, 
+	SIMPLE_2D_PARALEL_TEST,
 
-enum {
+
 	OBJ_MODEL, OBJ_MODEL_PARALLEL, GLTF_MODEL
 };
+
 
 enum class renderMode {
 	STATIC,
@@ -60,9 +60,19 @@ inline double random_double()
 	return std::rand() / (RAND_MAX + 1.0);
 }
 
+inline float random_float()
+{
+	return static_cast<float>(std::rand() / (RAND_MAX + 1.0));
+}
+
 inline double random_double(double min, double max)
 {
 	return min + (max - min) * random_double();
+}
+
+inline float random_float(float min, float max)
+{
+	return min + (max - min) * random_float();
 }
 
 inline int random_int(int min, int max)

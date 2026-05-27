@@ -23,8 +23,13 @@ protected:
 	std::unique_ptr<hittable_list> world;
 	std::unique_ptr<material_list> list;
 	communicator* para;
+
+
+	// filenames for 3d object loading.. In the future 
+	// I will make the file names more general
 	std::string obj_file_name = "../../models/Toyota_Sequoia_2023/Toyota_Sequoia_2023_2015_obj.obj";
 	std::string mtl_file_name;
+	std::string gltf_file_name;
 
 	// settings
 	scene_settings* stngs;
@@ -41,10 +46,13 @@ private:
 	void setup_boxes();
 	void setup_boxes_rotated();
 	void setup_cornell_smoke();
-	void setup_3d_obj();
-	void setup_3d_obj_parallel();
 	void setup_random_spheres_animated();
 	void setup_simple_2d_parallel_test();
+
+	// file readers
+	void setup_3d_obj();
+	void setup_3d_obj_parallel();
+	void setup_gltf();
 
 
 	void set_bvh();

@@ -16,6 +16,7 @@ void scene_settings::set_input_map()
 		{"-mode",&mode_string},
 		{"-obj_file",&obj_file_name},
 		{"-mtl_file",&mtl_file_name},
+		{"-gltf_file",&gltf_file_name},
 
 		// floor
 		{"-floor",&floor_string},
@@ -35,7 +36,8 @@ void scene_settings::set_input_map()
 
 		{"--m",&mode_string},
 		{"--obj",&obj_file_name},
-		{"--mtl",&mtl_file_name}
+		{"--mtl",&mtl_file_name},
+		{"--gltf",&gltf_file_name},
 	};
 
 	threeInputMap = {
@@ -68,10 +70,13 @@ void scene_settings::return_scene_map(std::map<std::string, int>& scene_map_)
 		{"TWO_BOXES",TWO_BOXES},
 		{"TWO_BOXES_ROTATED",TWO_BOXES_ROTATED},
 		{"CORNELL_SMOKE",CORNELL_SMOKE},
+		{"RANDOM_SPHERES_ANIMATED",RANDOM_SPHERES_ANIMATED},
+		{"SIMPLE_2D_PARALEL_TEST",SIMPLE_2D_PARALEL_TEST},
+
+
 		{"OBJ_MODEL",OBJ_MODEL},
 		{"OBJ_MODEL_PARALLEL",OBJ_MODEL_PARALLEL},
-		{"RANDOM_SPHERES_ANIMATED",RANDOM_SPHERES_ANIMATED},
-		{"SIMPLE_2D_PARALEL_TEST",SIMPLE_2D_PARALEL_TEST}
+		{"GLTF_MODEL",GLTF_MODEL}
 	};
 }
 
@@ -100,6 +105,11 @@ std::string scene_settings::return_obj_file_name() const
 std::string scene_settings::return_mtl_file_name() const
 {
 	return mtl_file_name;
+}
+
+std::string scene_settings::return_gltf_file_name() const
+{
+	return gltf_file_name;
 }
 
 void scene_settings::extra_parse()
@@ -131,10 +141,14 @@ void scene_settings::check_validity() const
 		std::ifstream obj_file(obj_file_name);
 		std::ifstream mtl_file(mtl_file_name);
 
-		if (!obj_file.is_open())
-			throw std::invalid_argument("the obj_file could not open");
-		if (!mtl_file.is_open())
-			throw std::invalid_argument("the mtl_file could not open");
+		if (!obj_file.is_open()) {
+			std::string error_text = "The obj file " + obj_file_name + " could not be opened!";
+			throw std::invalid_argument(error_text);
+		}
+		if (!mtl_file.is_open()) {
+			std::string error_text = "The mtl file " + mtl_file_name + " could not be opened!";
+			throw std::invalid_argument(error_text);
+		}
 	}
 
 }

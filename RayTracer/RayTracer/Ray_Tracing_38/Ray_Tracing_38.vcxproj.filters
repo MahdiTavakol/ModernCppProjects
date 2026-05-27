@@ -192,7 +192,7 @@
     <ClCompile Include="Algorithms\image_async.cpp">
       <Filter>Source Files\Algorithms</Filter>
     </ClCompile>
-    <ClCompile Include="Input\read_gltf.cpp">
+    <ClCompile Include="Input\gltf_reader.cpp">
       <Filter>Source Files\Input</Filter>
     </ClCompile>
     <ClCompile Include="Input\tiny_gltf_v3.c">
@@ -365,7 +365,7 @@
     <ClInclude Include="Algorithms\image_async.h">
       <Filter>Source Files\Algorithms</Filter>
     </ClInclude>
-    <ClInclude Include="Input\read_gltf.h">
+    <ClInclude Include="Input\gltf_reader.h">
       <Filter>Source Files\Input</Filter>
     </ClInclude>
     <ClInclude Include="Input\tiny_gltf_v3.h">

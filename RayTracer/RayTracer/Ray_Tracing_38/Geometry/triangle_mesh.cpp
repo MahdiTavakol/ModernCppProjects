@@ -23,6 +23,19 @@ triangle_mesh::triangle_mesh(
 	initialize();
 }
 
+triangle_mesh::triangle_mesh(
+	const std::array<point3, 3>& v_,
+	const std::array<point2, 3>& vts_,
+	const std::array<point2, 3>& vts_1_,
+	const std::array<point3, 3>& vn_,
+	const int mat_indx_) :
+	hittable{ "triangle_mesh",mat_indx_ },
+	vs{ v_ }, vts{ vts_ }, vts_1{vts_1_}, vns{ vn_ }
+{
+	initialize();
+}
+
+
 void triangle_mesh::initialize()
 {
 	n1 = cross(vs[1] - vs[0], vs[2] - vs[0]);
@@ -67,6 +80,7 @@ bool triangle_mesh::hit(const ray& _r, interval _ray_t, hit_record& _rec) const
 
 	auto normal = interpolate(alpha,beta, vns);
 	auto texture = interpolate(alpha,beta,vts);
+	auto texture_1 = interpolate(alpha, beta, vts_1);
 
 	normal = unit_vector(normal);
 
@@ -75,6 +89,8 @@ bool triangle_mesh::hit(const ray& _r, interval _ray_t, hit_record& _rec) const
 	_rec.u = texture[0];
 	_rec.v = texture[1];
 	_rec.w = texture[2];
+	_rec.u1 = texture_1[0];
+	_rec.v1 = texture_1[1];
 	_rec.mat_indx = mat_indx;
 	_rec.set_face_normal(_r, normal);
 	return true;

@@ -26,6 +26,7 @@ public:
 	static void return_scene_map(std::map<std::string, int>& scene_map_);
 	std::string return_obj_file_name() const;
 	std::string return_mtl_file_name() const;
+	std::string return_gltf_file_name() const;
 
 	// special parser
 	void parse_material_change(std::istringstream& iss_);
@@ -50,6 +51,7 @@ protected:
 	std::string mode_string;
 	std::string obj_file_name = "";
 	std::string mtl_file_name = "";
+	std::string gltf_file_name = "";
 	//std::string obj_file_name = "../../models/Toyota_Sequoia_2023/Toyota_Sequoia_2023_2015_obj.obj";
 	//std::string mtl_file_name = "../../models/Toyota_Sequoia_2023/Toyota_Sequoia_2023_2015_mtl.mtl";
 

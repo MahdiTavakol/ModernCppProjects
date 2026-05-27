@@ -106,8 +106,11 @@ void renderer_settings::set_mode(int mode_)
 
 bool renderer_settings::set_from_scene(hittable_list& world_)
 {
-	if (inputSet.find("-location") != inputSet.end() ||
-		(mode != OBJ_MODEL && mode != OBJ_MODEL_PARALLEL))
+	if (inputSet.find("-location") != inputSet.end())
+		return false;
+	if (mode != OBJ_MODEL &&
+		mode != OBJ_MODEL_PARALLEL &&
+		mode != GLTF_MODEL)
 		return false;
 	
 	bool set1 = false;

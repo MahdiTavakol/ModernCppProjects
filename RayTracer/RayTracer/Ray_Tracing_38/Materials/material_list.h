@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include <unordered_map>
+#include "../Input/tiny_gltf_v3.h"
 
 class material_list {
 public:
@@ -29,6 +30,7 @@ public:
 		}
 		return indx;
 	}
+
 
 	int push_back(std::pair<std::string, std::unique_ptr<material>> in_)
 	{

@@ -26,6 +26,7 @@
 #include "../Geometry/texture.h"
 #include "../Types/vec3.h"
 #include "../Output/output.h"
+#include "gltf_reader.h"
 
 scene_factory::scene_factory(settings* wld_settings_, communicator* para_):
 	mode{wld_settings_->return_mode()}, para{para_}, list{std::make_unique<material_list>()}
@@ -38,6 +39,7 @@ scene_factory::scene_factory(settings* wld_settings_, communicator* para_):
 
 	obj_file_name = stngs->return_obj_file_name();
 	mtl_file_name = stngs->return_mtl_file_name();
+	gltf_file_name = stngs->return_gltf_file_name();
 }
 
 scene_factory::scene_factory(int mode_, std::unique_ptr<communicator>& para_) :
@@ -91,17 +93,23 @@ void scene_factory::create()
 	case CORNELL_SMOKE:
 		setup_cornell_smoke();
 		break;
+	case RANDOM_SPHERES_ANIMATED:
+		setup_random_spheres_animated();
+		break;
+	case SIMPLE_2D_PARALEL_TEST:
+		setup_simple_2d_parallel_test();
+		break;
+
+
+
 	case OBJ_MODEL:
 		setup_3d_obj();
 		break;
 	case OBJ_MODEL_PARALLEL:
 		setup_3d_obj_parallel();
 		break;
-	case RANDOM_SPHERES_ANIMATED:
-		setup_random_spheres_animated();
-		break;
-	case SIMPLE_2D_PARALEL_TEST:
-		setup_simple_2d_parallel_test();
+	case GLTF_MODEL:
+		setup_gltf();
 		break;
 	}
 
@@ -522,6 +530,15 @@ void scene_factory::setup_3d_obj_parallel()
 		std::make_unique<obj_model_reader_parallel>(obj_file_name,para);
 	model_reader->read();
 
+	world = model_reader->return_world();
+	list = model_reader->return_mtl_list();
+}
+
+void scene_factory::setup_gltf()
+{
+	std::unique_ptr<gltf_reader> model_reader =
+		std::make_unique<gltf_reader>(gltf_file_name, para);
+	model_reader->read();
 	world = model_reader->return_world();
 	list = model_reader->return_mtl_list();
 }

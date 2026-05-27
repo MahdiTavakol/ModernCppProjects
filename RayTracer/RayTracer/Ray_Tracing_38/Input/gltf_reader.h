@@ -2,9 +2,10 @@
 #include "../Algorithms/hittable_list.h"
 #include "../Materials/material_list.h"
 #include "tiny_gltf_v3.h"
+#include "../Algorithms/communicator.h"
 #include <string>
-#include <iomanip>
 
+constexpr int MAX_COORD = 16;
 
 struct face_indx2
 {
@@ -15,20 +16,23 @@ struct face_indx2
 	int mat_indx;
 };
 
-class read_gltf {
+class gltf_reader {
 public:
-	read_gltf(const std::string& file_path);
-	~read_gltf();
-	void parse();
+	gltf_reader(const std::string& file_pat, communicator* para_);
+	~gltf_reader();
+	void read();
 
 	std::unique_ptr<hittable_list> return_world();
 	std::unique_ptr<material_list> return_mtl_list();
 
 protected:
 	bool silent = false;
+	communicator* para;
 	std::string file_path;
-	int max_message_level = 4;
+	int max_message_level = 1000;
 
+	// temp variable for the number of materials for now!
+	int material_num = 0;
 	// the min and max of the simulation box
 	vec3 min, max;
 	// scaling the file
@@ -43,7 +47,8 @@ protected:
 	// data
 	std::vector<face_indx2> faces;
 	std::vector<vec3> vs, vns;
-	std::vector<vec2> vts;
+	// TEXCOORDS
+	std::array<std::vector<vec2>, MAX_COORD> vts_array;
 
 
 	// helper functions

@@ -6,7 +6,7 @@
 #include "Shared/rtweekend.h"
 #include "Renderer/Renderer.h"
 #include "Renderer/Renderer_facade.h"
-#include "Input/read_gltf.h"
+
 
 
 
@@ -35,7 +35,6 @@ int main(int argc, char** argv)
 	//mode = RANDOM_SPHERES_ANIMATED;
 	mode = SIMPLE_2D_PARALEL_TEST;
 
-	/*
 	try {
 		std::unique_ptr<renderer_facade> rendFacade =
 			std::make_unique<renderer_facade>(argc, argv, mode, MPI_COMM_WORLD);
@@ -52,12 +51,6 @@ int main(int argc, char** argv)
 	{
 		std::cout << "Runtime error exception " << e.what() << std::endl;
 	}
-	*/
-
-
-	read_gltf reader("..\\models\\Corvett-StingRay\\Corvette_Stingray.glb");
-	reader.parse();
-
 
 
 	MPI_Finalize();
