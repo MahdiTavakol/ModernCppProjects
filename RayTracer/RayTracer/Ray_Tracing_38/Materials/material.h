@@ -9,6 +9,7 @@
 #include "../Geometry/texture.h"
 #include "../Algorithms/hit_record.h"
 #include <array>
+#include <vector>
 
 #include "../Input/tiny_gltf_v3.h"
 
@@ -322,10 +323,10 @@ public:
 			std::cout << "Warning: currently coords higher than 0 is not supported!";
 		}
 
-		tg3_image* img = &images[index];
 		vec4 vc{ 1.0,1.0,1.0,1.0 };
 		if (index != -1)
 		{
+			tg3_image* img = &images[index];
 			int x = static_cast<int>(u_ * (img->width - 1));
 			int y = static_cast<int>((1.0 - v_) * (img->height - 1));
 			vc = tg3_image_to_color(img, x, y);
@@ -404,7 +405,7 @@ public:
 
 private:
 	tg3_material prop;
-	static std::vector<tg3_image> images;
+	inline static std::vector<tg3_image> images;
 };
 
 

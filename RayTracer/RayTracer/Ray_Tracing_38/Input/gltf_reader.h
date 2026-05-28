@@ -4,6 +4,7 @@
 #include "tiny_gltf_v3.h"
 #include "../Algorithms/communicator.h"
 #include <string>
+#include <vector>
 
 constexpr int MAX_COORD = 16;
 
