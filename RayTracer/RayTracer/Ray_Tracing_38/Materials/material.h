@@ -28,7 +28,7 @@ public:
 	virtual ~material() = default;
 
 
-	virtual color emitted(double _u, double _v, const point3& _p) const
+	virtual color emitted([[maybe_unused]] double _u, [[maybe_unused]] double _v, [[maybe_unused]]  const point3& _p) const
 	{
 		return color(0, 0, 0);
 	}

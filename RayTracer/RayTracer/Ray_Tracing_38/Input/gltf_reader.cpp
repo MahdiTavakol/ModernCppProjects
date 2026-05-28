@@ -344,6 +344,9 @@ void gltf_reader::read_objects()
 								break;
 							}
 							default:
+							    message = "Warning the component type is unknown!";
+								print_message(message,msg_level);
+							    break;
 							}
 							break;
 						default:
@@ -464,11 +467,14 @@ void gltf_reader::read_objects()
 								break;
 							}
 							default:
+								message = "Warning the component type is unknown!";
+								print_message(message,msg_level);
 							}
 
 						}
 						default:
-
+							message = "Warning unknown!";
+							print_message(message,msg_level);
 						}
 					}
 				}
