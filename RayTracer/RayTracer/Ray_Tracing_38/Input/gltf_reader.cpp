@@ -1,7 +1,9 @@
 #include "gltf_reader.h"
 #include "../Geometry/triangle_mesh.h"
+#include "../external/stb_image.h"
 #include <iostream>
 #include <sstream>
+#include <fstream>
 
 gltf_reader::gltf_reader(const std::string& file_path_, communicator* para_) :
 	para{para_},
@@ -11,6 +13,8 @@ gltf_reader::gltf_reader(const std::string& file_path_, communicator* para_) :
 {
 	tg3_parse_options_init(&opts);
 	tg3_error_stack_init(&errors);
+
+
 
 
 	// as the file parsing might take a while
@@ -74,8 +78,13 @@ void gltf_reader::read()
 	message = std::string(52, '=');
 	print_message(message, msg_level);
 
+
+
 	read_objects();
 	read_materials();
+	read_textures();
+	read_samplers();
+	load_images();
 	int low = 0;
 	int high = static_cast<int>(faces.size()-1);
 	add_item(low, high);
@@ -250,9 +259,12 @@ void gltf_reader::read_objects()
 					// This only has to be done once per primitive
 					convertedToTriangleList = true;
 
-
+					int offset = static_cast<int>(vs.size());
 					for (size_t k = 0; k < index_vector.size(); k += 3) {
-						std::vector<int> ind = { index_vector[k],index_vector[k+1],index_vector[k+2] };
+						std::vector<int> ind = { 
+							index_vector[k] + offset,
+							index_vector[k+1] + offset,
+							index_vector[k+2] + offset };
 						int ind_size = static_cast<int>(ind.size());
 						face_indx2 face_i = { ind, object, group, ind_size, material_id };
 						faces.push_back(face_i);
@@ -403,7 +415,7 @@ void gltf_reader::read_objects()
 						}
 
 					}
-					else if (!attribute_name.rfind("TEXTCOORD_",0) == 0)
+					else if (!attribute_name.compare(0,9,"TEXCOORD_"))
 					{
 						msg_level=7;
 						int coord_i;
@@ -470,7 +482,7 @@ void gltf_reader::read_objects()
 								message = "Warning the component type is unknown!";
 								print_message(message,msg_level);
 							}
-
+							break;
 						}
 						default:
 							message = "Warning unknown!";
@@ -547,10 +559,7 @@ void gltf_reader::read_materials()
 	message = std::string(52, '=');
 	print_message(message, msg_level);
 
-	message = "Adding images to the material list";
-	msg_level = 1;
-	print_message(message, msg_level);
-	PBR::add_images(model.images, model.images_count);
+
 
 	message = "Adding materials to the material list";
 	msg_level = 1;
@@ -567,6 +576,8 @@ void gltf_reader::read_materials()
 		print_message(message, msg_level);
 		std::unique_ptr<material> mat_i = std::make_unique<PBR>(material_i);
 		mtl_list->push_back(material_name,std::move(mat_i));
+		std::unique_ptr<material> test_mat = std::make_unique<lambertian>(vec3(0.0, 1.0, 0.0));
+		//mtl_list->push_back(material_name, std::move(test_mat));
 	}
 
 	msg_level = 0;
@@ -582,6 +593,296 @@ void gltf_reader::read_materials()
 	print_message(message, msg_level);
 }
 
+void gltf_reader::read_textures()
+{
+	std::string message;
+	int msg_level = 0;
+	message = std::string(52, '=');
+	print_message(message, msg_level);
+	message = "Reading textures from the glTF file...";
+	print_message(message, msg_level);
+	message = std::string(52, '=');
+	print_message(message, msg_level);
+
+
+	uint32_t textures_count = model.textures_count;
+	tg3_texture* read_textures = new tg3_texture[textures_count];
+
+	for (int i = 0; i < textures_count; i++)
+	{
+		const tg3_texture& tex_i = model.textures[i];
+		std::string tex_name = std::string(tex_i.name.data, tex_i.name.len);
+		msg_level = 2;
+		message = "Creating the texture " + std::to_string(i) +
+			": " + tex_name;
+		if (tex_i.name.len == 0)
+			message = "Creating the texture " + std::to_string(i);
+
+		print_message(message, msg_level);
+		read_textures[i] = tex_i;
+	}
+
+	msg_level = 1;
+	message = "Finished reading all texture";
+	print_message(message, msg_level);
+	msg_level = 2;
+	message = "Adding textures to the PBR class";
+	print_message(message, msg_level);
+	PBR::set_textures(read_textures, textures_count);
+
+	msg_level = 1;
+	message = "Cleaning up!";
+	print_message(message, msg_level);
+	delete[] read_textures;
+
+
+
+	message = "The total number of texture is " + std::to_string(textures_count);
+	print_message(message, msg_level + 1);
+	message = std::string(52, '=');
+	print_message(message, msg_level);
+	msg_level = 0;
+	message = "Finished reading textures from the glTF file.";
+	print_message(message, msg_level);
+	message = std::string(52, '=');
+	print_message(message, msg_level);
+}
+
+void gltf_reader::read_samplers()
+{
+	std::string message;
+	int msg_level = 0;
+	message = std::string(52, '=');
+	print_message(message, msg_level);
+	message = "Reading samplers from the glTF file...";
+	print_message(message, msg_level);
+	message = std::string(52, '=');
+	print_message(message, msg_level);
+
+
+	uint32_t samplers_count = model.samplers_count;
+	tg3_sampler* read_samplers = new tg3_sampler[samplers_count];
+
+	for (int i = 0; i < samplers_count; i++)
+	{
+		const tg3_sampler& smp_i = model.samplers[i];
+		std::string smp_name = std::string(smp_i.name.data, smp_i.name.len);
+		msg_level = 2;
+		message = "Creating the texture " + std::to_string(i) +
+			": " + smp_name;
+		if (smp_i.name.len == 0)
+			message = "Creating the texture " + std::to_string(i);
+
+		print_message(message, msg_level);
+		read_samplers[i] = smp_i;
+	}
+
+	msg_level = 1;
+	message = "Finished reading all samplers";
+	print_message(message, msg_level);
+	msg_level = 2;
+	message = "Adding samplers to the PBR class";
+	print_message(message, msg_level);
+	PBR::set_samplers(read_samplers,samplers_count);
+
+	msg_level = 1;
+	message = "Cleaning up!";
+	print_message(message, msg_level);
+	delete[] read_samplers;
+
+
+
+	message = "The total number of samplers is " + std::to_string(samplers_count);
+	print_message(message, msg_level + 1);
+	message = std::string(52, '=');
+	print_message(message, msg_level);
+	msg_level = 0;
+	message = "Finished reading samplers from the glTF file.";
+	print_message(message, msg_level);
+	message = std::string(52, '=');
+	print_message(message, msg_level);
+}
+
+void gltf_reader::load_images()
+{
+	std::string message;
+	int msg_level;
+
+	msg_level = 0;
+	message = std::string(52, '=');
+	print_message(message, msg_level);
+	message = "Loading images";
+	print_message(message, msg_level);
+	message = std::string(52, '=');
+	print_message(message, msg_level);
+
+	tg3_image_result* loaded_images;
+	loaded_images = new tg3_image_result[model.images_count];
+
+	for (int i = 0; i < model.images_count; i++)
+	{
+		msg_level = 2;
+		message = "Loading image-" + std::to_string(i);
+		print_message(message, msg_level);
+
+		const tg3_image* image_i = &model.images[i];
+		tg3_image_result& loaded_image_i = loaded_images[i];
+		if (image_i->buffer_view && image_i->uri.data)
+		{
+			throw std::invalid_argument("Both the buffer_view and uri cannot be specified for an image at the same time!");
+		}
+		if (image_i->uri.data)
+		{
+			throw std::invalid_argument("The uri option for image is not supported yet!");
+		}
+		else if (image_i->buffer_view)
+		{
+			const tg3_buffer_view& buffer_view_i = model.buffer_views[image_i->buffer_view];
+			const tg3_buffer& buffer_i = model.buffers[buffer_view_i.buffer];
+			const auto dataAddress = buffer_i.data.data + buffer_view_i.byte_offset;
+			int size = static_cast<int>(buffer_view_i.byte_length);
+			
+			int w = 0, h = 0, comp = 0, req_comp = 0;
+
+			// decoding the image header
+			if (!stbi_info_from_memory(dataAddress, size, &w, &h, &comp))
+			{
+				throw std::invalid_argument("Unknown format!");
+			}
+
+			int bits = 8;
+			
+			if (stbi_is_16_bit_from_memory(dataAddress, size))
+			{
+				bits = 16;
+			}
+
+
+			unsigned char* data = nullptr;
+			if (bits == 16)
+			{
+				data = reinterpret_cast<unsigned char*>(
+					stbi_load_16_from_memory(dataAddress, size, &w, &h, &comp, req_comp));
+			}
+			// load as 8 bit per channel
+			if (!data)
+			{
+				data = stbi_load_from_memory(dataAddress, size, &w, &h, &comp, req_comp);
+				if (!data)
+				{
+					throw std::invalid_argument("The stb cannot convert the image!");
+				}
+				bits = 8;
+			}
+
+			if ((w < 1) || (h < 1))
+			{
+				throw std::invalid_argument("Wrong image format");
+			}
+
+			loaded_image_i.width = w;
+			loaded_image_i.height = h;
+			loaded_image_i.component = comp;
+			loaded_image_i.bits = bits;
+
+			// allocating data
+			int num_elements = w * h * comp * static_cast<int>(bits / 8);
+			loaded_image_i.pixels = new uint8_t[num_elements];
+			std::copy(data, data + num_elements, loaded_image_i.pixels);
+
+			//cleaning up the data
+			stbi_image_free(data);
+
+
+
+			std::string debug_file = "test" + std::to_string(i) + ".ppm";
+
+			if (i == 5)
+				print_image(&loaded_image_i, debug_file);
+
+		}
+
+
+	}
+
+	msg_level = 1;
+	message = "Adding images to the PBR material";
+	print_message(message, msg_level);
+	PBR::set_images(loaded_images, model.images_count);
+
+	msg_level = 1;
+	message = "Cleaning up!";
+	print_message(message, msg_level);
+	delete[] loaded_images;
+
+
+	msg_level = 0;
+	message = std::string(52, '=');
+	print_message(message, msg_level);
+	message = "Finished adding images";
+	print_message(message, msg_level);
+	message = std::string(52, '=');
+	print_message(message, msg_level);
+}
+
+void gltf_reader::print_image(tg3_image_result* image_, std::string file_name_)
+{
+	std::ofstream file(file_name_);
+	int32_t w = image_->width;
+	int32_t h = image_->height;
+	int32_t comp = image_->component;
+	int32_t bits = image_->bits;
+	int32_t bytes = bits / 8;
+
+
+	file << "P6" << std::endl;
+	file << w << " " << h << std::endl;
+
+	switch (bytes)
+	{
+	case 1:
+		file << "255" <<std::endl;
+		for (int i = 0; i < bytes * h * w *comp; i++)
+		{
+			int pixelNumber = i / bytes;
+			// skipping the component 
+			if (pixelNumber% comp >= 3)
+				continue;
+			file.write(reinterpret_cast<char*>(&image_->pixels[i]), 1);
+		}
+		break;
+	case 2:
+		//file << "655535" <<std::endl;
+		//for (int i = 0; i < h * w; i++)
+		//	file << static_cast<unsigned short>(image_->pixels[i]);
+		file << "655535" << std::endl;
+		for (int i = 0; i < bytes * h * w * comp; i++)
+		{
+			file.write(reinterpret_cast<char*>(image_->pixels[i]), 1);
+		}
+		break;
+	default:
+		throw std::invalid_argument("Unsupported!");
+	}
+
+}
+
+vec3 gltf_reader::image_average_color(tg3_image_result* image_)
+{
+	// Implementation for calculating average color
+	vec3 avg = vec3{ 0, 0, 0 };
+	int w = image_->width;
+	int h = image_->height;
+	int cpp = image_->component;
+
+	for (int i = 0; i < w * h * cpp; i += cpp) {
+		avg[0] += image_->pixels[i];     // Red
+		avg[1] += image_->pixels[i + 1]; // Green
+		avg[2] += image_->pixels[i + 2]; // Blue
+	}
+	avg /= static_cast<double>(w * h);
+	return avg;
+}
 
 void gltf_reader::add_item(const int& _low, const int& _hi)
 {
@@ -760,15 +1061,8 @@ std::unique_ptr<hittable_list> gltf_reader::return_world()
 
 std::unique_ptr<material_list> gltf_reader::return_mtl_list()
 {
-	//
-	//if (mtl_list == nullptr)
-	//	throw std::invalid_argument("The material list is empty!");
-	//
-	for (int i = 0; i < material_num; i++)
-	{
-		std::string name = "material_" + std::to_string(i);
-		std::unique_ptr<material> mat = std::make_unique<metal>(color(0.8, 0.8, 0.8),0.25);
-		mtl_list->push_back(name, std::move(mat));
-	}
+	if (mtl_list == nullptr)
+		throw std::invalid_argument("The material list is empty!");
+	
 	return std::move(mtl_list);
 }

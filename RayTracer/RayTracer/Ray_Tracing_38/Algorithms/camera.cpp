@@ -216,10 +216,10 @@ color camera::ray_color(const ray& r_, int depth_, const hittable& world_, const
 	{
 		//diffusive scatter
 		if (srec[0].scattered)
-			color_from_scatter += srec[0].weight * srec[0].attenuation * simple_direct_lighting(rec);
+			color_from_scatter += srec[0].weight * srec[0].attenuation * (simple_direct_lighting(rec)+ ray_color(srec[0].scattered_ray, depth_ - 1, world_, list_));
 		// specular scatter
 		if (srec[1].scattered)
-			color_from_emission += srec[1].weight * srec[1].attenuation * ray_color(srec[1].scattered_ray, depth_ - 1, world_, list_);
+			color_from_emission += srec[1].weight * srec[1].attenuation *(simple_direct_lighting(rec)+ ray_color(srec[1].scattered_ray, depth_ - 1, world_, list_));
 		// transmit scatter
 		if (srec[2].scattered)
 			color_from_emission += srec[2].weight * srec[2].attenuation * ray_color(srec[2].scattered_ray, depth_ - 1, world_, list_);

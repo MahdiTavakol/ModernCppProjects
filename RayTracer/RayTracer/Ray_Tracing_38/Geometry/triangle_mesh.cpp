@@ -88,7 +88,7 @@ bool triangle_mesh::hit(const ray& _r, interval _ray_t, hit_record& _rec) const
 	_rec.p = intersection;
 	_rec.u = texture[0];
 	_rec.v = texture[1];
-	_rec.w = texture[2];
+	_rec.w = 0.0;
 	_rec.u1 = texture_1[0];
 	_rec.v1 = texture_1[1];
 	_rec.mat_indx = mat_indx;

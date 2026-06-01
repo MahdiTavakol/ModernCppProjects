@@ -10,6 +10,7 @@
 #include "../Algorithms/hit_record.h"
 #include <array>
 #include <vector>
+#include <string>
 
 #include "../Input/tiny_gltf_v3.h"
 
@@ -232,7 +233,8 @@ public:
 
 	void scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_) const override
 	{
-		srec_[0] = { ray(rec.p, vec3(0, 0, 0), r_in.time()), color(0, 0, 0), 0.0, false };
+		// transmitting ray 
+		srec_[2] = { ray(rec.p, vec3(0,0,0), r_in.time()), color(0, 0, 0), 0.1,false };
 
 		// getting u, v coordinates
 		double u = rec.u, v = rec.v;
@@ -242,8 +244,9 @@ public:
 		const tg3_texture_info* texture = &prop.pbr_metallic_roughness.base_color_texture;
 		int32_t tex_coord = texture->tex_coord;
 
-		vec4 vc = tg3_texture_info_to_color(texture, u, v,u1, v1);
-		vec3 albedo = vec3{ vc[0]*base_col[0],vc[1]*base_col[1],vc[2]*base_col[2]};
+		vec4 vc = tg3_texture_info_to_color(texture, u, v, u1, v1);
+		vec3 albedo = vec3{ vc[0] * base_col[0],vc[1] * base_col[1],vc[2] * base_col[2] };
+
 
 		// reflected part
 		// reading the roughness texture
@@ -251,6 +254,7 @@ public:
 		vc = tg3_texture_info_to_color(texture, u, v, u1, v1);
 		double metallic_weight = vc[2]; // the blue channel
 		double roughness = vc[1]; // the green channel
+
 		// metallic 
 		vec3 reflected = reflect(r_in.direction(), rec.normal);
 		double metallic_factor = prop.pbr_metallic_roughness.metallic_factor;
@@ -259,7 +263,6 @@ public:
 		double diffuse_weight = 1.0 - metallic_weight;
 
 		// roughness 
-
 		vec3 random_vector = random_unit_vector();
 		double roughness_factor = prop.pbr_metallic_roughness.roughness_factor;
 		vec3 roughReflected = roughness *
@@ -270,13 +273,13 @@ public:
 		reflected += roughness_factor * roughReflected;
 		reflected = unit_vector(reflected);
 
-		srec_[1] = { ray(rec.p, reflected, r_in.time()), albedo, metallic_weight, true };
+		srec_[1] = { ray(rec.p, reflected, r_in.time()), albedo, metallic_weight -0.025, true };
 
 
 		// diffusive part
 		vec3 diffuse = random_unit_vector() + rec.normal;
 		diffuse = unit_vector(diffuse);
-		srec_[2] = { ray(rec.p,diffuse,r_in.time()),albedo,diffuse_weight,true };
+		srec_[0] = { ray(rec.p,diffuse,r_in.time()),albedo,diffuse_weight - 0.025,true };
 	}
 
 	color emitted(double _u, double _v, const point3& _p)  const override
@@ -298,11 +301,35 @@ public:
 		return false;
 	}
 
-	static void add_images(const tg3_image* imagePtr_, const int& image_count_)
+	static void set_textures(const tg3_texture* textures_, const int& texture_count_)
+	{
+		for (int i = 0; i < texture_count_; i++)
+		{
+			textures.push_back(textures_[i]);
+		}
+	}
+
+	static void set_samplers(const tg3_sampler* samplers_, const int& sampler_count_)
+	{
+		for (int i = 0; i < sampler_count_; i++)
+		{
+			samplers.push_back(samplers_[i]);
+		}
+	}
+
+	static void set_images(const tg3_image_result* images_, const int& image_count_)
 	{
 		for (int i = 0; i < image_count_; i++)
 		{
-			images.push_back(imagePtr_[i]);
+			images.push_back(images_[i]);
+		}
+	}
+
+	static void release_images()
+	{
+		for (tg3_image_result& image_i : images)
+		{
+			delete[] image_i.pixels;
 		}
 	}
 
@@ -318,18 +345,30 @@ public:
 		{
 			std::cout << "Warning: currently coords higher than 0 is not supported!";
 		}
-		if (index >= images.size())
-		{
-			std::cout << "Warning: currently coords higher than 0 is not supported!";
-		}
+
 
 		vec4 vc{ 1.0,1.0,1.0,1.0 };
 		if (index != -1)
 		{
-			tg3_image* img = &images[index];
-			int x = static_cast<int>(u_ * (img->width - 1));
-			int y = static_cast<int>((1.0 - v_) * (img->height - 1));
-			vc = tg3_image_to_color(img, x, y);
+			if (index >= textures.size())
+			{
+				throw std::out_of_range("out of range access for the textures array");
+			}
+			tg3_texture& texture = textures[index];
+			int32_t source = texture.source;
+			int32_t samplerIndex = texture.sampler;
+			tg3_sampler* sampler = &samplers[samplerIndex];
+			if (source != -1) {
+				if (source >= images.size())
+				{
+					throw std::out_of_range("out of range access for the images array");
+				}
+
+				tg3_image_result* img = &images[source];
+				int x = static_cast<int>((u_) * (img->width - 1));
+				int y = static_cast<int>((v_) * (img->height - 1));
+				vc = tg3_image_to_color(img,sampler, x, y);
+			}
 		}
 		return vc;
 	}
@@ -346,66 +385,208 @@ public:
 
 		if (coord != 0)
 		{
-			std::cout << "Warning: currently coords higher than 0 is not supported!";
-		}
-		if (index >= images.size())
-		{
-			throw std::runtime_error("Out of range access for images!");
+			std::cout << "Warning: currently coords higher than 0 is not supported!" << std::endl;
 		}
 
-		tg3_image* img = &images[index];
+
 		vec4 vc{ 1.0,1.0,1.0,1.0 };
 		if (index != -1)
 		{
-			int x, y;
-			if (coord == 0) {
-				x = static_cast<int>(u_ * (img->width - 1));
-				y = static_cast<int>((1.0 - v_) * (img->height - 1));
-			}
-			else if (coord == 1)
+			if (index >= textures.size())
 			{
-				x = static_cast<int>(u1_ * (img->width - 1));
-				y = static_cast<int>((1.0 - v1_) * (img->height - 1));
+				throw std::out_of_range("out of range access for the textures array");
 			}
-			else
-			{
-				std::cout << "Warning: currently coords higher than 0 is not supported!";
-				x = static_cast<int>(u_ * (img->width - 1));
-				y = static_cast<int>((1.0 - v_) * (img->height - 1));
+			tg3_texture& texture = textures[index];
+			int32_t source = texture.source;
+			int32_t samplerIndex = texture.sampler;
+			tg3_sampler* sampler = &samplers[samplerIndex];
+			if (source != -1) {
+				if (source >= images.size())
+				{
+					throw std::out_of_range("out of range access for the images array");
+				}
+				tg3_image_result* img = &images[index];
+				int x, y;
+				if (coord == 0) {
+					x = static_cast<int>(u_ * (img->width - 1));
+					y = static_cast<int>((v_) * (img->height - 1));
+				}
+				else if (coord == 1)
+				{
+					x = static_cast<int>(u1_ * (img->width - 1));
+					y = static_cast<int>((v1_) * (img->height - 1));
+				}
+				else
+				{
+					std::cout << "Warning: currently coords higher than 0 is not supported!" << std::endl;
+					x = static_cast<int>(u_ * (img->width - 1));
+					y = static_cast<int>((1.0 - v_) * (img->height - 1));
+				}
+				vc = tg3_image_to_color(img, sampler,x, y);
 			}
-			vc = tg3_image_to_color(img, x, y);
 		}
 		return vc;
 	}
 
 	static vec4 tg3_image_to_color(
-		const tg3_image* image_, 
+		const tg3_image_result* image_, 
+		const tg3_sampler* smp_,
 		const int& x_,
 		const int& y_)
 	{
-		tg3_span_u8 image_raw = image_->image;
-		int dataPerPixel = image_->component;
-		int dataPerRow = image_->component * image_->width;
-		int ind1 = y_ * dataPerRow + x_ * dataPerPixel;
-		int ind2 = ind1 + 1;
-		int ind3 = ind1 + 2;
-		int ind4 = ind1 + 3;
-		if (ind4 >= image_raw.count)
+		int x = x_, y = y_;
+
+		if (x < 0 || x >= image_->width) {
+			int xDiv;
+			switch (smp_->wrap_s)
+			{
+			case TG3_TEXTURE_WRAP_REPEAT:
+				x = x >= 0 ? x : x + image_->width;
+				x = x % image_->width;
+				break;
+			case TG3_TEXTURE_WRAP_MIRRORED_REPEAT:
+				x = x >= 0 ? x : x + image_->width;
+				x = x % image_->width;
+				xDiv = x_ / image_->width;
+				if (xDiv % 2) x = image_->width-1 - x;
+				break;
+			case TG3_TEXTURE_WRAP_CLAMP_TO_EDGE:
+				x = x < 0 ? 0 : x;
+				x = x >= image_->width ? image_->width - 1 : x;
+				break;
+			default:
+				throw std::invalid_argument("Unsupported sampler!");
+			}
+		}
+		if (y < 0 || y >= image_->height) {
+			int yDiv;
+			switch (smp_->wrap_t)
+			{
+			case TG3_TEXTURE_WRAP_REPEAT:
+				y = y >= 0 ? y : y + image_->height;
+				y = y % image_->height;
+				break;
+			case TG3_TEXTURE_WRAP_MIRRORED_REPEAT:
+				y = y >= 0 ? y : y + image_->height;
+				y = y % image_->height;
+				yDiv = y_ / image_->height;
+				if (yDiv % 2) y = image_->height-1 - y;
+				break;
+			case TG3_TEXTURE_WRAP_CLAMP_TO_EDGE:
+				y = y < 0 ? 0 : y;
+				y = y >= image_->height ? image_->height - 1 : y;
+				break;
+			default:
+				throw std::invalid_argument("Unsupported sampler!");
+			}
+		}
+
+
+		int32_t bits = image_->bits;
+		int32_t bytes = bits / 8;
+		int32_t cpp = image_->component ;
+		int32_t row = cpp * image_->width;
+
+		int base = y * row + x * cpp;
+
+		if (x >= image_->width || y >= image_->height) {
+			std::cout << "image_component==" << image_->component << std::endl;
+			std::cout << "image_width==" << image_->width << std::endl;
 			throw std::runtime_error("Out of range access!");
+		}
 
-		vec4 vc{ 
-			image_raw.data[ind1]/255.0,
-			image_raw.data[ind2]/255.0,
-			image_raw.data[ind3]/255.0,
-			image_raw.data[ind4]/255.0};
+		switch (bytes)
+		{
+		case 2:
+		{
+			unsigned short* chimage = reinterpret_cast<unsigned short*>(image_->pixels);
+			switch (cpp)
+			{
+			case 1:
+			{
+				double g = chimage[base] / (255.0 * bytes);
+				return vec4{ g,g,g,1.0 };
+			}
 
-		return vc;
+			case 2:
+			{
+				double g = chimage[base] / (255.0 * bytes);
+				double a = chimage[base + 1] / (255.0 * bytes);
+				return vec4{ g,g,g,a };
+			}
+
+			case 3:
+			{
+				return vec4{
+				 chimage[base] / (255.0 * bytes),
+				 chimage[base + 1] / (255.0 * bytes),
+				 chimage[base + 2] / (255.0 * bytes),
+					1.0 };
+			}
+
+			case 4:
+			{
+				return vec4{
+				 chimage[base] / (255.0 * bytes),
+				 chimage[base + 1] / (255.0 * bytes),
+				 chimage[base + 2] / (255.0 * bytes),
+				 chimage[base + 3] / (255.0 * bytes) };
+			}
+
+			default:
+				throw std::runtime_error("Unsupported channel count");
+			}
+		}
+		case 1:
+		{
+			switch (cpp)
+			{
+			case 1:
+			{
+				double g = image_->pixels[base] / (255.0 * bytes);
+				return vec4{ g,g,g,1.0 };
+			}
+
+			case 2:
+			{
+				double g = image_->pixels[base] / (255.0 * bytes);
+					double a = image_->pixels[base + 1] / (255.0 * bytes);
+				return vec4{ g,g,g,a };
+			}
+
+			case 3:
+			{
+				double r = static_cast<double>(image_->pixels[base])/ (255.0 * bytes);
+				double g = static_cast<double>(image_->pixels[base + 1]) / (255.0 * bytes);
+				double b = static_cast<double>(image_->pixels[base + 2]) / (255.0 * bytes);
+				return vec4{r,g,b,1.0 };
+			}
+
+			case 4:
+			{
+				double r = static_cast<double>(image_->pixels[base])/ 255.0;
+				double g = static_cast<double>(image_->pixels[base + 1]) / 255.0;
+				double b = static_cast<double>(image_->pixels[base + 2])  / 255.0;
+				double a = static_cast<double>(image_->pixels[base + 3])/ 255.0;
+				return vec4{r,g,b,a};
+			}
+
+			default:
+				throw std::runtime_error("Unsupported channel count");
+			}
+		}
+		default:
+			throw std::runtime_error("You should never have reached here!");
+		}
 	}
 
 
 private:
 	tg3_material prop;
-	inline static std::vector<tg3_image> images;
+	// shared variables
+	inline static std::vector<tg3_texture> textures;
+	inline static std::vector<tg3_image_result> images;
+	inline static std::vector<tg3_sampler> samplers;
 };
 
 

@@ -57,6 +57,16 @@ protected:
 	void read_objects();
 	// reading materials from the gltf
 	void read_materials();
+	// reading textures
+	void read_textures();
+	// reading the samplers
+	void read_samplers();
+	// loading images from the gltf
+	void load_images();
+	// printing the image to file just for debuggin purposes
+	void print_image(tg3_image_result* image_, std::string file_name_);
+	// just for debugging purposes
+	static vec3 image_average_color(tg3_image_result* image_);
 	// adding items to the world
 	virtual void add_item(const int& _low, const int& _hi);
 	// estimating the normal vectors if they are not given in the file

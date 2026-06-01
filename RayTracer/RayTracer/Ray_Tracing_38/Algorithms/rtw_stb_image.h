@@ -6,7 +6,7 @@
 #pragma warning (push, 0)
 #endif
 
-#define STB_IMAGE_IMPLEMENTATION
+
 #define STBI_FAILUTER_USERMSG
 
 #include <cstdlib>
