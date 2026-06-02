@@ -7,11 +7,8 @@
 obj_model_reader::obj_model_reader(
 	std::string obj_file_name_,
     communicator* para_) :
-	para{ para_ },
-	obj_file_name(obj_file_name_),
-	v_num(0), vt_num(0), vn_num(0),
-	world{ std::make_unique<hittable_list>() },
-	mtl_list{std::make_unique<material_list>()}
+	model_reader{ obj_file_name_, para_ },
+	obj_file_name{file_path}
 
 {
 	set_silent_status();
@@ -26,13 +23,10 @@ obj_model_reader::obj_model_reader(
 
 obj_model_reader::obj_model_reader(std::string _obj_file_name,
 	std::string _mtl_file_name,
-	communicator* _para):
-	para{ _para},
-	obj_file_name{_obj_file_name},
-	mtl_file_name{_mtl_file_name},
-	v_num{ 0 }, vt_num{ 0 }, vn_num{ 0 },
-	world{ std::make_unique<hittable_list>() },
-	mtl_list{ std::make_unique<material_list>() }
+	communicator* _para) :
+	model_reader{ _obj_file_name, _para }, 
+	obj_file_name{file_path},
+	mtl_file_name{_mtl_file_name}
 {
 	set_silent_status();
 
@@ -45,12 +39,9 @@ obj_model_reader::obj_model_reader(
 	std::unique_ptr<std::iostream> _obj_file_ptr,
 	std::unique_ptr<std::iostream> _mtl_file_ptr,
 	communicator* _para):
-	para{ _para},
-	obj_file_name{},
+	model_reader{ "", _para },
+	obj_file_name{file_path},
 	mtl_file_name{},
-	v_num{ 0 }, vt_num{ 0 }, vn_num{ 0 },
-	world{ std::make_unique<hittable_list>() },
-	mtl_list{ std::make_unique<material_list>() },
 	obj_file_ptr{ std::move(_obj_file_ptr) },
 	mtl_file_ptr{ std::move(_mtl_file_ptr) }
 {
@@ -92,10 +83,13 @@ void obj_model_reader::read_obj_file()
 {
 	std::string line;
 
+	// the expected number of vertices, vertex normals, vertex textures in the file
 	int file_vs_num = 0, file_vts_num = 0, file_vns_num = 0;
+	// the number of vectices, vertex normals, vertex textures read from the file
+	int v_num = 0, vt_num = 0, vn_num = 0;
+
 	int file_polygon_num = 0, file_triangle_num = 0;
 
-	face_indx faces;
 	int num_polygons = 0;
 	int num_triangles = 0;
 	int current_mat_indx = -1;
@@ -225,7 +219,7 @@ void obj_model_reader::read_obj_file()
 					face.mat_indx = current_mat_indx;
 					face.object = current_obj_name;
 					face.group = current_group;
-					face_indexes.push_back(face);
+					faces.push_back(face);
 					break;
 				default:
 					face_triangulate(face, triangulated);
@@ -236,7 +230,7 @@ void obj_model_reader::read_obj_file()
 						triangle.object = current_obj_name;
 						triangle.group = current_group;
 						triangle.mat_indx = current_mat_indx;
-						face_indexes.push_back(triangle);
+						faces.push_back(triangle);
 					}
 				}
 			}
@@ -400,7 +394,7 @@ void obj_model_reader::read_mtl_file()
 
 void obj_model_reader::set_range(int& _low, int& _hi) {
 	_low = 0;
-	_hi = face_indexes.size()-1;
+	_hi = faces.size()-1;
 }
 
 void obj_model_reader::add_item(const int& _low, const int& _hi)
@@ -408,8 +402,8 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 	int counter = 0;
 
 	int hi = _hi;
-	if (hi >= face_indexes.size())
-		hi = static_cast<int>(face_indexes.size());
+	if (hi >= faces.size())
+		hi = static_cast<int>(faces.size());
 
 
 	int num_triangle = 0;
@@ -419,8 +413,8 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 	
 	for (int i = _low; i < hi; i++)
 	{
-		std::string group = face_indexes[i].group;
-		std::string object = face_indexes[i].object;
+		std::string group = faces[i].group;
+		std::string object = faces[i].object;
 		if (!silent && !object.empty() && object.compare(current_obj))
 		{
 			current_obj = object;
@@ -433,7 +427,7 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 		}
 		else if (!silent && group.empty() && counter % 100 == 0)
 		{
-			std::cout << "\t adding item " << i << " out of " << face_indexes.size() << std::endl;
+			std::cout << "\t adding item " << i << " out of " << faces.size() << std::endl;
 		}
 		std::array<point3, 3> vs_i,  vns_i;
 		std::array<point2, 3> vts_i;
@@ -441,7 +435,7 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 		bool any_missing_vn = false;
 
 
-		auto& face = face_indexes[i];
+		auto& face = faces[i];
 
 		object = face.object;
 		group = face.group;
@@ -505,7 +499,7 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 		// estimating missing vt vectors
 		if (any_missing_vn)
 		{
-			estimate_vns( vs_i, set_vn_i, vns_i);
+			estimate_vns( vs_i, vns_i);
 		}
 
 		auto trngle = std::make_unique<triangle_mesh>(vs_i, vts_i, vns_i, mat_indx);
@@ -522,43 +516,8 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 
 }
 
-std::unique_ptr<hittable_list> obj_model_reader::return_world()
-{
-	return std::move(world);
-}
 
-std::unique_ptr<material_list> obj_model_reader::return_mtl_list()
-{
-	return std::move(mtl_list);
-}
 
-std::unique_ptr<std::istream> obj_model_reader::open_file(std::string& file_name_, std::string path_, bool silent_)
-{
-	char delimiter;
-#ifdef _WIN32
-	delimiter = '\\';
-#else
-	delimiter = '/';
-#endif
-	if (file_name_.empty())
-		return nullptr;
-	auto file_ptr =
-		std::make_unique<std::ifstream>(file_name_);
-	if (!file_ptr->is_open()) {
-		file_name_ = path_ + file_name_;
-		file_ptr = std::make_unique<std::ifstream>(file_name_);
-		std::cout << "Trying opening " << file_name_ << std::endl;
-		if (!file_ptr->is_open()) {
-			if (!silent_)
-				std::cout << "The file " << std::endl
-				<< file_name_ << std::endl
-				<< "does not exists in the path " << std::endl
-				<< std::filesystem::current_path() << std::endl;
-		return nullptr;
-		}
-	}
-	return std::move(file_ptr);
-}
 
 void obj_model_reader::set_silent_status()
 {
@@ -630,25 +589,7 @@ void obj_model_reader::face_triangulate(
 	}
 }
 
-void obj_model_reader::estimate_vns(
-	const std::array<point3, 3>& vs_,
-	const std::array<bool, 3>& set_vn_,
-	std::array<point3, 3>& vns_)
-{
-	constexpr int num_edges = 3;
-	for (int i = 0; i < num_edges; i++)
-	{
-		if (set_vn_[i] == true)
-			continue;
-		int prev = i ? i - 1 : num_edges - 1;
-		int next = (i != num_edges - 1) ? i + 1 : 0;
-		vec3 a = vs_[next] - vs_[i];
-		vec3 b = vs_[prev] - vs_[i];
-		vec3 normal = cross(a, b);
-		vec3 unit_normal = unit_vector(normal);
-		vns_[i] = unit_normal;
-	}
-}
+
 
 std::string obj_model_reader::extract_path(std::string file_name_)
 {

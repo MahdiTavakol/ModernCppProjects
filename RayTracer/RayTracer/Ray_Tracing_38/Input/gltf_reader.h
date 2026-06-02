@@ -3,35 +3,21 @@
 #include "../Materials/material_list.h"
 #include "tiny_gltf_v3.h"
 #include "../Algorithms/communicator.h"
+#include "model_reader.h"
 #include <string>
 #include <vector>
 
 constexpr int MAX_COORD = 16;
 
-struct face_indx2
-{
-	std::vector<int> indx;
-	std::string object;
-	std::string group;
-	int num_edges;
-	int mat_indx;
-};
 
-class gltf_reader {
+class gltf_reader: public model_reader {
 public:
-	gltf_reader(const std::string& file_pat, communicator* para_);
+	gltf_reader(const std::string& file_path, communicator* para_);
 	~gltf_reader();
-	void read();
+	void read() override;
 
-	std::unique_ptr<hittable_list> return_world();
-	std::unique_ptr<material_list> return_mtl_list();
 
 protected:
-	bool silent = false;
-	communicator* para;
-	std::string file_path;
-	int max_message_level = 1000;
-
 	// temp variable for the number of materials for now!
 	int material_num = 0;
 	// the min and max of the simulation box
@@ -40,14 +26,8 @@ protected:
 	double scale = 1.0;
 
 
-	// the object container
-	std::unique_ptr<hittable_list> world;
-	// the material list
-	std::unique_ptr<material_list> mtl_list;
 
 	// data
-	std::vector<face_indx2> faces;
-	std::vector<vec3> vs, vns;
 	// TEXCOORDS
 	std::array<std::vector<vec2>, MAX_COORD> vts_array;
 
@@ -68,29 +48,16 @@ protected:
 	// just for debugging purposes
 	static vec3 image_average_color(tg3_image_result* image_);
 	// adding items to the world
-	virtual void add_item(const int& _low, const int& _hi);
-	// estimating the normal vectors if they are not given in the file
-	void estimate_vns(
-		const std::array<point3, 3>& vs_,
-		std::array<point3, 3>& vns_);
+	virtual void add_item(const int& _low, const int& _hi) override;
+
 
 
 
 private:
-	// The messaging interface.. 
-	// should have its own class at the end
-	void print_message(const std::string message_, int level_ = 0, char delimiter = ' ')
-	{
-		if (level_ > max_message_level)
-			return;
-		std::cout << std::string(level_, delimiter) << message_ << "\n";
-	}
-
 	// tinygltf data structures
 	tg3_parse_options opts;
 	tg3_error_stack errors;
 	tg3_model model;
-
 
 
 	// helper functions taken from

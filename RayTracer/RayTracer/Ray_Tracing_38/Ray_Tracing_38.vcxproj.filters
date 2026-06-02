@@ -198,6 +198,9 @@
     <ClCompile Include="Input\tiny_gltf_v3.c">
       <Filter>Source Files\Input</Filter>
     </ClCompile>
+    <ClCompile Include="Input\model_reader.cpp">
+      <Filter>Source Files\Input</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Types\color.h">
@@ -372,6 +375,9 @@
       <Filter>Source Files\Input</Filter>
     </ClInclude>
     <ClInclude Include="Input\tinygltf_json_c.h">
+      <Filter>Source Files\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Input\model_reader.h">
       <Filter>Source Files\Input</Filter>
     </ClInclude>
   </ItemGroup>

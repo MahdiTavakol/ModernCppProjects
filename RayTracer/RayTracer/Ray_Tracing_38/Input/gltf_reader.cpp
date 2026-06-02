@@ -6,10 +6,7 @@
 #include <fstream>
 
 gltf_reader::gltf_reader(const std::string& file_path_, communicator* para_) :
-	para{para_},
-	file_path{ file_path_ },
-	world{ std::make_unique<hittable_list>() },
-	mtl_list{ std::make_unique<material_list>() }
+	model_reader{file_path_, para_}
 {
 	tg3_parse_options_init(&opts);
 	tg3_error_stack_init(&errors);
@@ -225,12 +222,17 @@ void gltf_reader::read_objects()
 					// We steal the guts of the vector
 					auto triangleFan = std::move(index_vector);
 
-
+					int offset = static_cast<int>(vs.size());
 					// Push back the indices that describe just one triangle one by one
 					for (size_t k = 2 ; k < triangleFan.size(); ++k) {
-						std::vector<int> ind = { triangleFan[0],triangleFan[k - 1],triangleFan[k] };
+						std::vector<int> ind = 
+						{ triangleFan[0] + offset,
+						  triangleFan[k - 1] + offset,
+						  triangleFan[k] + offset};
 						int ind_size = static_cast<int>(ind.size());
-						faces.emplace_back(ind, object, group, ind_size, material_id);
+						faces.emplace_back(
+							ind, std::vector<int>(), std::vector<int>(),
+							object, group, ind_size, material_id);
 						face_count_j++;
 					}
 				}
@@ -243,11 +245,16 @@ void gltf_reader::read_objects()
 
 					auto triangleStrip = std::move(index_vector);
 
-
+					int offset = static_cast<int>(vs.size());
 					for (size_t k = 2 ; k < triangleStrip.size(); ++k) {
-						std::vector<int> ind = { triangleStrip[k - 2],triangleStrip[k - 1],triangleStrip[k] };
+						std::vector<int> ind =
+						{ triangleStrip[k - 2] + offset,
+						  triangleStrip[k - 1] + offset,
+						  triangleStrip[k] + offset};
 						int ind_size = static_cast<int>(ind.size());
-						faces.emplace_back(ind, object, group, ind_size, material_id);
+						faces.emplace_back(
+							ind, std::vector<int>(), std::vector<int>(),
+							object, group, ind_size, material_id);
 						face_count_j++;
 					}
 				}
@@ -259,14 +266,16 @@ void gltf_reader::read_objects()
 					// This only has to be done once per primitive
 					convertedToTriangleList = true;
 
-					int offset = static_cast<int>(vs.size());
+					int offset = 0; // static_cast<int>(vs.size());
 					for (size_t k = 0; k < index_vector.size(); k += 3) {
 						std::vector<int> ind = { 
 							index_vector[k] + offset,
 							index_vector[k+1] + offset,
 							index_vector[k+2] + offset };
 						int ind_size = static_cast<int>(ind.size());
-						face_indx2 face_i = { ind, object, group, ind_size, material_id };
+						face_indx face_i = 
+						{ ind, std::vector<int>(), std::vector<int>(),
+							object, group, ind_size, material_id };
 						faces.push_back(face_i);
 						face_count_j++;
 					}
@@ -852,12 +861,13 @@ void gltf_reader::print_image(tg3_image_result* image_, std::string file_name_)
 		}
 		break;
 	case 2:
-		//file << "655535" <<std::endl;
-		//for (int i = 0; i < h * w; i++)
-		//	file << static_cast<unsigned short>(image_->pixels[i]);
 		file << "655535" << std::endl;
 		for (int i = 0; i < bytes * h * w * comp; i++)
 		{
+			int pixelNumber = i / bytes;
+			// skipping the component
+			if (pixelNumber % comp >= 3)
+				continue;
 			file.write(reinterpret_cast<char*>(image_->pixels[i]), 1);
 		}
 		break;
@@ -943,11 +953,11 @@ void gltf_reader::add_item(const int& _low, const int& _hi)
 		object = face.object;
 		group = face.group;
 
-		int num_edges = static_cast<int>(face.indx.size());
+		int num_edges = static_cast<int>(face.v_indx.size());
 
 		for (int j = 0; j < num_edges; j++)
 		{
-			int indx_j = face.indx[j];
+			int indx_j = face.v_indx[j];
 
 			// bound checking for the indices
 			// as vts and vns are optional we check them only if they are mentioned in the face
@@ -1032,37 +1042,4 @@ void gltf_reader::add_item(const int& _low, const int& _hi)
 	print_message(message, msg_level);
 	message = std::string(52, '=');
 	print_message(message, msg_level);
-}
-
-void gltf_reader::estimate_vns(
-	const std::array<point3, 3>& vs_,
-	std::array<point3, 3>& vns_)
-{
-	constexpr int num_edges = 3;
-	for (int i = 0; i < num_edges; i++)
-	{
-		int prev = i ? i - 1 : num_edges - 1;
-		int next = (i != num_edges - 1) ? i + 1 : 0;
-		vec3 a = vs_[next] - vs_[i];
-		vec3 b = vs_[prev] - vs_[i];
-		vec3 normal = cross(a, b);
-		vec3 unit_normal = unit_vector(normal);
-		vns_[i] = unit_normal;
-	}
-}
-
-
-std::unique_ptr<hittable_list> gltf_reader::return_world()
-{
-	if (world == nullptr)
-		throw std::invalid_argument("The world is empty!");
-	return std::move(world);
-}
-
-std::unique_ptr<material_list> gltf_reader::return_mtl_list()
-{
-	if (mtl_list == nullptr)
-		throw std::invalid_argument("The material list is empty!");
-	
-	return std::move(mtl_list);
 }

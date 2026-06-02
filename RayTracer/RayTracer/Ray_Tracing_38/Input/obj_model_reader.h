@@ -16,20 +16,12 @@
 #include "../Geometry/triangle_mesh.h"
 #include "../Geometry/mesh.h"
 
-struct face_indx
-{
-	std::vector<int> v_indx;
-	std::vector<int> vt_indx;
-	std::vector<int> vn_indx;
-	std::string object;
-	std::string group;
-	int num_edges;
-	int mat_indx;
-};
+#include "model_reader.h"
 
-class obj_model_reader {
+
+
+class obj_model_reader: public model_reader {
 public:
-	obj_model_reader(){}
 	obj_model_reader(std::string obj_file_name_,
 		             communicator* para_);
 	obj_model_reader(std::string _obj_file_name,
@@ -41,35 +33,22 @@ public:
 	obj_model_reader(std::unique_ptr<std::iostream> _obj_file_ptr,
 		             std::unique_ptr<std::iostream> _mtl_file_ptr,
 		             std::unique_ptr<communicator>& _para);
-	virtual void read();
-	std::unique_ptr<hittable_list> return_world();
-	std::unique_ptr<material_list> return_mtl_list();
+	virtual void read() override;
+
 
 protected:
 	// my rank
 	std::array<int, 2> my_rank_config;
-	// the parallel object
-	communicator* para = nullptr;
-	// the object container
-	std::unique_ptr<hittable_list> world;
-	// the material list
-	std::unique_ptr<material_list> mtl_list;
 	// file names
-	std::string obj_file_name, mtl_file_name;
-	// data
-	std::vector<vec3> vs, vns;
-	std::vector<vec2> vts;
-	// number of data
-	int v_num = 0, vt_num = 0, vn_num = 0;
+	std::string& obj_file_name, mtl_file_name;
+
+	// number of shapes
 	int polygon_num = 0, triangle_num = 0;
 	// names
 	// unordered_map is better in performance
 	std::vector<std::string> obj_mat_names;
-	// face indexes
-	std::vector<face_indx> face_indexes;
 
-	// 
-	bool silent = false;
+
 
 	// input streams
 	std::unique_ptr<std::istream> obj_file_ptr;
@@ -78,8 +57,7 @@ protected:
 	void read_obj_file();
 	void read_mtl_file();
 	virtual void set_range(int& _low, int& _hi);
-	virtual void add_item(const int& _low, const int& _hi);
-	static std::unique_ptr<std::istream> open_file(std::string& file_name_, std::string path_="", bool silent = false);
+	virtual void add_item(const int& _low, const int& _hi) override;
 
 	// setting the silent status
 	void set_silent_status();
@@ -87,11 +65,7 @@ protected:
 	static void check_data(const int& num_file_, const int& num_read_, const std::string& title, const bool silent_ = true);
 	// triangulating a face
 	static void face_triangulate(const face_indx& input_, std::vector<face_indx>& output_);
-	// calculating the vn values from the edges
-	static void estimate_vns(
-		const std::array<point3,3>& vs_,
-		const std::array<bool, 3>& set_vn_,
-		std::array<point3,3>& vns_);
+
 
 
 	static std::string extract_path(std::string obj_file_name);
