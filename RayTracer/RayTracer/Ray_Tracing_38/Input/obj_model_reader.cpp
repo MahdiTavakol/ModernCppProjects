@@ -376,8 +376,7 @@ void obj_model_reader::create_and_add_material(material_info& mat_info)
 	message = "Creating the material " + mat_info.material_name;
 	print_message(message, msg_level);
 
-	//if (!texture_path.empty())
-	auto file_stream = open_file(mat_info.texture_path, path, false);
+	file_stream = open_file(mat_info.texture_path, path, false);
 
 	if (file_stream)
 	{
@@ -412,6 +411,8 @@ void obj_model_reader::set_range(int& _low, int& _hi) {
 void obj_model_reader::add_item(const int& _low, const int& _hi)
 {
 	int counter = 0;
+	int msg_level;
+	std::string message;
 
 	int hi = _hi;
 	if (hi >= faces.size())
@@ -430,20 +431,26 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 		if (!silent && !object.empty() && object.compare(current_obj))
 		{
 			current_obj = object;
-			std::cout << "\t adding object " << object << std::endl;
+			msg_level = 2;
+			message = "Adding the object " + object;
+			print_message(message, msg_level);
 		}
 		if (!silent && !group.empty() && group.compare(current_group))
 		{
 			current_group = group;
-			std::cout << "\t\t adding group " + group << std::endl;
+			msg_level = 3;
+			message = "Adding the group " + group;
+			print_message(message, msg_level);
 		}
 		else if (!silent && group.empty() && counter % 100 == 0)
 		{
-			std::cout << "\t adding item " << i << " out of " << faces.size() << std::endl;
+			msg_level = 2;
+			message = "Adding the item " + std::to_string(i) + " out of " + std::to_string(faces.size());
+			print_message(message, msg_level);
 		}
+
 		std::array<point3, 3> vs_i,  vns_i;
 		std::array<point2, 3> vts_i;
-		std::array<bool, 3> set_vn_i = { true,true,true };
 		bool any_missing_vn = false;
 
 
@@ -453,7 +460,6 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 		group = face.group;
 
 		counter++;
-		//std::cout << "Adding the face " << counter << std::endl;
 		std::unique_ptr<material> mat;
 		int num_edges = face.num_edges;
 
@@ -493,7 +499,6 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 			else
 			{
 				// we estimate it later
-				set_vn_i[j] = false;
 				any_missing_vn = true;
 			}
 
@@ -524,8 +529,6 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 
 	// setting all the read objects as main label
 	world->add_label("main");
-
-
 }
 
 

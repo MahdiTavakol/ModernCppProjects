@@ -21,6 +21,7 @@
 struct material_info
 {
 	std::string material_name;
+	color Ka;
 	color Kd;
 	double Ns;
 	double Tr;
