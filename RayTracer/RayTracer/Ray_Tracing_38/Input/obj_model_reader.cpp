@@ -58,29 +58,38 @@ obj_model_reader::obj_model_reader(
 
 void obj_model_reader::read()
 {
-	if (!silent) {
-		std::cout << "Started reading the mtl file " << std::endl;
-	}
-	read_mtl_file();
-	if (!silent) {
-		std::cout << "Finished reading the mtl file " << std::endl;
-		std::cout << "Started reading the obj file " << std::endl;
-	}
-	read_obj_file();
-	if (!silent) {
-		std::cout << "Finished reading the obj file " << std::endl;
-		std::cout << "Started adding the items " << std::endl;
-	}
-	int low, hi;
-	set_range(low, hi);
-	add_item(low,hi);
-	if (!silent)
-		std::cout << "Finished adding items to the hittable_list" << std::endl;
+	int msg_level = 0;
+	std::string message = std::string(52, '=');
+	print_message(message, msg_level);
+	message = "Reading the obj+mtl file ...";
+	print_message(message, msg_level);
+	message = std::string(52, '=');
+	print_message(message, msg_level);
 
+	msg_level = 0;
+	message = "Started reading the mtl file ";
+	print_message(message, msg_level);
+	read_mtl_file();
+	message = "Finished reading the mtl file ";
+	print_message(message, msg_level);
+	message = "Started reading the obj file ";
+	print_message(message, msg_level);
+	read_obj_file();
+	message = "Finished reading the obj file ";
+	print_message(message, msg_level);
+	message = "Started adding the items ";
+	print_message(message, msg_level);
+	int low, high;
+	set_range(low, high);
+	message = "Finished adding items to the hittable_list";
+	print_message(message, msg_level);
 }
 
 void obj_model_reader::read_obj_file()
 {
+	int msg_level = 0;
+	std::string message;
+
 	std::string line;
 
 	// the expected number of vertices, vertex normals, vertex textures in the file
@@ -211,8 +220,11 @@ void obj_model_reader::read_obj_file()
 				case 1:
 					[[fallthrough]];
 				case 2:
-					if (!silent)
-						std::cout << "Ignoring the line " << line << std::endl;
+					msg_level = 1;
+					message = 
+						"Warning: Ignoring the line " + line +
+						" since it has less than 3 vertices";
+					print_message(message, msg_level);
 					break;
 				case 3:
 					num_triangles++;
@@ -258,18 +270,20 @@ void obj_model_reader::read_obj_file()
 
 void obj_model_reader::read_mtl_file()
 {
+	std::string message;
+	int msg_level = 1;
 	std::string line;
 	std::stringstream iss;
 
-	double Ns, d, Tr;
-	color Ka, Kd, Ks, Tf;
-	double Ni = 1.5;
-	std::string texture_path = "";
+
 	std::string dummy_str;
 	int material_counter = 0;
-	bool read_Tr = false;
-	std::string material_name;
 
+
+	material_info mat_info;
+	mat_info.Ni = 1.5;
+	mat_info.texture_path = "";
+	mat_info.read_Tr = false;
 
 
 	std::unique_ptr<material> material_i;
@@ -289,107 +303,105 @@ void obj_model_reader::read_mtl_file()
 			{
 				if (material_counter)
 				{
-					if (!read_Tr)
-						Tr = 1.0 - d;
-					read_Tr = false;
-					if (!silent)
-						std::cout << "Creating material " << material_name << std::endl;
-					
-					//if (!texture_path.empty())
-						file_stream = open_file(texture_path, path,false);
-					
-					if (file_stream)
-					{
-						texture = std::make_unique<image_texture>(texture_path.c_str());
-						material_i = std::make_unique<lambertian>(std::move(texture));
-					}
-					else
-					{
-						//std::cout << "The file was not found reverting to simple rendering" << std::endl;
-						material_i = std::make_unique<general>(Kd, Ns, Tr, Tf, Ks,Ni);
-					}
-					if (!silent)
-						std::cout << "Adding material " << material_name << std::endl;
-
-
-					// adding the material
-					mtl_list->push_back(material_name, std::move(material_i));
+					create_and_add_material(mat_info);
+					mat_info.read_Tr = false;
 				}
 				// resetting the texture_path
-				texture_path.clear();
+				mat_info.texture_path.clear();
 
 				iss >> dummy_str;
-				if (!silent)
-					std::cout << "Reading the material " << dummy_str << std::endl;
-				material_name = dummy_str;
+				msg_level = 1;
+				message = "Reading the material " + dummy_str;
+				mat_info.material_name = dummy_str;
 				material_counter++;
 			}
 			else if (dummy_str == "Ns")
 			{
-				iss >> Ns;
+				iss >> mat_info.	Ns;
 			}
 			else if (dummy_str == "d")
 			{
-				iss >> d;
+				iss >> mat_info.d;
 			}
 			else if (dummy_str == "Tr")
 			{
-				read_Tr = true;
-				iss >> Tr;
+				mat_info.read_Tr = true;
+				iss >> mat_info.Tr;
 				iss.clear();
 				iss.str("");
 			}
 			else if (dummy_str == "Tf")
 			{
-				iss >> Tf;
+				iss >> mat_info.Tf;
 			}
 			else if (dummy_str == "Ka")
 			{
-				iss >> Ka;
+				iss >> mat_info.Ka;
 			}
 			else if (dummy_str == "Kd")
 			{
-				iss >> Kd;
+				iss >> mat_info.Kd;
 			}
 			else if (dummy_str == "Ks")
 			{
-				iss >> Ks;
+				iss >> mat_info.Ks;
 			}
 			else if (dummy_str == "Ni")
 			{
-				iss >> Ni;
+				iss >> mat_info.Ni;
 			}
 			else if (dummy_str == "map_Kd")
 			{
-				iss >> texture_path;
+				iss >> mat_info.texture_path;
 			}
 		}
 	}
 
-	// Since we add to the materials vector whenever we read a newmtl line the last material would not be added otherwise.
-	if (!silent)
-		std::cout << "Creating material " << material_name << std::endl;
+	create_and_add_material(mat_info);
+}
 
-	if (!read_Tr)
-		Tr = 1.0 - d;
+void obj_model_reader::create_and_add_material(material_info& mat_info)
+{
+	int msg_level = 1;
+	std::string message;
+
+	std::unique_ptr<material> material_i;
+	std::unique_ptr<image_texture> texture;
+	std::unique_ptr<std::istream> file_stream;
 
 
-	file_stream = open_file(texture_path, path, false);
+	if (!mat_info.read_Tr)
+		mat_info.Tr = 1.0 - mat_info.d;
+	msg_level = 1;
+	message = "Creating the material " + mat_info.material_name;
+	print_message(message, msg_level);
+
+	//if (!texture_path.empty())
+	auto file_stream = open_file(mat_info.texture_path, path, false);
 
 	if (file_stream)
 	{
-		texture = std::make_unique<image_texture>(texture_path);
+		texture = std::make_unique<image_texture>(mat_info.texture_path.c_str());
 		material_i = std::make_unique<lambertian>(std::move(texture));
 	}
 	else
 	{
-		//std::cout << "The file was not found reverting to simple rendering" << std::endl;
-		material_i = std::make_unique<general>(Kd, Ns, Tr, Tf, Ks, Ni);
+		msg_level = 1;
+		message = "The texture file " + mat_info.texture_path + " was not found! Reverting to simple rendering";
+		print_message(message, msg_level);
+		material_i =
+			std::make_unique<general>(
+				mat_info.Kd, mat_info.Ns, 
+				mat_info.Tr, mat_info.Tf,
+				mat_info.Ks, mat_info.Ni);
 	}
-	if (!silent)
-		std::cout << "Adding material " << material_name << std::endl;
+	msg_level = 1;
+	message = "Adding the material " + mat_info.material_name;
+	print_message(message, msg_level);
 
-	mtl_list->push_back(material_name, std::move(material_i));
+
+	// adding the material
+	mtl_list->push_back(mat_info.material_name, std::move(material_i));
 }
 
 void obj_model_reader::set_range(int& _low, int& _hi) {

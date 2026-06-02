@@ -18,7 +18,19 @@
 
 #include "model_reader.h"
 
-
+struct material_info
+{
+	std::string material_name;
+	color Kd;
+	double Ns;
+	double Tr;
+	color Tf;
+	color Ks;
+	double Ni;
+	double d;
+	bool read_Tr = false;
+	std::string texture_path;
+};
 
 class obj_model_reader: public model_reader {
 public:
@@ -65,7 +77,8 @@ protected:
 	static void check_data(const int& num_file_, const int& num_read_, const std::string& title, const bool silent_ = true);
 	// triangulating a face
 	static void face_triangulate(const face_indx& input_, std::vector<face_indx>& output_);
-
+	// creating and adding materials to the material list
+	void create_and_add_material(material_info& mat_info);
 
 
 	static std::string extract_path(std::string obj_file_name);
