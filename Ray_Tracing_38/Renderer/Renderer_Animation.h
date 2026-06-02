@@ -1,0 +1,16 @@
+#pragma once
+#include "Renderer.h"
+
+class renderer_animation final : public renderer
+{
+public:
+	renderer_animation(communicator* para_, std::unique_ptr<path>&& pth_, std::string info_ = "", bool verbose_ = false);
+	void render(image* img_, camera* cam_, output* writer_) override;
+	virtual void write_file(output* writer_, image* img_) override;
+
+
+private:
+	int num_frames;
+	void update_filename(std::string filename_);
+
+};

@@ -1,0 +1,266 @@
+#include <fstream>
+#include <numbers>
+
+#include "../Shared/rtweekend.h"
+
+#include "camera.h"
+
+camera::camera(settings* cam_setting_, const image* img_)
+{
+	// checking the setting type
+	camera_settings* sett = dynamic_cast<camera_settings*>(cam_setting_);
+	if (!sett)
+		throw std::invalid_argument("Wrong settings object");
+	
+
+
+	// setting the image_width and height
+	img_->returnSize(image_width, image_height);
+
+	setup(sett);
+	initialize();
+}
+
+
+void camera::setup(camera_settings* cam_setting_)
+{
+	int& samples_per_pixel_setting = cam_setting_->get_samples_per_pixel();
+	int& max_depth_setting = cam_setting_->get_max_depth();
+	int& vfov_setting = cam_setting_->get_vfov();
+	double& focus_dist_setting = cam_setting_->get_focus_dist();
+	double& defocus_angle_setting = cam_setting_->get_defocus_angle();
+	point3& lookat_setting = cam_setting_->get_lookat();
+	point3& vup_setting = cam_setting_->get_vup();
+	point3& background_setting = cam_setting_->get_background();
+
+	std::string background_image_name = cam_setting_->return_HDRI_name();
+
+
+	this->samples_per_pixel = samples_per_pixel_setting;
+	this->max_depth = max_depth_setting;
+	this->vfov = vfov_setting;
+	this->defocus_angle = defocus_angle_setting;
+	this->focus_dist = focus_dist_setting;
+	this->defocus_angle = defocus_angle_setting;
+	this->lookat = lookat_setting;
+	this->vup = vup_setting;
+	this->background = background_setting;
+
+	if (!background_image_name.empty())
+	{
+		background_image = std::make_unique<HDRI_texture>(background_image_name);
+	}
+}
+
+void camera::initialize()
+{
+	pixel_samples_scale = 1.0 / samples_per_pixel;
+
+
+
+	center = lookfrom;
+
+	auto theta = degrees_to_radians(vfov);
+	auto h = std::tan(theta / 2.0);
+	auto viewport_height = 2 * h * focus_dist;
+	auto viewport_width = viewport_height * (double(image_width) / image_height);
+
+	w = unit_vector(lookfrom - lookat);
+	u = unit_vector(cross(vup, w));
+	v = cross(w, u);
+
+
+	auto viewport_u = viewport_width * u;
+	auto viewport_v = viewport_height * -v;
+
+	pixel_delta_u = viewport_u / image_width;
+	pixel_delta_v = viewport_v / image_height;
+
+	auto viewport_upper_left = center - focus_dist * w - viewport_u / 2 - viewport_v / 2;
+	pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
+
+	auto defocus_radius = focus_dist * std::tan(degrees_to_radians(defocus_angle / 2));
+	defocus_disk_u = u * defocus_radius;
+	defocus_disk_v = v * defocus_radius;
+}
+
+void camera::render(image* img_, const hittable& world_, const material_list& list_) const
+{
+	// getting the color_array pointer from the image object
+	color_array* c_array = img_->array();
+	// getting the ranges from the image object
+	std::array<int, 2> widthRange, heightRange;
+	img_->returnRange(widthRange, heightRange);
+	int height_min = heightRange[0];
+	int height_max = heightRange[1];
+	int width_min = widthRange[0];
+	int width_max = widthRange[1];
+
+
+	for (int j = height_min; j < height_max; j++)
+	{
+		for (int i = width_min; i < width_max; i++)
+		{
+			color pixel_color(0, 0, 0);
+			for (int sample = 0; sample < samples_per_pixel; sample++)
+			{
+				ray r = get_ray(i, j);
+				pixel_color += ray_color(r, max_depth, world_,list_);
+			}
+			pixel_color = pixel_samples_scale * pixel_color;
+			color_data c_data{ pixel_color.x(),pixel_color.y(),pixel_color.z() };
+			c_array->set(i - width_min, j - height_min, c_data);
+		}
+	}
+}
+
+void camera::render_verbose(image* img_, const hittable& world_, const material_list& list_) const
+{
+	// getting the color_data array from the image object
+	color_data** c_data = img_->returnColorData();
+	// getting the ranges from the image object
+	std::array<int, 2> widthRange, heightRange;
+	img_->returnRange(widthRange, heightRange);
+	int height_min = heightRange[0];
+	int height_max = heightRange[1];
+	int width_min = widthRange[0];
+	int width_max = widthRange[1];
+
+	int image_height = height_max - height_min;
+	int image_width = width_max - width_min;
+
+	int my_samples_per_pixel = 1;
+
+
+	for (int j = height_min; j < height_max; j++)
+	{
+		std::clog << "\rRendering row: " << j << " " << std::endl;
+		//std::clog << "\rScanlines remaining: " << (height_max - j) << " " << std::flush;
+		for (int i = width_min; i < width_max; i++)
+		{
+			color pixel_color(0, 0, 0);
+			for (int sample = 0; sample < my_samples_per_pixel; sample++)
+			{
+				ray r = get_ray(i, j);
+				pixel_color += ray_color(r, max_depth, world_, list_);
+			}
+			pixel_color = pixel_samples_scale * pixel_color;
+			c_data[i][j].r = pixel_color.x();
+			c_data[i][j].g = pixel_color.y();
+			c_data[i][j].b = pixel_color.z();
+		}
+	}
+
+	std::clog << "\rDone                          ";
+}
+
+ray camera::get_ray(int i, int j) const
+{
+	auto offset = sample_square();
+	auto pixel_sample = pixel00_loc
+		+ ((i + offset.x()) * pixel_delta_u)
+		+ ((j + offset.y()) * pixel_delta_v);
+
+	auto ray_origin = (defocus_angle <= 0) ? center : defocus_disk_sample();
+	auto ray_direction = pixel_sample - ray_origin;
+	auto ray_time = random_double();
+
+	return ray(ray_origin, ray_direction, ray_time);
+}
+
+vec3 camera::sample_square()
+{
+	return vec3(random_double() - 0.5, random_double() - 0.5, 0);
+}
+
+point3 camera::defocus_disk_sample() const
+{
+	auto p = random_in_unit_disk();
+	return center + (p[0] * defocus_disk_u) + (p[1] * defocus_disk_v);
+}
+
+
+color camera::ray_color(const ray& r_, int depth_, const hittable& world_, const material_list& list_) const
+{
+	if (depth_ <= 0)
+		return color(0, 0, 0);
+
+	hit_record rec;
+
+	if (!world_.hit(r_, interval(0.001, infinity), rec))
+		return background_color(r_);
+
+	int mat_indx = rec.mat_indx;
+	material* mat = list_(mat_indx);
+
+
+	ray scattered;
+	color attenuation;
+	color color_from_emission = mat->emitted(rec.u, rec.v, rec.p);
+
+	std::array<scatter_record, 3> srec;
+	for (auto& s : srec)
+	{
+		s.scattered_ray = scattered;
+		s.attenuation = attenuation;
+	}
+
+	mat->scatter(r_, rec, srec);
+	
+	if (!srec[0].scattered && !srec[1].scattered && !srec[2].scattered)
+		return color_from_emission;
+
+	color color_from_scatter;
+
+	//for (auto& s : srec)
+	{
+		//diffusive scatter
+		if (srec[0].scattered)
+			color_from_scatter += srec[0].weight * srec[0].attenuation * (simple_direct_lighting(rec));//+ray_color(srec[0].scattered_ray, depth_ - 1, world_, list_));
+		// specular scatter
+		if (srec[1].scattered)
+			color_from_emission += srec[1].weight * srec[1].attenuation *ray_color(srec[1].scattered_ray, depth_ - 1, world_, list_);
+		// transmit scatter
+		if (srec[2].scattered)
+			color_from_emission += srec[2].weight * srec[2].attenuation * ray_color(srec[2].scattered_ray, depth_ - 1, world_, list_);
+	}
+
+
+	return color_from_emission + color_from_scatter;
+}
+
+color camera::background_color(const ray& r_) const
+{
+	if (background_image == nullptr)
+	{
+		return background;
+	}
+
+	vec3 dir = unit_vector(r_.direction());
+	// cartesian to spherical coordinates
+	double theta = std::acos(dir[1]);
+	double phi = std::atan2(dir[0], dir[2]);
+
+	double u = (phi + std::numbers::pi) / (2.0 * pi);
+	double v = theta * std::numbers::inv_pi;
+
+	point3 p;
+	return background_image->value(u, v, p);
+}
+
+color camera::simple_direct_lighting(const hit_record& rec_) const
+{
+	vec3 light_dir = vec3{ 1.0,1.0,1.0 };
+	double ndotl = dot(rec_.normal, light_dir);
+	if (ndotl < 0)
+	{
+		light_dir = vec3{ -1.0,1.0,1.0 };
+		ndotl = std::max(dot(rec_.normal, light_dir), 0.0);
+	}
+
+	color ambient{ 0.15,0.15,0.15 };
+	color light_color{ 1.0,1.0,1.0 };
+
+	return ambient + ndotl * light_color;
+
+}

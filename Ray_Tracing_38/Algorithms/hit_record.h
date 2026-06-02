@@ -1,0 +1,27 @@
+#pragma once
+
+#include "../Shared/rtweekend.h"
+#include "../Types/ray.h"
+#include "../Types/vec3.h"
+
+class material;
+
+class hit_record
+{
+public:
+    point3 p;
+    vec3 normal;
+    // just material index.
+    int mat_indx;
+    double t{ 0.0 };
+    double u{ 0.0 };
+    double v{ 0.0 };
+    double w{ 0.0 };
+    bool front_face = false;
+
+    // texcoord_1. pissibly deterioriate the cache locality
+    double u1{ 0.0 };
+    double v1{ 0.0 };
+
+    void set_face_normal(const ray& r, const vec3& outward_normal);
+};

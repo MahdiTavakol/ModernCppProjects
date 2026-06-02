@@ -1,0 +1,6 @@
+mode OBJ_MODEL
+renderer -renderer_mode ASYNC -path_type NONE -max_threads 8
+scene -mode OBJ_MODEL -obj_file ..\\models\\Mustang1965\\Mustang1965.obj -mtl_file  ..\\models\\Mustang1965\\Mustang1965.mtl
+camera -vup 0 1 0 -samples_per_pixel 30 -max_depth 30 -vfov 45.0
+image -width 1080 -aspect_ratio 16.0 9.0
+output -output_type async  -output_mode P6 -image_file Tests\\SampleOutputs\\test_11.ppm

@@ -1,0 +1,128 @@
+75 [24384] INFO perfrun.launcher <> - Launcher main begin
+81 [24384] INFO perfrun.launcher <> - MessageCatalogInit finished
+81 [24384] INFO perfrun.launcher <> - Launcher instance created
+81 [24384] INFO perfrun.launcher <> - argc = 7; cmdline = C:\Program Files (x86)\Intel\oneAPI\vtune\2026.0\bin64\amplxe-runss.exe --ui-output-format xml --ui-output-fd 1084 --option-file C:\6-Courses\19-ModernC++Projects\RayTracer\RayTracer\Ray_Tracing_38\Intel® VTune™ Profiler Results\Ray_Tracing_39\r008hs\config\runss.options 
+96 [24384] INFO perfrun.launcher <> - New signal handler callback was added
+138 [24384] INFO perfrun.perfcollector <> - SEP tool path: C:\Program Files (x86)\Intel\oneAPI\vtune\2026.0\bin64\sep.exe
+150 [24384] INFO perfrun.launcher <> - create msngr2::ICliToolContext
+150 [24384] INFO perfrun.launcher <> - create file finder object
+150 [24384] INFO perfrun.launcher <> - create a result directory: pattern = C:\6-Courses\19-ModernC++Projects\RayTracer\RayTracer\Ray_Tracing_38\Intel® VTune™ Profiler Results\Ray_Tracing_39\r008hs pid = 4294967295
+157 [24384] INFO perfrun.launcher <> - create data directory = C:\6-Courses\19-ModernC++Projects\RayTracer\RayTracer\Ray_Tracing_38\Intel® VTune™ Profiler Results\Ray_Tracing_39\r008hs\data.0
+162 [24384] INFO perfrun.launcher <> - Creating the master collection flag
+169 [24384] INFO perfrun.launcher <> - Done creating the master collection flag
+170 [20180] INFO perfrun.launcher <> - plugin [remoteplug] was disabled because it doesn't support the given collection type.
+171 [20180] INFO perfrun.sdk <> - Allocating TMU :C:\6-Courses\19-ModernC++Projects\RayTracer\RayTracer\Ray_Tracing_38\Intel® VTune™ Profiler Results\Ray_Tracing_39\r008hs\data.0\systemcollector-17976-Afshin.sc
+172 [20180] INFO perfrun.launcher <> - plugin [] was disabled because it doesn't support the given collection type.
+176 [20180] INFO perfrun.launcher <> - plugin [] was disabled because it doesn't support the given collection type.
+176 [20180] INFO perfrun.launcher <> - plugin [gpu] was disabled because it doesn't support the given collection type.
+176 [20180] INFO perfrun.launcher <> - plugin [etw.kernel] was disabled because it doesn't support the given collection type.
+176 [20180] INFO perfrun.launcher <> - plugin [etw.dx] was disabled because it doesn't support the given collection type.
+176 [20180] INFO perfrun.launcher <> - plugin [etw.wsa] was disabled because it doesn't support the given collection type.
+176 [20180] INFO perfrun.mrte <> - system-wide mode is 0
+177 [20180] INFO perfrun.mrte <> - Getting  mrte profiling environment ...
+240 [20180] INFO perfrun.mrte <> - INTEL_MRTE_DATA_DIR=C:\6-Courses\19-ModernC++Projects\RayTracer\RayTracer\Ray_Tracing_38\Intel® VTune™ Profiler Results\Ray_Tracing_39\r008hs\data.0
+240 [20180] INFO perfrun.mrte <> - INTEL_MRTE_HOST_NAME=Afshin
+240 [20180] INFO perfrun.mrte <> - JAVA_TOOL_OPTIONS=-agentlib:amplxe_samplingmrte_javaprof_1.0
+240 [20180] INFO perfrun.mrte <> - PATH=C:\Program Files (x86)\Intel\oneAPI\vtune\2026.0\bin32\runtime;C:\Program Files (x86)\Intel\oneAPI\vtune\2026.0\bin64\runtime;C:\Program Files\Microsoft MPI\Bin\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\PuTTY\;C:\Program Files\Pandoc\;C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\;C:\Program Files\Git\cmd;C:\Program Files\NVIDIA Corporation\Nsight Compute 2025.4.1\;C:\Users\mahdi\AppData\Local\Microsoft\WindowsApps;C:\Program Files (x86)\Microsoft SDKs\MPI\Bin\;;C:\Users\mahdi\.lmstudio\bin;C:\Users\mahdi\AppData\Local\Programs\Ollama;C:\Users\mahdi\AppData\Local\Programs\Microsoft VS Code\bin;C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE\PrivateAssemblies\runtimes\win-x64\native
+240 [20180] INFO perfrun.mrte <> - COR_ENABLE_PROFILING=1
+240 [20180] INFO perfrun.mrte <> - COR_PROFILER={AA5E4821-E3B1-479c-B7FF-5AD047D22CED}
+240 [20180] INFO perfrun.mrte <> - COMPLUS_ProfAPI_ProfilerCompatibilitySetting=EnableV2Profiler
+240 [20180] INFO perfrun.mrte <> - CORECLR_ENABLE_PROFILING=1
+240 [20180] INFO perfrun.mrte <> - CORECLR_PROFILER={AA5E4821-E3B1-479c-B7FF-5AD047D22CED}
+240 [20180] INFO perfrun.mrte <> - CORECLR_PROFILER_PATH=C:\Program Files (x86)\Intel\oneAPI\vtune\2026.0\bin64/amplxe_samplingmrte_clrprof_1.0.dll
+240 [20180] INFO perfrun.mrte <> - INTEL_MRTE_PROFILER_MODE=mixed
+240 [20180] INFO perfrun.mrte <> - Data directory: C:\6-Courses\19-ModernC++Projects\RayTracer\RayTracer\Ray_Tracing_38\Intel® VTune™ Profiler Results\Ray_Tracing_39\r008hs\data.0
+240 [20180] INFO perfrun.mrte <> - Mrte plugin is initialized
+240 [20180] INFO perfrun.launcher <> - plugin [emon] was disabled because it doesn't support the given collection type.
+241 [20180] INFO perfrun.launcher <> - plugin [cuscol] was disabled because it doesn't support the given collection type.
+241 [20180] INFO perfrun.launcher <> - plugin [stdsrc] was disabled because it doesn't support the given collection type.
+241 [20180] INFO perfrun.launcher <> - plugin [sep] was disabled because it doesn't support the given collection type.
+241 [20180] INFO perfrun.launcher <> - plugin [vtsspp] was disabled because it doesn't support the given collection type.
+241 [20180] INFO perfrun.launcher <> - plugin [perf] was disabled because it doesn't support the given collection type.
+241 [20180] INFO perfrun.launcher <> - plugin [aoclprofile] was disabled because it doesn't support the given collection type.
+241 [20180] INFO perfrun.tpss <> - initialize tpss controller
+241 [20180] INFO perfrun.tpss <> - configure collection mode: value = cpu:stack
+242 [20180] INFO perfrun.tpss <> - default obj-size-min=1024
+242 [20180] INFO perfrun.tpss <> - default hash-table-size=0
+242 [20180] INFO perfrun.launcher <> - plugin [] was disabled because it doesn't support the given collection type.
+242 [20180] INFO perfrun.launcher <> - plugin [] was disabled because it doesn't support the given collection type.
+242 [20180] INFO perfrun.launcher <> - plugin [] was disabled because it doesn't support the given collection type.
+242 [20180] INFO perfrun.launcher <> - plugin [] was disabled because it doesn't support the given collection type.
+242 [20180] INFO perfrun.launcher <> - plugin [power] was disabled because it doesn't support the given collection type.
+242 [20180] INFO perfrun.launcher <> - plugin [] was disabled because it doesn't support the given collection type.
+242 [20180] INFO perfrun.launcher <> - plugin [] was disabled because it doesn't support the given collection type.
+242 [20180] INFO perfrun.launcher <> - plugin [] was disabled because it doesn't support the given collection type.
+242 [20180] INFO perfrun.launcher <> - plugin [l0_metrics] was disabled because it doesn't support the given collection type.
+242 [20180] INFO perfrun.launcher <> - plugin [stall_reasons] was disabled because it doesn't support the given collection type.
+242 [24384] INFO perfrun.launcher <> - set environment variable: PATH = C:\Program Files (x86)\Intel\oneAPI\vtune\2026.0\bin32\runtime;C:\Program Files (x86)\Intel\oneAPI\vtune\2026.0\bin64\runtime;C:\Program Files\Microsoft MPI\Bin\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\PuTTY\;C:\Program Files\Pandoc\;C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\;C:\Program Files\Git\cmd;C:\Program Files\NVIDIA Corporation\Nsight Compute 2025.4.1\;C:\Users\mahdi\AppData\Local\Microsoft\WindowsApps;C:\Program Files (x86)\Microsoft SDKs\MPI\Bin\;;C:\Users\mahdi\.lmstudio\bin;C:\Users\mahdi\AppData\Local\Programs\Ollama;C:\Users\mahdi\AppData\Local\Programs\Microsoft VS Code\bin;C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE\PrivateAssemblies\runtimes\win-x64\native
+242 [24384] INFO perfrun.launcher <> - set environment variable: INTEL_LIBITTNOTIFY32 = C:\Program Files (x86)\Intel\oneAPI\vtune\2026.0\bin32\runtime\ittnotify_collector.dll
+242 [24384] INFO perfrun.launcher <> - set environment variable: INTEL_LIBITTNOTIFY64 = C:\Program Files (x86)\Intel\oneAPI\vtune\2026.0\bin64\runtime\ittnotify_collector.dll
+242 [24384] INFO perfrun.launcher <> - set environment variable: INTEL_ITTNOTIFY_GROUPS = 
+242 [24384] INFO perfrun.launcher <> - set environment variable: INTEL_JIT_PROFILER32 = C:\Program Files (x86)\Intel\oneAPI\vtune\2026.0\bin32\runtime\ittnotify_collector.dll
+243 [24384] INFO perfrun.launcher <> - set environment variable: INTEL_JIT_PROFILER64 = C:\Program Files (x86)\Intel\oneAPI\vtune\2026.0\bin64\runtime\ittnotify_collector.dll
+243 [24384] INFO perfrun.launcher <> - set environment variable: CCL_ITT_LEVEL = 1
+243 [24384] INFO perfrun.launcher <> - set environment variable: ENABLE_JITPROFILING = 1
+243 [24384] INFO perfrun.launcher <> - set environment variable: CL_CONFIG_USE_VTUNE = True
+243 [24384] INFO perfrun.launcher <> - set environment variable: KMP_FORKJOIN_FRAMES = 0
+243 [24384] INFO perfrun.launcher <> - set environment variable: KMP_FORKJOIN_FRAMES_MODE = 0
+243 [24384] INFO perfrun.launcher <> - set environment variable: INTEL_MRTE_DATA_DIR = C:\6-Courses\19-ModernC++Projects\RayTracer\RayTracer\Ray_Tracing_38\Intel® VTune™ Profiler Results\Ray_Tracing_39\r008hs\data.0
+243 [24384] INFO perfrun.launcher <> - set environment variable: INTEL_MRTE_HOST_NAME = Afshin
+243 [24384] INFO perfrun.launcher <> - set environment variable: JAVA_TOOL_OPTIONS = -agentlib:amplxe_samplingmrte_javaprof_1.0
+243 [24384] INFO perfrun.launcher <> - set environment variable: PATH = C:\Program Files (x86)\Intel\oneAPI\vtune\2026.0\bin32\runtime;C:\Program Files (x86)\Intel\oneAPI\vtune\2026.0\bin64\runtime;C:\Program Files\Microsoft MPI\Bin\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\PuTTY\;C:\Program Files\Pandoc\;C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\;C:\Program Files\Git\cmd;C:\Program Files\NVIDIA Corporation\Nsight Compute 2025.4.1\;C:\Users\mahdi\AppData\Local\Microsoft\WindowsApps;C:\Program Files (x86)\Microsoft SDKs\MPI\Bin\;;C:\Users\mahdi\.lmstudio\bin;C:\Users\mahdi\AppData\Local\Programs\Ollama;C:\Users\mahdi\AppData\Local\Programs\Microsoft VS Code\bin;C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE\PrivateAssemblies\runtimes\win-x64\native
+244 [24384] INFO perfrun.launcher <> - set environment variable: COR_ENABLE_PROFILING = 1
+244 [24384] INFO perfrun.launcher <> - set environment variable: COR_PROFILER = {AA5E4821-E3B1-479c-B7FF-5AD047D22CED}
+244 [24384] INFO perfrun.launcher <> - set environment variable: COMPLUS_ProfAPI_ProfilerCompatibilitySetting = EnableV2Profiler
+244 [24384] INFO perfrun.launcher <> - set environment variable: CORECLR_ENABLE_PROFILING = 1
+244 [24384] INFO perfrun.launcher <> - set environment variable: CORECLR_PROFILER = {AA5E4821-E3B1-479c-B7FF-5AD047D22CED}
+244 [24384] INFO perfrun.launcher <> - set environment variable: CORECLR_PROFILER_PATH = C:\Program Files (x86)\Intel\oneAPI\vtune\2026.0\bin64/amplxe_samplingmrte_clrprof_1.0.dll
+244 [24384] INFO perfrun.launcher <> - set environment variable: INTEL_MRTE_PROFILER_MODE = mixed
+245 [24384] INFO perfrun.launcher <> - RpcServer: run RPC server to handle requests
+252 [24384] INFO perfrun.sdk <> - IProcessUtil: the given executable 'C:\Program Files\Microsoft MPI\Bin\mpiexec.exe' is valid.
+252 [24384] INFO perfrun.launcher <> - Launcher: command line to start before modification = C:\Program Files\Microsoft MPI\Bin\mpiexec.exe -np 8 C:\6-Courses\19-ModernC++Projects\RayTracer\RayTracer\x64\Debug\RayTracingApp.exe file Tests\SampleInputs\SampleInput-7.txt
+256 [24384] INFO perfrun.launcher <> - Launcher: command line to start after modification = C:\Program Files (x86)\Intel\oneAPI\vtune\2026.0\bin64\pin.exe -error_file C:\6-Courses\19-ModernC++Projects\RayTracer\RayTracer\Ray_Tracing_38\Intel® VTune™ Profiler Results\Ray_Tracing_39\r008hs\data.0\pinerr.tpsslog -detach_reattach -probe -follow_execv -p32 C:\Program Files (x86)\Intel\oneAPI\vtune\2026.0\bin32\pin.exe -p64 C:\Program Files (x86)\Intel\oneAPI\vtune\2026.0\bin64\pin.exe -t64 C:\Program Files (x86)\Intel\oneAPI\vtune\2026.0\bin64\tpsstool.dll -t C:\Program Files (x86)\Intel\oneAPI\vtune\2026.0\bin32\tpsstool.dll -server_name tpss_ipc.17976 -prd_dir C:\Program Files (x86)\Intel\oneAPI\vtune\2026.0 -- C:\Program Files\Microsoft MPI\Bin\mpiexec.exe -np 8 C:\6-Courses\19-ModernC++Projects\RayTracer\RayTracer\x64\Debug\RayTracingApp.exe file Tests\SampleInputs\SampleInput-7.txt
+256 [24384] INFO perfrun.launcher <> - ProcessCreator object was created
+265 [24384] INFO perfrun.launcher <> - Launcher: the process was started in suspend mode
+267 [20180] INFO perfrun.itt <> - start itt controller for pid #24260
+275 [20180] INFO perfrun.tpss <> - start tpss controller for pid #24260
+326 [24384] INFO perfrun.launcher <> - Launcher: all plugins were started
+326 [24384] INFO perfrun.launcher <> - DirectoryMonitor object was created
+326 [24384] INFO perfrun.launcher <> - DirectoryMonitor: a callback was added
+326 [24384] INFO perfrun.launcher <> - DirectoryMonitor was started with pingTime = 1000
+326 [24384] INFO perfrun.launcher <> - DeadlineTimer is going to be constructed
+326 [24384] INFO perfrun.launcher <> - DeadlineTimer: a callback was added
+336 [24384] INFO perfrun.launcher <> - Launcher: resume the profiled application and  wait its termination or stop command
+321321 [20180] INFO perfrun.itt <> - pause itt controller
+321321 [20180] WARN perfrun.launcher <> - Messenger::say: Pause command is not supported for managed code profiling. Runtime overhead is still possible. Data size limit may be exceeded.
+321321 [20180] INFO perfrun.tpss <> - pause tpss controller
+332899 [14560] INFO perfrun.launcher <> - Stopping collection by RPC request
+333175 [20180] INFO perfrun.itt <> - detach itt controller
+333175 [20180] INFO perfrun.itt <> - detach itt controller done
+333175 [20180] INFO perfrun.tpss <> - stop tpss controller
+334577 [20180] INFO perfrun.sdk <> - De-allocating TMU: C:\6-Courses\19-ModernC++Projects\RayTracer\RayTracer\Ray_Tracing_38\Intel® VTune™ Profiler Results\Ray_Tracing_39\r008hs\data.0\systemcollector-17976-Afshin.sc
+334622 [20180] INFO perfrun.system <> - closed the system trace file: C:\6-Courses\19-ModernC++Projects\RayTracer\RayTracer\Ray_Tracing_38\Intel® VTune™ Profiler Results\Ray_Tracing_39\r008hs\data.0\systemcollector-17976-Afshin.sc
+334769 [21048] INFO perfrun.launcher <> - SignalHandler: signal #1 was caught
+334779 [24384] WARN perfrun.sdk <> - Unexpected exit status - -1073741510, at file: vcs\perfrun1\sdk\src\utils_win.cpp:544
+334779 [24384] INFO perfrun.launcher <> - Launcher: the profiled application was terminated  with exit code = -1073741510
+334888 [14560] WARN perfrun.launcher <> - Cannot send KILL signal to the process with pid #9624 : Access is denied., at file: vcs\perfrun1\launcher\src\signal_handler_win.cpp:73
+334889 [14560] WARN perfrun.launcher <> - Cannot send TERMINATE signal to the process with pid #10960 : An attempt was made to load a program with an incorrect format., at file: vcs\perfrun1\launcher\src\signal_handler_win.cpp:107
+334951 [14560] INFO perfrun.launcher <> - Cannot open the given process to KILL #10960 : The parameter is incorrect.
+334951 [14560] WARN perfrun.launcher <> - Cannot send TERMINATE signal to the process with pid #13132 : An attempt was made to load a program with an incorrect format., at file: vcs\perfrun1\launcher\src\signal_handler_win.cpp:107
+335014 [14560] INFO perfrun.launcher <> - Cannot open the given process to KILL #13132 : The parameter is incorrect.
+335015 [14560] WARN perfrun.launcher <> - Cannot send TERMINATE signal to the process with pid #16608 : An attempt was made to load a program with an incorrect format., at file: vcs\perfrun1\launcher\src\signal_handler_win.cpp:107
+335076 [14560] INFO perfrun.launcher <> - Cannot open the given process to KILL #16608 : The parameter is incorrect.
+335076 [14560] WARN perfrun.launcher <> - Cannot send TERMINATE signal to the process with pid #16772 : An attempt was made to load a program with an incorrect format., at file: vcs\perfrun1\launcher\src\signal_handler_win.cpp:107
+335138 [14560] INFO perfrun.launcher <> - Cannot open the given process to KILL #16772 : The parameter is incorrect.
+335139 [14560] WARN perfrun.launcher <> - Cannot send TERMINATE signal to the process with pid #18856 : An attempt was made to load a program with an incorrect format., at file: vcs\perfrun1\launcher\src\signal_handler_win.cpp:107
+335200 [14560] INFO perfrun.launcher <> - Cannot open the given process to KILL #18856 : The parameter is incorrect.
+335200 [14560] WARN perfrun.launcher <> - Cannot send TERMINATE signal to the process with pid #23292 : An attempt was made to load a program with an incorrect format., at file: vcs\perfrun1\launcher\src\signal_handler_win.cpp:107
+335263 [14560] INFO perfrun.launcher <> - Cannot open the given process to KILL #23292 : The parameter is incorrect.
+335263 [14560] WARN perfrun.launcher <> - Cannot send TERMINATE signal to the process with pid #27316 : An attempt was made to load a program with an incorrect format., at file: vcs\perfrun1\launcher\src\signal_handler_win.cpp:107
+335325 [14560] INFO perfrun.launcher <> - Cannot open the given process to KILL #27316 : The parameter is incorrect.
+335325 [21048] WARN perfrun.launcher <> - Stop command is ignored because it is received when collection is already stopped, at file: vcs\perfrun1\launcher\src\command_handler.cpp:226
+335327 [24384] INFO perfrun.launcher <> - Launcher: all plugins were stopped.
+335327 [24384] INFO perfrun.launcher <> - DeadlineTimer is going to be destroyed
+335328 [24384] INFO perfrun.launcher <> - DeadlineTimer was destroyed
+335328 [24384] INFO perfrun.launcher <> - DirectoryMonitor object was destroyed
+335328 [24384] WARN perfrun.launcher <> - Stop command is ignored because it is received when collection is already stopped, at file: vcs\perfrun1\launcher\src\command_handler.cpp:226
+335330 [24384] INFO perfrun.launcher <> - Application exit code: -1073741510
+335330 [24384] INFO perfrun.launcher <> - Exit code: 4

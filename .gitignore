@@ -1,0 +1,36 @@
+﻿# Visual Studio / VSCode
+.vs/
+.vscode/
+*.vcxproj.user
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build / VS output
+[Bb]in/
+[Oo]bj/
+x64/
+Debug*/
+Release*/
+*.exe
+*.dll
+*.pdb
+*.ilk
+*.idb
+
+# Logs
+debug.log
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Large assets / temporary
+models/
+HDRI/
+images/
+textures/
+
+# misc
+*.vsidx

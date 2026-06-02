@@ -1,0 +1,12 @@
+139 [12312] INFO perfrun.launcher <> - Launcher main begin
+162 [12312] INFO perfrun.launcher <> - MessageCatalogInit finished
+162 [12312] INFO perfrun.launcher <> - Launcher instance created
+162 [12312] INFO perfrun.launcher <> - argc = 9; cmdline = C:\Program Files (x86)\Intel\oneAPI\vtune\2026.0\bin64\amplxe-runss.exe --ui-output-format xml --ui-output-fd 1324 -r C:\6-Courses\19-ModernC++Projects\RayTracer\RayTracer\Ray_Tracing_38\Intel® VTune™ Profiler Results\Ray_Tracing_39\r008hs --command stop 
+185 [12312] INFO perfrun.launcher <> - New signal handler callback was added
+304 [12312] INFO perfrun.perfcollector <> - SEP tool path: C:\Program Files (x86)\Intel\oneAPI\vtune\2026.0\bin64\sep.exe
+345 [12312] INFO perfrun.launcher <> - create msngr2::ICliToolContext
+345 [12312] INFO perfrun.launcher <> - create file finder object
+345 [12312] INFO perfrun.launcher <> - open the result directory: pattern = C:\6-Courses\19-ModernC++Projects\RayTracer\RayTracer\Ray_Tracing_38\Intel® VTune™ Profiler Results\Ray_Tracing_39\r008hs
+356 [12312] INFO perfrun.launcher <> - RpcClient: IP address = 127.0.0.1; port = 4294960958
+2786 [12312] INFO perfrun.launcher <> - Application exit code: 0
+2786 [12312] INFO perfrun.launcher <> - Exit code: 0

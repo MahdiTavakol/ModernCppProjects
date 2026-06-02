@@ -1,0 +1,199 @@
+#include "triangle_mesh.h"
+
+triangle_mesh::triangle_mesh(
+	const std::array<point3, 3>& _vs,
+	const std::array<point2, 3>& _vts,
+	const std::array<point3, 3>& _vns,
+	std::unique_ptr<material> _mat)
+	:
+	hittable{"triangle_mesh",std::move(_mat)},
+	vs {_vs}, vts{ _vts }, vns{ _vns }
+{
+	initialize();
+}
+
+triangle_mesh::triangle_mesh(
+	const std::array<point3, 3>& vs_,
+	const std::array<point2, 3>& vts_,
+	const std::array<point3, 3>& vns_,
+	const int mat_indx_):
+	hittable{"triangle_mesh",mat_indx_ },
+	vs{ vs_ }, vts{ vts_ }, vns{ vns_ }
+{
+	initialize();
+}
+
+triangle_mesh::triangle_mesh(
+	const std::array<point3, 3>& v_,
+	const std::array<point2, 3>& vts_,
+	const std::array<point2, 3>& vts_1_,
+	const std::array<point3, 3>& vn_,
+	const int mat_indx_) :
+	hittable{ "triangle_mesh",mat_indx_ },
+	vs{ v_ }, vts{ vts_ }, vts_1{vts_1_}, vns{ vn_ }
+{
+	initialize();
+}
+
+
+void triangle_mesh::initialize()
+{
+	n1 = cross(vs[1] - vs[0], vs[2] - vs[0]);
+	unit_n1 = unit_vector(n1);
+	Q1 = vs[0];
+	D1 = dot(unit_n1, Q1);
+	w1 = n1 / dot(n1, n1);
+
+	set_bounding_box();
+}
+
+void triangle_mesh::set_bounding_box()
+{
+	auto bbox_diagonal1 = aabb(vs[0], vs[1]);
+	auto bbox_diagonal2 = aabb(vs[0], vs[2]);
+	auto bbox_diagonal3 = aabb(vs[1], vs[2]);
+
+	auto bbox_diagonal = aabb(bbox_diagonal1, bbox_diagonal2);
+	bbox_diagonal = aabb(bbox_diagonal, bbox_diagonal3);
+	bbox = bbox_diagonal;
+}
+
+bool triangle_mesh::hit(const ray& _r, interval _ray_t, hit_record& _rec) const
+{
+	auto denom1 = dot(unit_n1, _r.direction());
+
+	if (std::fabs(denom1) < 1e-8)
+		return false;
+
+	auto t1 = (D1 - dot(unit_n1, _r.origin())) / denom1;
+	if (!_ray_t.contains(t1))
+		return false;
+
+
+	auto intersection = _r.at(t1);
+	vec3 planar_hitpt_vector = intersection - Q1;
+	auto alpha = dot(w1, cross(planar_hitpt_vector, vs[2] - vs[0]));
+	auto beta = dot(w1, cross(vs[1] - vs[0], planar_hitpt_vector));
+
+	if (!is_interior(alpha, beta, _rec))
+		return false;
+
+	auto normal = interpolate(alpha,beta, vns);
+	auto texture = interpolate(alpha,beta,vts);
+	auto texture_1 = interpolate(alpha, beta, vts_1);
+
+	normal = unit_vector(normal);
+
+	_rec.t = t1;
+	_rec.p = intersection;
+	_rec.u = texture[0];
+	_rec.v = texture[1];
+	_rec.w = 0.0;
+	_rec.u1 = texture_1[0];
+	_rec.v1 = texture_1[1];
+	_rec.mat_indx = mat_indx;
+	_rec.set_face_normal(_r, normal);
+	return true;
+}
+
+void triangle_mesh::return_params(
+	std::array<point3, 3>& vs_,
+	std::array<point2, 3>& vts_,
+	std::array<point3, 3>& vns_,
+	material* mat_)
+{
+	vs_ = vs; vts_ = vts; vns_ = vns; mat_ = mat.get();
+}
+
+bool triangle_mesh::is_interior(double _a, double _b, hit_record& _rec) const {
+	constexpr double eps = 1e-8;
+	if (_a >= -eps && _b >= -eps && _a + _b <= 1 + eps)
+		return true;
+
+	return false;
+}
+
+bool triangle_mesh::compare(hittable* rhs_, const double& tol) const
+{
+	// checking the rhs type
+	triangle_mesh* rhsConv = dynamic_cast<triangle_mesh*>(rhs_);
+	// it is not of triangle mesh type
+	if (!rhsConv)
+	{
+		return true;
+	}
+
+	// comparing the geometry
+	for (int i = 0; i < 3; i++)
+	{
+		point3 datavsi  =  vs[i] - rhsConv->vs[i];
+		point2 datavtsi = vts[i] - rhsConv->vts[i];
+		point3 datavnsi = vns[i] - rhsConv->vns[i];
+		if (datavsi.length() >= tol)
+		{
+			std::cout << vs[i];
+			std::cout << rhsConv->vs[i];
+			return true;
+		}
+		if (datavtsi.length() >= tol) {
+			std::cout << vts[i];
+			std::cout << rhsConv->vts[i];
+			return true;
+		}
+		if (datavnsi.length() >= tol) {
+			std::cout << vns[i];
+			std::cout << rhsConv->vns[i];
+			return true;
+		}
+	}
+	return false;
+}
+
+bool triangle_mesh::comparator(const std::unique_ptr<hittable>& rhs_) const
+{
+	auto rhs_cast = dynamic_cast<triangle_mesh*>(rhs_.get());
+	if (!rhs_cast)
+		throw std::invalid_argument("Different types!");
+
+	auto area = this->get_area();
+	auto rhs_area = rhs_cast->get_area();
+
+	if (area < rhs_area)
+		return true;
+	return false;
+}
+
+double triangle_mesh::get_area() const
+{
+	double area = n1.length() / 2.0;
+	return area;
+}
+
+vec3 triangle_mesh::interpolate(double alpha_, double beta_, const std::array<point3, 3>& arr_)
+{
+	double gamma = 1.0 - alpha_ - beta_;
+	return gamma * arr_[0] + alpha_ * arr_[1] + beta_ * arr_[2];
+}
+
+vec2 triangle_mesh::interpolate(double alpha_, double beta_, const std::array<point2, 3>& arr_)
+{
+	std::array<point3, 3> arr3;
+	arr3[0] = point3(arr_[0]);
+	arr3[1] = point3(arr_[1]);
+	arr3[2] = point3(arr_[2]);
+	vec3 output = interpolate(alpha_, beta_, arr3);
+	return vec2{ output.x(), output.y() };
+}
+
+void triangle_mesh::scale(const vec3& center_, const double& factor_)
+{
+	for (auto& v : vs)
+	{
+		vec3 delta = v - center_;
+		v = center_ + factor_ * delta;
+	}
+
+	bbox.scale(center_, factor_);
+
+	initialize();
+}

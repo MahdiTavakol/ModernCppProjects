@@ -1,0 +1,6 @@
+mode RANDOM_SPHERES
+renderer -renderer_mode STATIC -path_type NONE -location 0 0 5
+scene -mode OBJ_MODEL -obj_file ..\\models\\Simple\\four_meshes_2.obj -mtl_file  ..\\models\\Simple\\four_meshes_2.mtl
+camera -lookat 0 0 1 -vup 0 1 0 -samples_per_pixel 72 -max_depth 30 -vfov 40
+image -width 120 -aspect_ratio 16.0 9.0
+output -output_type parallel  -output_mode P6 -image_file Tests\\SampleOutputs\\test_4.ppm
