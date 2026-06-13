@@ -11,7 +11,6 @@ material_list::material_list(int nmax_) :
 // releasing the static resources for each material type
 material_list::~material_list()
 {
-	PBR::release_images();
 }
 
 int material_list::push_back(std::string name_, std::unique_ptr<material> mat_)

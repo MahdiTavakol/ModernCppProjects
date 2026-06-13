@@ -1,12 +1,14 @@
 #pragma once
 #include "../Algorithms/hittable_list.h"
 #include "../Materials/material_list.h"
+#include "../Materials/PBR.h"
 #include "tiny_gltf_v3.h"
 #include "../Algorithms/communicator.h"
 #include "model_reader.h"
 #include <string>
 #include <vector>
 #include <Eigen/Dense>
+#include <memory>
 
 
 using Eigen::VectorXd;
@@ -42,6 +44,9 @@ protected:
 
 	// data
 	std::vector<primitive_struct> primitives;
+
+	// the resources for the PBR material
+	std::shared_ptr<PBR_Resources> pbr_resources;
 
 
 	// helper functions

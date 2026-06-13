@@ -171,6 +171,11 @@ void gltf_reader::read_materials()
 	message = std::string(52, '=');
 	error->print_message(message, msg_level);
 
+	message = "Creating the PBR resources";
+	msg_level = 1;
+	error->print_message(message, msg_level);
+	pbr_resources = make_shared<PBR_Resources>(error);
+
 
 
 	message = "Adding materials to the material list";
@@ -186,9 +191,8 @@ void gltf_reader::read_materials()
 		message = "Creating material " + std::to_string(i) +
 			": " + material_name;
 		error->print_message(message, msg_level);
-		std::unique_ptr<material> mat_i = std::make_unique<PBR>(error,material_i);
+		std::unique_ptr<material> mat_i = std::make_unique<PBR>(error,pbr_resources,material_i);
 		mtl_list->push_back(material_name,std::move(mat_i));
-		std::unique_ptr<material> test_mat = std::make_unique<lambertian>(error,vec3(0.0, 1.0, 0.0));
 	}
 
 	msg_level = 0;
@@ -239,7 +243,7 @@ void gltf_reader::read_textures()
 	msg_level = 2;
 	message = "Adding textures to the PBR class";
 	error->print_message(message, msg_level);
-	PBR::set_textures(read_textures, textures_count);
+	pbr_resources->set_textures(read_textures, textures_count);
 
 	msg_level = 1;
 	message = "Cleaning up!";
@@ -294,7 +298,7 @@ void gltf_reader::read_samplers()
 	msg_level = 2;
 	message = "Adding samplers to the PBR class";
 	error->print_message(message, msg_level);
-	PBR::set_samplers(read_samplers,samplers_count);
+	pbr_resources->set_samplers(read_samplers, samplers_count);
 
 	msg_level = 1;
 	message = "Cleaning up!";
@@ -900,6 +904,7 @@ void gltf_reader::load_images()
 	message = std::string(52, '=');
 	error->print_message(message, msg_level);
 
+	pbr_resources->set_images(error, &model);
 
 	msg_level = 0;
 	message = std::string(52, '=');

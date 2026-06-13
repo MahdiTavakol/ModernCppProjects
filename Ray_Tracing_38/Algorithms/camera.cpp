@@ -99,7 +99,6 @@ void camera::render(image* img_, const hittable& world_, const material_list& li
 
 	for (int j = height_min; j < height_max; j++)
 	{
-		std::clog << "\rRendering row: " << j << " " << std::endl;
 		for (int i = width_min; i < width_max; i++)
 		{
 			color pixel_color(0, 0, 0);

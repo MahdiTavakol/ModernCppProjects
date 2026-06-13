@@ -6,33 +6,39 @@
 using TexVec_func = std::function<vec4(double u_, double v_, double u1_, double v1_)>;
 using Sampler_func = std::function<void(int& x_)>;
 
+class PBR_Resources
+{
+public:
+	PBR_Resources(Logger* error_);
+	~PBR_Resources();
+	void set_textures(const tg3_texture* textures_, const int& texture_count_);
+	void set_samplers(const tg3_sampler* samplers_, const int& sampler_count_);
+	void set_images(Logger* error_, const tg3_model* model_);
+	void release_images();
+	tg3_texture* texture_i(size_t i_) { return &textures[i_]; }
+	tg3_image_result* image_i(size_t i_) { return &images[i_]; }
+	tg3_sampler* sampler_i(size_t i_) { return &samplers[i_]; }
+
+//private:
+	Logger* error;
+	std::vector<tg3_texture> textures;
+	std::vector<tg3_image_result> images;
+	std::vector<tg3_sampler> samplers;	
+};
+
 // PBR material for gltf 
 class PBR : public material
 {
 public:
-	PBR(Logger* error_, const tg3_material prop_);
+	PBR(Logger* error_, std::shared_ptr<PBR_Resources> resources_, const tg3_material prop_);
 	void init_functionals();
-	static TexVec_func set_TexVecFunc(const tg3_texture_info* texture_);
+	TexVec_func set_TexVecFunc(const tg3_texture_info* texture_);
 	void scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_) const override;
 	color emitted(double _u, double _v, const point3& _p)  const override;
 	bool is_equal(const material& _second) const override;
 
-	// functions for the shared variables
-	static void set_textures(const tg3_texture* textures_, const int& texture_count_);
-	static void set_samplers(const tg3_sampler* samplers_, const int& sampler_count_);
-	static void set_images(Logger* error_, const tg3_model* model_);
-	static void validate_shared_variables();
-	static void release_images();
 
-	vec4 tg3_texture_info_to_color(const tg3_texture_info* texture_, const double& u_, const double& v_) const;
-
-	vec4 tg3_texture_info_to_color(
-		const tg3_texture_info* texture_,
-		const double& u_,
-		const double& v_,
-		const double& u1_,
-		const double& v1_) const;
-
+	// the main 
 	static vec4 tg3_image_to_color(
 		const tg3_image_result* image_,
 		const tg3_sampler* smp_,
@@ -42,9 +48,7 @@ public:
 private:
 	tg3_material prop;
 	// shared variables
-	inline static std::vector<tg3_texture> textures;
-	inline static std::vector<tg3_image_result> images;
-	inline static std::vector<tg3_sampler> samplers;
+	std::shared_ptr<PBR_Resources> resources;
 
 	//function pointers to be used in the hotspot of the rendering loop
 	// to avoid checking at each step if there is a specific texture or not
@@ -67,7 +71,5 @@ private:
 	static void mirror_sampler(int& i_, const int size_);
 	static void mirror_repeat_sampler(int& i_, const int size_);
 	static void clamped_sampler(int& i_, const int size_);
-
-
 
 };

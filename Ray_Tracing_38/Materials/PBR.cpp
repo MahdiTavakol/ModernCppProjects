@@ -4,8 +4,131 @@
 
 constexpr double eps = 1e-6;
 
-PBR::PBR(Logger* error_, const tg3_material prop_) :
+PBR_Resources::PBR_Resources(Logger* error_):
+	error{error_}
+{}
+
+PBR_Resources::~PBR_Resources()
+{
+	release_images();
+}
+
+void PBR_Resources::set_textures(const tg3_texture* textures_, const int& texture_count_)
+{
+	for (int i = 0; i < texture_count_; i++)
+	{
+		textures.push_back(textures_[i]);
+	}
+}
+
+void PBR_Resources::set_samplers(const tg3_sampler* samplers_, const int& sampler_count_)
+{
+	for (int i = 0; i < sampler_count_; i++)
+	{
+		samplers.push_back(samplers_[i]);
+	}
+}
+
+void PBR_Resources::set_images(Logger* error_, const tg3_model* model_)
+{
+	int msg_level;
+	std::string message;
+
+	const tg3_image* input_images = model_->images;
+	int32_t images_count = model_->images_count;
+
+
+	images.resize(images_count);
+
+	for (int i = 0; i < images_count; i++)
+	{
+		msg_level = 2;
+		message = "Loading image-" + std::to_string(i);
+		error_->print_message(message, msg_level);
+
+		const tg3_image* image_i = &input_images[i];
+		tg3_image_result& loaded_image_i = images[i];
+		if (image_i->buffer_view && image_i->uri.data)
+		{
+			throw std::invalid_argument("Both the buffer_view and uri cannot be specified for an image at the same time!");
+		}
+		if (image_i->uri.data)
+		{
+			throw std::invalid_argument("The uri option for image is not supported yet!");
+		}
+		else if (image_i->buffer_view)
+		{
+			const tg3_buffer_view& buffer_view_i = model_->buffer_views[image_i->buffer_view];
+			const tg3_buffer& buffer_i = model_->buffers[buffer_view_i.buffer];
+			const auto dataAddress = buffer_i.data.data + buffer_view_i.byte_offset;
+			int size = static_cast<int>(buffer_view_i.byte_length);
+
+			int w = 0, h = 0, comp = 0, req_comp = 0;
+
+			// decoding the image header
+			if (!stbi_info_from_memory(dataAddress, size, &w, &h, &comp))
+			{
+				throw std::invalid_argument("Unknown format!");
+			}
+
+			int bits = 8;
+
+			if (stbi_is_16_bit_from_memory(dataAddress, size))
+			{
+				bits = 16;
+			}
+
+
+			unsigned char* data = nullptr;
+			if (bits == 16)
+			{
+				data = reinterpret_cast<unsigned char*>(
+					stbi_load_16_from_memory(dataAddress, size, &w, &h, &comp, req_comp));
+			}
+			// load as 8 bit per channel
+			if (!data)
+			{
+				data = stbi_load_from_memory(dataAddress, size, &w, &h, &comp, req_comp);
+				if (!data)
+				{
+					throw std::invalid_argument("The stb cannot convert the image!");
+				}
+				bits = 8;
+			}
+
+			if ((w < 1) || (h < 1))
+			{
+				throw std::invalid_argument("Wrong image format");
+			}
+
+			loaded_image_i.width = w;
+			loaded_image_i.height = h;
+			loaded_image_i.component = comp;
+			loaded_image_i.bits = bits;
+
+			// allocating data
+			int num_elements = w * h * comp * static_cast<int>(bits / 8);
+			loaded_image_i.pixels = new uint8_t[num_elements];
+			std::copy(data, data + num_elements, loaded_image_i.pixels);
+
+			//cleaning up the data
+			stbi_image_free(data);
+		}
+	}
+}
+
+
+void PBR_Resources::release_images()
+{
+	for (tg3_image_result& image_i : images)
+	{
+		delete[] image_i.pixels;
+	}
+}
+
+PBR::PBR(Logger* error_, std::shared_ptr<PBR_Resources> resources_, const tg3_material prop_) :
 	material{ error_ },
+	resources{resources_},
 	prop{ prop_ }
 {
 	// deep copies is not possible since member functions are const pointer!
@@ -33,13 +156,17 @@ PBR::PBR(Logger* error_, const tg3_material prop_) :
 	if (emmi_ext.extras != NULL)
 		std::cout << "Warning: ignoring the extras for the emission_texture" << std::endl;
 
+
+	// initializing functionals
+	init_functionals();
+
 }
 
 void PBR::init_functionals()
 {
 	int msg_level = 1;
 	std::string message;
-	if (textures.size() == 0 && images.size() == 0 && textures.size() == 0)
+	if (resources == nullptr)
 	{
 		message = "It seems that the shared variables in the PBR class has not initiated yet!\n";
 		message += "They should be initiated before any PBR material is created!";
@@ -143,10 +270,6 @@ void PBR::init_functionals()
 
 		}
 	}
-
-
-
-
 }
 
 void PBR::scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_) const
@@ -154,24 +277,22 @@ void PBR::scatter(const ray& r_in, const hit_record& rec, std::array<scatter_rec
 	// transmitting ray 
 	srec_[2] = { ray(rec.p, vec3(0,0,0), r_in.time()), color(0, 0, 0), 0.05,false };
 
+
 	// getting u, v coordinates
 	double u = rec.u, v = rec.v;
 	double u1 = rec.u1, v1 = rec.v1;
-	// getting the base color
-	const double* base_col = prop.pbr_metallic_roughness.base_color_factor;
-	const tg3_texture_info* texture = &prop.pbr_metallic_roughness.base_color_texture;
-	int32_t tex_coord = texture->tex_coord;
 
-	vec4 vc = tg3_texture_info_to_color(texture, u, v, u1, v1);
-	vec3 albedo = vec3{ vc[0] * base_col[0],vc[1] * base_col[1],vc[2] * base_col[2] };
+	// getting the albedo from the base_color and the base_color_texture
+	vec4 albedo_vec4 = albedo_func(u, v, u1, v1);
+	vec3 albedo = { albedo_vec4[0],albedo_vec4[1],albedo_vec4[2] };
 
 
 	// reflected part
-	// reading the roughness texture
-	texture = &prop.pbr_metallic_roughness.metallic_roughness_texture;
-	vc = tg3_texture_info_to_color(texture, u, v, u1, v1);
-	double metallic_weight = vc[2]; // the blue channel
-	double roughness = vc[1]; // the green channel
+	// geting the metallic_weight and the roughness
+	vec2 metal_rough =  metal_rough_func(u, v, u1, v1);
+	double metallic_weight = metal_rough[0];
+	double roughness = metal_rough[1];
+
 
 	// metallic 
 	vec3 reflected = reflect(r_in.direction(), rec.normal);
@@ -207,234 +328,13 @@ void PBR::scatter(const ray& r_in, const hit_record& rec, std::array<scatter_rec
 
 color PBR::emitted(double _u, double _v, const point3& _p)  const
 {
-	const double* emissive_factor = prop.emissive_factor;
-	const tg3_texture_info* texture = &prop.emissive_texture;
-	vec4 vc = tg3_texture_info_to_color(texture, _u, _v);
-
-	vc[0] *= emissive_factor[0];
-	vc[1] *= emissive_factor[1];
-	vc[2] *= emissive_factor[2];
-
-	color clr{ vc[0],vc[1],vc[2] };
+	color clr = emission_func(_u, _v, _p);
 	return clr;
 }
 
 bool PBR::is_equal(const material& _second) const
 {
 	return false;
-}
-
-void PBR::set_textures(const tg3_texture* textures_, const int& texture_count_)
-{
-	for (int i = 0; i < texture_count_; i++)
-	{
-		textures.push_back(textures_[i]);
-	}
-}
-
-void PBR::set_samplers(const tg3_sampler* samplers_, const int& sampler_count_)
-{
-	for (int i = 0; i < sampler_count_; i++)
-	{
-		samplers.push_back(samplers_[i]);
-	}
-}
-
-void PBR::set_images(Logger* error_, const tg3_model* model_)
-{
-	int msg_level;
-	std::string message;
-
-	const tg3_image* input_images = model_->images;
-	int32_t images_count = model_->images_count;
-
-
-	images.resize(images_count);
-
-	for (int i = 0; i < images_count; i++)
-	{
-		msg_level = 2;
-		message = "Loading image-" + std::to_string(i);
-		error_->print_message(message, msg_level);
-
-		const tg3_image* image_i = &input_images[i];
-		tg3_image_result& loaded_image_i = images[i];
-		if (image_i->buffer_view && image_i->uri.data)
-		{
-			throw std::invalid_argument("Both the buffer_view and uri cannot be specified for an image at the same time!");
-		}
-		if (image_i->uri.data)
-		{
-			throw std::invalid_argument("The uri option for image is not supported yet!");
-		}
-		else if (image_i->buffer_view)
-		{
-			const tg3_buffer_view& buffer_view_i = model_->buffer_views[image_i->buffer_view];
-			const tg3_buffer& buffer_i = model_->buffers[buffer_view_i.buffer];
-			const auto dataAddress = buffer_i.data.data + buffer_view_i.byte_offset;
-			int size = static_cast<int>(buffer_view_i.byte_length);
-
-			int w = 0, h = 0, comp = 0, req_comp = 0;
-
-			// decoding the image header
-			if (!stbi_info_from_memory(dataAddress, size, &w, &h, &comp))
-			{
-				throw std::invalid_argument("Unknown format!");
-			}
-
-			int bits = 8;
-
-			if (stbi_is_16_bit_from_memory(dataAddress, size))
-			{
-				bits = 16;
-			}
-
-
-			unsigned char* data = nullptr;
-			if (bits == 16)
-			{
-				data = reinterpret_cast<unsigned char*>(
-					stbi_load_16_from_memory(dataAddress, size, &w, &h, &comp, req_comp));
-			}
-			// load as 8 bit per channel
-			if (!data)
-			{
-				data = stbi_load_from_memory(dataAddress, size, &w, &h, &comp, req_comp);
-				if (!data)
-				{
-					throw std::invalid_argument("The stb cannot convert the image!");
-				}
-				bits = 8;
-			}
-
-			if ((w < 1) || (h < 1))
-			{
-				throw std::invalid_argument("Wrong image format");
-			}
-
-			loaded_image_i.width = w;
-			loaded_image_i.height = h;
-			loaded_image_i.component = comp;
-			loaded_image_i.bits = bits;
-
-			// allocating data
-			int num_elements = w * h * comp * static_cast<int>(bits / 8);
-			loaded_image_i.pixels = new uint8_t[num_elements];
-			std::copy(data, data + num_elements, loaded_image_i.pixels);
-
-			//cleaning up the data
-			stbi_image_free(data);
-		}
-	}
-}
-
-
-void PBR::release_images()
-{
-	for (tg3_image_result& image_i : images)
-	{
-		delete[] image_i.pixels;
-	}
-}
-
-vec4 PBR::tg3_texture_info_to_color(
-	const tg3_texture_info* texture_,
-	const double& u_,
-	const double& v_
-) const
-{
-	int32_t index = texture_->index;
-	int32_t coord = texture_->tex_coord;
-	if (coord != 0)
-	{
-		std::cout << "Warning: currently coords higher than 0 is not supported!";
-	}
-
-
-	vec4 vc{ 1.0,1.0,1.0,1.0 };
-	if (index != -1)
-	{
-		if (index >= textures.size())
-		{
-			throw std::out_of_range("out of range access for the textures array");
-		}
-		tg3_texture& texture = textures[index];
-		int32_t source = texture.source;
-		int32_t samplerIndex = texture.sampler;
-		if (samplerIndex != -1 && samplerIndex < samplers.size())
-		{
-			tg3_sampler* sampler = &samplers[samplerIndex];
-			if (source != -1) {
-				if (source >= images.size())
-				{
-					throw std::out_of_range("out of range access for the images array");
-				}
-
-				tg3_image_result* img = &images[source];
-				int x = static_cast<int>((u_) * (img->width - 1));
-				int y = static_cast<int>((v_) * (img->height - 1));
-				vc = tg3_image_to_color(img, sampler, x, y);
-			}
-		}
-	}
-	return vc;
-}
-
-vec4 PBR::tg3_texture_info_to_color(
-	const tg3_texture_info* texture_,
-	const double& u_,
-	const double& v_,
-	const double& u1_,
-	const double& v1_) const
-{
-	int32_t index = texture_->index;
-	int32_t coord = texture_->tex_coord;
-
-	if (coord != 0)
-	{
-		std::cout << "Warning: currently coords higher than 0 is not supported!" << std::endl;
-	}
-
-
-	vec4 vc{ 1.0,1.0,1.0,1.0 };
-	if (index != -1)
-	{
-		if (index >= textures.size())
-		{
-			throw std::out_of_range("out of range access for the textures array");
-		}
-		tg3_texture& texture = textures[index];
-		int32_t source = texture.source;
-		int32_t samplerIndex = texture.sampler;
-		if (samplerIndex != -1 && samplerIndex < samplers.size()) {
-			tg3_sampler* sampler = &samplers[samplerIndex];
-			if (source != -1) {
-				if (source >= images.size())
-				{
-					throw std::out_of_range("out of range access for the images array");
-				}
-				tg3_image_result* img = &images[source];
-				int x, y;
-				if (coord == 0) {
-					x = static_cast<int>(u_ * (img->width - 1));
-					y = static_cast<int>((v_) * (img->height - 1));
-				}
-				else if (coord == 1)
-				{
-					x = static_cast<int>(u1_ * (img->width - 1));
-					y = static_cast<int>((v1_) * (img->height - 1));
-				}
-				else
-				{
-					std::cout << "Warning: currently coords higher than 0 is not supported!" << std::endl;
-					x = static_cast<int>(u_ * (img->width - 1));
-					y = static_cast<int>((1.0 - v_) * (img->height - 1));
-				}
-				vc = tg3_image_to_color(img, sampler, x, y);
-			}
-		}
-	}
-	return vc;
 }
 
 vec4 PBR::tg3_image_to_color(
@@ -626,11 +526,11 @@ TexVec_func PBR::set_TexVecFunc(const tg3_texture_info* texture_)
 		return null_vec4;
 	}
 	// out of range
-	else if (index >= textures.size())
+	else if (index >= resources->textures.size())
 	{
 		throw std::out_of_range("out of range access for the textures array");
 	}
-	tg3_texture& texture = textures[index];
+	tg3_texture& texture = resources->textures[index];
 	int32_t source = texture.source;
 	int32_t samplerIndex = texture.sampler;
 
@@ -640,7 +540,7 @@ TexVec_func PBR::set_TexVecFunc(const tg3_texture_info* texture_)
 		return null_vec4;
 	}
 	// out of range
-	else if (source >= images.size())
+	else if (source >= resources->images.size())
 	{
 		throw std::out_of_range("out of range access for the images array");
 	}
@@ -656,13 +556,13 @@ TexVec_func PBR::set_TexVecFunc(const tg3_texture_info* texture_)
 		smpler_x = null_sampler;
 		smpler_y = null_sampler;
 	}
-	else if (samplerIndex >= samplers.size())
+	else if (samplerIndex >= resources->samplers.size())
 	{
 		throw std::out_of_range("out of range access for the samplers array");
 	}
 	else {
-		img = &images[source];
-		tg3_sampler* smplr = &samplers[samplerIndex];
+		img = &resources->images[source];
+		tg3_sampler* smplr = &resources->samplers[samplerIndex];
 		int width = img->width;
 		int height = img->height;
 
@@ -753,7 +653,7 @@ vec4 PBR::tg3_image_to_color(double s_, double t_,
 	{
 	case 2:
 	{
-		unsigned short* chimage = reinterpret_cast<unsigned short*>(image_->pixels);
+		unsigned short* chimage = reinterpret_cast<unsigned short*>(img_->pixels);
 		switch (cpp)
 		{
 		case 1:

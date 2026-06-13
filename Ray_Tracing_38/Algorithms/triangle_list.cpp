@@ -461,5 +461,7 @@ std::vector<aabb>& triangle_list::return_bboxes_ref()
 
 std::unique_ptr<hittable_list> triangle_list::return_non_triangles()
 {
+	if (non_triangles == nullptr)
+		throw std::runtime_error("The non_triangles list is empty!");
 	return std::move(non_triangles);
 }
