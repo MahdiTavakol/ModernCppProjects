@@ -16,7 +16,6 @@
 #include "../Types/vec3.h"
 #include "../Input/settings.h"
 #include "../Input/camera_settings.h"
-#include "../Algorithms/rtw_stb_image.h"
 
 
 
@@ -56,9 +55,12 @@ public:
 
 protected:
 
-
+	// flag 
+	bool stratified = true;
 	// primary parameters set by the class input;
 	int samples_per_pixel = 10;
+	int sqrt_spp;
+	double recip_sqrt_spp;
 	int max_depth = 10;
 	color background;
 	double vfov = 90;
@@ -88,7 +90,9 @@ protected:
 
 	// the rest of functions
 	ray get_ray(int i, int j) const;
+	ray get_ray(const int& i_,const int& j_,const int& s_i_,const int& s_j_) const;
 	static vec3 sample_square();
+	vec3 sample_square_stratified(const int& s_i_, const int& s_j_) const;
 	point3 defocus_disk_sample() const;
 	virtual color ray_color(const ray& r_, int depth_, const hittable& world_, const material_list& list_) const;
 	color background_color(const ray& r_) const;

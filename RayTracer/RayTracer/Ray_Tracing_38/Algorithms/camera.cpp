@@ -32,8 +32,8 @@ void camera::setup(camera_settings* cam_setting_)
 	point3& lookat_setting = cam_setting_->get_lookat();
 	point3& vup_setting = cam_setting_->get_vup();
 	point3& background_setting = cam_setting_->get_background();
-
 	std::string background_image_name = cam_setting_->return_HDRI_name();
+	bool stratified_setting = cam_setting_->get_stratified();
 
 
 	this->samples_per_pixel = samples_per_pixel_setting;
@@ -50,14 +50,12 @@ void camera::setup(camera_settings* cam_setting_)
 	{
 		background_image = std::make_unique<HDRI_texture>(background_image_name);
 	}
+
+	stratified = stratified_setting;
 }
 
 void camera::initialize()
 {
-	pixel_samples_scale = 1.0 / samples_per_pixel;
-
-
-
 	center = lookfrom;
 
 	auto theta = degrees_to_radians(vfov);
@@ -82,6 +80,20 @@ void camera::initialize()
 	auto defocus_radius = focus_dist * std::tan(degrees_to_radians(defocus_angle / 2));
 	defocus_disk_u = u * defocus_radius;
 	defocus_disk_v = v * defocus_radius;
+
+
+
+	sqrt_spp = static_cast<int>(std::sqrt(samples_per_pixel));
+	recip_sqrt_spp = 1.0 / sqrt_spp;
+
+	if (stratified == true)
+	{
+		pixel_samples_scale = 1.0 / (sqrt_spp * sqrt_spp);
+	}
+	else
+	{
+		pixel_samples_scale = 1.0 / samples_per_pixel;
+	}
 }
 
 void camera::render(image* img_, const hittable& world_, const material_list& list_) const
@@ -97,19 +109,44 @@ void camera::render(image* img_, const hittable& world_, const material_list& li
 	int width_max = widthRange[1];
 
 
-	for (int j = height_min; j < height_max; j++)
+	//  I put the if outside the loop even though the code 
+	// is repeated but inside the loop the if is not checked for 
+	// each iteration. 
+	if (stratified == true)
 	{
-		for (int i = width_min; i < width_max; i++)
+		for (int j = height_min; j < height_max; j++)
 		{
-			color pixel_color(0, 0, 0);
-			for (int sample = 0; sample < samples_per_pixel; sample++)
+			for (int i = width_min; i < width_max; i++)
 			{
-				ray r = get_ray(i, j);
-				pixel_color += ray_color(r, max_depth, world_,list_);
+				color pixel_color(0, 0, 0);
+				for (int s_j = 0; s_j < sqrt_spp; s_j++)
+				{
+					for (int s_i = 0; s_i < sqrt_spp; s_i++) {
+						ray r = get_ray(i, j, s_i, s_j);
+						pixel_color += ray_color(r, max_depth, world_);
+					}
+				}
+				pixel_color = pixel_samples_scale * pixel_color;
+				color_data c_data{ pixel_color.x(),pixel_color.y(),pixel_color.z() };
+				c_array->set(i - width_min, j - height_min, c_data);
 			}
-			pixel_color = pixel_samples_scale * pixel_color;
-			color_data c_data{ pixel_color.x(),pixel_color.y(),pixel_color.z() };
-			c_array->set(i - width_min, j - height_min, c_data);
+		}
+	}
+	else {
+		for (int j = height_min; j < height_max; j++)
+		{
+			for (int i = width_min; i < width_max; i++)
+			{
+				color pixel_color(0, 0, 0);
+				for (int sample = 0; sample < samples_per_pixel; sample++)
+				{
+					ray r = get_ray(i, j);
+					pixel_color += ray_color(r, max_depth, world_, list_);
+				}
+				pixel_color = pixel_samples_scale * pixel_color;
+				color_data c_data{ pixel_color.x(),pixel_color.y(),pixel_color.z() };
+				c_array->set(i - width_min, j - height_min, c_data);
+			}
 		}
 	}
 }
@@ -212,18 +249,17 @@ color camera::ray_color(const ray& r_, int depth_, const hittable& world_, const
 
 	color color_from_scatter;
 
-	//for (auto& s : srec)
-	{
-		//diffusive scatter
-		if (srec[0].scattered)
-			color_from_scatter += srec[0].weight * srec[0].attenuation * (simple_direct_lighting(rec)+ ray_color(srec[0].scattered_ray, depth_ - 1, world_, list_));
-		// specular scatter
-		if (srec[1].scattered)
-			color_from_emission += srec[1].weight * srec[1].attenuation *(simple_direct_lighting(rec)+ ray_color(srec[1].scattered_ray, depth_ - 1, world_, list_));
-		// transmit scatter
-		if (srec[2].scattered)
-			color_from_emission += srec[2].weight * srec[2].attenuation * ray_color(srec[2].scattered_ray, depth_ - 1, world_, list_);
-	}
+
+	//diffusive scatter
+	if (srec[0].scattered)
+		color_from_scatter += srec[0].weight * srec[0].attenuation * (simple_direct_lighting(rec)+ ray_color(srec[0].scattered_ray, depth_ - 1, world_, list_));
+	// specular scatter
+	if (srec[1].scattered)
+		color_from_emission += srec[1].weight * srec[1].attenuation *(simple_direct_lighting(rec)+ ray_color(srec[1].scattered_ray, depth_ - 1, world_, list_));
+	// transmit scatter
+	if (srec[2].scattered)
+		color_from_emission += srec[2].weight * srec[2].attenuation * ray_color(srec[2].scattered_ray, depth_ - 1, world_, list_);
+
 
 
 	return color_from_emission + color_from_scatter;
@@ -263,4 +299,26 @@ color camera::simple_direct_lighting(const hit_record& rec_) const
 
 	return ambient + ndotl * light_color;
 
+}
+
+ray camera::get_ray(const int& i_, const int& j_, const int& s_i_, const int& s_j_) const
+{
+	auto offset = sample_square_stratified(s_i_, s_j_);
+	auto pixel_sample = pixel00_loc
+		+ ((i_ + offset.x()) * pixel_delta_u)
+		+ ((j_ + offset.y()) * pixel_delta_v);
+
+	auto ray_origin = (defocus_angle <= 0) ? center : defocus_disk_sample();
+	auto ray_direction = pixel_sample - ray_origin;
+	auto ray_time = random_double();
+
+	return ray(ray_origin, ray_direction, ray_time);
+}
+
+vec3 camera::sample_square_stratified(const int& s_i_, const int& s_j_) const
+{
+	auto px = ((s_i_ + random_double()) * recip_sqrt_spp) - 0.5;
+	auto py = ((s_j_ + random_double()) * recip_sqrt_spp) - 0.5;
+
+	return vec3(px, py, 0);
 }

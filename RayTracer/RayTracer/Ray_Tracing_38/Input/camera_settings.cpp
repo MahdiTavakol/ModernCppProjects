@@ -91,6 +91,7 @@ bool camera_settings::set_from_scene(hittable_list& world_)
 void camera_settings::set_input_map()
 {
 	singleInputMap = {
+		{"-stratified",&stratified_string},
 		{"-samples_per_pixel",&samples_per_pixel},
 		{"-max_depth",&max_depth},
 		{"-vfov",&vfov},
@@ -163,4 +164,27 @@ void camera_settings::log_class_name(std::iostream& stream_) const
 std::string camera_settings::return_HDRI_name()
 {
 	return HDRI_name;
+}
+
+void camera_settings::extra_parse()
+{
+	std::transform(
+		stratified_string.begin(),
+		stratified_string.end(),
+		stratified_string.begin(),
+		::toupper);
+
+	if (stratified_string == "ON" || stratified_string == "TRUE")
+	{
+		stratified = true;
+	}
+	else
+	{
+		stratified = false;
+	}
+}
+
+bool camera_settings::get_stratified()
+{
+	return stratified;
 }

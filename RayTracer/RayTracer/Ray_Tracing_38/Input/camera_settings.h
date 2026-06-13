@@ -25,7 +25,9 @@ public:
 	point3& get_lookat();
 	point3& get_vup();
 	color& get_background();
+	bool get_stratified();
 	std::string return_HDRI_name();
+	void extra_parse() override;
 
 protected:
 
@@ -41,6 +43,10 @@ protected:
 
 	color background = color(0.7, 0.8, 1.00);
 	std::string HDRI_name = "";
+
+
+	std::string stratified_string = "off";
+	bool  stratified = false;
 
 
 };
