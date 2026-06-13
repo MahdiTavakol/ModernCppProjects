@@ -75,22 +75,7 @@ public:
         std::lock_guard<std::mutex> lk(mtVec[j_]);
         array[i_][j_] = val_;
     }
-    bool operator!=(color_array& _rhs)
-    {
-        if (this == &_rhs)
-            return false;
-        if (height != _rhs.height || width != _rhs.width)
-            return true;
-        for (int i = 0; i < width; i++)
-            for (int j = 0; j < height; j++)
-            {
-                color_data& c_1 = (*this)(i, j);
-                color_data& c_2 = _rhs(i, j);
-                if (!compare_color_data(c_1, c_2, 1e-6))
-                    return true;
-            }
-        return false;
-    }
+    bool operator!=(color_array& _rhs);
 
     void write(std::iostream& out_, 
         const outputMode& mode_,

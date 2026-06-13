@@ -6,14 +6,12 @@
 #include "../Algorithms/hittable_list.h"
 #include "../Algorithms/communicator.h"
 #include "../Materials/material_list.h"
+#include "../Output/Logger.h"
 #include "scene_settings.h"
 
 class scene_factory {
 public:
-	scene_factory(settings* wld_settings, communicator* para_);
-	scene_factory(int mode_, std::unique_ptr<communicator>& para_);
-	scene_factory(int mode_, std::unique_ptr<communicator>& para_,
-		          std::string obj_file_name_);
+	scene_factory(settings* wld_settings, Logger* error_, communicator* para_);
 	void create();
 	std::unique_ptr<hittable_list> return_object();
 	std::unique_ptr<material_list> return_mtl_list();
@@ -23,6 +21,7 @@ protected:
 	std::unique_ptr<hittable_list> world;
 	std::unique_ptr<material_list> list;
 	communicator* para;
+	Logger* error;
 	BVH_Split_Method bvh_mode = BVH_Split_Method::MEDIAN;
 
 
@@ -49,6 +48,7 @@ private:
 	void setup_cornell_smoke();
 	void setup_random_spheres_animated();
 	void setup_simple_2d_parallel_test();
+	void setup_final_scene();
 
 	// file readers
 	void setup_3d_obj();

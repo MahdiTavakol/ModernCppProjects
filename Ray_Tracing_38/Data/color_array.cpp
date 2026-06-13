@@ -228,3 +228,20 @@ color_data color_array::average() const
     output.b /= static_cast<double>(width * height);
     return output;
 }
+
+bool color_array::operator!=(color_array& _rhs)
+{
+    if (this == &_rhs)
+        return false;
+    if (height != _rhs.height || width != _rhs.width)
+        return true;
+    for (int i = 0; i < width; i++)
+        for (int j = 0; j < height; j++)
+        {
+            color_data& c_1 = (*this)(i, j);
+            color_data& c_2 = _rhs(i, j);
+            if (!compare_color_data(c_1, c_2, 1e-6))
+                return true;
+        }
+    return false;
+}

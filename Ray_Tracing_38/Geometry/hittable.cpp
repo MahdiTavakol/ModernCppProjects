@@ -1,8 +1,5 @@
 #include "hittable.h"
 
-material* hittable::get_material() {
-    return mat.get();
-}
 
 bool hittable::comparator(const std::unique_ptr<hittable>& rhs_) const
 {
@@ -121,5 +118,12 @@ bool rotate_y::hit(const ray& _r, interval _ray_t, hit_record& _rec) const
     _rec.p = point3(x_rec_p, y_rec_p, z_rec_p);
     _rec.normal = vec3(x_rec_n, y_rec_n, z_rec_n);
 
+    return true;
+}
+
+bool hittable::compare(hittable* rhs_, const double& tol_) const
+{
+    // it means that the compare has not been implemented
+    std::cout << "Warning: The compare function has not been implemented for this object type yet!" << std::endl;
     return true;
 }

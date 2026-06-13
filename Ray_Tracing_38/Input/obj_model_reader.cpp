@@ -6,8 +6,9 @@
 
 obj_model_reader::obj_model_reader(
 	std::string obj_file_name_,
+	Logger* error_,
     communicator* para_) :
-	model_reader{ obj_file_name_, para_ },
+	model_reader{ obj_file_name_,error_, para_ },
 	obj_file_name{file_path}
 
 {
@@ -23,8 +24,9 @@ obj_model_reader::obj_model_reader(
 
 obj_model_reader::obj_model_reader(std::string _obj_file_name,
 	std::string _mtl_file_name,
+	Logger* error_,
 	communicator* _para) :
-	model_reader{ _obj_file_name, _para }, 
+	model_reader{ _obj_file_name,error_, _para }, 
 	obj_file_name{file_path},
 	mtl_file_name{_mtl_file_name}
 {
@@ -38,8 +40,9 @@ obj_model_reader::obj_model_reader(std::string _obj_file_name,
 obj_model_reader::obj_model_reader(
 	std::unique_ptr<std::iostream> _obj_file_ptr,
 	std::unique_ptr<std::iostream> _mtl_file_ptr,
+	Logger* error_,
 	communicator* _para):
-	model_reader{ "", _para },
+	model_reader{ "",error_, _para },
 	obj_file_name{file_path},
 	mtl_file_name{},
 	obj_file_ptr{ std::move(_obj_file_ptr) },
@@ -51,8 +54,9 @@ obj_model_reader::obj_model_reader(
 obj_model_reader::obj_model_reader(
 	std::unique_ptr<std::iostream> _obj_file_ptr,
 	std::unique_ptr<std::iostream> _mtl_file_ptr,
+	Logger* error_,
 	std::unique_ptr<communicator>& _para) :
-	obj_model_reader{ std::move(_obj_file_ptr), std::move(_mtl_file_ptr), _para.get()}
+	obj_model_reader{ std::move(_obj_file_ptr), std::move(_mtl_file_ptr),error_, _para.get()}
 {}
 
 
@@ -60,29 +64,29 @@ void obj_model_reader::read()
 {
 	int msg_level = 0;
 	std::string message = std::string(52, '=');
-	print_message(message, msg_level);
+	error->print_message(message, msg_level);
 	message = "Reading the obj+mtl file ...";
-	print_message(message, msg_level);
+	error->print_message(message, msg_level);
 	message = std::string(52, '=');
-	print_message(message, msg_level);
+	error->print_message(message, msg_level);
 
 	msg_level = 0;
 	message = "Started reading the mtl file ";
-	print_message(message, msg_level);
+	error->print_message(message, msg_level);
 	read_mtl_file();
 	message = "Finished reading the mtl file ";
-	print_message(message, msg_level);
+	error->print_message(message, msg_level);
 	message = "Started reading the obj file ";
-	print_message(message, msg_level);
+	error->print_message(message, msg_level);
 	read_obj_file();
 	message = "Finished reading the obj file ";
-	print_message(message, msg_level);
+	error->print_message(message, msg_level);
 	message = "Started adding the items ";
-	print_message(message, msg_level);
+	error->print_message(message, msg_level);
 	int low, high;
 	set_range(low, high);
 	message = "Finished adding items to the hittable_list";
-	print_message(message, msg_level);
+	error->print_message(message, msg_level);
 }
 
 void obj_model_reader::read_obj_file()
@@ -121,24 +125,24 @@ void obj_model_reader::read_obj_file()
 				{
 					if (dummy_str == "vertices") {
 						file_vs_num = dummy_int;
-						check_data(file_vs_num, v_num, "vertices",silent);
+						check_data(file_vs_num, v_num, "vertices",error,silent);
 						v_num = 0;
 					}
 					if (dummy_str == "vertex") {
 						file_vns_num = dummy_int;
-						check_data(file_vns_num, vn_num, "vertex", silent);
+						check_data(file_vns_num, vn_num, "vertex",error, silent);
 						vn_num = 0;
 					}
 					if (dummy_str == "texture") {
 						file_vts_num = dummy_int;
-						check_data(file_vts_num, vt_num, "texture", silent);
+						check_data(file_vts_num, vt_num, "texture",error, silent);
 						vt_num = 0;
 					}
 						
 					if (dummy_str == "polygons")
 					{
 						file_polygon_num = dummy_int;
-						check_data(file_polygon_num, num_polygons, "polygons", silent);
+						check_data(file_polygon_num, num_polygons, "polygons", error,silent);
 						num_polygons = 0;
 						if (iss >> dummy_str >> dummy_int >> dummy_str)
 						{
@@ -146,7 +150,7 @@ void obj_model_reader::read_obj_file()
 								file_triangle_num = dummy_int;
 							{
 								file_triangle_num = dummy_int;
-								check_data(file_triangle_num, num_triangles, "triangles", silent);
+								check_data(file_triangle_num, num_triangles, "triangles",error, silent);
 								num_triangles= 0;
 							}
 						}
@@ -224,7 +228,7 @@ void obj_model_reader::read_obj_file()
 					message = 
 						"Warning: Ignoring the line " + line +
 						" since it has less than 3 vertices";
-					print_message(message, msg_level);
+					error->print_message(message, msg_level);
 					break;
 				case 3:
 					num_triangles++;
@@ -374,29 +378,30 @@ void obj_model_reader::create_and_add_material(material_info& mat_info)
 		mat_info.Tr = 1.0 - mat_info.d;
 	msg_level = 1;
 	message = "Creating the material " + mat_info.material_name;
-	print_message(message, msg_level);
+	error->print_message(message, msg_level);
 
-	file_stream = open_file(mat_info.texture_path, path, false);
+	file_stream = open_file(mat_info.texture_path, path, error,false);
 
 	if (file_stream)
 	{
 		texture = std::make_unique<image_texture>(mat_info.texture_path.c_str());
-		material_i = std::make_unique<lambertian>(std::move(texture));
+		material_i = std::make_unique<lambertian>(error,std::move(texture));
 	}
 	else
 	{
 		msg_level = 1;
 		message = "The texture file " + mat_info.texture_path + " was not found! Reverting to simple rendering";
-		print_message(message, msg_level);
+		error->print_message(message, msg_level);
 		material_i =
 			std::make_unique<general>(
+				error,
 				mat_info.Kd, mat_info.Ns, 
 				mat_info.Tr, mat_info.Tf,
 				mat_info.Ks, mat_info.Ni);
 	}
 	msg_level = 1;
 	message = "Adding the material " + mat_info.material_name;
-	print_message(message, msg_level);
+	error->print_message(message, msg_level);
 
 
 	// adding the material
@@ -405,7 +410,7 @@ void obj_model_reader::create_and_add_material(material_info& mat_info)
 
 void obj_model_reader::set_range(int& _low, int& _hi) {
 	_low = 0;
-	_hi = faces.size()-1;
+	_hi = static_cast<int>(faces.size())-1;
 }
 
 void obj_model_reader::add_item(const int& _low, const int& _hi)
@@ -433,20 +438,20 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 			current_obj = object;
 			msg_level = 2;
 			message = "Adding the object " + object;
-			print_message(message, msg_level);
+			error->print_message(message, msg_level);
 		}
 		if (!silent && !group.empty() && group.compare(current_group))
 		{
 			current_group = group;
 			msg_level = 3;
 			message = "Adding the group " + group;
-			print_message(message, msg_level);
+			error->print_message(message, msg_level);
 		}
 		else if (!silent && group.empty() && counter % 100 == 0)
 		{
 			msg_level = 2;
 			message = "Adding the item " + std::to_string(i) + " out of " + std::to_string(faces.size());
-			print_message(message, msg_level);
+			error->print_message(message, msg_level);
 		}
 
 		std::array<point3, 3> vs_i,  vns_i;
@@ -470,12 +475,17 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 			int vn_indx_j = face.vn_indx[j];
 
 			if (j >= face.v_indx.size() || j >= face.vt_indx.size() || j >= face.vn_indx.size()) {
-				std::cerr << "Out of bounds access for edges" << std::endl;
+				std::string error_text = "Out of bounds access for edges";
+				error->print_error(error_text);
 				continue;
 			}
 			if (v_indx_j != -1) {
 				if (v_indx_j - 1 < 0 || v_indx_j - 1 >= this->vs.size()) {
-					std::cerr << "Out of bounds access for v " << v_indx_j << "," << vs.size() << std::endl;
+					std::string error_text =
+						"Out of bounds access for v " +
+						std::to_string(v_indx_j) + "," +
+						std::to_string(vs.size());
+					error->print_error(error_text);
 					continue;
 				}
 			}
@@ -486,13 +496,17 @@ void obj_model_reader::add_item(const int& _low, const int& _hi)
 						std::to_string(vt_indx_j) +
 						" out of " +
 						std::to_string(vts.size());
+					error->print_error(error_text);
 					std::cerr << error_text << std::endl;
 					continue;
 				}
 			}
 			if (vn_indx_j != -1) {
 				if (vn_indx_j - 1 < 0 || vn_indx_j - 1 >= this->vns.size()) {
-					std::cout << "Out of bounds access for vn " << vn_indx_j << "," << vns.size() << std::endl;
+					std::string error_text =
+						"Out of bounds access for vn " + std::to_string(vn_indx_j) +
+						"," + std::to_string(vns.size());
+					error->print_error(error_text);
 					continue;
 				}
 			}
@@ -543,12 +557,24 @@ void obj_model_reader::set_silent_status()
 		silent = true;
 }
 
-void obj_model_reader::check_data(const int& num_file_, const int& num_read_, const std::string& title, const bool silent_)
+void obj_model_reader::check_data(
+	const int& num_file_,
+	const int& num_read_, 
+	const std::string& title_,
+	Logger* error_,
+	const bool silent_)
 {
 	if (!silent_ && num_file_ != num_read_)
-		std::cout << "Inconsistency in the number of " << title 
-		<< " read vs with those in the obj file  "
-		<< num_read_ << "," << num_file_ << std::endl;
+	{
+		std::string message =
+			"Inconsistency in the number of " +
+			title_ +
+			" read vs with those in the obj file  " +
+			std::to_string(num_read_) +
+			"," +
+			std::to_string(num_file_);
+		error_->print_message(message, 0);
+	}
 
 }
 

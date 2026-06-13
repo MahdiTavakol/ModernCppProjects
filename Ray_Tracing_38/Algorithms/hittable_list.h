@@ -23,16 +23,14 @@ public:
 	hittable_list(std::unique_ptr<hittable> object);
 	hittable_list(std::unique_ptr<hittable>& object);
 
-	void clear() { objects.clear(); }
+	virtual void clear();
 
 	size_t size() const override;
 
-	hittable* operator[](const int& i) {
-		return objects[i].get();
-	}
+	virtual hittable* operator[](const int& i);
 
-	void resize(const int size);
-	void sort();
+	virtual void resize(const int size);
+	virtual void sort();
 
 	virtual void add(std::unique_ptr<hittable> object);
 
@@ -40,19 +38,16 @@ public:
 
 	aabb bounding_box() const override {return bbox; }
 
-	virtual material* get_material() override {
-		return nullptr;
-	}
 
 
-	vec3 com();
-	vec3 com(std::string label_, bool& set_);
+	virtual vec3 com() const;
+	virtual vec3 com(std::string label_, bool& set_);
 
-	aabb bounding_box(std::string label_, bool& set_) override;
+	virtual aabb bounding_box(std::string label_, bool& set_) override;
 
-	void add_label(std::string label_) override;
+	virtual void add_label(std::string label_) override;
 
-	void scale(const vec3& center_, const double& factor_) override;
+	virtual void scale(const vec3& center_, const double& factor_) override;
 
 
 protected:

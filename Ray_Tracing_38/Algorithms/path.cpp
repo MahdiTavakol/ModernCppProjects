@@ -80,3 +80,8 @@ int path::return_num_frames()
 {
 	return num_frames;
 }
+
+point3 path::operator[](int i) const {
+	point3 output = locs[i].return_loc();
+	return output;
+}

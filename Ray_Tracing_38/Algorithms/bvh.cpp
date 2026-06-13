@@ -1,5 +1,9 @@
 #include "bvh.h"
 
+bvh_node::bvh_node(std::string type_, BVH_Split_Method split_method_) :
+	hittable{type_},split_mode{split_method_}
+{
+}
 
 // this one steals the std::vector<std::unique_ptr<hittable>
 // object from the input list
@@ -19,7 +23,12 @@ bvh_node::bvh_node(std::vector<std::unique_ptr<hittable>>& objects, size_t start
 
 	size_t object_span = end - start;
 
-	if (object_span == 1) {
+	if (object_span == 0)
+	{
+		left = std::make_unique<hittable_list>();
+		right = std::make_unique<hittable_list>();
+	}
+	else if (object_span == 1) {
 		left = std::move(objects[start]);
 		// empty object list
 		right = std::make_unique<hittable_list>();

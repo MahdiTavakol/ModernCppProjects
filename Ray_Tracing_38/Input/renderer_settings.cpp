@@ -66,10 +66,8 @@ void renderer_settings::set_mode(int mode_)
 	case CORNELL_BOX:
 	case TWO_BOXES:
 	case TWO_BOXES_ROTATED:
-		this->location = point3(278, 278, -700);
-		break;
 	case CORNELL_SMOKE:
-		this->location = point3(278, 278, -800);
+		this->location = point3(278, 278, -700);
 		break;
 	case SIMPLE_2D_PARALEL_TEST:
 		this->location = point3(100, 100, 500);
@@ -89,6 +87,12 @@ void renderer_settings::set_mode(int mode_)
 	case RANDOM_SPHERES:
 		this->location = point3{ 0,3,12 };
 		break;
+
+	case FINAL_SCENE:
+		this->location = point3{ 478,278,-600 };
+		break;
+
+
 	case CHECKER_BOARDS:
 	case EARTH_SPHERE:
 	case PERLIN_SPHERE:

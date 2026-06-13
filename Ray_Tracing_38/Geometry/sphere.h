@@ -15,17 +15,6 @@
 class sphere : public hittable {
 public:
     // Stationary Sphere
-    sphere(const point3& _center, 
-           double _radius, 
-           std::unique_ptr<material> _mat);
-
-    // Moving Sphere
-    sphere(const point3& _center1, 
-           const point3& _center2,
-           double _radius, 
-           std::unique_ptr<material> _mat);
-
-    // Stationary Sphere
     sphere(const point3& _center,
         double _radius,
         const int mat_indx);
@@ -40,10 +29,7 @@ public:
     virtual bool compare(hittable* rhs_, const double& tol_) const override;
     virtual bool comparator(const std::unique_ptr<hittable>& rhs_) const override;
 
-    double get_radius()
-    {
-        return radius;
-    }
+    double get_radius();
 
 
 

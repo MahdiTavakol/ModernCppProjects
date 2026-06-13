@@ -37,6 +37,12 @@ factory::factory(int argc, char** argv, int mode_,
 	// the parallel class in charge of the parallel communicator
 	para = std::make_unique<mpiComm>(comm_, comm_settings.get());
 
+	// parsing the logger arguments for the Logger class from the cml
+	//std::unique_ptr<settings> error_settings = std::make_unique<logger_settings>();
+	//input::set_logger_settings(argc, argv, error_settings.get());
+	// the Logger class is in charge of logging output
+	error = std::make_unique<Logger>();
+
 
 	// changing the settings based on the user input
 	in = std::make_unique<input>(argc, argv, mode_,app_set_map, para.get());
@@ -46,10 +52,11 @@ factory::factory(int argc, char** argv, int mode_,
 	stngs = in->return_app_settings();
 
 
+
 	// getting the settings for the scene_factory object
 	settings* scene_settings = (*stngs)["scene"];
 	// the world_factory is in charge of lazy creation of the scene.
-	world_factory = std::make_unique<scene_factory>(scene_settings, para.get());
+	world_factory = std::make_unique<scene_factory>(scene_settings,error.get(), para.get());
 	// since settings in some classes are dependent on hittable_list
 	// we first create that.
 	// building the hittable_list
@@ -212,4 +219,10 @@ std::unique_ptr<renderer> factory::return_renderer()
 	if (rend == nullptr)
 		throw std::runtime_error("This object has already been returned!");
 	return std::move(rend);
+}
+
+std::unique_ptr<Logger> factory::return_error()
+{
+	// returning the error
+	return std::move(error);
 }

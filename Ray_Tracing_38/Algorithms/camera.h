@@ -34,22 +34,9 @@ public:
 	virtual void render(image* img_, const hittable& world_, const material_list& list_) const;
 	virtual void render_verbose(image* img_, const hittable& world_, const material_list& list_) const;
 
-	virtual void move_camera(point3 _lookfrom) {
-		this->lookfrom = _lookfrom;
-		initialize();
-	}
-
-
-	void print_back_ground() const
-	{
-		std::cout << background << std::endl;
-	}
-
-	virtual void set_range(const int& _width_min, const int& _width_max, const int& _height_min, const int& _height_max)
-	{
-		// I just needed that method in both the camera and camera_parallel classes
-		// so that the setup in the parallel class can have generic input of camera* type
-	}
+	virtual void move_camera(point3 _lookfrom);
+	void print_back_ground() const;
+	virtual void set_range(const int& _width_min, const int& _width_max, const int& _height_min, const int& _height_max);
 
 
 

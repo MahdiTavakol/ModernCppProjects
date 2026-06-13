@@ -1,18 +1,6 @@
 #include "triangle_mesh.h"
 
 triangle_mesh::triangle_mesh(
-	const std::array<point3, 3>& _vs,
-	const std::array<point2, 3>& _vts,
-	const std::array<point3, 3>& _vns,
-	std::unique_ptr<material> _mat)
-	:
-	hittable{"triangle_mesh",std::move(_mat)},
-	vs {_vs}, vts{ _vts }, vns{ _vns }
-{
-	initialize();
-}
-
-triangle_mesh::triangle_mesh(
 	const std::array<point3, 3>& vs_,
 	const std::array<point2, 3>& vts_,
 	const std::array<point3, 3>& vns_,
@@ -58,6 +46,32 @@ void triangle_mesh::set_bounding_box()
 	bbox = bbox_diagonal;
 }
 
+void triangle_mesh::flip()
+{
+	std::vector flip_indx = { 0,2,1 };
+
+	std::array<point3, 3> new_vs;
+	std::array<point2, 3> new_vts;
+	std::array<point2, 3> new_vts_1;
+	std::array<point3, 3> new_vns;
+
+	for (int i = 0; i < 3; i++)
+	{
+		new_vs[i] = vs[flip_indx[i]];
+		new_vts[i] = vts[flip_indx[i]];
+		new_vts_1[i] = vts_1[flip_indx[i]];
+		new_vns[i] = vns[flip_indx[i]];
+	}
+
+	vs = new_vs;
+	vts = new_vts;
+	vts_1 = new_vts_1;
+	vns = new_vns;
+
+	initialize();
+
+}
+
 bool triangle_mesh::hit(const ray& _r, interval _ray_t, hit_record& _rec) const
 {
 	auto denom1 = dot(unit_n1, _r.direction());
@@ -99,10 +113,10 @@ bool triangle_mesh::hit(const ray& _r, interval _ray_t, hit_record& _rec) const
 void triangle_mesh::return_params(
 	std::array<point3, 3>& vs_,
 	std::array<point2, 3>& vts_,
-	std::array<point3, 3>& vns_,
-	material* mat_)
+	std::array<point2, 3>& vts_1_,
+	std::array<point3, 3>& vns_)
 {
-	vs_ = vs; vts_ = vts; vns_ = vns; mat_ = mat.get();
+	vs_ = vs; vts_ = vts; vns_ = vns; vts_1_ = vts_1;
 }
 
 bool triangle_mesh::is_interior(double _a, double _b, hit_record& _rec) const {

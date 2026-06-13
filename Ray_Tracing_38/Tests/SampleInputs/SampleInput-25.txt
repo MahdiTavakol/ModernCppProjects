@@ -1,5 +1,5 @@
-mode CORNELL_SMOKE
+mode TWO_BOXES
 renderer -renderer_mode STATIC -path_type NONE 5
-scene -mode CORNELL_SMOKE
-image -width 1080
+scene -mode TWO_BOXES
+image -width 720
 output -output_type parallel  -output_mode P6 -image_file Tests\\SampleOutputs\\test_25.ppm

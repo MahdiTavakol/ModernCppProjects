@@ -3,32 +3,6 @@
 sphere::sphere(
     const point3& _center,
     double _radius,
-    std::unique_ptr<material> _mat)
-    : 
-    hittable{"sphere", std::move(_mat)},
-    center{_center, vec3(0, 0, 0)}, radius{std::fmax(0, _radius)}
-{
-    auto rvec = vec3(radius, radius, radius);
-    bbox = aabb(_center - rvec, _center + rvec);
-}
-
-sphere::sphere(const point3& _center1,
-               const point3& _center2,
-               double _radius,
-               std::unique_ptr<material> _mat)
-    : 
-    hittable{ "sphere",std::move(_mat)},
-    center{ _center1, _center2 - _center1 }, radius{ std::fmax(0, _radius) }
-{
-    auto rvec = vec3(radius, radius, radius);
-    aabb box1(center.at(0) - rvec, center.at(0) + rvec);
-    aabb box2(center.at(1) - rvec, center.at(1) + rvec);
-    bbox = aabb(box1, box2);
-}
-
-sphere::sphere(
-    const point3& _center,
-    double _radius,
     const int mat_indx_)
     :
     hittable{ "sphere", mat_indx_ },
@@ -130,4 +104,9 @@ void sphere::get_sphere_uv(const point3& p, double& u, double& v)
 
     u = phi / (2 * pi);
     v = theta / pi;
+}
+
+double sphere::get_radius()
+{
+    return radius;
 }

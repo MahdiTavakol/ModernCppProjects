@@ -80,6 +80,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>true</EnableASAN>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -94,6 +95,7 @@
     <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>false</EnableASAN>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -223,7 +225,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Program Files\Microsoft MPI\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Mahdi\16-Courses\19-ModernC++Projects\eigen-master;C:\Program Files\Microsoft MPI\Include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp23</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <Optimization>Disabled</Optimization>
@@ -265,6 +267,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp23</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <AdditionalIncludeDirectories>C:\Mahdi\16-Courses\19-ModernC++Projects\eigen-master</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -277,6 +280,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Algorithms\bvh.cpp" />
+    <ClCompile Include="Algorithms\bvh_triangles.cpp" />
     <ClCompile Include="Algorithms\camera.cpp" />
     <ClCompile Include="Algorithms\communicator.cpp" />
     <ClCompile Include="Algorithms\hittable_list.cpp" />
@@ -289,6 +293,7 @@
     <ClCompile Include="Algorithms\path.cpp" />
     <ClCompile Include="Algorithms\rtw_stb_image.cpp" />
     <ClCompile Include="Algorithms\simpleComm.cpp" />
+    <ClCompile Include="Algorithms\triangle_list.cpp" />
     <ClCompile Include="Data\color_array.cpp" />
     <ClCompile Include="Geometry\aabb.cpp" />
     <ClCompile Include="Geometry\constant_medium.cpp" />
@@ -299,6 +304,7 @@
     <ClCompile Include="Geometry\planes.cpp" />
     <ClCompile Include="Geometry\quad.cpp" />
     <ClCompile Include="Geometry\sphere.cpp" />
+    <ClCompile Include="Geometry\texture.cpp" />
     <ClCompile Include="Geometry\triangle_mesh.cpp" />
     <ClCompile Include="Input\camera_settings.cpp" />
     <ClCompile Include="Input\communicator_settings.cpp" />
@@ -317,11 +323,15 @@
     <ClCompile Include="Input\settings.cpp" />
     <ClCompile Include="Input\scene_settings.cpp" />
     <ClCompile Include="Input\tiny_gltf_v3.c" />
+    <ClCompile Include="Materials\material.cpp" />
+    <ClCompile Include="Materials\material_list.cpp" />
+    <ClCompile Include="Materials\PBR.cpp" />
     <ClCompile Include="Output\Logger.cpp" />
     <ClCompile Include="Output\output.cpp" />
     <ClCompile Include="Output\output_async.cpp" />
     <ClCompile Include="Output\output_parallel.cpp" />
     <ClCompile Include="Output\output_serial.cpp" />
+    <ClCompile Include="Output\profiler.cpp" />
     <ClCompile Include="RayTracing_21.cpp" />
     <ClCompile Include="Renderer\Renderer.cpp" />
     <ClCompile Include="Renderer\Renderer_Animation.cpp" />
@@ -332,6 +342,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Algorithms\bvh.h" />
+    <ClInclude Include="Algorithms\bvh_triangles.h" />
     <ClInclude Include="Algorithms\camera.h" />
     <ClInclude Include="Algorithms\communicator.h" />
     <ClInclude Include="Algorithms\hittable_list.h" />
@@ -344,6 +355,7 @@
     <ClInclude Include="Algorithms\path.h" />
     <ClInclude Include="Algorithms\rtw_stb_image.h" />
     <ClInclude Include="Algorithms\simpleComm.h" />
+    <ClInclude Include="Algorithms\triangle_list.h" />
     <ClInclude Include="Data\color_array.h" />
     <ClInclude Include="Geometry\aabb.h" />
     <ClInclude Include="Geometry\constant_medium.h" />
@@ -376,11 +388,13 @@
     <ClInclude Include="Input\tiny_gltf_v3.h" />
     <ClInclude Include="Materials\material.h" />
     <ClInclude Include="Materials\material_list.h" />
+    <ClInclude Include="Materials\PBR.h" />
     <ClInclude Include="Output\Logger.h" />
     <ClInclude Include="Output\output.h" />
     <ClInclude Include="Output\output_async.h" />
     <ClInclude Include="Output\output_parallel.h" />
     <ClInclude Include="Output\output_serial.h" />
+    <ClInclude Include="Output\profiler.h" />
     <ClInclude Include="Renderer\Renderer.h" />
     <ClInclude Include="Renderer\Renderer_Animation.h" />
     <ClInclude Include="Renderer\Renderer_Async.h" />

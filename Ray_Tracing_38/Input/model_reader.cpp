@@ -2,10 +2,11 @@
 #include <fstream>
 #include <filesystem>
 
-model_reader::model_reader(std::string file_path_, communicator* para_)
+model_reader::model_reader(std::string file_path_, Logger* error_, communicator* para_)
 	: 
-	file_path(file_path_),
-	para(para_),
+	file_path{file_path_},
+	error{error_},
+	para{ para_ },
 	world{ std::make_unique<hittable_list>() },
 	mtl_list{std::make_unique<material_list>()}
 {
@@ -25,7 +26,8 @@ std::unique_ptr<material_list> model_reader::return_mtl_list()
 	return std::move(mtl_list);
 }
 
-std::unique_ptr<std::istream> model_reader::open_file(std::string& file_name_, std::string path_, bool silent_)
+std::unique_ptr<std::istream> model_reader::open_file(
+	std::string& file_name_, std::string path_, Logger* error_, bool silent_)
 {
 	char delimiter;
 #ifdef _WIN32
@@ -40,13 +42,16 @@ std::unique_ptr<std::istream> model_reader::open_file(std::string& file_name_, s
 	if (!file_ptr->is_open()) {
 		file_name_ = path_ + file_name_;
 		file_ptr = std::make_unique<std::ifstream>(file_name_);
-		std::cout << "Trying opening " << file_name_ << std::endl;
+		std::string message = "Trying opening " + file_name_;
+		error_->print_message(message, 0);
 		if (!file_ptr->is_open()) {
 			if (!silent_)
-				std::cout << "The file " << std::endl
-				<< file_name_ << std::endl
-				<< "does not exists in the path " << std::endl
-				<< std::filesystem::current_path() << std::endl;
+			{
+				std::string message = "The file " + file_name_ +
+					 "does not exists in the path\n" +
+					std::filesystem::current_path().string();
+				error_->print_message(message, 1);
+			}
 			return nullptr;
 		}
 	}

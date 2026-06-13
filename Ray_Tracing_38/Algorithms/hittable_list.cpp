@@ -71,7 +71,7 @@ size_t hittable_list::size() const
 	return out;
 }
 
-vec3 hittable_list::com()
+vec3 hittable_list::com() const
 {
 	// each individual objects 
 	// has a different com so for now
@@ -133,4 +133,12 @@ void hittable_list::scale(const vec3& center_, const double& factor_)
 		object->scale(center_, factor_);
 	}
 	bbox.scale(center_, factor_);
+}
+
+void hittable_list::clear() {
+	objects.clear(); 
+}
+
+hittable* hittable_list::operator[](const int& i) {
+	return objects[i].get();
 }

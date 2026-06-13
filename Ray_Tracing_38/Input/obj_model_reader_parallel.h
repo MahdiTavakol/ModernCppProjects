@@ -22,9 +22,11 @@ class obj_model_reader_parallel: public obj_model_reader
 public:
 	obj_model_reader_parallel(
 		std::string _obj_file_name,
+		Logger* error_,
 		std::unique_ptr<communicator>& _para);
 	obj_model_reader_parallel(
 		std::string _obj_file_name,
+		Logger* error_,
 		communicator* _para);
 
 protected:

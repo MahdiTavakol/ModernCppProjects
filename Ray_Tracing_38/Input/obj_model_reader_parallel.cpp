@@ -2,14 +2,16 @@
 
 obj_model_reader_parallel::obj_model_reader_parallel(
 	std::string _obj_file_name,
+	Logger* error_,
 	std::unique_ptr<communicator>& _para) :
-	obj_model_reader_parallel{ _obj_file_name, _para.get()}
+	obj_model_reader_parallel{ _obj_file_name,error_, _para.get()}
 {}
 
 obj_model_reader_parallel::obj_model_reader_parallel(
 	std::string _obj_file_name,
+	Logger* error_,
 	communicator* _para) :
-	obj_model_reader{ _obj_file_name, _para }
+	obj_model_reader{ _obj_file_name,error_, _para }
 {
 	int rank = para->return_rank();
 	if (rank == 0)

@@ -24,10 +24,7 @@ public:
         std::array<int,2>& size_) const override;
     virtual void barrier() const override;
     void bcast(void* buff_, int nBytes_, int root_ = 0) const override;
-    MPI_Comm* return_comm()
-    {
-        return &MPI_world;
-    }
+    MPI_Comm* return_comm();
 
 protected:
     MPI_Comm MPI_world;

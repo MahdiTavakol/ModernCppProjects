@@ -229,4 +229,9 @@ void mpiComm::bcast(void* buff_, int nBytes_, int root_) const
     MPI_Bcast(buff_, nBytes_, MPI_BYTE, root_, MPI_world);
 }
 
+MPI_Comm* mpiComm::return_comm()
+{
+    return &MPI_world;
+}
+
 

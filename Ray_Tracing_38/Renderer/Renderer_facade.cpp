@@ -26,6 +26,7 @@ void renderer_facade::setup()
 	// creating the objects
 	builder->create();
 	// returning each object
+	error = builder->return_error();
 	rend = builder->return_renderer();
 	cam = builder->return_camera();
 	para = builder->return_comm();
@@ -57,6 +58,11 @@ void renderer_facade::write()
 	// also the renderer is in the charge of updating the file contents in its render method, 
 	// so the writer just needs to write the file with the current contents.
 	rend->write_file(writer.get(),img.get());
+}
+
+std::unique_ptr<Logger> renderer_facade::return_error()
+{
+	return std::move(error);
 }
 
 

@@ -20,10 +20,7 @@ public:
 	path(point3 _point); // For backward compatibility with the static case.
 	~path() {}
 
-	point3 operator[](int i) const {
-		point3 output = locs[i].return_loc();
-		return output;
-	}
+	point3 operator[](int i) const;
 
 	int return_num_frames();
 

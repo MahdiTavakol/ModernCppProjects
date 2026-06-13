@@ -6,13 +6,27 @@
 #include "model_reader.h"
 #include <string>
 #include <vector>
+#include <Eigen/Dense>
+
+
+using Eigen::VectorXd;
+using Eigen::MatrixXd;
+using Eigen::Vector4d;
+using Eigen::Matrix4d;
 
 constexpr int MAX_COORD = 16;
+
+struct primitive_struct
+{
+	std::vector<face_indx> faces;
+	std::vector<vec3> vs_vector, vns_vector;
+	std::array<std::vector<vec2>, MAX_COORD> vts_array_vector;
+};
 
 
 class gltf_reader: public model_reader {
 public:
-	gltf_reader(const std::string& file_path, communicator* para_);
+	gltf_reader(const std::string& file_path,Logger* error_, communicator* para_);
 	~gltf_reader();
 	void read() override;
 
@@ -22,19 +36,17 @@ protected:
 	int material_num = 0;
 	// the min and max of the simulation box
 	vec3 min, max;
-	// scaling the file
-	double scale = 1.0;
+
 
 
 
 	// data
-	// TEXCOORDS
-	std::array<std::vector<vec2>, MAX_COORD> vts_array;
+	std::vector<primitive_struct> primitives;
 
 
 	// helper functions
-	// reading objects from the gltf
-	void read_objects();
+	// reading nodes (which own meshes) from the gltf
+	void read_scene(size_t frame_ = 0);
 	// reading materials from the gltf
 	void read_materials();
 	// reading textures
@@ -52,6 +64,15 @@ protected:
 
 
 
+
+	// reading nodes form gltf
+	void read_node(size_t node_id_, Matrix4d transform_ = Matrix4d::Identity());
+	// reading meshes of a node in the gltf
+	void read_mesh(size_t mesh_id_, Matrix4d transform_ = Matrix4d::Identity());
+
+
+	// the transformation helpers
+	MatrixXd create_gltf_matrix(const double* rotation_, const double* scale_, const double* translation_);
 
 private:
 	// tinygltf data structures

@@ -10,6 +10,7 @@
 #include "../Algorithms/hittable_list.h"
 #include "../Input/factory.hpp"
 #include "../Materials/material_list.h"
+#include "../Output/Logger.h"
 
 
 class renderer_facade
@@ -21,6 +22,7 @@ public:
 	void add(std::unique_ptr<hittable>& object);
 	virtual void render();
 	void write();
+	std::unique_ptr<Logger> return_error();
 
 
 
@@ -29,6 +31,7 @@ protected:
 	std::unique_ptr<factory> builder;
 
 	// resources
+	std::unique_ptr<Logger> error;
 	std::unique_ptr<image> img;
 	std::unique_ptr<renderer> rend;
 	std::unique_ptr<camera> cam;

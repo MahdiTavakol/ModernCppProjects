@@ -23,32 +23,40 @@ void image_settings::set_input_map()
 
 void image_settings::set_mode(int mode_)
 {
-	if (mode_ == QUADS)
+	switch(mode_)
 	{
+	case QUADS:
 		this->image_width = 1080;
 		this->width_ratio = 1.0;
 		this->height_ratio = 1.0;
-	}
-	else if (mode_ == TWO_LIGHTS || mode_ == SIMPLE_LIGHT)
-	{
-	}
-	else if (mode_ == CORNELL_BOX || mode_ == TWO_BOXES || mode_ == TWO_BOXES_ROTATED)
-	{
+		break;
+	case TWO_LIGHTS:
+	case SIMPLE_LIGHT:
+		break;
+	case CORNELL_BOX:
+	case TWO_BOXES:
+	case TWO_BOXES_ROTATED:
 		this->width_ratio = 1.0;
 		this->height_ratio = 1.0;
-	}
-	else if (mode_ == CORNELL_SMOKE)
-	{
+		break;
+	case CORNELL_SMOKE:
 		this->width_ratio = 1.0;
 		this->height_ratio = 1.0;
-	}
-	else if (mode_ == RANDOM_SPHERES_ANIMATED)
-	{
-	}
-	else if (mode_ == SIMPLE_2D_PARALEL_TEST)
-	{
+		break;
+	case FINAL_SCENE:
+		this->image_width = 400; // 800
+		this->width_ratio = 1.0;
+		this->height_ratio = 1.0;
+
+
+	case RANDOM_SPHERES_ANIMATED:
+		break;
+	case SIMPLE_2D_PARALEL_TEST:
 		this->image_width = 1080;
+		break;
 	}
+
+
 }
 
 
@@ -58,7 +66,7 @@ int& image_settings::get_image_width()
 }
 int image_settings::get_image_height()
 {
-	return this->image_width * height_ratio / width_ratio;
+	return static_cast<int>(this->image_width * height_ratio / width_ratio);
 }
 
 double& image_settings::get_width_ratio()

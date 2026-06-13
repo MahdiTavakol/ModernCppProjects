@@ -6,6 +6,7 @@
 #include "Shared/rtweekend.h"
 #include "Renderer/Renderer.h"
 #include "Renderer/Renderer_facade.h"
+#include "Output/Logger.h"
 
 
 
@@ -15,6 +16,7 @@
 int main(int argc, char** argv)
 {
 	MPI_Init(&argc, &argv);
+	std::unique_ptr<Logger> error;
 
 	int mode;
 
@@ -42,26 +44,32 @@ int main(int argc, char** argv)
 		rendFacade->setup();
 		rendFacade->render();
 		rendFacade->write();
+		error = std::move(rendFacade->return_error());
 	}
 	catch (const std::invalid_argument& e)
 	{
-		std::cout << "Invalid_argument exception " << e.what() << std::endl;
+		std::string message = "Invalid_argument exception " + std::string(e.what());
+		error->print_message(message, 0);
 	}
 	catch (const std::runtime_error& e)
 	{
-		std::cout << "Runtime error exception " << e.what() << std::endl;
+		std::string message = "Runtime error exception " + std::string(e.what());
+		error->print_message(message, 0);
 	}
 	catch (const std::out_of_range& e)
 	{
-		std::cout << "Out of range exception " << e.what() << std::endl;
+		std::string message = "Out of range exception " + std::string(e.what());
+		error->print_message(message, 0);
 	}
 	catch (const std::exception& e)
 	{
-		std::cout << "Exception " << e.what() << std::endl;
+		std::string message = "Exception " + std::string(e.what());
+		error->print_message(message, 0);
 	}
 	catch (...)
 	{
-		std::cout << "Unknown exception" << std::endl;
+		std::string message = "Unknown exception ";
+		error->print_message(message, 0);
 	}
 
 

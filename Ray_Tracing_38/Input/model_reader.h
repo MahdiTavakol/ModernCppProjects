@@ -4,6 +4,7 @@
 #include "../Algorithms/hittable_list.h"
 #include "../Materials/material_list.h"
 #include "../Algorithms/communicator.h"
+#include "../Output/Logger.h"
 
 // in the case where all
 // the indexes are the same for a face
@@ -12,6 +13,7 @@
 struct face_indx
 {
 	std::vector<int> v_indx;
+	// either for the vt_indx or offset for v, vt and vn
 	std::vector<int> vt_indx;
 	std::vector<int> vn_indx;
 	std::string object;
@@ -24,7 +26,7 @@ struct face_indx
 class model_reader
 {
 public:
-	model_reader(std::string file_path_, communicator* para_);
+	model_reader(std::string file_path_, Logger* error_, communicator* para_);
 	virtual void read() = 0;
 	std::unique_ptr<hittable_list> return_world();
 	std::unique_ptr<material_list> return_mtl_list();
@@ -32,6 +34,7 @@ public:
 protected:
 	std::string file_path;
 	communicator* para = nullptr;
+	Logger* error = nullptr;
 	// should I be silent
 	bool silent = false;
 	// how much verbose I want to be in the messaging interface
@@ -56,21 +59,12 @@ protected:
 	static std::unique_ptr<std::istream> open_file(
 		std::string& file_name_,
 		std::string path_ = "",
+		Logger* error_ = nullptr,
 		bool silent = false);
 
 	// calculating the vn values from the edges
 	static void estimate_vns(
 		const std::array<point3, 3>& vs_,
 		std::array<point3, 3>& vns_);
-
-
-	// The messaging interface.. 
-// should have its own class at the end
-	void print_message(const std::string message_, int level_ = 0, char delimiter = ' ')
-	{
-		if (level_ > max_message_level)
-			return;
-		std::cout << std::string(level_, delimiter) << message_ << "\n";
-	}
 
 };

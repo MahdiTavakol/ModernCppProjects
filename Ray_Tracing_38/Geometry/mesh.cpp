@@ -1,18 +1,7 @@
 #include "mesh.h"
 #include <mpi.h>
 
-mesh::mesh(const std::array<point3, 4>& _vs,
-	       const std::array<point3, 4>& _vts,
-	       const std::array<point3, 4>& _vns,
-	       std::unique_ptr<material> _mat,
-		   std::string type_ )
-	: hittable{type_,std::move(_mat)},
-	  vs{ _vs }, vts{ _vts }, 
-	  vns{ _vns },
-	  num_edges{ 4 }
-{
-	initialize();
-}
+
 
 mesh::mesh(
 	const std::array<point3, 4>& vs_,
@@ -28,9 +17,6 @@ mesh::mesh(
 	initialize();
 }
 
-
-mesh::mesh(std::unique_ptr<material> _mat, std::string type_) :
-	hittable{ type_ ,std::move(_mat)} { }
 
 mesh::mesh(const int mat_indx, std::string type_):
 	hittable{type_, mat_indx}

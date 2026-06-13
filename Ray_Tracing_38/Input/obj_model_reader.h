@@ -15,6 +15,7 @@
 #include "../Types/vec3.h"
 #include "../Geometry/triangle_mesh.h"
 #include "../Geometry/mesh.h"
+#include "../Output/Logger.h"
 
 #include "model_reader.h"
 
@@ -36,15 +37,19 @@ struct material_info
 class obj_model_reader: public model_reader {
 public:
 	obj_model_reader(std::string obj_file_name_,
+		             Logger* error_,
 		             communicator* para_);
 	obj_model_reader(std::string _obj_file_name,
 		             std::string _mtl_file_name,
+		             Logger* error_,
 		             communicator* _para);
 	obj_model_reader(std::unique_ptr<std::iostream> _obj_file_ptr,
 					 std::unique_ptr<std::iostream> _mtl_file_ptr,
+		             Logger* error_,
 		             communicator* _para);
 	obj_model_reader(std::unique_ptr<std::iostream> _obj_file_ptr,
 		             std::unique_ptr<std::iostream> _mtl_file_ptr,
+		             Logger* error_,
 		             std::unique_ptr<communicator>& _para);
 	virtual void read() override;
 
@@ -75,7 +80,12 @@ protected:
 	// setting the silent status
 	void set_silent_status();
 	// checking data
-	static void check_data(const int& num_file_, const int& num_read_, const std::string& title, const bool silent_ = true);
+	static void check_data(
+		const int& num_file_, 
+		const int& num_read_,
+		const std::string& title,
+		Logger* error_,
+		const bool silent_ = true);
 	// triangulating a face
 	static void face_triangulate(const face_indx& input_, std::vector<face_indx>& output_);
 	// creating and adding materials to the material list

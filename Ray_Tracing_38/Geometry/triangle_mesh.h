@@ -9,10 +9,7 @@
 
 class triangle_mesh : public hittable {
 public:
-	triangle_mesh(const std::array<point3, 3>& _vs,
-		          const std::array<point2, 3>& _vts,
-		          const std::array<point3, 3>& _vns,
-		          std::unique_ptr<material> _mat);
+
 	triangle_mesh(const std::array<point3, 3>& vs_,
 		          const std::array<point2, 3>& vts_,
 		          const std::array<point3, 3>& vns_,
@@ -24,13 +21,14 @@ public:
 		          const int mat_indx_);
 	virtual void initialize();
 	virtual void set_bounding_box();
+	void flip();
 	bool hit(const ray& _r, interval _ray_t, hit_record& _rec) const override;
 	virtual bool is_interior(double _a, double _b, hit_record& _rec) const;
 	void return_params(
 		std::array<point3, 3>& vs_,
 		std::array<point2, 3>& vts_,
-		std::array<point3, 3>& vns_,
-		material* mat_);
+		std::array<point2,3>& vts_1_,
+		std::array<point3, 3>& vns_);
 	bool compare(hittable* rhs_, const double& tol) const override;
 	virtual bool comparator(const std::unique_ptr<hittable>& rhs_) const override;
 	double get_area() const override;

@@ -48,12 +48,23 @@ void camera_settings::set_mode(int mode_)
 		this->background = color(0, 0, 0);
 		break;
 	case CORNELL_SMOKE:
-		this->background = color(0, 0, 0);
-		this->vfov = 40;
 		this->lookat = point3(278, 278, 0);
+		this->vfov = 40;
 		this->vup = vec3(0, 1, 0);
 		this->defocus_angle = 0;
+		this->background = color(0, 0, 0);
+		this->samples_per_pixel = 200;
 		break;
+	case FINAL_SCENE:
+		this->lookat = point3{ 278,278,0 };
+		this->vfov = 40;
+		this->samples_per_pixel = 250; // 10000
+		this->max_depth = 4;
+		this->background = color{ 0,0,0 };
+		this->defocus_angle = 0.0;
+		this->vup = vec3{ 0,1,0 };
+		break;
+
 	case RANDOM_SPHERES_ANIMATED:
 		this->background = color(0.7, 0.8, 1.00);
 		// The rest of the thing

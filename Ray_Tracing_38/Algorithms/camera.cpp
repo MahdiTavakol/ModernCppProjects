@@ -99,6 +99,7 @@ void camera::render(image* img_, const hittable& world_, const material_list& li
 
 	for (int j = height_min; j < height_max; j++)
 	{
+		std::clog << "\rRendering row: " << j << " " << std::endl;
 		for (int i = width_min; i < width_max; i++)
 		{
 			color pixel_color(0, 0, 0);
@@ -187,8 +188,11 @@ color camera::ray_color(const ray& r_, int depth_, const hittable& world_, const
 
 	hit_record rec;
 
-	if (!world_.hit(r_, interval(0.001, infinity), rec))
+	bool hit_any = world_.hit(r_, interval(0.001, infinity), rec);
+
+	if (!hit_any)
 		return background_color(r_);
+
 
 	int mat_indx = rec.mat_indx;
 	material* mat = list_(mat_indx);
@@ -199,11 +203,6 @@ color camera::ray_color(const ray& r_, int depth_, const hittable& world_, const
 	color color_from_emission = mat->emitted(rec.u, rec.v, rec.p);
 
 	std::array<scatter_record, 3> srec;
-	for (auto& s : srec)
-	{
-		s.scattered_ray = scattered;
-		s.attenuation = attenuation;
-	}
 
 	mat->scatter(r_, rec, srec);
 	
@@ -212,18 +211,16 @@ color camera::ray_color(const ray& r_, int depth_, const hittable& world_, const
 
 	color color_from_scatter;
 
-	//for (auto& s : srec)
-	{
-		//diffusive scatter
-		if (srec[0].scattered)
-			color_from_scatter += srec[0].weight * srec[0].attenuation * (simple_direct_lighting(rec));//+ray_color(srec[0].scattered_ray, depth_ - 1, world_, list_));
-		// specular scatter
-		if (srec[1].scattered)
-			color_from_emission += srec[1].weight * srec[1].attenuation *ray_color(srec[1].scattered_ray, depth_ - 1, world_, list_);
-		// transmit scatter
-		if (srec[2].scattered)
-			color_from_emission += srec[2].weight * srec[2].attenuation * ray_color(srec[2].scattered_ray, depth_ - 1, world_, list_);
-	}
+
+	//diffusive scatter
+	if (srec[0].scattered)
+		color_from_scatter += srec[0].weight * srec[0].attenuation * (simple_direct_lighting(rec));//+ray_color(srec[0].scattered_ray, depth_ - 1, world_, list_));
+	// specular scatter
+	if (srec[1].scattered)
+		color_from_emission += srec[1].weight * srec[1].attenuation *ray_color(srec[1].scattered_ray, depth_ - 1, world_, list_);
+	// transmit scatter
+	if (srec[2].scattered)
+		color_from_emission += srec[2].weight * srec[2].attenuation * ray_color(srec[2].scattered_ray, depth_ - 1, world_, list_);
 
 
 	return color_from_emission + color_from_scatter;
@@ -263,4 +260,21 @@ color camera::simple_direct_lighting(const hit_record& rec_) const
 
 	return ambient + ndotl * light_color;
 
+}
+
+void camera::move_camera(point3 _lookfrom) {
+	this->lookfrom = _lookfrom;
+	initialize();
+}
+
+
+void camera::print_back_ground() const
+{
+	std::cout << background << std::endl;
+}
+
+void camera::set_range(const int& _width_min, const int& _width_max, const int& _height_min, const int& _height_max)
+{
+	// I just needed that method in both the camera and camera_parallel classes
+	// so that the setup in the parallel class can have generic input of camera* type
 }

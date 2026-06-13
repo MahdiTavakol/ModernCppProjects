@@ -21,10 +21,7 @@ public:
 	solid_color(double _red, double _green,double _blue): 
 		solid_color(color(_red,_green,_blue)) {}
 
-	color value(double _u, double _v, const point3& p) const override
-	{
-		return albedo;
-	}
+	color value(double _u, double _v, const point3& p) const override;
 
 private:
 	color albedo;
@@ -33,23 +30,11 @@ private:
 class checker_texture : public texture
 {
 public:
-	checker_texture(double _scale, std::unique_ptr<texture> _even, std::unique_ptr<texture> _odd )
-		: inv_scale{ 1.0 / _scale }, even{ std::move(_even) }, odd{ std::move(_odd) } {
-	}
+	checker_texture(double _scale, std::unique_ptr<texture> _even, std::unique_ptr<texture> _odd);
 
-	checker_texture(double _scale, const color& _c1, const color& _c2)
-		: checker_texture(_scale, std::make_unique<solid_color>(_c1), std::make_unique<solid_color>(_c2)) {}
+	checker_texture(double _scale, const color& _c1, const color& _c2);
 
-	color value(double _u, double _v, const point3& _p) const override
-	{
-		auto xInteger = int(std::floor(inv_scale * _p.x()));
-		auto yInteger = int(std::floor(inv_scale * _p.y()));
-		auto zInteger = int(std::floor(inv_scale * _p.z()));
-
-		bool isEven = (xInteger + yInteger + zInteger) % 2 == 0;
-
-		return isEven ? even->value(_u, _v, _p) : odd->value(_u, _v, _p);
-	}
+	color value(double _u, double _v, const point3& _p) const override;
 
 private:
 	double inv_scale;
@@ -60,23 +45,11 @@ private:
 class image_texture : public texture
 {
 public:
-	image_texture(const char* _filename) :image(_filename) {}
-	image_texture(std::string filename_) : image(filename_.c_str()) {}
+	image_texture(const char* _filename);
+	image_texture(std::string filename_);
 
-	color value(double u, double v, const point3& p) const override
-	{
-		if (image.height() <= 0) return color(0, 1, 1);
+	color value(double u, double v, const point3& p) const override;
 
-		u = interval(0, 1).clamp(u);
-		v = 1.0 - interval(0, 1).clamp(v);
-
-		auto i = int(u * image.width());
-		auto j = int(v * image.height());
-		auto pixel = image.pixel_data(i, j);
-
-		auto color_scale = 1.0 / 255.0;
-		return color(color_scale * pixel[0], color_scale * pixel[1], color_scale * pixel[2]);
-	}
 private:
 	rtw_image image;
 };
@@ -84,21 +57,9 @@ private:
 class HDRI_texture : public texture
 {
 public:
-	HDRI_texture(std::string _filename) :image(_filename.c_str()) {}
+	HDRI_texture(std::string _filename);
 
-	color value(double u, double v, const point3& p) const override
-	{
-		if (image.height() <= 0) return color(0, 1, 1);
-
-		u = interval(0, 1).clamp(u);
-		v = interval(0, 1).clamp(v);
-
-		auto i = int(u * image.width());
-		auto j = int(v * image.height());
-		const float* pixel = image.pixel_raw(i, j);
-
-		return color(pixel[0],pixel[1],pixel[2]);
-	}
+	color value(double u, double v, const point3& p) const override;
 private:
 	rtw_image image;
 };
@@ -106,14 +67,8 @@ private:
 class noise_texture : public texture
 {
 public:
-	noise_texture(double _scale) : scale(_scale) {}
-
-	color value(double _u, double _b, const point3& _p) const override
-	{
-		return color(0.5, 0.5, 0.5) * (1 + std::sin(scale * _p.z() + 10 * noise.turb(_p, 7)));
-		//return color(1, 1, 1) * noise.turb(p, 7);
-		//return color(1, 1, 1) * 0.5 * (1.0 + noise.noise(scale * _p));
-	}
+	noise_texture(double _scale);
+	color value(double _u, double _b, const point3& _p) const override;
 private:
 	perlin noise;
 	double scale;

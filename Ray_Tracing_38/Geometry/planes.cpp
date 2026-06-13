@@ -1,9 +1,6 @@
 #include "planes.h"
 
-triangle::triangle(const point3& _Q, const vec3& _u, const vec3& _v, 
-	std::unique_ptr<material> _mat):
-	quad{ _Q, _u, _v, std::move(_mat), "triangle"} {
-}
+
 
 triangle::triangle(const point3& _Q, const vec3& _u, const vec3& _v,
 	const int mat_indx_):
@@ -16,10 +13,6 @@ bool triangle::is_interior(double _a, double _b, hit_record& _rec) const
 }
 
 
-
-circle::circle(const point3& _Q, const vec3& _u, const vec3& _v, std::unique_ptr<material> _mat) :
-	quad{ _Q, _u, _v, std::move(_mat), "circle"} {
-}
 
 circle::circle(const point3& _Q, const vec3& _u, const vec3& _v,
 	const int mat_indx):

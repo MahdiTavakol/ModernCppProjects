@@ -9,6 +9,7 @@
 #include "../Algorithms/hittable_list.h"
 #include "../Output/output.h"
 #include "../Materials/material_list.h"
+#include "../Output/Logger.h"
 #include <mpi.h>
 
 class factory
@@ -25,12 +26,14 @@ public:
 	std::unique_ptr<hittable_list> return_world();
 	std::unique_ptr<material_list> return_mtl_list();
 	std::unique_ptr<image> return_image();
+	std::unique_ptr<Logger> return_error();
 
 protected:
 	// the mode used for various default parameters
 	int mode;
 	// special objects which are created before the input class
 	std::unique_ptr<communicator> para;
+	std::unique_ptr<Logger> error;
 	// the parser 
 	std::unique_ptr<input> in;
 	// the settings array for all the objects

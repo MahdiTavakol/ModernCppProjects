@@ -35,6 +35,7 @@ public:
 		return aabb(this->x + _offset.x(), this->y + _offset.y(), this->z + _offset.z());
 	}
 
+
 	void scale(const vec3 center_, double factor_);
 	
 private:
