@@ -23,9 +23,13 @@ file(GLOB_RECURSE RAYTRACER_SOURCES
     CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/*.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/*.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/*.cxx
 )
 
+# Exclude test, build and heavy external folders (e.g. eigen demos) from the sources
 list(FILTER RAYTRACER_SOURCES EXCLUDE REGEX "/(Tests|x64|Intel® VTune™ Profiler Results)/")
+list(FILTER RAYTRACER_SOURCES EXCLUDE REGEX "/external/eigen-master/")
 
 if(BUILD_TESTS)
     file(GLOB_RECURSE TEST_SOURCES
