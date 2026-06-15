@@ -38,12 +38,6 @@ public:
 	bool is_equal(const material& _second) const override;
 
 
-	// the main 
-	static vec4 tg3_image_to_color(
-		const tg3_image_result* image_,
-		const tg3_sampler* smp_,
-		const int& x_,
-		const int& y_);
 
 private:
 	tg3_material prop;
@@ -58,16 +52,19 @@ private:
 	// null function returning zero
 	static color null_color(double u_, double v_, const point3& p) { return color{ 0,0,0 }; }
 	static vec2 null_vec2(const double&, const double&, const double&, const double&) { return vec2{ 0,0 }; }
+	static vec2 unity_vec2(const double&, const double&, const double&, const double&) { return vec2{ 1,1 }; }
 	static color fixed_color(double u_, double v_, const point3& p,const color col_) 
 	{ return col_; }
 
 	// texture to vec4 functions
-	static vec4 null_vec4(double u_, double v_, double u1_, double v1_) { return vec4{ 1.0,1.0,1.0,1.0 }; }
+	static vec4 null_vec4(double u_, double v_, double u1_, double v1_) { return vec4{0.0,0.0,0.0,0.0}; }
+	static vec4 unity_vec4(double u_, double v_, double u1_, double v1_) { return vec4{ 1.0,1.0,1.0,1.0 }; }
 	static vec4 tg3_image_to_color(double s_, double t_,
 		const tg3_image_result* image_, const std::array<Sampler_func,2> smp_);
 
 	// sampler functions
 	static void null_sampler(int& i_) { return; }
+	static void repeat_sampler(int& i_, const int size_);
 	static void mirror_sampler(int& i_, const int size_);
 	static void mirror_repeat_sampler(int& i_, const int size_);
 	static void clamped_sampler(int& i_, const int size_);

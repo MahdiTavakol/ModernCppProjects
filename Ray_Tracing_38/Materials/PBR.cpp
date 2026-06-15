@@ -168,14 +168,16 @@ void PBR::init_functionals()
 	std::string message;
 	if (resources == nullptr)
 	{
-		message = "It seems that the shared variables in the PBR class has not initiated yet!\n";
+		message = "It seems that the shared variables in the PBR class has not been initiated yet!\n";
 		message += "They should be initiated before any PBR material is created!";
 		error->print_message(message, msg_level);
 	}
 	
 	// setting the emissive_func
 	{
-		const double* emissive_factor = prop.emissive_factor;
+		const double* emissive_factor_src = prop.emissive_factor;
+		double emissive_factor[3];
+		std::copy_n(emissive_factor_src, 3, emissive_factor);
 		const tg3_texture_info* texture = &prop.emissive_texture;
 		double emissive_size = std::sqrt(
 			emissive_factor[0] * emissive_factor[0] +
@@ -190,8 +192,8 @@ void PBR::init_functionals()
 		// the emissive texture is absent
 		else if (prop.emissive_texture.index == -1)
 		{
-			color emissive_color = color(emissive_factor[0], emissive_factor[1], emissive_factor[1]);
-			emission_func = [&emissive_color](double u_, double v_, const point3& p_)->color {
+			color emissive_color = color(emissive_factor[0], emissive_factor[1], emissive_factor[2]);
+			emission_func = [emissive_color](double u_, double v_, const point3& p_)->color {
 				return fixed_color(u_, v_, p_, emissive_color);
 			};
 		}
@@ -199,7 +201,7 @@ void PBR::init_functionals()
 		else
 		{
 			TexVec_func func = set_TexVecFunc(texture);
-			emission_func = [&func, &emissive_factor](double u_, double v_, const point3& p_)->color {
+			emission_func = [func, emissive_factor](double u_, double v_, const point3& p_)->color {
 				color output;
 				vec4 func_out = func(u_, v_, 0.0, 0.0);
 				output[0] = emissive_factor[0] * func_out[0];
@@ -213,7 +215,9 @@ void PBR::init_functionals()
 	// setting the albedo function
 	{
 		const tg3_pbr_metallic_roughness& pmr = prop.pbr_metallic_roughness;
-		const double* base_color = pmr.base_color_factor;
+		const double* base_color_src = pmr.base_color_factor;
+		double base_color[4];
+		std::copy_n(base_color_src, 4, base_color);
 		const tg3_texture_info* texture = &pmr.base_color_texture;
 		double base_color_size = std::sqrt(
 			base_color[0] * base_color[0] +
@@ -228,16 +232,16 @@ void PBR::init_functionals()
 		// the texture is missing
 		else if (texture->index == -1)
 		{
-			albedo_func = null_vec4;
+			albedo_func = unity_vec4;
 		}
 		// the general case
 		else
 		{
 			TexVec_func func = set_TexVecFunc(texture);
-			albedo_func = [&func, &base_color]
+			albedo_func = [func, base_color]
 			(const double& u_, const double& v_, const double& u1_, const double& v1_)->vec4
 			{
-				vec4 output = func(u_,v_,u1_,v_);
+				vec4 output = func(u_,v_,u1_,v1_);
 				output[0] *= base_color[0];
 				output[1] *= base_color[1];
 				output[2] *= base_color[2];
@@ -254,19 +258,22 @@ void PBR::init_functionals()
 		// the texture is missing
 		if (texture->index == -1)
 		{
-			metal_rough_func = null_vec2;
+			metal_rough_func = unity_vec2;
 		}
 		// the general case
 		else
 		{
 			TexVec_func func = set_TexVecFunc(texture);
-			metal_rough_func = [&func]
-			(const double& u_, const double& v_, const double& u1_, const double& v1_)->vec2
-				{
-					vec4 func_output = func(u_, v_, u1_, v_);
-					vec2 output = { func_output[2],func_output[1] };
-					return output;
-				};
+			metal_rough_func = [func] (
+				const double& u_,
+				const double& v_,
+				const double& u1_,
+				const double& v1_)->vec2
+			{
+				vec4 func_output = func(u_, v_, u1_, v1_);
+				vec2 output = { func_output[2],func_output[1] };
+				return output;
+			};
 
 		}
 	}
@@ -337,158 +344,12 @@ bool PBR::is_equal(const material& _second) const
 	return false;
 }
 
-vec4 PBR::tg3_image_to_color(
-	const tg3_image_result* image_,
-	const tg3_sampler* smp_,
-	const int& x_,
-	const int& y_)
+
+
+void PBR::repeat_sampler(int& i_, const int size_)
 {
-	int x = x_, y = y_;
-
-	if (x < 0 || x >= image_->width) {
-		int xDiv;
-		switch (smp_->wrap_s)
-		{
-		case TG3_TEXTURE_WRAP_REPEAT:
-			x = x >= 0 ? x : x + image_->width;
-			x = x % image_->width;
-			break;
-		case TG3_TEXTURE_WRAP_MIRRORED_REPEAT:
-			x = x >= 0 ? x : x + image_->width;
-			x = x % image_->width;
-			xDiv = x_ / image_->width;
-			if (xDiv % 2) x = image_->width - 1 - x;
-			break;
-		case TG3_TEXTURE_WRAP_CLAMP_TO_EDGE:
-			x = x < 0 ? 0 : x;
-			x = x >= image_->width ? image_->width - 1 : x;
-			break;
-		default:
-			throw std::invalid_argument("Unsupported sampler!");
-		}
-	}
-	if (y < 0 || y >= image_->height) {
-		int yDiv;
-		switch (smp_->wrap_t)
-		{
-		case TG3_TEXTURE_WRAP_REPEAT:
-			y = y >= 0 ? y : y + image_->height;
-			y = y % image_->height;
-			break;
-		case TG3_TEXTURE_WRAP_MIRRORED_REPEAT:
-			y = y >= 0 ? y : y + image_->height;
-			y = y % image_->height;
-			yDiv = y_ / image_->height;
-			if (yDiv % 2) y = image_->height - 1 - y;
-			break;
-		case TG3_TEXTURE_WRAP_CLAMP_TO_EDGE:
-			y = y < 0 ? 0 : y;
-			y = y >= image_->height ? image_->height - 1 : y;
-			break;
-		default:
-			throw std::invalid_argument("Unsupported sampler!");
-		}
-	}
-
-
-	int32_t bits = image_->bits;
-	int32_t bytes = bits / 8;
-	int32_t cpp = image_->component;
-	int32_t row = cpp * image_->width;
-
-	int base = y * row + x * cpp;
-
-	if (x >= image_->width || y >= image_->height) {
-		std::cout << "image_component==" << image_->component << std::endl;
-		std::cout << "image_width==" << image_->width << std::endl;
-		throw std::runtime_error("Out of range access!");
-	}
-
-	switch (bytes)
-	{
-	case 2:
-	{
-		unsigned short* chimage = reinterpret_cast<unsigned short*>(image_->pixels);
-		switch (cpp)
-		{
-		case 1:
-		{
-			double g = chimage[base] / (255.0 * bytes);
-			return vec4{ g,g,g,1.0 };
-		}
-
-		case 2:
-		{
-			double g = chimage[base] / (255.0 * bytes);
-			double a = chimage[base + 1] / (255.0 * bytes);
-			return vec4{ g,g,g,a };
-		}
-
-		case 3:
-		{
-			return vec4{
-			 chimage[base] / (255.0 * bytes),
-			 chimage[base + 1] / (255.0 * bytes),
-			 chimage[base + 2] / (255.0 * bytes),
-				1.0 };
-		}
-
-		case 4:
-		{
-			return vec4{
-			 chimage[base] / (255.0 * bytes),
-			 chimage[base + 1] / (255.0 * bytes),
-			 chimage[base + 2] / (255.0 * bytes),
-			 chimage[base + 3] / (255.0 * bytes) };
-		}
-
-		default:
-			throw std::runtime_error("Unsupported channel count");
-		}
-	}
-	case 1:
-	{
-		switch (cpp)
-		{
-		case 1:
-		{
-			double g = image_->pixels[base] / (255.0 * bytes);
-			return vec4{ g,g,g,1.0 };
-		}
-
-		case 2:
-		{
-			double g = image_->pixels[base] / (255.0 * bytes);
-			double a = image_->pixels[base + 1] / (255.0 * bytes);
-			return vec4{ g,g,g,a };
-		}
-
-		case 3:
-		{
-			double r = static_cast<double>(image_->pixels[base]) / (255.0 * bytes);
-			double g = static_cast<double>(image_->pixels[base + 1]) / (255.0 * bytes);
-			double b = static_cast<double>(image_->pixels[base + 2]) / (255.0 * bytes);
-			return vec4{ r,g,b,1.0 };
-		}
-
-		case 4:
-		{
-			double r = static_cast<double>(image_->pixels[base]) / 255.0;
-			double g = static_cast<double>(image_->pixels[base + 1]) / 255.0;
-			double b = static_cast<double>(image_->pixels[base + 2]) / 255.0;
-			double a = static_cast<double>(image_->pixels[base + 3]) / 255.0;
-			return vec4{ r,g,b,a };
-		}
-
-		default:
-			throw std::runtime_error("Unsupported channel count");
-		}
-	}
-	default:
-		throw std::runtime_error("You should never have reached here!");
-	}
+	i_ = ((i_ % size_) + size_) % size_;
 }
-
 
 void PBR::mirror_sampler(int& i_, const int size_)
 {
@@ -545,43 +406,48 @@ TexVec_func PBR::set_TexVecFunc(const tg3_texture_info* texture_)
 		throw std::out_of_range("out of range access for the images array");
 	}
 
+	//the image
+	img = &resources->images[source];
+	int width = img->width;
+	int height = img->height;
+
 	// dealing with the sampler function
 	Sampler_func smpler_x, smpler_y;
-	smpler_x = null_sampler;
-	smpler_y = null_sampler;
 
-	// no sampler
-	if (samplerIndex == -1)
+	smpler_x = [width](int& i_) -> void
 	{
-		smpler_x = null_sampler;
-		smpler_y = null_sampler;
-	}
-	else if (samplerIndex >= resources->samplers.size())
+		repeat_sampler(i_, width);
+	};
+	smpler_y = [height](int& i_)-> void
+	{
+		repeat_sampler(i_, height);
+	};
+
+
+	if (samplerIndex >= resources->samplers.size())
 	{
 		throw std::out_of_range("out of range access for the samplers array");
 	}
-	else {
-		img = &resources->images[source];
+	else
+	{
 		tg3_sampler* smplr = &resources->samplers[samplerIndex];
-		int width = img->width;
-		int height = img->height;
 
 		switch (smplr->wrap_s)
 		{
 		case TG3_TEXTURE_WRAP_REPEAT:
-			smpler_x = [&width](int& i_)->void
+			smpler_x = [width](int& i_)->void
 				{
-					return mirror_sampler(i_, width);
+					return repeat_sampler(i_, width);
 				};
 			break;
 		case TG3_TEXTURE_WRAP_MIRRORED_REPEAT:
-			smpler_x = [&width](int& i_)->void
+			smpler_x = [width](int& i_)->void
 				{
 					return mirror_repeat_sampler(i_, width);
 				};
 			break;
 		case TG3_TEXTURE_WRAP_CLAMP_TO_EDGE:
-			smpler_x = [&width](int& i_)->void
+			smpler_x = [width](int& i_)->void
 				{
 					return clamped_sampler(i_, width);
 				};
@@ -593,21 +459,21 @@ TexVec_func PBR::set_TexVecFunc(const tg3_texture_info* texture_)
 		switch (smplr->wrap_t)
 		{
 		case TG3_TEXTURE_WRAP_REPEAT:
-			smpler_y = [&width](int& j_)->void
+			smpler_y = [height](int& j_)->void
 				{
-					return mirror_sampler(j_, width);
+					return repeat_sampler(j_, height);
 				};
 			break;
 		case TG3_TEXTURE_WRAP_MIRRORED_REPEAT:
-			smpler_y = [&width](int& j_)->void
+			smpler_y = [height](int& j_)->void
 				{
-					return mirror_repeat_sampler(j_, width);
+					return mirror_repeat_sampler(j_, height);
 				};
 			break;
 		case TG3_TEXTURE_WRAP_CLAMP_TO_EDGE:
-			smpler_y = [&width](int& j_)->void
+			smpler_y = [height](int& j_)->void
 				{
-					return clamped_sampler(j_, width);
+					return clamped_sampler(j_, height);
 				};
 			break;
 		default:
@@ -615,19 +481,24 @@ TexVec_func PBR::set_TexVecFunc(const tg3_texture_info* texture_)
 		}
 	}
 
+
 	TexVec_func func;
 	std::array<Sampler_func, 2> smp = { smpler_x,smpler_y };
 	if (coord == 0)
 	{
-		func = [&img, &coord, &smp](double u_, double v_, double u1_, double v1_) ->vec4 {
+		func = [img, smp](double u_, double v_, double u1_, double v1_) ->vec4 {
 			return tg3_image_to_color(u_, v_, img, smp);
-			};
+		};
 	}
 	else if (coord == 1)
 	{
-		func = [&img, &coord, &smp](double u_, double v_, double u1_, double v1_) ->vec4 {
+		func = [img, smp](double u_, double v_, double u1_, double v1_) ->vec4 {
 			return tg3_image_to_color(u1_, v1_, img, smp);
-			};
+		};
+	}
+	else
+	{
+		throw std::invalid_argument("Coords higher than 1 are not yet supported!");
 	}
 	return func;
 }
