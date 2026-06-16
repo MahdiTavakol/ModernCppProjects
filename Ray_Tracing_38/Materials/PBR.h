@@ -5,6 +5,7 @@
 // this converts texture to vector4
 using TexVec_func = std::function<vec4(double u_, double v_, double u1_, double v1_)>;
 using Sampler_func = std::function<void(int& x_)>;
+using PixelVec_func = std::function<vec4(uint8_t* pixels_, int& base_)>;
 
 class PBR_Resources
 {
@@ -59,8 +60,11 @@ private:
 	// texture to vec4 functions
 	static vec4 null_vec4(double u_, double v_, double u1_, double v1_) { return vec4{0.0,0.0,0.0,0.0}; }
 	static vec4 unity_vec4(double u_, double v_, double u1_, double v1_) { return vec4{ 1.0,1.0,1.0,1.0 }; }
-	static vec4 tg3_image_to_color(double s_, double t_,
-		const tg3_image_result* image_, const std::array<Sampler_func,2> smp_);
+	static vec4 tg3_image_to_color(
+		double s_, double t_,
+		const tg3_image_result* image_,
+		const std::array<Sampler_func,2> smp_,
+		const PixelVec_func& pixel_to_vec_);
 
 	// sampler functions
 	static void null_sampler(int& i_) { return; }
@@ -68,5 +72,15 @@ private:
 	static void mirror_sampler(int& i_, const int size_);
 	static void mirror_repeat_sampler(int& i_, const int size_);
 	static void clamped_sampler(int& i_, const int size_);
+
+	// image processing functions
+	static vec4 image_to_vec4_1byte_1(uint8_t* pixels_, int& base_);
+	static vec4 image_to_vec4_1byte_2(uint8_t* pixels_, int& base_);
+	static vec4 image_to_vec4_1byte_3(uint8_t* pixels_, int& base_);
+	static vec4 image_to_vec4_1byte_4(uint8_t* pixels_, int& base_);
+	static vec4 image_to_vec4_2bytes_1(uint8_t* pixels_, int& base_);
+	static vec4 image_to_vec4_2bytes_2(uint8_t* pixels_, int& base_);
+	static vec4 image_to_vec4_2bytes_3(uint8_t* pixels_, int& base_);
+	static vec4 image_to_vec4_2bytes_4(uint8_t* pixels_, int& base_);
 
 };

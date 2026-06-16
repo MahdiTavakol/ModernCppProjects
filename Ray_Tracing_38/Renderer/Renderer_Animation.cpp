@@ -3,8 +3,14 @@
 
 
 
-renderer_animation::renderer_animation(communicator* para_, std::unique_ptr<path>&& pth_, std::string info_, bool verbose_) :
-	renderer{ para_, std::move(pth_),info_,verbose_}
+renderer_animation::renderer_animation(
+	communicator* para_,
+	Logger* error_,
+	profiler* timer_, 
+	std::unique_ptr<path>&& pth_,
+	std::string info_,
+	bool verbose_) :
+	renderer{ para_,error_,timer_, std::move(pth_),info_,verbose_}
 {
 	int rank = para->return_rank();
 	if (rank != 0)
@@ -22,22 +28,27 @@ void renderer_animation::render(image* img_, camera* cam_, output* writer_)
 
 	for (int i = 0; i < num_frames; i++)
 	{
-		message("Moving the camera to the frame " + std::to_string(i));
+		std::string message = "Moving the camera to the frame " + std::to_string(i);
+		int msg_level = 1;
+		error->print_message(message, msg_level);
 		cam_->move_camera(pth_ref[i]);
 
-		message("Updating the filename for the frame " + std::to_string(i));
+		message = "Updating the filename for the frame " + std::to_string(i);
+		error->print_message(message, msg_level);
+
 		info = "frame-" + std::to_string(i);
 		update_filename(info);
 
-		std::string text = "Rendering the frame " + std::to_string(i);
-		message(text);
-		cam_->render(img_,*world,*mtls);
+		message = "Rendering the frame " + std::to_string(i);
+		error->print_message(message, msg_level);
 
+
+		cam_->render(img_,*world,*mtls);
 		writer_->reset_filename(filename);
 		writer_->setup(img_);
 
-		text = "Writing the frame " + std::to_string(i);
-		message(text);
+		message = "Writing the frame " + std::to_string(i);
+		error->print_message(message, msg_level);
 
 		// writing the file - it is the job of the writer to just write the file in the rank 0, so no need to check the rank here.
 		writer_->write_file(img_);

@@ -11,6 +11,14 @@ enum class specialEnum {
 	FOG
 };
 
+enum class Bvh_Type
+{
+	NONE,
+	NORMAL,
+	TRIANGLE,
+	TRI_ASYNC
+};
+
 class scene_settings: public settings
 {
 public:
@@ -32,7 +40,8 @@ public:
 	// special parser
 	void parse_material_change(std::istringstream& iss_);
 
-	// bvh mode
+	// bvh type and mode
+	Bvh_Type get_bvh_type() const;
 	BVH_Split_Method get_bvh_mode() const;
 
 	// related to special effects
@@ -52,6 +61,7 @@ public:
 protected:
 	bool wrong_access = false;
 	std::string mode_string;
+	std::string bvh_type_str = "NORMAL";
 	std::string bvh_mode_str = "MEDIAN";
 	std::string obj_file_name = "";
 	std::string mtl_file_name = "";
@@ -63,6 +73,8 @@ protected:
 	void set_scene_map();
 	std::map<std::string, int> scene_map;
 
+	// the bvh type
+	Bvh_Type bvh_type = Bvh_Type::NORMAL;
 	// the bvh mode
 	BVH_Split_Method bvh_mode = BVH_Split_Method::MEDIAN;
 

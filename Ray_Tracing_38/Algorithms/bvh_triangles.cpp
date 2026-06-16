@@ -3,12 +3,14 @@
 
 // the c'tor for the main root
 bvh_triangles::bvh_triangles(
+	profiler* timer_,
 	std::unique_ptr<triangle_list> list_,
 	BVH_Split_Method split_method_) :
-	bvh_node{"bvh_triangles",split_method_},
-	non_triangles_bvh{ std::make_unique<bvh_node>("non_triangle_bvh",split_method_)},
+	bvh_node{timer_,"bvh_triangles",split_method_},
+	non_triangles_bvh{ std::make_unique<bvh_node>(timer_,"non_triangle_bvh",split_method_)},
 	type{Node_Type::ROOT}
 {
+	timer->start_event(" triangle bvh creation");
 	// number of levels
 	size_t num_levels = log2(list_->size()) + 1;
 	// the size of boxes array
@@ -35,7 +37,10 @@ bvh_triangles::bvh_triangles(
 
 	// taking care of non_triangles objects
 	std::unique_ptr<hittable_list> non_triangles = list->return_non_triangles();
-	non_triangles_bvh = std::make_unique<bvh_node>(std::move(non_triangles));
+	non_triangles_bvh = std::make_unique<bvh_node>(timer,std::move(non_triangles));
+
+
+	timer->stop_event(" triangle bvh creation");
 
 }
 
@@ -67,8 +72,8 @@ bvh_triangles::~bvh_triangles()
 	}
 }
 
-bvh_triangles::bvh_triangles() :
-	bvh_node{},
+bvh_triangles::bvh_triangles(profiler* timer_) :
+	bvh_node{timer_},
 	non_triangles_bvh{std::unique_ptr<bvh_node>()},
 	type{ Node_Type::EMPTY },
 	box_indx{ 0 }
@@ -79,11 +84,12 @@ bvh_triangles::bvh_triangles() :
 }
 
 bvh_triangles::bvh_triangles(
+	profiler* timer_,
 	size_t start_, size_t end_,
 	const int indx_,
 	const int level_,
 	BVH_Split_Method split_method_) :
-	bvh_node{},
+	bvh_node{timer_},
 	non_triangles_bvh{ std::unique_ptr<bvh_node>() },
 	type{ Node_Type::INTERNAL }
 {
@@ -96,11 +102,12 @@ bvh_triangles::bvh_triangles(
 
 
 bvh_triangles::bvh_triangles(
+	profiler* timer_,
 	const size_t& box_indx_, 
 	const size_t& triangle_indx_,
 	const aabb& bbox_,
 	Node_Type type_) :
-	bvh_node{},
+	bvh_node{timer_},
 	box_indx{ box_indx_ },
 	triangle_indx{triangle_indx_},
 	non_triangles_bvh{ std::unique_ptr<bvh_node>() },
@@ -108,7 +115,7 @@ bvh_triangles::bvh_triangles(
 {
 	if (box_indx >= bboxes.size())
 	{
-		bboxes.resize(box_indx);
+		bboxes.resize(box_indx+1);
 	}
 	bboxes[box_indx] = bbox_;
 }
@@ -126,7 +133,7 @@ void bvh_triangles::set_left_right(
 		aabb bbox_i = list->return_bbox(object_index);
 		bbox = aabb(bbox, bbox_i);
 	}
-	
+
 	size_t bbox_size = bboxes.size();
 	int base_indx = std::pow(2, level_) - 1;
 	box_indx = base_indx + indx_;
@@ -139,7 +146,7 @@ void bvh_triangles::set_left_right(
 
 	int left_indx = 2 * indx_;
 	int right_indx = 2 * indx_ + 1;
-	
+
 
 	if (object_span == 0) {
 		return;
@@ -153,15 +160,23 @@ void bvh_triangles::set_left_right(
 		aabb bbox_right = aabb::empty;
 		aabb bbox_left = list->return_bbox(start_);
 		// creating a leaf
-		left = 
+		left =
 			std::unique_ptr<bvh_triangles>(
 				new bvh_triangles(
-					left_bbox_indx, left_triangle_indx,bbox_left,Node_Type::LEAF));
+					timer,
+					left_bbox_indx,
+					left_triangle_indx,
+					bbox_left,
+					Node_Type::LEAF));
 		// empty object list
-		right = 
+		right =
 			std::unique_ptr<bvh_triangles>(
 				new bvh_triangles(
-					right_bbox_indx, right_triangle_indx, bbox_right, Node_Type::EMPTY));
+					timer,
+					right_bbox_indx,
+					right_triangle_indx, 
+					bbox_right, 
+					Node_Type::EMPTY));
 	}
 	else if (object_span == 2)
 	{
@@ -174,11 +189,20 @@ void bvh_triangles::set_left_right(
 		aabb bbox_right = list->return_bbox(start_ + 1);
 		// creating leaves
 		right = std::unique_ptr<bvh_triangles>(
-			new bvh_triangles(left_bbox_indx,left_triangle_indx,bbox_left,Node_Type::LEAF));
+			new bvh_triangles(
+				timer,
+				left_bbox_indx,
+				left_triangle_indx,
+				bbox_left, Node_Type::LEAF));
 		left = std::unique_ptr<bvh_triangles>(
-			new bvh_triangles(right_bbox_indx,right_triangle_indx,bbox_right,Node_Type::LEAF));
-	} 
+			new bvh_triangles(
+				timer,
+				right_bbox_indx, 
+				right_triangle_indx, 
+				bbox_right, Node_Type::LEAF));
+	}
 	else {
+		size_t mid;
 
 		list->sort_range(start_, end_);
 
@@ -186,19 +210,7 @@ void bvh_triangles::set_left_right(
 		{
 		case BVH_Split_Method::MEDIAN:
 		{
-			auto mid = start_ + object_span / 2;
-			left = std::unique_ptr<bvh_triangles>(
-			new bvh_triangles(
-				start_, mid,
-				left_indx,
-				level_ + 1,
-				split_method_));
-			right = std::unique_ptr<bvh_triangles>(
-			new bvh_triangles(
-				mid, end_,
-				right_indx,
-				level_ + 1,
-				split_method_));
+			mid = start_ + object_span / 2;
 			break;
 		}
 		case BVH_Split_Method::SAH_SIMPLE:
@@ -240,28 +252,51 @@ void bvh_triangles::set_left_right(
 				Cfactors[i] = i * left_area + (len - i) * right_area;
 			}
 			auto min_iter = std::min_element(Cfactors.begin() + 1, Cfactors.end());
-			int mid = std::distance(Cfactors.begin(), min_iter) + start_;
-			left = std::unique_ptr<bvh_triangles>(
-			new bvh_triangles(
-				start_, mid,
-				left_indx,
-				level_ + 1,
-				split_method_));
-			right = std::unique_ptr<bvh_triangles>(
-			new bvh_triangles(
-				mid, end_,
-				right_indx,
-				level_ + 1,
-				split_method_));
+			mid = std::distance(Cfactors.begin(), min_iter) + start_;
+
 			break;
 		}
 		default:
 			break;
 		}
 
+
+		set_internal_left_right(
+			start_,
+			mid,
+			end_,
+			left_indx,
+			right_indx,
+			level_,
+			split_method_);
+
 	}
 }
 
+void bvh_triangles::set_internal_left_right(
+	size_t start_,
+	size_t mid_,
+	size_t end_,
+	const int left_indx_,
+	const int right_indx_,
+	const int level_,
+	BVH_Split_Method split_method_)
+{
+	left = std::unique_ptr<bvh_triangles>(
+		new bvh_triangles(
+			timer,
+			start_, mid_,
+			left_indx_,
+			level_ + 1,
+			split_method_));
+	right = std::unique_ptr<bvh_triangles>(
+		new bvh_triangles(
+			timer,
+			mid_, end_,
+			right_indx_,
+			level_ + 1,
+			split_method_));
+}
 
 bool bvh_triangles::hit(const ray& r_, interval ray_t_, hit_record& rec_) const
 {
@@ -283,6 +318,8 @@ bool bvh_triangles::hit(const ray& r_, interval ray_t_, hit_record& rec_) const
 	{
 		// It is a leaf
 		bool hit_me = false;
+
+
 		triangle_struct& triangle_i = triangles[triangle_indx];
 		hit_me = triangle_list::hit_triangle(r_, ray_t_, rec_, triangle_i);
 		return hit_me;
@@ -339,21 +376,5 @@ aabb bvh_triangles::bounding_box(std::string label_, bool& set_)
 }
 
 
-void bvh_triangles::print_mat_indxes()
-{
-	if (type == Node_Type::ROOT || type == Node_Type::INTERNAL)
-	{
-		bvh_triangles* left_conv = dynamic_cast<bvh_triangles*>(left.get());
-		bvh_triangles* right_conv = dynamic_cast<bvh_triangles*>(right.get());
-		left_conv->print_mat_indxes();
-		right_conv->print_mat_indxes();
-	}
-	else if (type == Node_Type::LEAF)
-	{
-		int mat_indx = triangles[triangle_indx].mat_indx;
-		if (mat_indx > 2000)
-		std::cout << triangle_indx << "-----" << mat_indx << std::endl;
-	}
-}
 
 

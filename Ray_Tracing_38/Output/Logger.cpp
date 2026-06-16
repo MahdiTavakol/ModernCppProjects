@@ -9,13 +9,13 @@ Logger::Logger(const std::vector<std::reference_wrapper<std::ostream>>& strms_) 
 {
 }
 
-void Logger::print_message(const std::string& text) const
+void Logger::print_message(const std::string text) const
 {
 	for (auto& strm : strms)
 		strm.get() << text << std::endl;
 }
 
-void Logger::print_message(const std::string& message_, int level_, char delimiter_) const
+void Logger::print_message(const std::string message_, int level_, char delimiter_) const
 {
 	std::string msg;
 
@@ -42,9 +42,23 @@ void Logger::print_message(const std::string& message_, int level_, char delimit
 		strm.get() << msg << std::endl;
 }
 
-void Logger::print_error(const std::string& message_) const
+void Logger::print_error(const std::string message_) const
 {
 	//for (auto& strm : strms)
 	//	strm.get() << message_ << std::endl;
 	std::cerr << message_ << std::endl;
+}
+
+void Logger::print_message(std::iostream& input_strm_) const
+{
+	std::string line;
+
+	// printing the stream line by line
+	while (std::getline(input_strm_, line))
+	{
+		for (auto& strm : strms)
+		{
+			strm.get() << line << std::endl;
+		}
+	}
 }

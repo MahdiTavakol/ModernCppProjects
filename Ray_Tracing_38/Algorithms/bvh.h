@@ -4,6 +4,7 @@
 #include "../Geometry/aabb.h"
 #include "../Geometry/hittable.h"
 #include "../Algorithms/hittable_list.h"
+#include "../Output/profiler.h"
 
 #include <algorithm>
 
@@ -17,12 +18,20 @@ enum class BVH_Split_Method {
 class bvh_node : public hittable
 {
 public:
-	bvh_node(std::string type_ = "bvh_node", BVH_Split_Method split_method_ = BVH_Split_Method::MEDIAN);
-
-	bvh_node(std::unique_ptr<hittable_list> list,
+	bvh_node(
+		profiler* timer_, 
+		std::string type_ = "bvh_node", 
 		BVH_Split_Method split_method_ = BVH_Split_Method::MEDIAN);
 
-	bvh_node(std::vector<std::unique_ptr<hittable>>& objects, size_t start, size_t end, 
+	bvh_node(
+		profiler* timer_,
+		std::unique_ptr<hittable_list> list_,
+		BVH_Split_Method split_method_ = BVH_Split_Method::MEDIAN);
+
+	bvh_node(
+		profiler* timer_,
+		std::vector<std::unique_ptr<hittable>>& objects_,
+		size_t start_, size_t end_, 
 		BVH_Split_Method split_method_ = BVH_Split_Method::MEDIAN);
 
 	bool hit(const ray& r, interval ray_t, hit_record& rec) const override;
@@ -34,6 +43,7 @@ public:
 	void scale(const vec3& center_, const double& factor_) override;
 
 protected:
+	profiler* timer;
 	BVH_Split_Method split_mode;
 	std::unique_ptr<hittable> left;
 	std::unique_ptr<hittable> right;

@@ -9,12 +9,19 @@
 #include "../Output/output.h"
 #include "../Algorithms/hittable_list.h"
 #include "../Materials/material_list.h"
+#include "../Output/profiler.h"
 
 
 class renderer
 {
 public:
-	renderer(communicator* para_,std::unique_ptr<path>&& pth_, std::string info_ = "", bool verbose_ = false);
+	renderer(
+		communicator* para_,
+		Logger* error_,
+		profiler* timer_,
+		std::unique_ptr<path>&& pth_,
+		std::string info_ = "", 
+		bool verbose_ = false);
 	virtual ~renderer();
 	void setup(hittable_list* world_, material_list* mtls_);
 	virtual void render(image* img_, camera* cam_, output* writer_);
@@ -25,11 +32,15 @@ public:
 protected:
 	std::string info = "";
 	bool verbose = false;
+	// shared resources of the program
 	communicator* para;
+	Logger* error;
+	profiler* timer;
 
+	// camera path
 	std::unique_ptr<path> pth;
 
-	void message(std::string _text);
+	// filename
 	std::string filename;
 
 

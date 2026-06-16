@@ -25,6 +25,7 @@ public:
 	size_t size() const;
 
 	void replace_material(std::string name_, std::unique_ptr<material> mat_);
+	void replace_all_materials(std::unique_ptr<metal>& mat_);
 
 
 private:

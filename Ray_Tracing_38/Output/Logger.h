@@ -18,9 +18,10 @@ public:
 
 	Logger(const std::vector<std::reference_wrapper<std::ostream>>& strms_);
 
-	void print_message(const std::string& text) const;
-	void print_message(const std::string& message_, int level_ = 0, char delimiter = ' ') const;
-	void print_error(const std::string& message_) const;
+	void print_message(const std::string text) const;
+	void print_message(const std::string message_, int level_ = 0, char delimiter = ' ') const;
+	void print_message(std::iostream& input_strm_) const;
+	void print_error(const std::string message_) const;
 
 private:
 	std::vector<std::reference_wrapper<std::ostream>> strms;

@@ -6,32 +6,25 @@
 #include "obj_model_reader_parallel.h"
 #include "../Geometry/aabb.h"
 #include "../Algorithms/bvh.h"
-#include "../Algorithms/camera.h"
+#include "../Algorithms/bvh_triangles.h"
+#include "../Algorithms/bvh_triangles_async.h"
 #include "../Types/color.h"
 #include "../Data/color_array.h"
 #include "../Geometry/constant_medium.h"
 #include "../Geometry/hittable.h"
 #include "../Algorithms/hittable_list.h"
-#include "../Input/input.h"
 #include "../Geometry/interval.h"
 #include "../Materials/material.h"
-#include "../Algorithms/path.h"
 #include "../Algorithms/communicator.h"
-#include "../Algorithms/bvh_triangles.h"
 #include "../Geometry/quad.h"
-#include "../Types/ray.h"
-#include "../Algorithms/rtw_stb_image.h"
-#include "../Geometry/planes.h"
-#include "../Geometry/perlin.h"
 #include "../Geometry/sphere.h"
 #include "../Geometry/texture.h"
 #include "../Types/vec3.h"
-#include "../Output/output.h"
 #include "gltf_reader.h"
 
-scene_factory::scene_factory(settings* wld_settings_, Logger* error_, communicator* para_) :
+scene_factory::scene_factory(settings* wld_settings_, Logger* error_, communicator* para_, profiler* timer_) :
 	mode{ wld_settings_->return_mode() },
-	para{ para_ }, error{ error_ },
+	para{ para_ }, error{ error_ }, timer{timer_},
 	list{ std::make_unique<material_list>() }
 {
 	// checking the setting type
@@ -45,6 +38,8 @@ scene_factory::scene_factory(settings* wld_settings_, Logger* error_, communicat
 	mtl_file_name = stngs->return_mtl_file_name();
 	gltf_file_name = stngs->return_gltf_file_name();
 
+
+	bvh_type = stngs->get_bvh_type();
 	bvh_mode = stngs->get_bvh_mode();
 }
 
@@ -53,65 +48,102 @@ void scene_factory::create()
 {
 	world = std::make_unique<hittable_list>();
 
-
+	std::string event;
 	switch (mode)
 	{
 	case RANDOM_SPHERES:
+		event = "Creating random spheres";
+		timer->start_event(event);
 		setup_random_spheres();
 		break;
 	case CHECKER_BOARDS:
+		event = "Creating checker boards";
+		timer->start_event(event);
 		setup_checker_boards();
 		break;
 	case EARTH_SPHERE:
+		event = "Creating earth sphere";
+		timer->start_event(event);
 		setup_earth_sphere();
 		break;
 	case PERLIN_SPHERE:
+		event = "Creating perlin sphere";
+		timer->start_event(event);
 		setup_perlin_sphere();
 		break;
 	case QUADS:
+		event = "Creating quads";
+		timer->start_event(event);
 		setup_quads();
 		break;
 	case SIMPLE_LIGHT:
+		event = "Creating simple light";
+		timer->start_event(event);
 		setup_simple_light();
 		break;
 	case TWO_LIGHTS:
+		event = "Creating two lights";
+		timer->start_event(event);
 		setup_two_lights();
 		break;
 	case CORNELL_BOX:
+		event = "Creating cornell box";
+		timer->start_event(event);
 		setup_cornell_box();
 		break;
 	case TWO_BOXES:
+		event = "Creating two boxes";
+		timer->start_event(event);
 		setup_boxes();
 		break;
 	case TWO_BOXES_ROTATED:
+		event = "Creating two boxes rotated";
+		timer->start_event(event);
 		setup_boxes_rotated();
 		break;
 	case CORNELL_SMOKE:
+		event = "Creating cornell smoke";
+		timer->start_event(event);
 		setup_cornell_smoke();
 		break;
 	case RANDOM_SPHERES_ANIMATED:
+		event = "Creating sphered animated";
+		timer->start_event(event);
 		setup_random_spheres_animated();
 		break;
 	case SIMPLE_2D_PARALEL_TEST:
+		event = "Creating simple 2d parallel test";
+		timer->start_event(event);
 		setup_simple_2d_parallel_test();
 		break;
 	case FINAL_SCENE:
+		event = "Creating the final scene";
+		timer->start_event(event);
 		setup_final_scene();
 		break;
 
 
 
 	case OBJ_MODEL:
+		event = "Reading the obj/mtl files";
+		timer->start_event(event);
 		setup_3d_obj();
 		break;
 	case OBJ_MODEL_PARALLEL:
+		event = "Reading the obj/mtl files";
+		timer->start_event(event);
 		setup_3d_obj_parallel();
 		break;
 	case GLTF_MODEL:
+		event = "Reading the gltf file";
+		timer->start_event(event);
 		setup_gltf();
 		break;
 	}
 
+	timer->stop_event(event);
+	event = "Special effects";
+	timer->start_event(event);
 
 	// adding special effects
 	if (stngs->specialCheck(specialEnum::SCALE))
@@ -139,6 +171,9 @@ void scene_factory::create()
 		add_diffuse_light(light_color, size_factor);
 	}
 
+	timer->stop_event(event);
+	event = "Creating BVH";
+	timer->start_event(event);
 
 	set_bvh();
 	// any special effect that 
@@ -147,6 +182,10 @@ void scene_factory::create()
 	// one object (the wrapper) and so it is
 	// not effective
 
+	timer->stop_event(event);
+	event = "Special effects";
+	timer->start_event(event);
+
 	if (stngs->specialCheck(specialEnum::FOG))
 	{
 		color fog_color;
@@ -154,6 +193,8 @@ void scene_factory::create()
 		stngs->fog_settings(fog_density, fog_color);
 		add_fog(fog_density, fog_color);
 	}
+
+	timer->stop_event(event);
 
 
 
@@ -608,7 +649,7 @@ void scene_factory::setup_final_scene()
 		}
 	}
 
-	std::unique_ptr<hittable> bvh = std::make_unique<bvh_node>(std::move(boxes1));
+	std::unique_ptr<hittable> bvh = std::make_unique<bvh_node>(timer,std::move(boxes1));
 	world->add(std::move(bvh));
 
 	auto light = std::make_unique<diffuse_light>(error, color(7.0, 7.0, 7.0));
@@ -667,10 +708,8 @@ void scene_factory::setup_final_scene()
 
 	world->add(std::make_unique<translate>(
 		std::make_unique<rotate_y>(
-			std::make_unique<bvh_node>(std::move(boxes2)), 15
-		),
-		vec3(-100, 270, 395)
-	)
+			std::make_unique<bvh_node>(timer,std::move(boxes2)), 15),
+		vec3(-100, 270, 395))
 	);
 
 
@@ -774,22 +813,40 @@ void scene_factory::set_bvh()
 	msg = "Building the bvh tree";
 	error->print_message(msg, msg_level);
 
+	std::unique_ptr<triangle_list> t_list;
 	std::unique_ptr<hittable> bvh;
 
-	switch (mode)
+	switch (bvh_type)
 	{
-	case GLTF_MODEL:
-	{
-		std::unique_ptr<triangle_list> t_list = std::make_unique<triangle_list>(std::move(world));
-		bvh = std::make_unique<bvh_triangles>(std::move(t_list), bvh_mode);
-	}
-	break;
-	default:
-		bvh = std::make_unique<bvh_node>(std::move(world), bvh_mode);
+	case Bvh_Type::NONE:
+		msg_level = 1;
+		msg = "No bvh is being built!";
+		error->print_message(msg, msg_level);
+		msg = std::string(52, '=');
+		msg_level = 0;
+		error->print_message(msg, msg_level);
+		return;
+	case Bvh_Type::NORMAL:
+		msg_level = 1;
+		msg = "The bvh tree is of normal type";
+		bvh = std::make_unique<bvh_node>(timer,std::move(world), bvh_mode);
+		break;
+	case Bvh_Type::TRIANGLE:
+		msg_level = 1;
+		msg = "The bvh tree is of triangle type";
+		t_list = std::make_unique<triangle_list>(std::move(world));
+		bvh = std::make_unique<bvh_triangles>(timer,std::move(t_list), bvh_mode);
+		break;
+	case Bvh_Type::TRI_ASYNC:
+		msg_level = 1;
+		msg = "The bvh tree is of triangle_async type";
+		t_list = std::make_unique<triangle_list>(std::move(world));
+		bvh = std::make_unique<bvh_triangles_async>(timer,std::move(t_list), bvh_mode);
 		break;
 	}
 
-	//bvh = std::make_unique<bvh_node>(std::move(world), bvh_mode);
+	error->print_message(msg, msg_level);
+
 	world = std::make_unique<hittable_list>();
 	world->add(std::move(bvh));
 

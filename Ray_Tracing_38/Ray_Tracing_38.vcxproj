@@ -281,6 +281,7 @@
   <ItemGroup>
     <ClCompile Include="Algorithms\bvh.cpp" />
     <ClCompile Include="Algorithms\bvh_triangles.cpp" />
+    <ClCompile Include="Algorithms\bvh_triangles_async.cpp" />
     <ClCompile Include="Algorithms\camera.cpp" />
     <ClCompile Include="Algorithms\communicator.cpp" />
     <ClCompile Include="Algorithms\hittable_list.cpp" />
@@ -337,12 +338,14 @@
     <ClCompile Include="Renderer\Renderer_Animation.cpp" />
     <ClCompile Include="Renderer\Renderer_Async.cpp" />
     <ClCompile Include="Renderer\Renderer_facade.cpp" />
+    <ClCompile Include="Renderer\Renderer_Profiler.cpp" />
     <ClCompile Include="Types\color.cpp" />
     <ClCompile Include="Types\vec3.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Algorithms\bvh.h" />
     <ClInclude Include="Algorithms\bvh_triangles.h" />
+    <ClInclude Include="Algorithms\bvh_triangles_async.h" />
     <ClInclude Include="Algorithms\camera.h" />
     <ClInclude Include="Algorithms\communicator.h" />
     <ClInclude Include="Algorithms\hittable_list.h" />
@@ -399,6 +402,7 @@
     <ClInclude Include="Renderer\Renderer_Animation.h" />
     <ClInclude Include="Renderer\Renderer_Async.h" />
     <ClInclude Include="Renderer\Renderer_facade.h" />
+    <ClInclude Include="Renderer\Renderer_Profiler.hpp" />
     <ClInclude Include="Shared\rtweekend.h" />
     <ClInclude Include="Types\color.h" />
     <ClInclude Include="Types\point3_animated.h" />

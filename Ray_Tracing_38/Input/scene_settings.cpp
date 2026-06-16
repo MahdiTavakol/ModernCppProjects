@@ -20,6 +20,7 @@ void scene_settings::set_input_map()
 
 
 		// bvh mode
+		{"-bvh_type",&bvh_type_str},
 		{"-bvh_mode",&bvh_mode_str},
 
 		// special effects 
@@ -121,6 +122,21 @@ std::string scene_settings::return_gltf_file_name() const
 void scene_settings::extra_parse()
 {
 	std::transform(bvh_mode_str.begin(), bvh_mode_str.end(), bvh_mode_str.begin(), ::toupper);
+	std::transform(bvh_type_str.begin(), bvh_type_str.end(), bvh_type_str.begin(), ::toupper);
+
+	if (bvh_type_str == "NONE")
+		bvh_type = Bvh_Type::NONE;
+	else if (bvh_type_str == "NORMAL")
+		bvh_type = Bvh_Type::NORMAL;
+	else if (bvh_type_str == "TRIANGLE")
+		bvh_type = Bvh_Type::TRIANGLE;
+	else if (bvh_type_str == "TRI_ASYNC")
+		bvh_type = Bvh_Type::TRI_ASYNC;
+	else
+	{
+		std::string error_text = "Unknown BVH type: " + bvh_type_str;
+		throw std::invalid_argument(error_text);
+	}
 
 	if (bvh_mode_str == "MEDIAN")
 		bvh_mode = BVH_Split_Method::MEDIAN;
@@ -171,6 +187,12 @@ void scene_settings::check_validity() const
 		}
 	}
 
+}
+
+
+Bvh_Type scene_settings::get_bvh_type() const
+{
+	return bvh_type;
 }
 
 BVH_Split_Method scene_settings::get_bvh_mode() const

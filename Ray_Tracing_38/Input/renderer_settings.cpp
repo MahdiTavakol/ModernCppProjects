@@ -20,6 +20,9 @@ void renderer_settings::set_input_map()
 
 		{"-path_type",&pth_type_str},
 
+		// if there is a profiling
+		{"-profiling",&nProfiling},
+
 
 		// path type none parameters
 		{"-location",&location},
@@ -153,6 +156,16 @@ void renderer_settings::return_path_type(Path_type& pth_type_)
 	pth_type_ = pth_type;
 }
 
+void renderer_settings::return_profiling_mode(Profiling_mode& prfl_mode_)
+{
+	prfl_mode_ = profiling_mode;
+}
+
+void renderer_settings::return_nprofiling(int& nprofiling_)
+{
+	nprofiling_ = nProfiling;
+}
+
 void renderer_settings::return_location_param(point3& location_)
 {
 	location_ = location;
@@ -211,6 +224,10 @@ void renderer_settings::extra_parse()
 	{
 		pth_type = Path_type::FILE;
 	}
+	// setting the profiling type
+	profiling_mode = Profiling_mode::OFF;
+	if (nProfiling > 1)
+		profiling_mode = Profiling_mode::ON;
 
 	// setting the path_type if it exists
 	if (pth_type == Path_type::FILE)

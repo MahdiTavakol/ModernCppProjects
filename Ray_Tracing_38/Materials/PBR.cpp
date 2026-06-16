@@ -122,7 +122,10 @@ void PBR_Resources::release_images()
 {
 	for (tg3_image_result& image_i : images)
 	{
-		delete[] image_i.pixels;
+		if (image_i.pixels != nullptr) {
+			delete[] image_i.pixels;
+			image_i.pixels = nullptr;
+		}
 	}
 }
 
@@ -166,7 +169,12 @@ void PBR::init_functionals()
 {
 	int msg_level = 1;
 	std::string message;
-	if (resources == nullptr)
+	if (
+		   (resources->images.size() == 0 &&
+			resources->textures.size() == 0 && 
+			resources->samplers.size() == 0) ||
+		    resources == nullptr
+		)
 	{
 		message = "It seems that the shared variables in the PBR class has not been initiated yet!\n";
 		message += "They should be initiated before any PBR material is created!";
@@ -232,7 +240,11 @@ void PBR::init_functionals()
 		// the texture is missing
 		else if (texture->index == -1)
 		{
-			albedo_func = unity_vec4;
+			albedo_func = [base_color]
+			(const double& u_, const double& v_, const double& u1_, const double& v1_)->vec4
+			{
+				return vec4{base_color[0],base_color[1],base_color[2],base_color[3]};
+			};
 		}
 		// the general case
 		else
@@ -276,6 +288,12 @@ void PBR::init_functionals()
 			};
 
 		}
+	}
+
+	// the functional to get vec4 from the image file
+	{
+		// for each texture it is individually set by the set_TexVecFunc 
+		// functional
 	}
 }
 
@@ -359,10 +377,11 @@ void PBR::mirror_sampler(int& i_, const int size_)
 
 void PBR::mirror_repeat_sampler(int& i_, const int size_)
 {
-	i_ = i_ >= 0 ? i_ : i_ + size_;
-	i_ = i_ % size_;
-	int iDiv = i_ / size_;
-	if (iDiv % 2) i_ = size_ - 1 - i_;
+	int period = 2 * size_;
+	i_ = ((i_ % period) + period) % period;
+
+	if (i_ >= size_)
+		i_ = period - 1 - i_;
 }
 
 void PBR::clamped_sampler(int& i_, const int size_)
@@ -423,8 +442,18 @@ TexVec_func PBR::set_TexVecFunc(const tg3_texture_info* texture_)
 		repeat_sampler(i_, height);
 	};
 
-
-	if (samplerIndex >= resources->samplers.size())
+	if (samplerIndex == -1)
+	{
+		smpler_x = [width](int& i_)->void
+		{
+			return repeat_sampler(i_, width);
+		};
+		smpler_y = [height](int& i_)->void
+		{
+			return repeat_sampler(i_, height);
+		};
+	}
+	else if (samplerIndex >= resources->samplers.size())
 	{
 		throw std::out_of_range("out of range access for the samplers array");
 	}
@@ -483,17 +512,68 @@ TexVec_func PBR::set_TexVecFunc(const tg3_texture_info* texture_)
 
 
 	TexVec_func func;
+	PixelVec_func pixel_to_vec;
 	std::array<Sampler_func, 2> smp = { smpler_x,smpler_y };
+	// getting the image properties to choose appropriate functionals
+	int32_t bits = img->bits;
+	int32_t bytes = bits / 8;
+	int32_t cpp = img->component;
+
+	// selecting appropriate functionals
+	switch (bytes)
+	{
+	case 1:
+		switch (cpp)
+		{
+		case 1:
+			pixel_to_vec = &image_to_vec4_1byte_1;
+			break;
+		case 2:
+			pixel_to_vec = &image_to_vec4_1byte_2;
+			break;
+		case 3:
+			pixel_to_vec = &image_to_vec4_1byte_3;
+			break;
+		case 4:
+			pixel_to_vec = &image_to_vec4_1byte_3;
+			break;
+		default:
+			throw std::invalid_argument("Unsupported image format");
+		}
+		break;
+	case 2:
+		switch (cpp)
+		{
+		case 1:
+			pixel_to_vec = &image_to_vec4_2bytes_1;
+			break;
+		case 2:
+			pixel_to_vec = &image_to_vec4_2bytes_2;
+			break;
+		case 3:
+			pixel_to_vec = &image_to_vec4_2bytes_3;
+			break;
+		case 4:
+			pixel_to_vec = &image_to_vec4_2bytes_3;
+			break;
+		default:
+			throw std::invalid_argument("Unsupported image format");
+		}
+		break;
+	default:
+		throw std::invalid_argument("Error in parsing the image!");
+	}
 	if (coord == 0)
 	{
-		func = [img, smp](double u_, double v_, double u1_, double v1_) ->vec4 {
-			return tg3_image_to_color(u_, v_, img, smp);
+		func = [img, smp, pixel_to_vec](double u_, double v_, double u1_, double v1_) ->vec4 {
+
+			return tg3_image_to_color(u_, v_, img, smp, pixel_to_vec);
 		};
 	}
 	else if (coord == 1)
 	{
-		func = [img, smp](double u_, double v_, double u1_, double v1_) ->vec4 {
-			return tg3_image_to_color(u1_, v1_, img, smp);
+		func = [img, smp, pixel_to_vec](double u_, double v_, double u1_, double v1_) ->vec4 {
+			return tg3_image_to_color(u1_, v1_, img, smp, pixel_to_vec);
 		};
 	}
 	else
@@ -503,8 +583,11 @@ TexVec_func PBR::set_TexVecFunc(const tg3_texture_info* texture_)
 	return func;
 }
 
-vec4 PBR::tg3_image_to_color(double s_, double t_,
-	const tg3_image_result* img_, const std::array<Sampler_func, 2> smp_)
+vec4 PBR::tg3_image_to_color(
+	double s_, double t_,
+	const tg3_image_result* img_,
+	const std::array<Sampler_func, 2> smp_,
+	const PixelVec_func& pixel_to_vec_)
 {
 	int x = static_cast<int>((s_) * (img_->width - 1));
 	int y = static_cast<int>((t_) * (img_->height - 1));
@@ -520,89 +603,79 @@ vec4 PBR::tg3_image_to_color(double s_, double t_,
 
 	int base = y * row + x * cpp;
 
-	switch (bytes)
-	{
-	case 2:
-	{
-		unsigned short* chimage = reinterpret_cast<unsigned short*>(img_->pixels);
-		switch (cpp)
-		{
-		case 1:
-		{
-			double g = chimage[base] / (255.0 * bytes);
-			return vec4{ g,g,g,1.0 };
-		}
-
-		case 2:
-		{
-			double g = chimage[base] / (255.0 * bytes);
-			double a = chimage[base + 1] / (255.0 * bytes);
-			return vec4{ g,g,g,a };
-		}
-
-		case 3:
-		{
-			return vec4{
-			 chimage[base] / (255.0 * bytes),
-			 chimage[base + 1] / (255.0 * bytes),
-			 chimage[base + 2] / (255.0 * bytes),
-				1.0 };
-		}
-
-		case 4:
-		{
-			return vec4{
-			 chimage[base] / (255.0 * bytes),
-			 chimage[base + 1] / (255.0 * bytes),
-			 chimage[base + 2] / (255.0 * bytes),
-			 chimage[base + 3] / (255.0 * bytes) };
-		}
-
-		default:
-			throw std::runtime_error("Unsupported channel count");
-		}
-	}
-	case 1:
-	{
-		switch (cpp)
-		{
-		case 1:
-		{
-			double g = img_->pixels[base] / (255.0 * bytes);
-			return vec4{ g,g,g,1.0 };
-		}
-
-		case 2:
-		{
-			double g = img_->pixels[base] / (255.0 * bytes);
-			double a = img_->pixels[base + 1] / (255.0 * bytes);
-			return vec4{ g,g,g,a };
-		}
-
-		case 3:
-		{
-			double r = static_cast<double>(img_->pixels[base]) / (255.0 * bytes);
-			double g = static_cast<double>(img_->pixels[base + 1]) / (255.0 * bytes);
-			double b = static_cast<double>(img_->pixels[base + 2]) / (255.0 * bytes);
-			return vec4{ r,g,b,1.0 };
-		}
-
-		case 4:
-		{
-			double r = static_cast<double>(img_->pixels[base]) / 255.0;
-			double g = static_cast<double>(img_->pixels[base + 1]) / 255.0;
-			double b = static_cast<double>(img_->pixels[base + 2]) / 255.0;
-			double a = static_cast<double>(img_->pixels[base + 3]) / 255.0;
-			return vec4{ r,g,b,a };
-		}
-
-		default:
-			throw std::runtime_error("Unsupported channel count");
-		}
-	}
-	default:
-		throw std::runtime_error("You should never have reached here!");
-	}
-
-
+	return pixel_to_vec_(img_->pixels, base);
 }
+
+
+vec4 PBR::image_to_vec4_1byte_1(uint8_t* pixels_, int& base_)
+{
+	constexpr int maxColor = 255.0;
+	double g = pixels_[base_] / maxColor;
+	return vec4{ g,g,g,1.0 };
+}
+
+vec4 PBR::image_to_vec4_1byte_2(uint8_t* pixels_, int& base_)
+{
+	constexpr int maxColor = 255.0;
+	double g = pixels_[base_] / maxColor;
+	double a = pixels_[base_ + 1] / maxColor;
+	return vec4{ g,g,g,a };
+}
+
+vec4 PBR::image_to_vec4_1byte_3(uint8_t* pixels_, int& base_)
+{
+	constexpr int maxColor = 255.0;
+	double r = static_cast<double>(pixels_[base_]) / maxColor;
+	double g = static_cast<double>(pixels_[base_ + 1]) / maxColor;
+	double b = static_cast<double>(pixels_[base_ + 2]) / maxColor;
+	return vec4{ r,g,b,1.0 };
+}
+
+vec4 PBR::image_to_vec4_1byte_4(uint8_t* pixels_, int& base_)
+{
+	constexpr int maxColor = 255.0;
+	double r = static_cast<double>(pixels_[base_]) / maxColor;
+	double g = static_cast<double>(pixels_[base_ + 1]) / maxColor;
+	double b = static_cast<double>(pixels_[base_ + 2]) / maxColor;
+	double a = static_cast<double>(pixels_[base_ + 3]) / maxColor;
+	return vec4{ r,g,b,a };
+}
+
+vec4 PBR::image_to_vec4_2bytes_1(uint8_t* pixels_, int& base_)
+{
+	constexpr int maxColor = 65535.0;
+	unsigned short* chimage = reinterpret_cast<unsigned short*>(pixels_);
+	double g = chimage[base_] / maxColor;
+	return vec4{ g,g,g,1.0 };
+}
+
+vec4 PBR::image_to_vec4_2bytes_2(uint8_t* pixels_, int& base_)
+{
+	constexpr int maxColor = 65535.0;
+	unsigned short* chimage = reinterpret_cast<unsigned short*>(pixels_);
+	double g = chimage[base_] / maxColor;
+	double a = chimage[base_+1] / maxColor;
+	return vec4{ g,g,g,a };
+}
+
+vec4 PBR::image_to_vec4_2bytes_3(uint8_t* pixels_, int& base_)
+{
+	constexpr int maxColor = 65535.0;
+	unsigned short* chimage = reinterpret_cast<unsigned short*>(pixels_);
+	double r = chimage[base_] / maxColor;
+	double g = chimage[base_ + 1] / maxColor;
+	double b = chimage[base_ + 2] / maxColor;
+	return vec4{ r,g,b,1.0 };
+}
+
+vec4 PBR::image_to_vec4_2bytes_4(uint8_t* pixels_, int& base_)
+{
+	constexpr int maxColor = 65535.0;
+	unsigned short* chimage = reinterpret_cast<unsigned short*>(pixels_);
+	double r = chimage[base_] / maxColor;
+	double g = chimage[base_ + 1] / maxColor;
+	double b = chimage[base_ + 2] / maxColor;
+	double a = chimage[base_ + 3] / maxColor;
+	return vec4{ r,g,b,a };
+}
+

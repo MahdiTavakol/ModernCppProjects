@@ -1,20 +1,27 @@
 #include "bvh.h"
 
-bvh_node::bvh_node(std::string type_, BVH_Split_Method split_method_) :
-	hittable{type_},split_mode{split_method_}
+bvh_node::bvh_node(
+	profiler* timer_,
+	std::string type_,
+	BVH_Split_Method split_method_) :
+	hittable{type_},timer{timer_}, split_mode{split_method_}
 {
 }
 
 // this one steals the std::vector<std::unique_ptr<hittable>
 // object from the input list
-bvh_node::bvh_node(std::unique_ptr<hittable_list> list, BVH_Split_Method split_mode_) :
-	bvh_node(list->objects, 0, list->objects.size(), split_mode_)
+bvh_node::bvh_node(
+	profiler* timer_,
+	std::unique_ptr<hittable_list> list,
+	BVH_Split_Method split_mode_) :
+	bvh_node{ timer_,list->objects, 0, list->objects.size(), split_mode_ }
 {}
 
-bvh_node::bvh_node(std::vector<std::unique_ptr<hittable>>& objects, size_t start, size_t end, 
+bvh_node::bvh_node(profiler* timer_, std::vector<std::unique_ptr<hittable>>& objects, size_t start, size_t end, 
 	BVH_Split_Method split_mode_):
-	hittable{"bvh_node"}, split_mode{split_mode_}
+	hittable{ "bvh_node" }, timer{ timer_ }, split_mode {split_mode_}
 {
+	timer->start_event(" normal bvh creation");
 	bbox = aabb::empty;
 
 	for (size_t object_index = start; object_index < end; object_index++)
@@ -48,8 +55,8 @@ bvh_node::bvh_node(std::vector<std::unique_ptr<hittable>>& objects, size_t start
 		case BVH_Split_Method::MEDIAN:
 			{
 			auto mid = start + object_span / 2;
-			left = std::make_unique<bvh_node>(objects, start, mid);
-			right = std::make_unique<bvh_node>(objects, mid, end);
+			left = std::make_unique<bvh_node>(timer,objects, start, mid);
+			right = std::make_unique<bvh_node>(timer,objects, mid, end);
 			break;
 			}
 			case BVH_Split_Method::SAH_SIMPLE:
@@ -91,14 +98,15 @@ bvh_node::bvh_node(std::vector<std::unique_ptr<hittable>>& objects, size_t start
 				}
 				auto min_iter = std::min_element(Cfactors.begin()+1, Cfactors.end());
 				int mid = std::distance(Cfactors.begin(), min_iter) + start;
-				left = std::make_unique<bvh_node>(objects, start, mid);
-				right = std::make_unique<bvh_node>(objects, mid, end);
+				left = std::make_unique<bvh_node>(timer,objects, start, mid);
+				right = std::make_unique<bvh_node>(timer,objects, mid, end);
 				break;
 			}
 		}
 
 	}
 
+	timer->stop_event(" normal bvh creation");
 }
 
 bool bvh_node::hit(const ray& r, interval ray_t, hit_record& rec) const 

@@ -1,10 +1,18 @@
 #include "renderer_factory.hpp"
 
+#include "../Renderer/Renderer.h"
+#include "../Renderer/Renderer_Profiler.hpp"
 #include "../Renderer/Renderer_Animation.h"
 #include "../Renderer/Renderer_Async.h"
 
-renderer_factory::renderer_factory(settings* stngs_, communicator* para_) :
-	para{ para_ }
+renderer_factory::renderer_factory(
+	settings* stngs_,
+	communicator* para_,
+	Logger* error_,
+	profiler* timer_) :
+	para{ para_ },
+	error{error_},
+	timer{timer_}
 {
 	// checking the setting type
 	renderer_settings* render_sett = dynamic_cast<renderer_settings*>(stngs_);
@@ -17,6 +25,9 @@ renderer_factory::renderer_factory(settings* stngs_, communicator* para_) :
 	
 	// checking the render mode
 	render_sett->return_render_mode(render_mode);
+
+	// checking if we do profiling 
+	render_sett->return_nprofiling(nProfiling);
 
 
 	switch (render_mode)
@@ -55,20 +66,30 @@ renderer_factory::renderer_factory(settings* stngs_, communicator* para_) :
 
 void renderer_factory::create()
 {
+	// lets just create one instance of the renderer object for now
 	std::unique_ptr<path> pth = this->create_and_return_path();
 	switch (render_mode)
 	{
 	case renderMode::STATIC:
-		renderObj = std::make_unique<renderer>(para,std::move(pth));
+		renderObj = std::make_unique<renderer>(para,error,timer,std::move(pth));
 		break;
 	case renderMode::ANIMATION:
-		renderObj = std::make_unique<renderer_animation>(para,std::move(pth));
+		renderObj = std::make_unique<renderer_animation>(para,error,timer,std::move(pth));
 		break;
 	case renderMode::ASYNC:
-		renderObj = std::make_unique<renderer_async>(para, std::move(pth),max_threads);
+		renderObj = std::make_unique<renderer_async>(para,error,timer,std::move(pth),max_threads);
 		break;
 	default:
 		throw std::invalid_argument("Unknown rendering mode");
+	}
+
+	/// check if we are doing profiling
+	if (nProfiling > 1)
+	{
+		std::unique_ptr<path> pth = this->create_and_return_path();
+		auto renderObjProf = std::make_unique<renderer_profiler>(para, error,timer, std::move(pth));
+		renderObjProf->set_parameters(nProfiling, std::move(renderObj));
+		renderObj = std::move(renderObjProf);
 	}
 }
 

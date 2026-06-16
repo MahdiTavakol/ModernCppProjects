@@ -136,6 +136,10 @@ void color_array::return_size(int& width_, int& height_)
 void color_array::allocate()
 {
     mtVec = std::vector<std::mutex>(height);
+    int num_elements = width * height;
+    // the malloc with size 0 is UB
+    if (width == 0 || height == 0)
+        return;
     color_data* temp = (color_data*)malloc(width * height * sizeof(color_data));
     this->array = (color_data**)malloc(width * sizeof(color_data*)); // Column major allocation since we use color_data[x_index][y_index]
     for (int i = 0; i < width; i++)
@@ -145,6 +149,9 @@ void color_array::allocate()
 void color_array::deallocate()
 {
     mtVec.clear();
+    // for the case of size 0 we have not allocated anything
+    if (width == 0 || height == 0)
+        return;
     if (this->array != nullptr)
     {
         if (this->array[0] != nullptr) free(this->array[0]);

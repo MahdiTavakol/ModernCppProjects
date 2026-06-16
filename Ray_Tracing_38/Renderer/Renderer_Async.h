@@ -9,6 +9,8 @@ class renderer_async : public renderer
 public:
 	renderer_async(
 		communicator* para_,
+		Logger* error_,
+		profiler* timer_,
 		std::unique_ptr<path>&& pth_,
 		int max_threads_,
 		std::string info_ = "",

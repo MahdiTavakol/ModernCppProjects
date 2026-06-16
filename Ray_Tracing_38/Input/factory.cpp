@@ -30,7 +30,7 @@ factory::factory(int argc, char** argv, int mode_,
 	* the only class coupled to the settings classes implementations.
 	*/
 
- 
+
 	// parsing the input arguments for the parallel communicator from the cml
 	std::unique_ptr<settings> comm_settings = std::make_unique<communicator_settings>();
 	input::set_communicator_settings(argc, argv, comm_settings.get());
@@ -42,6 +42,13 @@ factory::factory(int argc, char** argv, int mode_,
 	//input::set_logger_settings(argc, argv, error_settings.get());
 	// the Logger class is in charge of logging output
 	error = std::make_unique<Logger>();
+
+	/* Since the profiler is dependent on the communicator and the logger objects,
+	* I put it here after those objects are created. 
+	* However, it needed to be created ASAP to be a more accurate measure of the program
+	* running time.
+	*/
+	timer = std::make_unique<profiler>(para.get(), error.get());
 
 
 	// changing the settings based on the user input
@@ -56,7 +63,7 @@ factory::factory(int argc, char** argv, int mode_,
 	// getting the settings for the scene_factory object
 	settings* scene_settings = (*stngs)["scene"];
 	// the world_factory is in charge of lazy creation of the scene.
-	world_factory = std::make_unique<scene_factory>(scene_settings,error.get(), para.get());
+	world_factory = std::make_unique<scene_factory>(scene_settings,error.get(), para.get(), timer.get());
 	// since settings in some classes are dependent on hittable_list
 	// we first create that.
 	// building the hittable_list
@@ -75,7 +82,11 @@ factory::factory(int argc, char** argv, int mode_,
 	// getting the settings for the renderer_factory object
 	settings* renderer_settings = sett["renderer"];
 	// the renderer factory
-	rend_factory = std::make_unique<renderer_factory>(renderer_settings,para.get());
+	rend_factory = std::make_unique<renderer_factory>(
+		renderer_settings,
+		para.get(),
+		error.get(),
+		timer.get());
 
 }
 
@@ -225,4 +236,11 @@ std::unique_ptr<Logger> factory::return_error()
 {
 	// returning the error
 	return std::move(error);
+}
+
+std::unique_ptr<profiler> factory::return_timer()
+{
+	if (timer == nullptr)
+		throw std::runtime_error("The timer has already returned.. This program does not support multiple timers");
+	return std::move(timer);
 }

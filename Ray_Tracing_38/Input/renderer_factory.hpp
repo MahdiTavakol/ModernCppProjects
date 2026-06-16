@@ -7,7 +7,7 @@
 class renderer_factory
 {
 public:
-	renderer_factory(settings* stngs_, communicator* para_);
+	renderer_factory(settings* stngs_, communicator* para_, Logger* error_, profiler* timer_);
 	void create();
 	std::unique_ptr<path> create_and_return_path();
 	std::unique_ptr<renderer> return_object();
@@ -15,9 +15,14 @@ public:
 protected:
 	std::unique_ptr<renderer> renderObj;
 	communicator* para;
+	Logger* error;
+	profiler* timer;
 
 	// renderer_mode
 	renderMode render_mode;
+
+	// if we do profiling
+	int nProfiling = 1;
 
 	// async settings
 	int max_threads;

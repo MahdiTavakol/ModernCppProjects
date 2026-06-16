@@ -13,6 +13,7 @@ renderer_facade::renderer_facade(int argc, char** argv, int mode_,
 {
 	// the factory object
 	builder = std::make_unique<factory>(argc, argv, mode_, comm_);
+	
 }
 
 
@@ -34,6 +35,7 @@ void renderer_facade::setup()
 	world = builder->return_world();
 	mtl_list = builder->return_mtl_list();
 	img = builder->return_image();
+	timer = builder->return_timer();
 	// objects with specific setup methods
 	writer->setup(img.get());
 	rend->setup(world.get(), mtl_list.get());
@@ -47,7 +49,9 @@ void renderer_facade::add(std::unique_ptr<hittable>& object)
 
 void renderer_facade::render()
 {
+	timer->start_event("rendering");
  	rend->render(img.get(),cam.get(), writer.get());
+	timer->stop_event("rendering");
 }
 
 
@@ -57,7 +61,14 @@ void renderer_facade::write()
 	// also the renderer sets the filename in its render method, so the writer will always write the file with the correct name.
 	// also the renderer is in the charge of updating the file contents in its render method, 
 	// so the writer just needs to write the file with the current contents.
+	timer->start_event("output");
 	rend->write_file(writer.get(),img.get());
+	timer->stop_event("output");
+}
+
+void renderer_facade::print_timing_info()
+{
+	timer->print_timing_info();
 }
 
 std::unique_ptr<Logger> renderer_facade::return_error()

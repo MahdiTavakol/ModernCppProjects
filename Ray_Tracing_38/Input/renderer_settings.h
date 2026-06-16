@@ -11,6 +11,12 @@ enum class Path_type
 	FILE
 };
 
+enum class Profiling_mode
+{
+	OFF,
+	ON
+};
+
 class renderer_settings: public settings
 {
 public:
@@ -33,6 +39,9 @@ public:
 	void return_movie_params(int& num_seconds_, int& fps_);
 	// returning the type of the path
 	void return_path_type(Path_type& pth_type_);
+	// retuning the profiling mode
+	void return_profiling_mode(Profiling_mode& prfl_mode_);
+	void return_nprofiling(int& nprofiling_);
 	// returning params for each path type
 	void return_location_param(point3& location_);
 	void return_circular_params(point3& center_, double& radius_, double& theta_);
@@ -50,6 +59,11 @@ protected:
 	// path type
 	std::string pth_type_str = "NONE";
 	Path_type pth_type = Path_type::NONE;
+
+	// see if there is profiling
+	std::string profiling_str = "OFF";
+	Profiling_mode profiling_mode = Profiling_mode::ON;
+	int nProfiling = 1;
 
 	// parameters for the static mode
 	// parameters for the path type none (static)

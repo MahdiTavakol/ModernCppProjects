@@ -11,6 +11,7 @@
 #include "../Input/factory.hpp"
 #include "../Materials/material_list.h"
 #include "../Output/Logger.h"
+#include "../Output/profiler.h"
 
 
 class renderer_facade
@@ -22,6 +23,7 @@ public:
 	void add(std::unique_ptr<hittable>& object);
 	virtual void render();
 	void write();
+	void print_timing_info();
 	std::unique_ptr<Logger> return_error();
 
 
@@ -39,5 +41,6 @@ protected:
 	std::unique_ptr<output> writer;
 	std::unique_ptr<hittable_list> world;
 	std::unique_ptr<material_list> mtl_list;
+	std::unique_ptr<profiler> timer;
 	
 };

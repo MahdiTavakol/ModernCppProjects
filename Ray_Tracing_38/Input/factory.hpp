@@ -10,6 +10,7 @@
 #include "../Output/output.h"
 #include "../Materials/material_list.h"
 #include "../Output/Logger.h"
+#include "../Output/profiler.h"
 #include <mpi.h>
 
 class factory
@@ -27,6 +28,7 @@ public:
 	std::unique_ptr<material_list> return_mtl_list();
 	std::unique_ptr<image> return_image();
 	std::unique_ptr<Logger> return_error();
+	std::unique_ptr<profiler> return_timer();
 
 protected:
 	// the mode used for various default parameters
@@ -34,6 +36,7 @@ protected:
 	// special objects which are created before the input class
 	std::unique_ptr<communicator> para;
 	std::unique_ptr<Logger> error;
+	std::unique_ptr<profiler> timer;
 	// the parser 
 	std::unique_ptr<input> in;
 	// the settings array for all the objects

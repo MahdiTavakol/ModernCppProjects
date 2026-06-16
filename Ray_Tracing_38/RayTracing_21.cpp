@@ -44,6 +44,7 @@ int main(int argc, char** argv)
 		rendFacade->setup();
 		rendFacade->render();
 		rendFacade->write();
+		rendFacade->print_timing_info();
 		error = std::move(rendFacade->return_error());
 	}
 	catch (const std::invalid_argument& e)

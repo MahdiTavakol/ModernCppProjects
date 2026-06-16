@@ -5,11 +5,13 @@
 
 renderer_async::renderer_async(
 	communicator* para_,
+	Logger* error_,
+	profiler* timer_,
 	std::unique_ptr<path>&& pth_,
 	int max_threads_,
 	std::string info_,
 	bool verbose_) :
-	renderer{ para_,std::move(pth_),info_,verbose_ },
+	renderer{ para_,error_,timer_, std::move(pth_),info_,verbose_ },
 	max_threads{max_threads_}
 {
 	if (max_threads <= 0)
@@ -82,11 +84,13 @@ void renderer_async::render_thread(
 		if (!img_thread || !wrt_thread)
 			break;
 
-
+		std::string myName = timer->start_thread_event("rendering-thread");
 		cam_->render(img_thread.get(), *world, *mtls);
+		timer->stop_thread_event(myName,"rendering-thread");
+		timer->start_thread_event(myName, "output-thread");
 		wrt_thread->open_file();
 		wrt_thread->write_file(img_thread.get(), npos_);
-
+		timer->stop_thread_event(myName, "output-thread");
 	}
 }
 

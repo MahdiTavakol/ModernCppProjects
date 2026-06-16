@@ -7,11 +7,12 @@
 #include "../Algorithms/communicator.h"
 #include "../Materials/material_list.h"
 #include "../Output/Logger.h"
+#include "../Output/profiler.h"
 #include "scene_settings.h"
 
 class scene_factory {
 public:
-	scene_factory(settings* wld_settings, Logger* error_, communicator* para_);
+	scene_factory(settings* wld_settings, Logger* error_, communicator* para_, profiler* timer_);
 	void create();
 	std::unique_ptr<hittable_list> return_object();
 	std::unique_ptr<material_list> return_mtl_list();
@@ -20,8 +21,13 @@ protected:
 	const int mode;
 	std::unique_ptr<hittable_list> world;
 	std::unique_ptr<material_list> list;
+	// reference to the program resources
 	communicator* para;
 	Logger* error;
+	profiler* timer;
+
+	// settings
+	Bvh_Type bvh_type = Bvh_Type::NORMAL;
 	BVH_Split_Method bvh_mode = BVH_Split_Method::MEDIAN;
 
 

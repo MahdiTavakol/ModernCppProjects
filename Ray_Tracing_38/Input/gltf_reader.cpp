@@ -16,6 +16,11 @@ gltf_reader::gltf_reader(const std::string& file_path_,Logger* error_, communica
 	// as the file parsing might take a while
 	// I would prefer lazy parsing
 
+	std::string message = "Creating the PBR resources";
+	int msg_level = 1;
+	error->print_message(message, msg_level);
+	pbr_resources = make_shared<PBR_Resources>(error);
+
 }
 
 gltf_reader::~gltf_reader()
@@ -34,7 +39,7 @@ void gltf_reader::read()
 	message = std::string(52, '=');
 	error->print_message(message, msg_level);
 
-	tg3_error_code err = tg3_parse_file(&model, &errors, file_path.c_str(), 10, &opts);
+	tg3_error_code err = tg3_parse_file(&model, &errors, file_path.c_str(), file_path.length(), &opts);
 	if (err != TG3_OK)
 	{
 		for (int i = 0; i < errors.count; i++)
@@ -77,10 +82,13 @@ void gltf_reader::read()
 
 	// reading the scene 0
 	read_scene();
-	read_materials();
+	/* materials are read after textures, samplers and images
+	 * since this information is required for the materials initiation!
+	 */
 	read_textures();
 	read_samplers();
 	load_images();
+	read_materials();
 
 	int low = 0;
 	int high = static_cast<int>(primitives.size() - 1);
@@ -123,7 +131,7 @@ void gltf_reader::read_scene(size_t frame_)
 		}
 		message = "Reading the node " + node_name;
 		error->print_message(message, msg_level);
-		read_node(i);
+		read_node(node_id);
 	}
 
 
@@ -171,10 +179,7 @@ void gltf_reader::read_materials()
 	message = std::string(52, '=');
 	error->print_message(message, msg_level);
 
-	message = "Creating the PBR resources";
-	msg_level = 1;
-	error->print_message(message, msg_level);
-	pbr_resources = make_shared<PBR_Resources>(error);
+
 
 
 
@@ -337,6 +342,7 @@ void gltf_reader::read_node(size_t node_id_, Matrix4d transform_)
 	const int32_t& has_matrix = node_i.has_matrix;
 	Matrix4d matrix;
 
+
 	if (has_matrix == 1)
 	{
 		const double* mat = node_i.matrix;
@@ -356,6 +362,7 @@ void gltf_reader::read_node(size_t node_id_, Matrix4d transform_)
 		const double* translation = node_i.translation;
 		matrix = create_gltf_matrix(rotation, scale, translation);
 	}
+
 
 	transform_ = transform_ * matrix;
 
@@ -386,7 +393,7 @@ void gltf_reader::read_mesh(size_t mesh_id_, Matrix4d transform_)
 
 	// transformation for normals
 	Eigen::Matrix3d upperleft = transform_.topLeftCorner<3, 3>();
-	Eigen::Matrix3d normalsTransform = upperleft.inverse();
+	Eigen::Matrix3d normalsTransform = upperleft.inverse().transpose();
 
 
 	const tg3_mesh& mesh_i = model.meshes[mesh_id_];

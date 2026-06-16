@@ -78,3 +78,15 @@ void material_list::replace_material(std::string name_, std::unique_ptr<material
 		list[loc] = std::move(mat_);
 	}
 }
+
+void material_list::replace_all_materials(std::unique_ptr<metal>& mat_)
+{
+	metal& mat_ref = *mat_;
+
+	int n_mats = static_cast<int>(list.size());
+	for (int i = 0; i < n_mats; i++)
+	{
+		std::unique_ptr<material> newMat = std::make_unique<metal>(mat_ref);
+		list[i] = std::move(newMat);
+	}
+}
