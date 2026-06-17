@@ -32,6 +32,8 @@ protected:
 	// the factory object
 	std::unique_ptr<factory> builder;
 
+	// a pointer to input arguments (needed by the profiler)
+	renderer_facade_inputs* ptr;
 	// resources
 	std::unique_ptr<Logger> error;
 	std::unique_ptr<image> img;
@@ -42,5 +44,16 @@ protected:
 	std::unique_ptr<hittable_list> world;
 	std::unique_ptr<material_list> mtl_list;
 	std::unique_ptr<profiler> timer;
-	
+
+	// profiling resources
+	bool profiling = false;
+	int nProfilings = 1;
+	std::unique_ptr<renderer> profiling_renderer;
+	std::vector<std::unique_ptr<profiler>> timers;
+	// args need for the profiler
+	std::vector<std::string> argv_vec;
+
+	MPI_Comm comm;
+	int mode;
+
 };

@@ -29,6 +29,7 @@ protected:
 	// settings
 	Bvh_Type bvh_type = Bvh_Type::NORMAL;
 	BVH_Split_Method bvh_mode = BVH_Split_Method::MEDIAN;
+	int bvh_n_threads = 1;
 
 
 	// filenames for 3d object loading.. In the future 

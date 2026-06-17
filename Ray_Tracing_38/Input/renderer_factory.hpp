@@ -11,6 +11,7 @@ public:
 	void create();
 	std::unique_ptr<path> create_and_return_path();
 	std::unique_ptr<renderer> return_object();
+	static std::unique_ptr<renderer> create_profiler(communicator* para_, Logger* error_, profiler* timer_);
 
 protected:
 	std::unique_ptr<renderer> renderObj;

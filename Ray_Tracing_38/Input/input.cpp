@@ -10,6 +10,7 @@
 #include "scene_settings.h"
 #include "camera_settings.h"
 #include "renderer_settings.h"
+#include "profiler_settings.h"
 
 input::input(int argc, char** argv, int mode_,
 	std::map<std::string, int> app_set_map_,
@@ -131,6 +132,10 @@ void input::init_app_settings()
 		else if (!keyword.compare("renderer")) {
 			current_set = std::make_unique<renderer_settings>(mode);
 		}
+		else if (!keyword.compare("profiler"))
+		{
+			current_set = std::make_unique<profiler_settings>(mode);
+		}
 		else {
 			std::string error_text = "Unknown keyword " + keyword + "!";
 			throw std::invalid_argument(error_text.c_str());
@@ -174,7 +179,8 @@ void input::parse_file()
 
 		std::string newCmd;
 		getline(ss, newCmd);
-		if (!app_set->add_cmd(text, newCmd) && text.compare("rank_config")) {
+		bool is_it_special = special_keywords.find(text) != special_keywords.end();
+		if (!app_set->add_cmd(text, newCmd) && !is_it_special) {
 			std::string error_text = "Wrong input argument! " + text + " " + newCmd;
 			throw std::invalid_argument(error_text.c_str());
 		}
@@ -223,6 +229,27 @@ void input::set_communicator_settings(int argc, char** argv, settings* com_setti
 		iarg++;
 	}
 	com_settings->parse_commands();
+}
+
+void input::set_profiler_settings(int argc, char** argv, settings* profiler_settings_)
+{
+	int iarg = 1;
+	std::string cmd = "profiling";
+	while (iarg < argc)
+	{
+		if (!strcmp(argv[iarg], cmd.c_str()))
+		{
+			if (iarg + 2 >= argc)
+				throw std::invalid_argument("Corrupted input!");
+			std::string text1(argv[iarg + 1]);
+			std::string text2(argv[iarg + 2]);
+			cmd += " " + text1 + " " + text2;
+			profiler_settings_->add_cmd(cmd);
+			break;
+		}
+		iarg++;
+	}
+	profiler_settings_->parse_commands();
 }
 
 void input::check_compatibility()

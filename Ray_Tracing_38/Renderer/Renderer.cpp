@@ -77,6 +77,10 @@ void renderer::write_file(output* writer_, image* img_)
 	timer->stop_event(event);
 }
 
+void renderer::print_timing_info()
+{
+	timer->print_timing_info();
+}
 
 
 

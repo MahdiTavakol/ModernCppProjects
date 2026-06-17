@@ -43,6 +43,7 @@ public:
 	// bvh type and mode
 	Bvh_Type get_bvh_type() const;
 	BVH_Split_Method get_bvh_mode() const;
+	int get_bvh_n_threads() const;
 
 	// related to special effects
 	// floor
@@ -63,6 +64,7 @@ protected:
 	std::string mode_string;
 	std::string bvh_type_str = "NORMAL";
 	std::string bvh_mode_str = "MEDIAN";
+	int bvh_threads;
 	std::string obj_file_name = "";
 	std::string mtl_file_name = "";
 	std::string gltf_file_name = "";

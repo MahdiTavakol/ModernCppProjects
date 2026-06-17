@@ -317,6 +317,7 @@
     <ClCompile Include="Input\obj_model_reader_parallel.cpp" />
     <ClCompile Include="Input\output_settings.cpp" />
     <ClCompile Include="Input\gltf_reader.cpp" />
+    <ClCompile Include="Input\profiler_settings.cpp" />
     <ClCompile Include="Input\renderer_factory.cpp" />
     <ClCompile Include="Input\renderer_settings.cpp" />
     <ClCompile Include="Input\scene_factory.cpp" />
@@ -381,6 +382,7 @@
     <ClInclude Include="Input\obj_model_reader_parallel.h" />
     <ClInclude Include="Input\output_settings.h" />
     <ClInclude Include="Input\gltf_reader.h" />
+    <ClInclude Include="Input\profiler_settings.h" />
     <ClInclude Include="Input\renderer_factory.hpp" />
     <ClInclude Include="Input\renderer_settings.h" />
     <ClInclude Include="Input\scene_factory.hpp" />

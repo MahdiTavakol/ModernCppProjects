@@ -20,8 +20,9 @@ void scene_settings::set_input_map()
 
 
 		// bvh mode
-		{"-bvh_type",&bvh_type_str},
+		{"-bvh",&bvh_type_str},
 		{"-bvh_mode",&bvh_mode_str},
+		{"-bvh_threads",&bvh_threads},
 
 		// special effects 
 
@@ -187,6 +188,11 @@ void scene_settings::check_validity() const
 		}
 	}
 
+	if (bvh_type_str != "TRI_ASYNC" && bvh_threads != 1)
+	{
+		std::cout << "bvh_threads parameter defined for a non_async bvh type: ignoring this parameter!" << std::endl;
+	}
+
 }
 
 
@@ -198,6 +204,11 @@ Bvh_Type scene_settings::get_bvh_type() const
 BVH_Split_Method scene_settings::get_bvh_mode() const
 {
 	return bvh_mode;
+}
+
+int scene_settings::get_bvh_n_threads() const
+{
+	return bvh_threads;
 }
 
 bool scene_settings::specialCheck(specialEnum effect_) const

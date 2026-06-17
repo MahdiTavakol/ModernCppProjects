@@ -228,6 +228,9 @@
     <ClCompile Include="Renderer\Renderer_Profiler.cpp">
       <Filter>Source Files\Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="Input\profiler_settings.cpp">
+      <Filter>Source Files\Input</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Types\color.h">
@@ -424,6 +427,9 @@
     </ClInclude>
     <ClInclude Include="Renderer\Renderer_Profiler.hpp">
       <Filter>Source Files\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Input\profiler_settings.h">
+      <Filter>Source Files\Input</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

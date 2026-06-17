@@ -19,40 +19,44 @@ struct TimingInfo {
 	// number of profilings done.
 	int nProfilings;
 
-	TimingInfo():
+
+	TimingInfo(int n_ = 1) :
 		myStart{},
-		myDuration{0},
-		minDuration{0},
-		avgDuration{0},
-		maxDuration{0},
-		nThreads{1},
-		nProfilings{0}
+		myDuration{ 0 },
+		minDuration{ 0 },
+		avgDuration{ 0 },
+		maxDuration{ 0 },
+		nThreads{ n_ },
+		nProfilings{ 0 }
 	{}
 
-	TimingInfo(Duration myMinDuration_, 
-		       Duration myAvgDuration_,
-		       Duration myMaxDuration_,
-		       int myThreads_):
+	TimingInfo(Duration myMinDuration_,
+		Duration myAvgDuration_,
+		Duration myMaxDuration_,
+		int myThreads_) :
 		myStart{},
 		myDuration{ 0 },
 		minDuration{ myMinDuration_ },
 		avgDuration{ myAvgDuration_ },
 		maxDuration{ myMaxDuration_ },
 		nThreads{ myThreads_ },
-		nProfilings{0}
+		nProfilings{ 0 }
 	{}
-		
 
-	TimingInfo(Time myStart_):
-		myStart{myStart_},
-		myDuration{0},
-		minDuration{0},
-		avgDuration{0},
-		maxDuration{0},
-		nThreads{1},
-		nProfilings{1}
-	{}
+
+	TimingInfo(Time myStart_) :
+		myStart{ myStart_ },
+		myDuration{ 0 },
+		minDuration{ 0 },
+		avgDuration{ 0 },
+		maxDuration{ 0 },
+		nThreads{ 1 },
+		nProfilings{ 1 }
+	{
+	}
 };
+
+
 
 class profiler
 {
@@ -68,8 +72,8 @@ public:
 
 
 	void return_event_duration(const std::string event_name_, std::vector<Duration>& durations_);
+	void add_child_events();
 	void add_child(profiler* child_);
-	void update_average_info();
 	void print_timing_info();
 
 	static std::unique_ptr<profiler> average_multiple_profilers(std::vector<std::unique_ptr<profiler>>& profiler_vec_);
@@ -91,4 +95,7 @@ protected:
 	std::mutex mtx;
 	// the duration of the progrma
 	Duration program_duration_avg, program_duration_min, program_duration_max;
+	// helper function for printing
+	template<typename T>
+	static std::string center(const T& val_, int width);
 };

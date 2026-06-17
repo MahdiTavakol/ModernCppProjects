@@ -10,7 +10,15 @@
 #include "../Algorithms/hittable_list.h"
 #include "../Materials/material_list.h"
 #include "../Output/profiler.h"
+#include <mpi.h>
 
+
+struct renderer_facade_inputs
+{
+	std::vector<std::string>* argv_vec;
+	int mode;
+	MPI_Comm comm;
+};
 
 class renderer
 {
@@ -23,9 +31,13 @@ public:
 		std::string info_ = "", 
 		bool verbose_ = false);
 	virtual ~renderer();
-	void setup(hittable_list* world_, material_list* mtls_);
+	virtual void setup(hittable_list* world_, material_list* mtls_);
+	virtual void set_resource_pointers(
+		std::vector<std::unique_ptr<profiler>>&& timers_,
+		renderer_facade_inputs* ptrs_) {}
 	virtual void render(image* img_, camera* cam_, output* writer_);
 	virtual void write_file(output* writer_, image *img_);
+	virtual void print_timing_info();
 	
 	
 

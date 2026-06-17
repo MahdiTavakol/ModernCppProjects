@@ -3,6 +3,8 @@
 #include <unordered_set>
 #include <numeric>
 
+constexpr double eps = 1e-6;
+
 profiler::profiler(communicator* para_, Logger* error_):
 	para{para_},error{error_},
 	program_start{std::chrono::steady_clock::now()}
@@ -67,40 +69,6 @@ void profiler::stop_thread_event(const std::string thread_name_, const std::stri
     thread_profiler->stop_event(event_name_);
 }
 
-void profiler::update_average_info()
-{
-    // we stop the timer for the program duration now
-    program_duration_min = 
-        program_duration_avg =
-            program_duration_max = 
-                std::chrono::steady_clock::now() - program_start;
-
-    for (auto& [event_name, timing_info] : timing_infos)
-    {
-        //looking for this event in the children profilers
-        std::vector<Duration> durations;
-        this->return_event_duration(event_name, durations);
-        // finding the min, max and avg values
-        auto min_itr = std::min_element(durations.begin(), durations.end());
-        auto max_itr = std::max_element(durations.begin(), durations.end());
-        Duration min_duration = *min_itr;
-        Duration max_duration = *max_itr;
-
-        int nThreads = static_cast<int>(durations.size());
-        timing_info.nThreads = nThreads;
-        //later one please use std library function
-        Duration sum_duration = std::accumulate(
-            durations.begin(), durations.end(), Duration{0}
-        );
-        Duration avg_duration = sum_duration / static_cast<double>(durations.size());
-
-
-        timing_info.maxDuration = max_duration;
-        timing_info.minDuration = min_duration;
-        timing_info.avgDuration = avg_duration;
-
-    }
-}
 
 
 void profiler::return_event_duration(const std::string event_name_, std::vector<Duration>& durations_)
@@ -117,14 +85,70 @@ void profiler::return_event_duration(const std::string event_name_, std::vector<
     }
 }
 
+void profiler::add_child_events()
+{
+    // event_name to the vector of event durations
+    std::map<std::string, std::vector<Duration>> durations_map;
+
+    // looping through children threads
+    for (auto& [t_name, t_profiler] : thread_profilers)
+    {
+        // looping through its events
+        for (auto& [e_name, t_info] : t_profiler->timing_infos)
+        {
+            // do we have such an event
+            if (durations_map.find(e_name) == durations_map.end())
+            {
+                durations_map[e_name] = std::vector<Duration>();
+            }
+            // adding the duration of this event to the map
+            durations_map[e_name].push_back(t_info.myDuration);
+        }
+    }
+
+
+    // averaging them 
+    for (auto& [e_name, d_vec] : durations_map)
+    {
+        if (timing_infos.find(e_name) != timing_infos.end())
+        {
+            std::string message = "Warning: name clash between the main program and threads ";
+            message += "for the event: " + e_name;
+            error->print_message(message, 0);
+        }
+        TimingInfo c_timing_info;
+        c_timing_info.nThreads = d_vec.size();
+        c_timing_info.minDuration = *std::min_element(d_vec.begin(), d_vec.end());
+        c_timing_info.maxDuration = *std::max_element(d_vec.begin(), d_vec.end());
+        c_timing_info.avgDuration = Duration{ 0 };
+        c_timing_info.avgDuration = std::accumulate(d_vec.begin(), d_vec.end(), Duration{ 0 });
+        c_timing_info.avgDuration /= static_cast<double>(d_vec.size());
+        timing_infos[e_name] = c_timing_info;
+    }
+}
+
 void profiler::print_timing_info()
 {
     if (error == nullptr)
         throw std::invalid_argument("The logger object has not been initialized yet!");
 
 
-    // updating the avg, min and max info
-    update_average_info();
+
+    // we stop the timer for the program duration now
+    program_duration_min =
+        program_duration_avg =
+            program_duration_max =
+                std::chrono::steady_clock::now() - program_start;
+
+    for (auto& [event_name, timing_info] : timing_infos)
+    {
+        timing_info.minDuration = timing_info.myDuration;
+        timing_info.maxDuration = timing_info.myDuration;
+        timing_info.avgDuration = timing_info.myDuration;
+    }
+
+    // updating the children timing info
+    add_child_events();
 
 
 
@@ -152,6 +176,9 @@ void profiler::print_timing_info()
         << std::right << std::setw(2 * pct_width) << "Percent (min/avg/max)"
         << std::right << std::setw(pct_width + trd_width) << "n_threads" << std::endl;;
     percent_strm << std::string(52, '.') << std::endl;
+
+
+  
 
 
     for (const auto& [event_name, timing] : timing_infos)
@@ -182,34 +209,56 @@ void profiler::print_timing_info()
 
 
 
-        duration_strm
-            << std::fixed << std::setw(dur_width)
-            << std::setprecision(3) << min_duration_ms
-            << std::fixed << std::setw(dur_width)
-            << std::setprecision(3) << avg_duration_ms
-            << std::fixed << std::left << std::setw(dur_width)
-            << std::setprecision(3) << max_duration_ms 
-            << std::fixed << std::left << std::setw(trd_width)
-            << nThreads << std::endl;
+       
+        if (std::abs(max_duration_ms - min_duration_ms) <= eps) {
+            duration_strm
+                << std::fixed << std::setw(3*dur_width)
+                << center(avg_duration_ms, 3 * dur_width)
+                << std::fixed << std::left << std::setw(trd_width)
+                << nThreads << std::endl;
 
-        percent_strm
-            << std::fixed << std::setw(pct_width)
-            << std::setprecision(3) << pct_min
-            << std::fixed << std::setw(pct_width)
-            << std::setprecision(3) << pct_avg
-            << std::fixed << std::left << std::setw(dur_width)
-            << std::setprecision(3) << pct_max << 
-            std::fixed << std::left << std::setw(trd_width)
-            << nThreads << std::endl;
+            percent_strm
+                << std::fixed << std::setw(3*pct_width)
+                << center(pct_avg, 3 * pct_width)
+                << std::fixed << std::left << std::setw(trd_width)
+                << nThreads << std::endl;
+        }
+        else
+        {
+            std::string avg_duration_string = center(avg_duration_ms,  dur_width);
+            std::string avg_pct_string = center(pct_avg, pct_width);
+            duration_strm
+                << center(min_duration_ms, dur_width)
+                << center(avg_duration_ms, dur_width)
+                << center(max_duration_ms, dur_width)
+                << std::fixed << std::left << std::setw(trd_width)
+                << nThreads << std::endl;
+
+            percent_strm
+                << center(pct_min,pct_width)
+                << center(pct_avg,pct_width)
+                << center(pct_max,pct_width)
+                << std::fixed << std::left << std::setw(trd_width)
+                << nThreads << std::endl;
+        }
     }
 
     duration_strm << std::string(52, '-') << std::endl;
     percent_strm << std::string(52, '.') << std::endl;
-    percent_strm << "Program took "
-        << program_duration_min
-        << "/" << program_duration_avg
-        << "/" << program_duration_max
-        << std::endl;
+    if (std::abs(program_duration_max.count() - program_duration_min.count()) < eps)
+    {
+        percent_strm << "Program took "
+            <<  program_duration_avg
+            <<  std::endl;
+    }
+    else
+    {
+        percent_strm << "Program took "
+            << program_duration_min
+            << "/" << program_duration_avg
+            << "/" << program_duration_max
+            << std::endl;
+    }
     percent_strm << std::string(52, '=') << std::endl;
 
     error->print_message(duration_strm);
@@ -224,57 +273,66 @@ std::unique_ptr<profiler> profiler::average_multiple_profilers(std::vector<std::
     Logger* error = profiler_vec_[0]->error;
 
     std::unique_ptr<profiler> timer = std::make_unique<profiler>(para, error);
-    std::vector<std::string> event_names;
 
+    // adding child events for each profiler
+    for (auto& profiler : profiler_vec_)
+    {
+        profiler->add_child_events();
+    }
+
+    auto& event_map = timer->timing_infos;
+    
     for (auto& profiler : profiler_vec_)
     {
         for (auto& [event_name, timing_info] : profiler->timing_infos)
         {
-            event_names.push_back(event_name);
-        }
-    }
-
-    std::unordered_map<std::string, TimingInfo> timing_info_map;
-
-    for (auto& event_name : event_names)
-    {
-        Duration minDuration = Duration{ std::numeric_limits<double>::infinity()};
-        Duration avgDuration = Duration{0};
-        Duration maxDuration = Duration{0};
-        int nThreads = 0;
-        timing_info_map[event_name] = TimingInfo{minDuration,avgDuration,maxDuration,nThreads};
-    }
-
-    for (auto& profiler : profiler_vec_)
-    {
-        for (auto& [event_name, timing_info] : profiler->timing_infos)
-        {
-            Duration myMinDuration = timing_info.minDuration;
-            Duration myAvgDuration = timing_info.avgDuration;
-            Duration myMaxDuration = timing_info.maxDuration;
+            // if event is not there add it
+            if (event_map.find(event_name) == event_map.end())
+            {
+                TimingInfo newTI(0);
+                newTI.minDuration = Duration{ std::numeric_limits<double>::infinity() };
+                event_map[event_name] = newTI;
+            }
+            auto& event = event_map[event_name];
+            Duration minDuration = timing_info.minDuration;
+            Duration avgDuration = timing_info.avgDuration;
+            Duration maxDuration = timing_info.maxDuration;
             int nThreads = timing_info.nThreads;
-
-            Duration& allMinDur = timing_info_map[event_name].minDuration;
-            Duration& allAvgDur = timing_info_map[event_name].avgDuration;
-            Duration& allMaxDur = timing_info_map[event_name].maxDuration;
-            int& allnThreads = timing_info_map[event_name].nThreads;
-            timing_info_map[event_name].nProfilings++;
-            timing_info_map[event_name].nThreads += nThreads;
-
-            if (myMinDuration < allMinDur)
-                allMinDur = myMinDuration;
-            if (myMaxDuration > allMaxDur)
-                allMaxDur = myMaxDuration;
-            allAvgDur += myAvgDuration * static_cast<double>(nThreads);
+            Duration sumDuration = avgDuration * static_cast<double>(nThreads);
+            if (minDuration < event.minDuration)
+                event.minDuration = minDuration;
+            if (maxDuration > event.maxDuration)
+                event.maxDuration = maxDuration;
+            event.avgDuration += sumDuration;
+            event.nThreads += nThreads;      
         }
     }
 
-    for (auto& [event_name, timing_info] : timing_info_map)
+    // averaging events
+    for (auto& [event_name, event] : event_map)
     {
-        if (timing_info.nThreads > 0)
-            timing_info.avgDuration /= static_cast<double>(timing_info.nThreads);
+        if (event.nThreads > 0)
+            event.avgDuration /= static_cast<double>(event.nThreads);
     }
 
     return timer;
+}
+
+
+template<typename T>
+std::string profiler::center(const T& val_, int width)
+{
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(3) << val_;
+    std::string s = ss.str();
+    if ((int)s.size() >= width)
+        return s;
+
+    int left = (width - s.size()) / 2;
+    int right = width - s.size() - left;
+
+    return std::string(left, ' ')
+        + s
+        + std::string(right, ' ');
 }
 

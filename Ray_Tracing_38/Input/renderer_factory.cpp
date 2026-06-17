@@ -82,15 +82,6 @@ void renderer_factory::create()
 	default:
 		throw std::invalid_argument("Unknown rendering mode");
 	}
-
-	/// check if we are doing profiling
-	if (nProfiling > 1)
-	{
-		std::unique_ptr<path> pth = this->create_and_return_path();
-		auto renderObjProf = std::make_unique<renderer_profiler>(para, error,timer, std::move(pth));
-		renderObjProf->set_parameters(nProfiling, std::move(renderObj));
-		renderObj = std::move(renderObjProf);
-	}
 }
 
 std::unique_ptr<path> renderer_factory::create_and_return_path()
@@ -115,4 +106,11 @@ std::unique_ptr<renderer> renderer_factory::return_object()
 		create();
 	}
 	return std::move(renderObj);
+}
+
+std::unique_ptr<renderer> renderer_factory::create_profiler(communicator* para_, Logger* error_, profiler* timer_)
+{
+	auto pth = std::make_unique<path>(vec3{});
+	auto obj = std::make_unique<renderer_profiler>(para_, error_, timer_, std::move(pth));
+	return obj;
 }

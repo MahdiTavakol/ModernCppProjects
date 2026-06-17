@@ -41,6 +41,7 @@ scene_factory::scene_factory(settings* wld_settings_, Logger* error_, communicat
 
 	bvh_type = stngs->get_bvh_type();
 	bvh_mode = stngs->get_bvh_mode();
+	bvh_n_threads = stngs->get_bvh_n_threads();
 }
 
 
@@ -841,7 +842,7 @@ void scene_factory::set_bvh()
 		msg_level = 1;
 		msg = "The bvh tree is of triangle_async type";
 		t_list = std::make_unique<triangle_list>(std::move(world));
-		bvh = std::make_unique<bvh_triangles_async>(timer,std::move(t_list), bvh_mode);
+		bvh = std::make_unique<bvh_triangles_async>(timer,std::move(t_list), bvh_mode,bvh_n_threads);
 		break;
 	}
 

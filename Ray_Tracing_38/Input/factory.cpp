@@ -7,6 +7,7 @@
 #include "../Algorithms/image.h"
 #include "../Algorithms/image_async.h"
 #include "../Output/output_async.h"
+#include "renderer_settings.h"
 
 factory::factory(int argc, char** argv, int mode_,
 	MPI_Comm comm_):
@@ -43,13 +44,13 @@ factory::factory(int argc, char** argv, int mode_,
 	// the Logger class is in charge of logging output
 	error = std::make_unique<Logger>();
 
+
 	/* Since the profiler is dependent on the communicator and the logger objects,
 	* I put it here after those objects are created. 
 	* However, it needed to be created ASAP to be a more accurate measure of the program
 	* running time.
 	*/
 	timer = std::make_unique<profiler>(para.get(), error.get());
-
 
 	// changing the settings based on the user input
 	in = std::make_unique<input>(argc, argv, mode_,app_set_map, para.get());
@@ -58,6 +59,33 @@ factory::factory(int argc, char** argv, int mode_,
 	// getting the app_settings object from the in
 	stngs = in->return_app_settings();
 
+
+	// checking the profiler settings
+	settings* prof_settings = (*stngs)["profiler"];;
+	// the profiler object
+	profiler_settings* prof_conv = dynamic_cast<profiler_settings*>(prof_settings);
+	if (prof_conv == nullptr)
+		throw std::runtime_error("Unrecoverable error!");
+	int nProfiling;
+	prof_conv->return_profiling_info(profiling, nProfiling);
+	timers.reserve(nProfiling);
+	for (int i = 0; i < nProfiling; i++)
+	{
+		timers.push_back(std::make_unique<profiler>(para.get(), error.get()));
+	}
+	render_profiler = renderer_factory::create_profiler(para.get(), error.get(), timer.get());
+
+	// getting the renderer setting to check if we need to shut down the logger or not
+	settings* rend_settings = (*stngs)["renderer"];
+	renderer_settings* rend_conv = dynamic_cast<renderer_settings*>(rend_settings);
+	if (rend_conv == nullptr)
+		error->print_error("Unrecoverable error!");
+	int nprofiling;
+	rend_conv->return_nprofiling(nprofiling);
+	if (nprofiling > 1) {
+		// supressing all the printings in the logger function
+		error->reset_mode(print_mode::PROFILING);
+	}
 
 
 	// getting the settings for the scene_factory object
@@ -87,6 +115,82 @@ factory::factory(int argc, char** argv, int mode_,
 		para.get(),
 		error.get(),
 		timer.get());
+
+}
+
+factory::factory(std::vector<std::string> argv_vec, int mode_,
+	MPI_Comm comm_, std::unique_ptr<profiler>& timer_) :
+	mode{ mode_ },
+	timer{std::move(timer_)}
+{
+	int argc = argv_vec.size();
+	char** argv;
+	argv = new char* [argc];
+	for (int i = 0; i < argc; i++)
+	{
+		int size = static_cast<int>(argv_vec[i].size());
+		argv[i] = new char[size + 1];
+		for (int j = 0; j < size; j++)
+			argv[i][j] = argv_vec[i][j];
+		argv[i][size] = '\0';
+	}
+
+	std::unique_ptr<settings> comm_settings = std::make_unique<communicator_settings>();
+	input::set_communicator_settings(argc, argv, comm_settings.get());
+	para = std::make_unique<mpiComm>(comm_, comm_settings.get());
+	error = std::make_unique<Logger>();
+	auto dummy_timer = std::make_unique<profiler>(para.get(), error.get());
+	in = std::make_unique<input>(argc, argv, mode_, app_set_map, para.get());
+	in->parse_file();
+	stngs = in->return_app_settings();
+	settings* prof_settings = (*stngs)["profiler"];;
+	profiler_settings* prof_conv = dynamic_cast<profiler_settings*>(prof_settings);
+	if (prof_conv == nullptr)
+		throw std::runtime_error("Unrecoverable error!");
+	int nProfiling;
+	prof_conv->return_profiling_info(profiling, nProfiling);
+	timers.reserve(nProfiling);
+	for (int i = 0; i < nProfiling; i++)
+	{
+		timers.push_back(std::make_unique<profiler>(para.get(), error.get()));
+	}
+
+	settings* rend_settings = (*stngs)["renderer"];
+	renderer_settings* rend_conv = dynamic_cast<renderer_settings*>(rend_settings);
+	if (rend_conv == nullptr)
+		error->print_error("Unrecoverable error!");
+	int nprofiling;
+	rend_conv->return_nprofiling(nprofiling);
+	if (nprofiling > 1) {
+		// supressing all the printings in the logger function
+		error->reset_mode(print_mode::PROFILING);
+	}
+	settings* scene_settings = (*stngs)["scene"];
+	world_factory = std::make_unique<scene_factory>(scene_settings, error.get(), para.get(), timer.get());
+
+	world_factory->create();
+	world = world_factory->return_object();
+
+
+	stngs->set_from_scene(*world);
+
+	auto& sett = *stngs;
+
+	// getting the settings for the renderer_factory object
+	settings* renderer_settings = sett["renderer"];
+	// the renderer factory
+	rend_factory = std::make_unique<renderer_factory>(
+		renderer_settings,
+		para.get(),
+		error.get(),
+		timer.get());
+
+
+	for (int i = 0; i < argc; i++)
+	{
+		delete[] argv[i];
+	}
+	delete[] argv;
 
 }
 
@@ -243,4 +347,15 @@ std::unique_ptr<profiler> factory::return_timer()
 	if (timer == nullptr)
 		throw std::runtime_error("The timer has already returned.. This program does not support multiple timers");
 	return std::move(timer);
+}
+
+
+void factory::return_profiling_info(
+	bool& profiling_,
+	std::unique_ptr<renderer>& render_profiler_,
+	std::vector<std::unique_ptr<profiler>>& timers_)
+{
+	profiling_ = profiling;
+	render_profiler_ = std::move(render_profiler);
+	timers_ = std::move(timers);
 }

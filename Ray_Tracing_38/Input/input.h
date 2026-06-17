@@ -40,6 +40,7 @@ public:
 	// create the input class we consider settings
 	// for a communicator as a special case
 	static void set_communicator_settings(int argc, char** argv, settings* com_settings);
+	static void set_profiler_settings(int argc, char** argv, settings* profiler_settings_);
 
 	// parsing the input file
 	void parse_file();
@@ -115,6 +116,8 @@ private:
 	std::unique_ptr<std::iostream> input_stream;
 	std::unique_ptr<app_settings> app_set;
 	std::map<std::string, int> app_set_map;
+	std::unordered_set<std::string> special_keywords =
+	{ "rank_config" ,"profiling"};
 };
 
 #endif

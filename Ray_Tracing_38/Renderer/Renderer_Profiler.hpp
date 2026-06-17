@@ -1,5 +1,7 @@
 #pragma once
 #include "Renderer.h"
+#include <mpi.h>
+
 
 class renderer_profiler : public renderer
 {
@@ -12,13 +14,18 @@ public:
 		std::string info_ = "",
 		bool verbose_ = false);
 	virtual ~renderer_profiler() override;
-	void set_parameters(int nProfilings_, std::unique_ptr<renderer>&& renderedObj_);
+	void setup(hittable_list* world_, material_list* mtls_) override;
+	void set_resource_pointers(
+		std::vector<std::unique_ptr<profiler>>&& timers_,
+		renderer_facade_inputs* ptrs_) override;
 	virtual void render(image* img_, camera* cam_, output* writer_) override;
 	virtual void write_file(output* writer_, image* img_) override;
+	void print_timing_info() override;
 
 protected:
-	std::unique_ptr<renderer> rendererObj;
 	std::vector<std::unique_ptr<profiler>> timers;
+	renderer_facade_inputs* ptrs;
 	int nProfilings = 10;
+	const int msg_level = -2;
 
 };
