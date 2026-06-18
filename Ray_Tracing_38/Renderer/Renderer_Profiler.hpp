@@ -23,6 +23,7 @@ public:
 	void print_timing_info() override;
 
 protected:
+	size_t print_len = 72;
 	std::vector<std::unique_ptr<profiler>> timers;
 	renderer_facade_inputs* ptrs;
 	int nProfilings = 10;

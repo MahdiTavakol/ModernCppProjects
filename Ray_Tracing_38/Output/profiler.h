@@ -74,8 +74,14 @@ public:
 	void return_event_duration(const std::string event_name_, std::vector<Duration>& durations_);
 	void add_child_events();
 	void add_child(profiler* child_);
-	void print_timing_info();
+	void print_timing_info(size_t print_len_ = 52);
+	// stopping the program counter
+	void stop_program_counter();
 
+	std::unordered_map<std::string, TimingInfo> return_timing_infos()
+	{
+		return timing_infos;
+	}
 	static std::unique_ptr<profiler> average_multiple_profilers(std::vector<std::unique_ptr<profiler>>& profiler_vec_);
 
 
@@ -89,11 +95,13 @@ protected:
 	std::unordered_map<std::string, std::unique_ptr<profiler>> thread_profilers;
 	// when the program did start
 	Time program_start;
+
 	// timing info for various events
 	std::unordered_map<std::string, TimingInfo> timing_infos;
 	//mutex for threads to safely add to the thread_profilers
 	std::mutex mtx;
-	// the duration of the progrma
+	// the duration of the program
+	int nProfiling = 1;
 	Duration program_duration_avg, program_duration_min, program_duration_max;
 	// helper function for printing
 	template<typename T>

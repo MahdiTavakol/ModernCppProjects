@@ -19,8 +19,11 @@ class factory
 public:
 	factory(int argc, char** argv, int mode_,
 		MPI_Comm comm_);
-	factory(std::vector<std::string> argv_vec, int mode_,
-		MPI_Comm comm_,std::unique_ptr<profiler>& timer_);
+	factory(std::vector<std::string> argv_vec, 
+		int mode_,
+		MPI_Comm comm_,
+		Logger* error_,
+		profiler* timer_);
 	void create();
 	void create_image();
 	std::unique_ptr<communicator> return_comm();
@@ -43,8 +46,10 @@ protected:
 
 	// special objects which are created before the input class
 	std::unique_ptr<communicator> para;
-	std::unique_ptr<Logger> error;
-	std::unique_ptr<profiler> timer;
+	std::unique_ptr<Logger> errorResource;
+	Logger* error;
+	std::unique_ptr<profiler> timerResource;
+	profiler* timer;
 	// whether we do profiling or not
 	bool profiling = false;
 	std::vector<std::unique_ptr<profiler>> timers;

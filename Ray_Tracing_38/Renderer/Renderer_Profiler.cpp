@@ -12,9 +12,9 @@ renderer_profiler::renderer_profiler(
 {
 	// supressing all the printings in the logger function
 	error->reset_mode(print_mode::PROFILING);
-	error->print_message(std::string(52, '='), msg_level);
+	error->print_message(std::string(print_len, '='), msg_level);
 	error->print_message("Starting the profiler", msg_level);
-	error->print_message(std::string(52, '='), msg_level);
+	error->print_message(std::string(print_len, '='), msg_level);
 }
 
 renderer_profiler::~renderer_profiler()
@@ -41,7 +41,7 @@ void renderer_profiler::render(image* img_, camera* cam_, output* writer_)
 	{
 		int event_number = static_cast<int>(&tmr - timers.data());
 		error->print_message("Profiling event " + std::to_string(event_number), msg_level);
-		error->print_message(std::string(52, '.'), msg_level);
+		error->print_message(std::string(print_len, '.'), msg_level);
 		error->print_message("\tBuilding resources", msg_level);
 		// resetting to timer to have an accurate run time
 		tmr->reset_program_timer();
@@ -49,9 +49,10 @@ void renderer_profiler::render(image* img_, camera* cam_, output* writer_)
 		auto& argv_vec = *(ptrs->argv_vec);
 		int mode = ptrs->mode;
 		MPI_Comm comm = ptrs->comm;
-		// we have send the timer to the builder object
+		// we have send the timer and error objects to the builder object
 		// so it itself record its own individual timings
- 		auto builder = std::make_unique<factory>(argv_vec, mode, comm,tmr);
+ 		auto builder = std::make_unique<factory>(
+			argv_vec, mode, comm,error,tmr.get());
 		// creating the objects
 		builder->create();
 		// returning each object
@@ -65,8 +66,7 @@ void renderer_profiler::render(image* img_, camera* cam_, output* writer_)
 		// objects with specific setup methods
 		writer->setup(img.get());
 		rend->setup(world.get(), mtl_list.get());
-		// getting back our own timer from the builder
-		tmr = builder->return_timer();
+
 
 
 		error->print_message("\tRendering", msg_level);
@@ -77,6 +77,8 @@ void renderer_profiler::render(image* img_, camera* cam_, output* writer_)
 		tmr->start_event("Output");
 		rend->write_file(writer.get(), img.get());
 		tmr->stop_event("Output");
+		// stopping the program counter
+		tmr->stop_program_counter();
 	}
 	error->print_message("Finished profiling", msg_level);
 }
@@ -90,5 +92,6 @@ void renderer_profiler::print_timing_info()
 {
 	// the average timer
 	std::unique_ptr<profiler> timer_avg = profiler::average_multiple_profilers(timers);
-	timer_avg->print_timing_info();
+	timer_avg->print_timing_info(print_len);
+
 }

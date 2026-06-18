@@ -42,7 +42,8 @@ factory::factory(int argc, char** argv, int mode_,
 	//std::unique_ptr<settings> error_settings = std::make_unique<logger_settings>();
 	//input::set_logger_settings(argc, argv, error_settings.get());
 	// the Logger class is in charge of logging output
-	error = std::make_unique<Logger>();
+	errorResource = std::make_unique<Logger>();
+	error = errorResource.get();
 
 
 	/* Since the profiler is dependent on the communicator and the logger objects,
@@ -50,8 +51,8 @@ factory::factory(int argc, char** argv, int mode_,
 	* However, it needed to be created ASAP to be a more accurate measure of the program
 	* running time.
 	*/
-	timer = std::make_unique<profiler>(para.get(), error.get());
-
+	timerResource = std::make_unique<profiler>(para.get(), error);
+	timer = timerResource.get();
 	// changing the settings based on the user input
 	in = std::make_unique<input>(argc, argv, mode_,app_set_map, para.get());
 	// parsing the cmd args or the input file
@@ -71,9 +72,9 @@ factory::factory(int argc, char** argv, int mode_,
 	timers.reserve(nProfiling);
 	for (int i = 0; i < nProfiling; i++)
 	{
-		timers.push_back(std::make_unique<profiler>(para.get(), error.get()));
+		timers.push_back(std::make_unique<profiler>(para.get(), error));
 	}
-	render_profiler = renderer_factory::create_profiler(para.get(), error.get(), timer.get());
+	render_profiler = renderer_factory::create_profiler(para.get(), error, timer);
 
 	// getting the renderer setting to check if we need to shut down the logger or not
 	settings* rend_settings = (*stngs)["renderer"];
@@ -91,7 +92,7 @@ factory::factory(int argc, char** argv, int mode_,
 	// getting the settings for the scene_factory object
 	settings* scene_settings = (*stngs)["scene"];
 	// the world_factory is in charge of lazy creation of the scene.
-	world_factory = std::make_unique<scene_factory>(scene_settings,error.get(), para.get(), timer.get());
+	world_factory = std::make_unique<scene_factory>(scene_settings,error, para.get(), timer);
 	// since settings in some classes are dependent on hittable_list
 	// we first create that.
 	// building the hittable_list
@@ -113,15 +114,17 @@ factory::factory(int argc, char** argv, int mode_,
 	rend_factory = std::make_unique<renderer_factory>(
 		renderer_settings,
 		para.get(),
-		error.get(),
-		timer.get());
+		error,
+		timer);
 
 }
 
 factory::factory(std::vector<std::string> argv_vec, int mode_,
-	MPI_Comm comm_, std::unique_ptr<profiler>& timer_) :
+	MPI_Comm comm_,
+	Logger* error_, profiler* timer_) :
 	mode{ mode_ },
-	timer{std::move(timer_)}
+	timer{timer_},
+	error{ error_}
 {
 	int argc = argv_vec.size();
 	char** argv;
@@ -138,8 +141,7 @@ factory::factory(std::vector<std::string> argv_vec, int mode_,
 	std::unique_ptr<settings> comm_settings = std::make_unique<communicator_settings>();
 	input::set_communicator_settings(argc, argv, comm_settings.get());
 	para = std::make_unique<mpiComm>(comm_, comm_settings.get());
-	error = std::make_unique<Logger>();
-	auto dummy_timer = std::make_unique<profiler>(para.get(), error.get());
+	auto dummy_timer = std::make_unique<profiler>(para.get(), error);
 	in = std::make_unique<input>(argc, argv, mode_, app_set_map, para.get());
 	in->parse_file();
 	stngs = in->return_app_settings();
@@ -152,7 +154,7 @@ factory::factory(std::vector<std::string> argv_vec, int mode_,
 	timers.reserve(nProfiling);
 	for (int i = 0; i < nProfiling; i++)
 	{
-		timers.push_back(std::make_unique<profiler>(para.get(), error.get()));
+		timers.push_back(std::make_unique<profiler>(para.get(), error));
 	}
 
 	settings* rend_settings = (*stngs)["renderer"];
@@ -166,7 +168,7 @@ factory::factory(std::vector<std::string> argv_vec, int mode_,
 		error->reset_mode(print_mode::PROFILING);
 	}
 	settings* scene_settings = (*stngs)["scene"];
-	world_factory = std::make_unique<scene_factory>(scene_settings, error.get(), para.get(), timer.get());
+	world_factory = std::make_unique<scene_factory>(scene_settings, error, para.get(), timer);
 
 	world_factory->create();
 	world = world_factory->return_object();
@@ -182,8 +184,8 @@ factory::factory(std::vector<std::string> argv_vec, int mode_,
 	rend_factory = std::make_unique<renderer_factory>(
 		renderer_settings,
 		para.get(),
-		error.get(),
-		timer.get());
+		error,
+		timer);
 
 
 	for (int i = 0; i < argc; i++)
@@ -339,14 +341,16 @@ std::unique_ptr<renderer> factory::return_renderer()
 std::unique_ptr<Logger> factory::return_error()
 {
 	// returning the error
-	return std::move(error);
+	if (errorResource == nullptr)
+		throw std::runtime_error("The logger has already returned.. This program does not support multiple logger");
+	return std::move(errorResource);
 }
 
 std::unique_ptr<profiler> factory::return_timer()
 {
-	if (timer == nullptr)
+	if (timerResource == nullptr)
 		throw std::runtime_error("The timer has already returned.. This program does not support multiple timers");
-	return std::move(timer);
+	return std::move(timerResource);
 }
 
 
