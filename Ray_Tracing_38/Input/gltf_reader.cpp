@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <future>
 
 gltf_reader::gltf_reader(
 	const std::string& file_path_,
@@ -937,6 +938,8 @@ void gltf_reader::load_images()
 	}
 	else if (reader_mode == GLTF_Reader_Mode::ASYNC)
 	{
+		// resetting the size
+		pbr_resources->resize_images(model.images_count);
 		async_parameters image_async_params(async_threads, 0, model.images_count);
 		// allocating space for images
 		int async_threads = image_async_params.async_threads;
@@ -947,7 +950,7 @@ void gltf_reader::load_images()
 			thread_pool.emplace_back(
 				&gltf_reader::load_image_async,
 				this,
-				image_async_params);
+				std::ref(image_async_params));
 		}
 
 		for (auto& thread : thread_pool)
@@ -1067,34 +1070,32 @@ void gltf_reader::add_item(const int& _low, const int& _hi)
 	
 
 	std::vector<std::unique_ptr<hittable>> triangles;
-	triangles.resize(hi - low);
-
 
 	if (reader_mode == GLTF_Reader_Mode::SERIAL)
 	{
-		add_items_range(triangles, low, hi);
+		triangles = add_items_range(low, hi);
 	}
 	else if (reader_mode == GLTF_Reader_Mode::ASYNC)
 	{
-		async_parameters items_async(async_threads, low, hi,1000);
+		async_parameters items_async(async_threads, low, hi,10);
 
-		std::vector<std::thread> thread_pool;
-		thread_pool.resize(items_async.async_threads);
+		std::vector<std::future<std::vector<std::unique_ptr<hittable>>>> future_pool;
+		future_pool.reserve(items_async.async_threads);
 
 		for (int i = 0; i < items_async.async_threads;i++)
 		{
-			thread_pool.emplace_back(
+			future_pool.emplace_back(std::async(
+				std::launch::async,
 				&gltf_reader::add_item_async,
 				this,
-				items_async,
-				triangles
-			);
+				std::ref(items_async)));
 		}
 
-		for (auto& thread : thread_pool)
+		for (auto& ftr : future_pool)
 		{
-			if (thread.joinable())
-				thread.join();
+			auto local_vector = std::move(ftr.get());
+			std::move(local_vector.begin(), local_vector.end(),
+				std::back_inserter(triangles));
 		}
 	}
 
@@ -1115,8 +1116,9 @@ void gltf_reader::add_item(const int& _low, const int& _hi)
 	error->print_message(message, msg_level);
 }
 
-void gltf_reader::add_item_async(async_parameters& params_, std::vector<std::unique_ptr<hittable>>& triangles_)
+std::vector<std::unique_ptr<hittable>> gltf_reader::add_item_async(async_parameters& params_)
 {
+	std::vector<std::unique_ptr<hittable>> triangles;
 	profiler* thread_timer = timer->start_thread_event("  thread add items");
 	std::atomic<int>& next_item = params_.next_item;
 	const int items_per_thread = params_.items_per_thread;
@@ -1138,15 +1140,16 @@ void gltf_reader::add_item_async(async_parameters& params_, std::vector<std::uni
 		int msg_level;
 		std::string message;
 
-		add_items_range(triangles_, first_item, last_item);
+		triangles = add_items_range(first_item, last_item);
 		// adding primitives
 	}
 	timer->stop_thread_event(thread_timer, "  thread add items");
-
+	return triangles;
 }
 
-void gltf_reader::add_items_range(std::vector<std::unique_ptr<hittable>>& triangles_, const int& first_item_, const int& last_item_)
+std::vector<std::unique_ptr<hittable>> gltf_reader::add_items_range( const int& first_item_, const int& last_item_)
 {
+	std::vector<std::unique_ptr<hittable>> triangles;
 	int msg_level;
 	std::string current_obj;
 	std::string message;
@@ -1271,8 +1274,9 @@ void gltf_reader::add_items_range(std::vector<std::unique_ptr<hittable>>& triang
 			}
 			trngle->add_label(object);
 			trngle->add_label(group);
-			triangles_[i] = std::move(trngle);
-
+			triangles.push_back(std::move(trngle));
 		}
 	}
+
+	return triangles;
 }

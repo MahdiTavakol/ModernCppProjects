@@ -20,6 +20,7 @@ hittable_list::hittable_list(std::vector<std::unique_ptr<hittable>>& item_list_)
 	{
 		add(std::move(item));
 	}
+
 }
 
 bool hittable_list::hit(const ray& r, interval ray_t, hit_record& rec) const 

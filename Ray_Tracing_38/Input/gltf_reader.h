@@ -40,11 +40,11 @@ struct async_parameters {
 		int item_low_,
 		int item_high_,
 		int items_per_thread_ = 1) :
-		async_threads{ async_threads },
+		async_threads{ async_threads_ },
 		next_item{item_low_},
+		items_per_thread{ items_per_thread_ },
 		item_low{ item_low_ },
-		item_high{ item_high_ },
-		items_per_thread{items_per_thread_}
+		item_high{ item_high_ }
 	{}
 };
 
@@ -105,9 +105,9 @@ protected:
 	// adding items to the world
 	virtual void add_item(const int& _low, const int& _hi) override;
 	// the async version of the add_item function
-	virtual void add_item_async(async_parameters& params_, std::vector<std::unique_ptr<hittable>>& triangles_);
+	std::vector<std::unique_ptr<hittable>> add_item_async(async_parameters& params_);
 	// serial version of the add_items to be used either by one thread or in the serial version
-	void add_items_range(std::vector<std::unique_ptr<hittable>>& triangles_, const int& first_item_, const int& last_item_);
+	std::vector<std::unique_ptr<hittable>> add_items_range(const int& first_item_, const int& last_item_);
 
 
 
