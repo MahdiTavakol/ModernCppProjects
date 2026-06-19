@@ -5,6 +5,7 @@
 #include "../Materials/material_list.h"
 #include "../Algorithms/communicator.h"
 #include "../Output/Logger.h"
+#include "../Output/profiler.h"
 
 // in the case where all
 // the indexes are the same for a face
@@ -26,12 +27,13 @@ struct face_indx
 class model_reader
 {
 public:
-	model_reader(std::string file_path_, Logger* error_, communicator* para_);
+	model_reader(std::string file_path_, Logger* error_, communicator* para_,profiler* timer_);
 	virtual void read() = 0;
 	std::unique_ptr<hittable_list> return_world();
 	std::unique_ptr<material_list> return_mtl_list();
 
 protected:
+	profiler* timer;
 	std::string file_path;
 	communicator* para = nullptr;
 	Logger* error = nullptr;

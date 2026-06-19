@@ -75,6 +75,9 @@ factory::factory(int argc, char** argv, int mode_,
 		timers.push_back(std::make_unique<profiler>(para.get(), error));
 	}
 	render_profiler = renderer_factory::create_profiler(para.get(), error, timer);
+	//do we do profiling
+	if (nProfiling > 1)
+		error->reset_mode(print_mode::PROFILING);
 
 	// getting the renderer setting to check if we need to shut down the logger or not
 	settings* rend_settings = (*stngs)["renderer"];
@@ -156,6 +159,8 @@ factory::factory(std::vector<std::string> argv_vec, int mode_,
 	{
 		timers.push_back(std::make_unique<profiler>(para.get(), error));
 	}
+	if (nProfiling > 1)
+		error->reset_mode(print_mode::PROFILING);
 
 	settings* rend_settings = (*stngs)["renderer"];
 	renderer_settings* rend_conv = dynamic_cast<renderer_settings*>(rend_settings);

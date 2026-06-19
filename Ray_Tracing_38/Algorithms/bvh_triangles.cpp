@@ -40,8 +40,8 @@ bvh_triangles::bvh_triangles(
 	non_triangles_bvh = std::make_unique<bvh_node>(timer,std::move(non_triangles));
 
 
-	timer->stop_event(" triangle bvh creation");
 
+	timer->stop_event(" triangle bvh creation");
 }
 
 bvh_triangles::~bvh_triangles()
@@ -204,17 +204,19 @@ void bvh_triangles::set_left_right(
 	else {
 		size_t mid;
 
-		list->sort_range(start_, end_);
+		
 
 		switch (split_mode)
 		{
 		case BVH_Split_Method::MEDIAN:
 		{
+			list->sort_range(start_, end_);
 			mid = start_ + object_span / 2;
 			break;
 		}
 		case BVH_Split_Method::SAH_SIMPLE:
 		{
+			list->sort_range(start_, end_);
 			std::vector<aabb>& list_boxes_ref = list->return_bboxes_ref();
 			int len = end_ - start_;
 

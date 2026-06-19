@@ -34,39 +34,33 @@ void profiler::stop_event(const std::string event_name_)
 }
 
 
-std::string profiler::start_thread_event(const std::string event_name_)
+profiler* profiler::start_thread_event(const std::string& event_name_)
 {
     // since memory allocation has some overhead I put this outside the lock
     std::unique_ptr<profiler> thread_profiler = std::make_unique<profiler>(para, error);
+    profiler* thread = thread_profiler.get();
     std::string thread_name;
     {
         // I do not want two threads at the same time inquire the
         // thread_profilers otherwise both would have the same name!
+        // Also std::map is not thread safe so I avoid accessing it through multiple threads
         std::lock_guard<std::mutex> lk(mtx);
         int n_threads = thread_profilers.size();
         thread_name = std::to_string(n_threads);
         thread_profilers[thread_name] = std::move(thread_profiler);
     }
-    thread_profilers[thread_name]->start_event(event_name_);
-    return thread_name;
+    thread->start_event(event_name_);
+    return thread;
 }
 
-void profiler::start_thread_event(const std::string thread_name_, const std::string event_name_)
+void profiler::start_thread_event(profiler* thread_, const std::string& event_name_)
 {
-    auto iter = thread_profilers.find(thread_name_);
-    if (iter == thread_profilers.end())
-        throw std::invalid_argument("The thread you are looking for is not there!");
-    auto& thread_profiler = iter->second;
-    thread_profiler->start_event(event_name_);
+    thread_->start_event(event_name_);
 }
 
-void profiler::stop_thread_event(const std::string thread_name_, const std::string event_name_)
+void profiler::stop_thread_event(profiler* thread_, const std::string& event_name_)
 {
-    auto iter = thread_profilers.find(thread_name_);
-    if (iter == thread_profilers.end())
-        throw std::invalid_argument("The thread you are looking for is not here!");
-    auto& thread_profiler = iter->second;
-    thread_profiler->stop_event(event_name_);
+    thread_->stop_event(event_name_);
 }
 
 
@@ -346,8 +340,8 @@ std::unique_ptr<profiler> profiler::average_multiple_profilers(std::vector<std::
     {
         program_duration_vec.push_back(profiler->program_duration_avg);
     }
-    timer->program_duration_min = *std::min(program_duration_vec.begin(), program_duration_vec.end());
-    timer->program_duration_max = *std::max(program_duration_vec.begin(), program_duration_vec.end());
+    timer->program_duration_min = *std::min_element(program_duration_vec.begin(), program_duration_vec.end());
+    timer->program_duration_max = *std::max_element(program_duration_vec.begin(), program_duration_vec.end());
     timer->program_duration_avg = std::accumulate(
         program_duration_vec.begin(),
         program_duration_vec.end(),

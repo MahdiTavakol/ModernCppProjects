@@ -4,6 +4,8 @@
 #include "../Output/profiler.h"
 #include <memory>
 #include <vector>
+#include <functional>
+
 
 enum class Node_Type {
 	ROOT,
@@ -81,8 +83,6 @@ protected:
 	inline static std::vector<triangle_struct> triangles;
 
 
-	// left and right nodes
-	//std::unique_ptr<bvh_triangles> left_bvh, right_bvh;
 
 	// the normal bvh_node for non_triangles objects
 	std::unique_ptr<hittable> non_triangles_bvh;

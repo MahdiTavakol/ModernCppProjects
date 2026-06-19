@@ -568,7 +568,7 @@ void scene_factory::setup_3d_obj_parallel()
 void scene_factory::setup_gltf()
 {
 	std::unique_ptr<gltf_reader> model_reader =
-		std::make_unique<gltf_reader>(gltf_file_name, error, para);
+		std::make_unique<gltf_reader>(gltf_file_name, error, para, timer);
 	model_reader->read();
 	world = model_reader->return_world();
 	list = model_reader->return_mtl_list();

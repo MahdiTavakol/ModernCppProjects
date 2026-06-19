@@ -9,6 +9,9 @@ void settings::parse_commands()
 		std::string text;
 
 		while (iss >> text) {
+			// getting ride of comments
+			if (text[0] == '#')
+				break;
 			inputSet.insert(text);
 			auto iter = singleInputMap.find(text);
 			auto iter2 = doubleInputMap.find(text);

@@ -84,13 +84,13 @@ void renderer_async::render_thread(
 		if (!img_thread || !wrt_thread)
 			break;
 
-		std::string myName = timer->start_thread_event("rendering-thread");
+		profiler* thread_profiler = timer->start_thread_event("rendering-thread");
 		cam_->render(img_thread.get(), *world, *mtls);
-		timer->stop_thread_event(myName,"rendering-thread");
-		timer->start_thread_event(myName, "output-thread");
+		timer->stop_thread_event(thread_profiler,"rendering-thread");
+		timer->start_thread_event(thread_profiler, "output-thread");
 		wrt_thread->open_file();
 		wrt_thread->write_file(img_thread.get(), npos_);
-		timer->stop_thread_event(myName, "output-thread");
+		timer->stop_thread_event(thread_profiler, "output-thread");
 	}
 }
 

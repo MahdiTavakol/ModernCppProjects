@@ -32,6 +32,16 @@ triangle_list::triangle_list(std::unique_ptr<hittable_list> list_) :
 	}
 }
 
+triangle_list::triangle_list(std::vector<std::unique_ptr<hittable>>& item_list_) :
+	triangles{}, bboxes{},
+	non_triangles{ std::make_unique<hittable_list>() }
+{
+	for (auto& item : item_list_)
+	{
+		this->add(std::move(item));
+	}
+}
+
 size_t triangle_list::size() const
 {
 	if (triangles.size() != bboxes.size())
@@ -75,8 +85,7 @@ void triangle_list::sort_range(size_t& start_, size_t& end_)
 	}
 
 	// putting the sorted arrays back
-	auto sorted_boxes_begin = sorted_boxes.begin();
-	auto sorted_triangles_begin = sorted_triangles.begin();
+
 	std::copy(sorted_boxes.begin(), sorted_boxes.end(), &bboxes[start_]);
 	std::copy(sorted_triangles.begin(), sorted_triangles.end(), &triangles[start_]);
 }

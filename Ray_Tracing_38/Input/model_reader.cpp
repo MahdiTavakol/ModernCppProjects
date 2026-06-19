@@ -2,8 +2,9 @@
 #include <fstream>
 #include <filesystem>
 
-model_reader::model_reader(std::string file_path_, Logger* error_, communicator* para_)
+model_reader::model_reader(std::string file_path_, Logger* error_, communicator* para_, profiler* timer_)
 	: 
+	timer{timer_},
 	file_path{file_path_},
 	error{error_},
 	para{ para_ },

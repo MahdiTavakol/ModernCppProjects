@@ -62,7 +62,7 @@ protected:
 
 	// see if there is profiling
 	std::string profiling_str = "OFF";
-	Profiling_mode profiling_mode = Profiling_mode::ON;
+	Profiling_mode profiling_mode = Profiling_mode::OFF;
 	int nProfiling = 1;
 
 	// parameters for the static mode

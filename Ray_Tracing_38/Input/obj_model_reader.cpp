@@ -8,7 +8,7 @@ obj_model_reader::obj_model_reader(
 	std::string obj_file_name_,
 	Logger* error_,
     communicator* para_) :
-	model_reader{ obj_file_name_,error_, para_ },
+	model_reader{ obj_file_name_,error_, para_,nullptr },
 	obj_file_name{file_path}
 
 {
@@ -26,7 +26,7 @@ obj_model_reader::obj_model_reader(std::string _obj_file_name,
 	std::string _mtl_file_name,
 	Logger* error_,
 	communicator* _para) :
-	model_reader{ _obj_file_name,error_, _para }, 
+	model_reader{ _obj_file_name,error_, _para,nullptr }, 
 	obj_file_name{file_path},
 	mtl_file_name{_mtl_file_name}
 {
@@ -42,7 +42,7 @@ obj_model_reader::obj_model_reader(
 	std::unique_ptr<std::iostream> _mtl_file_ptr,
 	Logger* error_,
 	communicator* _para):
-	model_reader{ "",error_, _para },
+	model_reader{ "",error_, _para, nullptr},
 	obj_file_name{file_path},
 	mtl_file_name{},
 	obj_file_ptr{ std::move(_obj_file_ptr) },

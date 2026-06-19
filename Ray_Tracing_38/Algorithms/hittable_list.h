@@ -22,6 +22,7 @@ public:
 	hittable_list() : hittable{ "hittable_list" } {}
 	hittable_list(std::unique_ptr<hittable> object);
 	hittable_list(std::unique_ptr<hittable>& object);
+	hittable_list(std::vector<std::unique_ptr<hittable>>& item_list_);
 
 	virtual void clear();
 

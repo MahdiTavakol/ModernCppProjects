@@ -1,4 +1,5 @@
 #include "bvh.h"
+#include "../Geometry/quad.h"
 
 bvh_node::bvh_node(
 	profiler* timer_,
@@ -47,61 +48,78 @@ bvh_node::bvh_node(profiler* timer_, std::vector<std::unique_ptr<hittable>>& obj
 	else {
 		int axis = bbox.longest_axis();
 		auto comparator = (axis == 0) ? box_x_compare : (axis == 1) ? box_y_compare : box_z_compare;
-		std::sort(std::begin(objects) + start, std::begin(objects) + end, comparator);
+		
 
 
 		switch (split_mode)
 		{
+		case BVH_Split_Method::MIDDLE:
+			{
+				double mid = bbox.axis_interval(axis).mid();
+				auto leftObjects = std::make_unique<hittable_list>();
+				auto rightObjects = std::make_unique<hittable_list>();
+				for (auto& obj : objects)
+				{
+					if (obj->bounding_box().axis_interval(axis).mid() < mid)
+						leftObjects->add(std::move(obj));
+					else
+						rightObjects->add(std::move(obj));
+				}
+				left = std::make_unique<bvh_node>(timer, std::move(rightObjects));
+				right = std::make_unique<bvh_node>(timer, std::move(leftObjects));
+			}
+			break;
+
 		case BVH_Split_Method::MEDIAN:
 			{
-			auto mid = start + object_span / 2;
+				std::sort(std::begin(objects) + start, std::begin(objects) + end, comparator);
+				auto mid = start + object_span / 2;
+				left = std::make_unique<bvh_node>(timer, objects, start, mid);
+				right = std::make_unique<bvh_node>(timer, objects, mid, end);
+			}
+			break;
+		case BVH_Split_Method::SAH_SIMPLE:
+			std::sort(std::begin(objects) + start, std::begin(objects) + end, comparator);
+			int len = end - start;
+
+			std::vector<aabb> left_boxes(len);
+			std::vector<aabb> right_boxes(len);
+
+			aabb bbox_left = aabb::empty;
+			aabb bbox_right = aabb::empty;
+
+			left_boxes[0] = bbox_left;
+
+			// the left does not include the divider element
+			// while right includes that element.
+
+			for (int i = 1; i < len; i++)
+			{
+				bbox_left = aabb(bbox_left, objects[start + i - 1]->bounding_box());
+				left_boxes[i] = bbox_left;
+			}
+
+			for (int i = len-1; i >= 0; i--)
+			{
+				bbox_right = aabb(bbox_right, objects[start + i]->bounding_box());
+				right_boxes[i] = bbox_right;
+			}
+
+			std::vector<double> Cfactors(len);
+			// splits with at least one element on each side
+			for (int i = 1; i < len; i++)
+			{
+				const aabb& left = left_boxes[i];
+				const aabb& right = right_boxes[i];
+				double left_area = left.surface_area();
+				double right_area = right.surface_area();
+				Cfactors[i] = i * left_area + (len - i) * right_area;
+			}
+			auto min_iter = std::min_element(Cfactors.begin()+1, Cfactors.end());
+			int mid = std::distance(Cfactors.begin(), min_iter) + start;
 			left = std::make_unique<bvh_node>(timer,objects, start, mid);
 			right = std::make_unique<bvh_node>(timer,objects, mid, end);
 			break;
-			}
-			case BVH_Split_Method::SAH_SIMPLE:
-			{
-				int len = end - start;
-
-				std::vector<aabb> left_boxes(len);
-				std::vector<aabb> right_boxes(len);
-
-				aabb bbox_left = aabb::empty;
-				aabb bbox_right = aabb::empty;
-
-				left_boxes[0] = bbox_left;
-
-				// the left does not include the divider element
-				// while right includes that element.
-
-				for (int i = 1; i < len; i++)
-				{
-					bbox_left = aabb(bbox_left, objects[start + i - 1]->bounding_box());
-					left_boxes[i] = bbox_left;
-				}
-
-				for (int i = len-1; i >= 0; i--)
-				{
-					bbox_right = aabb(bbox_right, objects[start + i]->bounding_box());
-					right_boxes[i] = bbox_right;
-				}
-
-				std::vector<double> Cfactors(len);
-				// splits with at least one element on each side
-				for (int i = 1; i < len; i++)
-				{
-					const aabb& left = left_boxes[i];
-					const aabb& right = right_boxes[i];
-					double left_area = left.surface_area();
-					double right_area = right.surface_area();
-					Cfactors[i] = i * left_area + (len - i) * right_area;
-				}
-				auto min_iter = std::min_element(Cfactors.begin()+1, Cfactors.end());
-				int mid = std::distance(Cfactors.begin(), min_iter) + start;
-				left = std::make_unique<bvh_node>(timer,objects, start, mid);
-				right = std::make_unique<bvh_node>(timer,objects, mid, end);
-				break;
-			}
 		}
 
 	}

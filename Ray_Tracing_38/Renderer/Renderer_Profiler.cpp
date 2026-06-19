@@ -10,15 +10,15 @@ renderer_profiler::renderer_profiler(
 	bool verbose_) :
 	renderer{ para_,error_,timer_,std::move(pth_),info_,verbose_ }
 {
-	// supressing all the printings in the logger function
-	error->reset_mode(print_mode::PROFILING);
-	error->print_message(std::string(print_len, '='), msg_level);
-	error->print_message("Starting the profiler", msg_level);
-	error->print_message(std::string(print_len, '='), msg_level);
 }
 
 renderer_profiler::~renderer_profiler()
 {}
+
+void renderer_profiler::print_opening_message() const
+{
+
+}
 
 void renderer_profiler::setup(hittable_list* world_, material_list* mtls_)
 {
@@ -40,6 +40,7 @@ void renderer_profiler::render(image* img_, camera* cam_, output* writer_)
 	for (auto& tmr : timers)
 	{
 		int event_number = static_cast<int>(&tmr - timers.data());
+		error->print_message(std::string(print_len, '-'), msg_level);
 		error->print_message("Profiling event " + std::to_string(event_number), msg_level);
 		error->print_message(std::string(print_len, '.'), msg_level);
 		error->print_message("\tBuilding resources", msg_level);
@@ -80,7 +81,9 @@ void renderer_profiler::render(image* img_, camera* cam_, output* writer_)
 		// stopping the program counter
 		tmr->stop_program_counter();
 	}
+	error->print_message(std::string(print_len, '='),msg_level);
 	error->print_message("Finished profiling", msg_level);
+	error->print_message(std::string(print_len, '.'), msg_level);
 }
 
 void renderer_profiler::write_file(output* writer_, image* img_)
@@ -90,6 +93,9 @@ void renderer_profiler::write_file(output* writer_, image* img_)
 
 void renderer_profiler::print_timing_info()
 {
+	error->print_message(std::string(print_len, '.'), msg_level);
+	error->print_message("Timing information", msg_level);
+	error->print_message(std::string(print_len, '='), msg_level);
 	// the average timer
 	std::unique_ptr<profiler> timer_avg = profiler::average_multiple_profilers(timers);
 	timer_avg->print_timing_info(print_len);

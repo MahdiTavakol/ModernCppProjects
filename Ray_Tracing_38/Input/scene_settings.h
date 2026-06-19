@@ -64,7 +64,7 @@ protected:
 	std::string mode_string;
 	std::string bvh_type_str = "NORMAL";
 	std::string bvh_mode_str = "MEDIAN";
-	int bvh_threads;
+	int bvh_threads = 1;
 	std::string obj_file_name = "";
 	std::string mtl_file_name = "";
 	std::string gltf_file_name = "";

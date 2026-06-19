@@ -50,6 +50,7 @@ void renderer_facade::setup()
 		builder->create();
 		// returning each object
 		rend = builder->return_renderer();
+		rend->print_opening_message();
 		cam = builder->return_camera();
 		para = builder->return_comm();
 		writer = builder->return_writer();
@@ -67,6 +68,7 @@ void renderer_facade::setup()
 		ptr->argv_vec = &argv_vec;
 		ptr->mode = mode;
 		ptr->comm = comm;
+		rend->print_opening_message();
 		rend->set_resource_pointers(std::move(timers), ptr);
 	}
 }

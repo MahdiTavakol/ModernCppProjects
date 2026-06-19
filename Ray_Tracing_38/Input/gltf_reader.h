@@ -4,6 +4,7 @@
 #include "../Materials/PBR.h"
 #include "tiny_gltf_v3.h"
 #include "../Algorithms/communicator.h"
+#include "../Output/profiler.h"
 #include "model_reader.h"
 #include <string>
 #include <vector>
@@ -25,21 +26,56 @@ struct primitive_struct
 	std::array<std::vector<vec2>, MAX_COORD> vts_array_vector;
 };
 
+// async running parameters
+// 8 for now
+struct async_parameters {
+	const int async_threads;
+	std::atomic<int> next_item;
+	const int items_per_thread;
+	const int item_low;
+	const int item_high;
+
+	async_parameters(
+		int async_threads_,
+		int item_low_,
+		int item_high_,
+		int items_per_thread_ = 1) :
+		async_threads{ async_threads },
+		next_item{item_low_},
+		item_low{ item_low_ },
+		item_high{ item_high_ },
+		items_per_thread{items_per_thread_}
+	{}
+};
+
+
+enum GLTF_Reader_Mode
+{
+	ASYNC,
+	SERIAL
+};
 
 class gltf_reader: public model_reader {
 public:
-	gltf_reader(const std::string& file_path,Logger* error_, communicator* para_);
+	gltf_reader(
+		const std::string& file_path,
+		Logger* error_,
+		communicator* para_,
+		profiler* timer_);
 	~gltf_reader();
 	void read() override;
 
 
 protected:
+	GLTF_Reader_Mode reader_mode = GLTF_Reader_Mode::ASYNC;
 	// temp variable for the number of materials for now!
 	int material_num = 0;
 	// the min and max of the simulation box
 	vec3 min, max;
 
 
+	/// async running
+	int async_threads = 8;
 
 
 	// data
@@ -60,12 +96,18 @@ protected:
 	void read_samplers();
 	// loading images from the gltf
 	void load_images();
+	// loading image in a async way
+	void load_image_async(async_parameters& params_);
 	// printing the image to file just for debuggin purposes
 	void print_image(tg3_image_result* image_, std::string file_name_);
 	// just for debugging purposes
 	static vec3 image_average_color(tg3_image_result* image_);
 	// adding items to the world
 	virtual void add_item(const int& _low, const int& _hi) override;
+	// the async version of the add_item function
+	virtual void add_item_async(async_parameters& params_, std::vector<std::unique_ptr<hittable>>& triangles_);
+	// serial version of the add_items to be used either by one thread or in the serial version
+	void add_items_range(std::vector<std::unique_ptr<hittable>>& triangles_, const int& first_item_, const int& last_item_);
 
 
 

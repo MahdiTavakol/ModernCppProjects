@@ -14,6 +14,7 @@ public:
 		std::string info_ = "",
 		bool verbose_ = false);
 	virtual ~renderer_profiler() override;
+	virtual void print_opening_message() const override;
 	void setup(hittable_list* world_, material_list* mtls_) override;
 	void set_resource_pointers(
 		std::vector<std::unique_ptr<profiler>>&& timers_,
@@ -23,7 +24,7 @@ public:
 	void print_timing_info() override;
 
 protected:
-	size_t print_len = 72;
+	size_t print_len = 82;
 	std::vector<std::unique_ptr<profiler>> timers;
 	renderer_facade_inputs* ptrs;
 	int nProfilings = 10;

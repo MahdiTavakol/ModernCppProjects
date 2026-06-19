@@ -31,6 +31,7 @@ public:
 		std::string info_ = "", 
 		bool verbose_ = false);
 	virtual ~renderer();
+	virtual void print_opening_message() const {}
 	virtual void setup(hittable_list* world_, material_list* mtls_);
 	virtual void set_resource_pointers(
 		std::vector<std::unique_ptr<profiler>>&& timers_,

@@ -12,6 +12,16 @@ hittable_list::hittable_list(std::unique_ptr<hittable>& object):
 	add(std::move(object)); 
 }
 
+
+hittable_list::hittable_list(std::vector<std::unique_ptr<hittable>>& item_list_) :
+	hittable{ "hittable_list" }
+{
+	for (auto& item : item_list_)
+	{
+		add(std::move(item));
+	}
+}
+
 bool hittable_list::hit(const ray& r, interval ray_t, hit_record& rec) const 
 {
 	hit_record temp_rec;

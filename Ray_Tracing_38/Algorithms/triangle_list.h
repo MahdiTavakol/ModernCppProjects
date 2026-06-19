@@ -25,6 +25,7 @@ public:
 	triangle_list(std::unique_ptr<hittable> object);
 	triangle_list(std::unique_ptr<hittable>& object);
 	triangle_list(std::unique_ptr<hittable_list> list);
+	triangle_list(std::vector<std::unique_ptr<hittable>>& item_list_);
 
 	virtual void clear() override;
 

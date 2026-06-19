@@ -15,10 +15,12 @@ public:
 	void set_textures(const tg3_texture* textures_, const int& texture_count_);
 	void set_samplers(const tg3_sampler* samplers_, const int& sampler_count_);
 	void set_images(Logger* error_, const tg3_model* model_);
+	void set_image(Logger* error_, const tg3_model* model_, const int image_id_);
 	void release_images();
 	tg3_texture* texture_i(size_t i_) { return &textures[i_]; }
 	tg3_image_result* image_i(size_t i_) { return &images[i_]; }
 	tg3_sampler* sampler_i(size_t i_) { return &samplers[i_]; }
+	void resize_images(const int new_size_) { images.resize(new_size_); }
 
 //private:
 	Logger* error;

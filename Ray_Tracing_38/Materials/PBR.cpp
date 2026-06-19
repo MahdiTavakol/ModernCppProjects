@@ -118,6 +118,80 @@ void PBR_Resources::set_images(Logger* error_, const tg3_model* model_)
 }
 
 
+
+void PBR_Resources::set_image(Logger* error_, const tg3_model* model_, const int image_id_)
+{
+	const tg3_image* input_images = model_->images;
+	const tg3_image* image_i = &input_images[image_id_];
+	tg3_image_result& loaded_image_i = images[image_id_];
+	if (image_i->buffer_view && image_i->uri.data)
+	{
+		throw std::invalid_argument("Both the buffer_view and uri cannot be specified for an image at the same time!");
+	}
+	if (image_i->uri.data)
+	{
+		throw std::invalid_argument("The uri option for image is not supported yet!");
+	}
+	else if (image_i->buffer_view)
+	{
+		const tg3_buffer_view& buffer_view_i = model_->buffer_views[image_i->buffer_view];
+		const tg3_buffer& buffer_i = model_->buffers[buffer_view_i.buffer];
+		const auto dataAddress = buffer_i.data.data + buffer_view_i.byte_offset;
+		int size = static_cast<int>(buffer_view_i.byte_length);
+
+		int w = 0, h = 0, comp = 0, req_comp = 0;
+
+		// decoding the image header
+		if (!stbi_info_from_memory(dataAddress, size, &w, &h, &comp))
+		{
+			throw std::invalid_argument("Unknown format!");
+		}
+
+		int bits = 8;
+
+		if (stbi_is_16_bit_from_memory(dataAddress, size))
+		{
+			bits = 16;
+		}
+
+
+		unsigned char* data = nullptr;
+		if (bits == 16)
+		{
+			data = reinterpret_cast<unsigned char*>(
+				stbi_load_16_from_memory(dataAddress, size, &w, &h, &comp, req_comp));
+		}
+		// load as 8 bit per channel
+		if (!data)
+		{
+			data = stbi_load_from_memory(dataAddress, size, &w, &h, &comp, req_comp);
+			if (!data)
+			{
+				throw std::invalid_argument("The stb cannot convert the image!");
+			}
+			bits = 8;
+		}
+
+		if ((w < 1) || (h < 1))
+		{
+			throw std::invalid_argument("Wrong image format");
+		}
+
+		loaded_image_i.width = w;
+		loaded_image_i.height = h;
+		loaded_image_i.component = comp;
+		loaded_image_i.bits = bits;
+
+		// allocating data
+		int num_elements = w * h * comp * static_cast<int>(bits / 8);
+		loaded_image_i.pixels = new uint8_t[num_elements];
+		std::copy(data, data + num_elements, loaded_image_i.pixels);
+
+		//cleaning up the data
+		stbi_image_free(data);
+	}
+}
+
 void PBR_Resources::release_images()
 {
 	for (tg3_image_result& image_i : images)

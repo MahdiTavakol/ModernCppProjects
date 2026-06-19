@@ -66,9 +66,9 @@ public:
 	void start_event(const std::string event_name_);
 	void stop_event(const std::string event_name_);
 	// since these functions are called by a thread I would use passing by copy rather than through reference
-	std::string start_thread_event(const std::string event_name_);
-	void start_thread_event(const std::string thread_name_, const std::string event_name_);
-	void stop_thread_event(const std::string thread_name_, const std::string event_name_);
+	profiler* start_thread_event(const std::string& event_name_);
+	void start_thread_event(profiler* thread_, const std::string& event_name_);
+	void stop_thread_event(profiler* thread_, const std::string& event_name_);
 
 
 	void return_event_duration(const std::string event_name_, std::vector<Duration>& durations_);

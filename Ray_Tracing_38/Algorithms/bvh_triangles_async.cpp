@@ -9,6 +9,8 @@ bvh_triangles_async::bvh_triangles_async(
 	bvh_triangles{timer_}
 {
 	timer_->start_event(" bvh tri_async creation");
+	// setting the node as the root node
+	type = Node_Type::ROOT;
 	// number of levels
 	size_t num_levels = log2(list_->size()) + 1;
 	// the size of boxes array
@@ -62,6 +64,7 @@ bvh_triangles_async::bvh_triangles_async(
 	bvh_triangles{timer_},
 	bvh_state{bvh_state_}
 {
+	type = Node_Type::INTERNAL;
 	set_left_right(
 		start_, end_,
 		indx_,
@@ -78,7 +81,9 @@ bvh_triangles_async::bvh_triangles_async(
 	Node_Type type):
 	bvh_triangles{timer_,box_indx_,triangle_indx_,bbox_,type},
 	bvh_state{nullptr}
-{}
+{
+	type = Node_Type::LEAF;
+}
 
 bvh_triangles_async::~bvh_triangles_async()
 {
@@ -120,9 +125,6 @@ void bvh_triangles_async::set_internal_left_right(
 
 	if (parallel == true)
 	{
-		// it is possible that after reading the running_threads
-		// another thread decreases its values but it does not matter
-		// since it still be lower than num_threads
 		right = std::move(right_ftr.get());
 		bvh_state->running_threads--;
 	}
@@ -148,8 +150,9 @@ std::unique_ptr<bvh_triangles_async> bvh_triangles_async::build_node_async(
 	std::shared_ptr<bvh_running_state> bvh_state,
 	BVH_Split_Method split_method_)
 {
-	std::string myName = timer_->start_thread_event("  bvh tri_async thread");
-	return std::unique_ptr<bvh_triangles_async>(
+	profiler* thread_profiler = timer_->start_thread_event("  bvh tri_async thread");
+	std::unique_ptr<bvh_triangles_async> output = 
+		std::unique_ptr<bvh_triangles_async>(
 		new bvh_triangles_async(
 			timer_,
 			start_, end_,
@@ -157,7 +160,8 @@ std::unique_ptr<bvh_triangles_async> bvh_triangles_async::build_node_async(
 			level_,
 			bvh_state,
 			split_method_));
-	timer_->stop_thread_event(myName, "  bvh tri_async thread");
+	timer_->stop_thread_event(thread_profiler, "  bvh tri_async thread");
+	return output;
 }
 
 bool bvh_triangles_async::try_acquire_thread()

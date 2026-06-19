@@ -1,14 +1,17 @@
 #include "gltf_reader.h"
 #include "../Geometry/triangle_mesh.h"
-#include "../Algorithms/bvh_triangles.h"
 #include "../Materials/PBR.h"
 
 #include <iostream>
 #include <sstream>
 #include <fstream>
 
-gltf_reader::gltf_reader(const std::string& file_path_,Logger* error_, communicator* para_) :
-	model_reader{file_path_,error_, para_}
+gltf_reader::gltf_reader(
+	const std::string& file_path_,
+	Logger* error_,
+	communicator* para_,
+	profiler* timer_) :
+	model_reader{file_path_,error_, para_,timer_}
 {
 	// creating the triangle_list 
 	tg3_parse_options_init(&opts);
@@ -38,6 +41,7 @@ void gltf_reader::read()
 	error->print_message(message, msg_level);
 	message = std::string(52, '=');
 	error->print_message(message, msg_level);
+	timer->start_event("  parsing gltf file");
 
 	tg3_error_code err = tg3_parse_file(&model, &errors, file_path.c_str(), file_path.length(), &opts);
 	if (err != TG3_OK)
@@ -53,6 +57,8 @@ void gltf_reader::read()
 		throw std::runtime_error("Failed to parse the glTF file!");
 	}
 
+
+	timer->stop_event("  parsing gltf file");
 	message = std::string(52, '=');
 	error->print_message(message, msg_level);
 	message = "Finished reading the glTF file.";
@@ -81,18 +87,31 @@ void gltf_reader::read()
 	error->print_message(message, msg_level);
 
 	// reading the scene 0
+	timer->start_event("  reading the scene 0");
 	read_scene();
+	timer->stop_event("  reading the scene 0");
 	/* materials are read after textures, samplers and images
 	 * since this information is required for the materials initiation!
 	 */
+	timer->start_event("  reading textures");
 	read_textures();
+	timer->stop_event("  reading textures");
+	timer->start_event("  reading samplers");
 	read_samplers();
+	timer->stop_event("  reading samplers");
+	timer->start_event("  reading images");
 	load_images();
+	timer->stop_event("  reading images");
+	timer->start_event("  reading materials");
 	read_materials();
+	timer->stop_event("  reading materials");
 
 	int low = 0;
 	int high = static_cast<int>(primitives.size() - 1);
+
+	timer->start_event("  adding items");
 	add_item(low, high);
+	timer->stop_event("  adding items");
 
 }
 
@@ -840,6 +859,7 @@ void gltf_reader::read_mesh(size_t mesh_id_, Matrix4d transform_)
 	error->print_message(message, msg_level);
 	message = "The number of faces is " + std::to_string(face_count_i);
 	error->print_message(message, msg_level + 1);
+	error->print_message(message, msg_level + 1);
 	message = "The number of vertices is " + std::to_string(v_count_i);
 	error->print_message(message, msg_level + 1);
 	message = "The number of texture coordinates is " + std::to_string(vt_count_i);
@@ -910,8 +930,35 @@ void gltf_reader::load_images()
 	error->print_message(message, msg_level);
 	message = std::string(52, '=');
 	error->print_message(message, msg_level);
+	
+	if (reader_mode == GLTF_Reader_Mode::SERIAL)
+	{
+		pbr_resources->set_images(error, &model);
+	}
+	else if (reader_mode == GLTF_Reader_Mode::ASYNC)
+	{
+		async_parameters image_async_params(async_threads, 0, model.images_count);
+		// allocating space for images
+		int async_threads = image_async_params.async_threads;
+		std::vector<std::thread> thread_pool;
+		thread_pool.reserve(async_threads);
+		for (int i = 0; i < async_threads;i++)
+		{
+			thread_pool.emplace_back(
+				&gltf_reader::load_image_async,
+				this,
+				image_async_params);
+		}
 
-	pbr_resources->set_images(error, &model);
+		for (auto& thread : thread_pool)
+		{
+			if (thread.joinable())
+				thread.join();
+		}
+	}
+	
+
+	
 
 	msg_level = 0;
 	message = std::string(52, '=');
@@ -920,6 +967,22 @@ void gltf_reader::load_images()
 	error->print_message(message, msg_level);
 	message = std::string(52, '=');
 	error->print_message(message, msg_level);
+}
+
+void gltf_reader::load_image_async(async_parameters& params_)
+{
+	profiler* thread_timer = timer->start_thread_event("  thread load image");
+	std::atomic<int>& next_image = params_.next_item;
+
+	while (true)
+	{
+		// acquires the next image
+		int current_image = next_image.fetch_add(1);
+		if (current_image >= params_.item_high)
+			break;
+		pbr_resources->set_image(error, &model, current_image);
+	}
+	timer->stop_thread_event(thread_timer, "  thread load image");
 }
 
 void gltf_reader::print_image(tg3_image_result* image_, std::string file_name_)
@@ -1001,15 +1064,93 @@ void gltf_reader::add_item(const int& _low, const int& _hi)
 	if (hi >= primitives.size())
 		hi = static_cast<int>(primitives.size());
 
+	
+
+	std::vector<std::unique_ptr<hittable>> triangles;
+	triangles.resize(hi - low);
 
 
+	if (reader_mode == GLTF_Reader_Mode::SERIAL)
+	{
+		add_items_range(triangles, low, hi);
+	}
+	else if (reader_mode == GLTF_Reader_Mode::ASYNC)
+	{
+		async_parameters items_async(async_threads, low, hi,1000);
 
-	int num_triangles = 0;
-	std::string current_group;
+		std::vector<std::thread> thread_pool;
+		thread_pool.resize(items_async.async_threads);
+
+		for (int i = 0; i < items_async.async_threads;i++)
+		{
+			thread_pool.emplace_back(
+				&gltf_reader::add_item_async,
+				this,
+				items_async,
+				triangles
+			);
+		}
+
+		for (auto& thread : thread_pool)
+		{
+			if (thread.joinable())
+				thread.join();
+		}
+	}
+
+	world = std::make_unique<hittable_list>(triangles);
+	// setting all the read objects as main label
+	world->add_label("main");
+
+
+	msg_level = 0;
+	message = std::string(52, '=');
+	error->print_message(message, msg_level);
+	message = "Finished adding objects to the hittable_list.";
+	error->print_message(message, msg_level);
+	message = "The total number of items in the hittable_list is "
+		+ std::to_string(world->size());
+	error->print_message(message, msg_level);
+	message = std::string(52, '=');
+	error->print_message(message, msg_level);
+}
+
+void gltf_reader::add_item_async(async_parameters& params_, std::vector<std::unique_ptr<hittable>>& triangles_)
+{
+	profiler* thread_timer = timer->start_thread_event("  thread add items");
+	std::atomic<int>& next_item = params_.next_item;
+	const int items_per_thread = params_.items_per_thread;
+
+
+	while (true)
+	{
+		// acquire the next item
+		int current_item = next_item.fetch_add(items_per_thread);
+		if (current_item >= params_.item_high)
+			break;
+
+		int first_item = current_item;
+		int last_item = current_item + items_per_thread;
+		last_item = last_item <= params_.item_high ? last_item : params_.item_high;
+
+		std::string current_group;
+		std::string current_obj;
+		int msg_level;
+		std::string message;
+
+		add_items_range(triangles_, first_item, last_item);
+		// adding primitives
+	}
+	timer->stop_thread_event(thread_timer, "  thread add items");
+
+}
+
+void gltf_reader::add_items_range(std::vector<std::unique_ptr<hittable>>& triangles_, const int& first_item_, const int& last_item_)
+{
+	int msg_level;
 	std::string current_obj;
-
-	// adding primitives
-	for (int i = _low; i < hi; i++)
+	std::string message;
+	for (int i = first_item_; i < last_item_; i++)
 	{
 		std::vector<vec3>& vs_ref = primitives[i].vs_vector;
 		std::vector<vec3>& vns_ref = primitives[i].vns_vector;
@@ -1037,7 +1178,8 @@ void gltf_reader::add_item(const int& _low, const int& _hi)
 			{
 				current_obj = object;
 				msg_level = 1;
-				error->print_message("Adding object " + object, msg_level);
+				if (async_threads == 1)
+					error->print_message("Adding object " + object, msg_level);
 			}
 
 			int num_edges = static_cast<int>(face.v_indx.size());
@@ -1047,10 +1189,6 @@ void gltf_reader::add_item(const int& _low, const int& _hi)
 				// adding edge j 
 				int indx_j = face.v_indx[j];
 
-				if (object == "Cube.005" && j == 2)
-				{
-					int stop_here = 0;
-				}
 
 				// bound checking for the indices
 				// as vts and vns are optional we check them only if they are mentioned in the face
@@ -1117,9 +1255,9 @@ void gltf_reader::add_item(const int& _low, const int& _hi)
 						std::to_string(face_level) +
 						" is negative,\ndespite flipping it!" +
 						std::to_string(trngle_area) +
-						"\n\t" + 
+						"\n\t" +
 						object + " " + group + " " +
-						std::to_string(face.v_indx[0]) + " " 
+						std::to_string(face.v_indx[0]) + " "
 						+ std::to_string(vs_i[0][0]) + " " + std::to_string(vs_i[0][1]) + " " + std::to_string(vs_i[0][2]) +
 						"\n\t" +
 						object + " " + group + " " + std::to_string(face.v_indx[1]) + " "
@@ -1133,23 +1271,8 @@ void gltf_reader::add_item(const int& _low, const int& _hi)
 			}
 			trngle->add_label(object);
 			trngle->add_label(group);
-			world->add(std::move(trngle));
+			triangles_[i] = std::move(trngle);
 
 		}
 	}
-
-	// setting all the read objects as main label
-	world->add_label("main");
-
-
-	msg_level = 0;
-	message = std::string(52, '=');
-	error->print_message(message, msg_level);
-	message = "Finished adding objects to the hittable_list.";
-	error->print_message(message, msg_level);
-	message = "The total number of items in the hittable_list is "
-		+ std::to_string(world->size());
-	error->print_message(message, msg_level);
-	message = std::string(52, '=');
-	error->print_message(message, msg_level);
 }
