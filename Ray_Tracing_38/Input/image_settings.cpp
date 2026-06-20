@@ -47,8 +47,11 @@ void image_settings::set_mode(int mode_)
 		this->image_width = 400;
 		this->width_ratio = 1.0;
 		this->height_ratio = 1.0;
+		break;
 	case FINAL_SCENE_DETAILED:
 		this->image_width = 800;
+		this->width_ratio = 1.0;
+		this->height_ratio = 1.0;
 		break;
 
 

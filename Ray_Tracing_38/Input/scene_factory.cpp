@@ -118,10 +118,6 @@ void scene_factory::create()
 		setup_simple_2d_parallel_test();
 		break;
 	case FINAL_SCENE:
-		event = "Creating the final scene";
-		timer->start_event(event);
-		setup_final_scene();
-		break;
 	case FINAL_SCENE_DETAILED:
 		event = "Creating the final scene";
 		timer->start_event(event);
@@ -689,10 +685,10 @@ void scene_factory::setup_final_scene()
 	hittable* boundary_address = boundary.get();
 	world->add(std::move(boundary));
 
-	auto fog_1_mat = std::make_unique<lambertian>(error, color(0.2, 0.4, 0.9));
+	auto fog_1_mat = std::make_unique<isotropic>(error, color(0.2, 0.4, 0.9));
 	int fog_1_mat_indx = list->push_back("fog_1_material", std::move(fog_1_mat));
-	auto fog_1 = std::make_unique<constant_medium>(boundary_address, 0.2, fog_1_mat_indx);
-	world->add(std::move(fog_1));
+	auto fog_1 = std::make_unique<constant_medium>(std::move(boundary), 0.2, fog_1_mat_indx);
+	//world->add(std::move(fog_1));
 
 	auto boundary2_material = std::make_unique<dielectric>(error, 1.5);
 	int boundary2_mat_indx = list->push_back("Boundary2_mat", std::move(boundary2_material));
@@ -700,9 +696,7 @@ void scene_factory::setup_final_scene()
 	auto boundary2 = std::make_unique<sphere>(point3(0, 0, 0), 5000, boundary2_mat_indx);
 	hittable* boundary2_address = boundary2.get();
 
-	// In the book, this large boundary is NOT added visibly to world,
-	// only used by constant_medium.
-	auto fog_2_mat = std::make_unique<lambertian>(error, color(1.0, 1.0, 1.0));
+	auto fog_2_mat = std::make_unique<isotropic>(error,color(1.0, 1.0, 1.0));
 	int fog_2_mat_indx = list->push_back("fog_2_material", std::move(fog_2_mat));
 
 	auto fog_2 = std::make_unique<constant_medium>(boundary2_address, 0.0001, fog_2_mat_indx);
@@ -710,13 +704,13 @@ void scene_factory::setup_final_scene()
 	// Important: boundary2 must stay alive.
 	// So either add boundary2 to world before fog_2:
 	world->add(std::move(boundary2));
-	world->add(std::move(fog_2));
+	//world->add(std::move(fog_2));
 
 	std::string earth_file_name;
 #ifdef _WIN32
 	earth_file_name = "..\\Shared\\earthmap.jpg";
 #else
-	earth_file_name = "../Shared/earthmap.jpg";
+	earth_file_name = "../../Shared/earthmap.jpg";
 #endif
 	auto emat = std::make_unique<lambertian>(error, std::make_unique<image_texture>(earth_file_name));
 	int emat_indx = list->push_back("earth_material", std::move(emat));

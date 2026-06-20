@@ -1,5 +1,5 @@
 mode FINAL_SCENE_DETAILED
 renderer -renderer_mode ASYNC -path_type NONE -max_threads 8
 scene -mode FINAL_SCENE_DETAILED
-image -width 360
+image -width 1080
 output -output_type ASYNC  -output_mode P6 -image_file Tests\\SampleOutputs\\test_28.ppm

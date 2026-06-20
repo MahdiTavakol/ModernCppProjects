@@ -92,6 +92,7 @@ void renderer_settings::set_mode(int mode_)
 		break;
 
 	case FINAL_SCENE:
+	case FINAL_SCENE_DETAILED:
 		this->location = point3{ 478,278,-600 };
 		break;
 
