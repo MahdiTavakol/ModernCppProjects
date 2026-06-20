@@ -28,7 +28,8 @@ struct TimingInfo {
 		maxDuration{ 0 },
 		nThreads{ n_ },
 		nProfilings{ 0 }
-	{}
+	{
+	}
 
 	TimingInfo(Duration myMinDuration_,
 		Duration myAvgDuration_,
@@ -41,7 +42,8 @@ struct TimingInfo {
 		maxDuration{ myMaxDuration_ },
 		nThreads{ myThreads_ },
 		nProfilings{ 0 }
-	{}
+	{
+	}
 
 
 	TimingInfo(Time myStart_) :

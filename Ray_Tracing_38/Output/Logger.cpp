@@ -1,4 +1,5 @@
 #include "Logger.h"
+#include <sstream>
 
 Logger::Logger():
 	strms{std::ref(std::cout)}
@@ -66,8 +67,34 @@ void Logger::print_error(const std::string message_) const
 
 void Logger::print_message(std::iostream& input_strm_) const
 {
+	constexpr int max_level = 5;
 	std::string line;
 
+	std::vector<std::stringstream> sorted_strm;
+	sorted_strm.resize(max_level);
+
+	while (std::getline(input_strm_, line))
+	{
+		size_t nspaces = line.find_first_not_of(' ');
+		if (nspaces < max_level)
+		{
+			sorted_strm[nspaces] << line << std::endl;
+		}
+	}
+
+	for (int i = 0; i < max_level; i++)
+	{
+		while (std::getline(sorted_strm[i], line))
+		{
+			for (auto& strm : strms)
+			{
+				strm.get() << line << std::endl;
+			}
+		}
+	}
+
+
+	/*
 	// printing the stream line by line
 	while (std::getline(input_strm_, line))
 	{
@@ -75,5 +102,5 @@ void Logger::print_message(std::iostream& input_strm_) const
 		{
 			strm.get() << line << std::endl;
 		}
-	}
+	}*/
 }

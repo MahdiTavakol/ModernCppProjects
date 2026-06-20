@@ -5,9 +5,9 @@
 
 constexpr double eps = 1e-6;
 
-profiler::profiler(communicator* para_, Logger* error_):
-	para{para_},error{error_},
-	program_start{std::chrono::steady_clock::now()}
+profiler::profiler(communicator* para_, Logger* error_) :
+    para{ para_ }, error{ error_ },
+    program_start{ std::chrono::steady_clock::now() }
 {
 }
 
@@ -18,13 +18,13 @@ void profiler::reset_program_timer()
 
 void profiler::start_event(const std::string event_name_)
 {
-	Time start = std::chrono::steady_clock::now();
+    Time start = std::chrono::steady_clock::now();
     timing_infos[event_name_] = TimingInfo{ start };
 }
 
 void profiler::stop_event(const std::string event_name_)
 {
-	Time end = std::chrono::steady_clock::now();
+    Time end = std::chrono::steady_clock::now();
     auto itr = timing_infos.find(event_name_);
     if (itr == timing_infos.end())
     {
@@ -170,12 +170,14 @@ void profiler::print_timing_info(size_t print_len_)
 
     // I use two differnt streams for duration and average values
     std::stringstream duration_strm;
+    std::stringstream last_dur_line;
     std::stringstream percent_strm;
+    std::stringstream last_pct_line;
 
     int name_width = static_cast<int>(0.31 * print_len_);
-    int dur_width = static_cast<int>(0.21*print_len_);
+    int dur_width = static_cast<int>(0.21 * print_len_);
     int pct_width = static_cast<int>(0.21 * print_len_);
-    int trd_width = print_len_ - name_width - 3*dur_width;
+    int trd_width = print_len_ - name_width - 3 * dur_width;
 
     int msg_level = 0;
 
@@ -194,7 +196,7 @@ void profiler::print_timing_info(size_t print_len_)
     percent_strm << std::string(print_len_, '.') << std::endl;
 
 
-  
+
 
 
     for (const auto& [event_name, timing] : timing_infos)
@@ -212,7 +214,7 @@ void profiler::print_timing_info(size_t print_len_)
         double pct_max = max_duration_ms * 100.0 / total_ms;
 
         int short_name_width = name_width - 2;
-        int name_rpts = (event_name.length()+ short_name_width -1) / short_name_width;
+        int name_rpts = (event_name.length() + short_name_width - 1) / short_name_width;
         std::string substr = event_name.substr(0, short_name_width);
         duration_strm << std::fixed << std::left << std::setw(name_width) << substr;
         percent_strm << std::fixed << std::left << std::setw(name_width) << substr;
@@ -220,28 +222,28 @@ void profiler::print_timing_info(size_t print_len_)
         {
             std::string substr = event_name.substr(i * short_name_width, short_name_width);
             duration_strm << std::endl << std::fixed << std::left << std::setw(name_width) << substr;
-            percent_strm << std::endl <<std::fixed << std::left << std::setw(name_width) << substr;
+            percent_strm << std::endl << std::fixed << std::left << std::setw(name_width) << substr;
         }
 
 
 
-       
+
         if (std::abs(max_duration_ms - min_duration_ms) <= eps) {
             duration_strm
-                << std::fixed << std::setw(3*dur_width)
+                << std::fixed << std::setw(3 * dur_width)
                 << center(avg_duration_ms, 3 * dur_width)
                 << std::fixed << std::left << std::setw(trd_width)
                 << nThreads << std::endl;
 
             percent_strm
-                << std::fixed << std::setw(3*pct_width)
+                << std::fixed << std::setw(3 * pct_width)
                 << center(pct_avg, 3 * pct_width)
                 << std::fixed << std::left << std::setw(trd_width)
                 << nThreads << std::endl;
         }
         else
         {
-            std::string avg_duration_string = center(avg_duration_ms,  dur_width);
+            std::string avg_duration_string = center(avg_duration_ms, dur_width);
             std::string avg_pct_string = center(pct_avg, pct_width);
             duration_strm
                 << center(min_duration_ms, dur_width)
@@ -251,36 +253,38 @@ void profiler::print_timing_info(size_t print_len_)
                 << nThreads << std::endl;
 
             percent_strm
-                << center(pct_min,pct_width)
-                << center(pct_avg,pct_width)
-                << center(pct_max,pct_width)
+                << center(pct_min, pct_width)
+                << center(pct_avg, pct_width)
+                << center(pct_max, pct_width)
                 << std::fixed << std::left << std::setw(trd_width)
                 << nThreads << std::endl;
         }
     }
 
-    duration_strm << std::string(print_len_, '-') << std::endl;
-    percent_strm << std::string(print_len_, '.') << std::endl;
+    last_dur_line << std::string(print_len_, '-') << std::endl;
+    last_pct_line << std::string(print_len_, '.') << std::endl;
     if (std::abs(program_duration_max.count() - program_duration_min.count()) < eps)
     {
-        percent_strm << "Program took "
-            <<  program_duration_avg
-            <<  std::endl;
+        last_pct_line << "Program took "
+            << program_duration_avg
+            << std::endl;
     }
     else
     {
-        percent_strm << "Program took "
+        last_pct_line << "Program took "
             << program_duration_min
             << "/" << program_duration_avg
             << "/" << program_duration_max
             << std::endl;
     }
-    percent_strm << std::string(print_len_, '=') << std::endl;
+    last_pct_line << std::string(print_len_, '=') << std::endl;
 
     error->print_message(duration_strm);
+    error->print_message(last_dur_line);
     error->print_message(percent_strm);
+    error->print_message(last_pct_line);
 
-   
+
 }
 
 std::unique_ptr<profiler> profiler::average_multiple_profilers(std::vector<std::unique_ptr<profiler>>& profiler_vec_)
@@ -297,7 +301,7 @@ std::unique_ptr<profiler> profiler::average_multiple_profilers(std::vector<std::
     }
 
     auto& event_map = timer->timing_infos;
-    
+
     for (auto& profiler : profiler_vec_)
     {
         for (auto& [event_name, timing_info] : profiler->timing_infos)
@@ -322,7 +326,7 @@ std::unique_ptr<profiler> profiler::average_multiple_profilers(std::vector<std::
             if (maxDuration > event.maxDuration)
                 event.maxDuration = maxDuration;
             event.avgDuration += sumDuration;
-            event.nThreads += nThreads;      
+            event.nThreads += nThreads;
         }
     }
 
@@ -371,4 +375,3 @@ std::string profiler::center(const T& val_, int width)
         + s
         + std::string(right, ' ');
 }
-

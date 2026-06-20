@@ -42,7 +42,7 @@ void gltf_reader::read()
 	error->print_message(message, msg_level);
 	message = std::string(52, '=');
 	error->print_message(message, msg_level);
-	timer->start_event("  parsing gltf file");
+	timer->start_event(" parsing gltf file");
 
 	tg3_error_code err = tg3_parse_file(&model, &errors, file_path.c_str(), file_path.length(), &opts);
 	if (err != TG3_OK)
@@ -59,7 +59,7 @@ void gltf_reader::read()
 	}
 
 
-	timer->stop_event("  parsing gltf file");
+	timer->stop_event(" parsing gltf file");
 	message = std::string(52, '=');
 	error->print_message(message, msg_level);
 	message = "Finished reading the glTF file.";
@@ -88,31 +88,31 @@ void gltf_reader::read()
 	error->print_message(message, msg_level);
 
 	// reading the scene 0
-	timer->start_event("  reading the scene 0");
+	timer->start_event(" reading the scene 0");
 	read_scene();
-	timer->stop_event("  reading the scene 0");
+	timer->stop_event(" reading the scene 0");
 	/* materials are read after textures, samplers and images
 	 * since this information is required for the materials initiation!
 	 */
-	timer->start_event("  reading textures");
+	timer->start_event(" reading textures");
 	read_textures();
-	timer->stop_event("  reading textures");
-	timer->start_event("  reading samplers");
+	timer->stop_event(" reading textures");
+	timer->start_event(" reading samplers");
 	read_samplers();
-	timer->stop_event("  reading samplers");
-	timer->start_event("  reading images");
+	timer->stop_event(" reading samplers");
+	timer->start_event(" reading images");
 	load_images();
-	timer->stop_event("  reading images");
-	timer->start_event("  reading materials");
+	timer->stop_event(" reading images");
+	timer->start_event(" reading materials");
 	read_materials();
-	timer->stop_event("  reading materials");
+	timer->stop_event(" reading materials");
 
 	int low = 0;
 	int high = static_cast<int>(primitives.size() - 1);
 
-	timer->start_event("  adding items");
+	timer->start_event(" adding items");
 	add_item(low, high);
-	timer->stop_event("  adding items");
+	timer->stop_event(" adding items");
 
 }
 

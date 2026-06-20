@@ -84,13 +84,13 @@ void renderer_async::render_thread(
 		if (!img_thread || !wrt_thread)
 			break;
 
-		profiler* thread_profiler = timer->start_thread_event("rendering-thread");
+		profiler* thread_profiler = timer->start_thread_event("  thread rendering");
 		cam_->render(img_thread.get(), *world, *mtls);
-		timer->stop_thread_event(thread_profiler,"rendering-thread");
-		timer->start_thread_event(thread_profiler, "output-thread");
+		timer->stop_thread_event(thread_profiler,"  thread rendering");
+		timer->start_thread_event(thread_profiler, "  thread output");
 		wrt_thread->open_file();
 		wrt_thread->write_file(img_thread.get(), npos_);
-		timer->stop_thread_event(thread_profiler, "output-thread");
+		timer->stop_thread_event(thread_profiler, "  thread output");
 	}
 }
 
