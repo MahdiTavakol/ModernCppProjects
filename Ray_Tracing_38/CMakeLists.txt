@@ -30,6 +30,9 @@ file(GLOB_RECURSE RAYTRACER_SOURCES
 # Exclude test, build and heavy external folders (e.g. eigen demos) from the sources
 list(FILTER RAYTRACER_SOURCES EXCLUDE REGEX "/(Tests|x64|Intel® VTune™ Profiler Results)/")
 list(FILTER RAYTRACER_SOURCES EXCLUDE REGEX "/external/eigen-master/")
+list(FILTER RAYTRACER_SOURCES EXCLUDE REGEX "/build/")
+list(FILTER RAYTRACER_SOURCES EXCLUDE REGEX "/CMakeFiles/")
+
 
 if(BUILD_TESTS)
     file(GLOB_RECURSE TEST_SOURCES
@@ -68,9 +71,13 @@ else()
         ${CMAKE_CURRENT_SOURCE_DIR}/Renderer
         ${CMAKE_CURRENT_SOURCE_DIR}/Shared
         ${CMAKE_CURRENT_SOURCE_DIR}/Types
-        ${CMAKE_CURRENT_SOURCE_DIR}/external
+        ${CMAKE_CURRENT_SOURCE_DIR}/external,
+        ${CMAKE_CURRENT_SOURCE_DIR}/../eigen-master
     )
 endif()
+
+
+
 
 find_package(MPI COMPONENTS CXX QUIET)
 if(MPI_CXX_FOUND)
