@@ -122,6 +122,11 @@ void scene_factory::create()
 		timer->start_event(event);
 		setup_final_scene();
 		break;
+	case FINAL_SCENE_DETAILED:
+		event = "Creating the final scene";
+		timer->start_event(event);
+		setup_final_scene();
+		break;
 
 
 
@@ -140,6 +145,8 @@ void scene_factory::create()
 		timer->start_event(event);
 		setup_gltf();
 		break;
+	default:
+		throw std::invalid_argument("Oops no scene has chosen!");
 	}
 
 	timer->stop_event(event);
@@ -878,7 +885,7 @@ void scene_factory::set_bvh()
 	world = std::make_unique<hittable_list>();
 	world->add(std::move(bvh));
 
-	msg = "Finished builing the bvh tree";
+	msg = "Finished building the bvh tree";
 	error->print_message(msg, msg_level);
 	msg = std::string(52, '=');
 	error->print_message(msg, msg_level);
