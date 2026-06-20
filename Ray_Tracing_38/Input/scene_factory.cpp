@@ -659,7 +659,7 @@ void scene_factory::setup_final_scene()
 	world->add(std::move(qad));
 
 	auto center1 = point3{ 400,400,200 };
-	auto center2 = center1 + vec3{ 300.0,0.0,0.0 };
+	auto center2 = center1 + vec3{ 30.0,0.0,0.0 };
 	auto sphere1_material = std::make_unique<lambertian>(error, color(0.7, 0.3, 0.1));
 	int sphere1_mat_indx = list->push_back("Sphere1_mat", std::move(sphere1_material));
 	auto sphr1 = std::make_unique<sphere>(center1, center2, 50.0, sphere1_mat_indx);
@@ -687,18 +687,46 @@ void scene_factory::setup_final_scene()
 	auto fog_1 = std::make_unique<constant_medium>(boundary_address, 0.2, fog_1_mat_indx);
 	world->add(std::move(fog_1));
 
+	auto boundary2_material = std::make_unique<dielectric>(error, 1.5);
+	int boundary2_mat_indx = list->push_back("Boundary2_mat", std::move(boundary2_material));
+
+	auto boundary2 = std::make_unique<sphere>(point3(0, 0, 0), 5000, boundary2_mat_indx);
+	hittable* boundary2_address = boundary2.get();
+
+	// In the book, this large boundary is NOT added visibly to world,
+	// only used by constant_medium.
 	auto fog_2_mat = std::make_unique<lambertian>(error, color(1.0, 1.0, 1.0));
 	int fog_2_mat_indx = list->push_back("fog_2_material", std::move(fog_2_mat));
-	auto fog_2 = std::make_unique<constant_medium>(boundary_address, 0.0001, fog_2_mat_indx);
+
+	auto fog_2 = std::make_unique<constant_medium>(boundary2_address, 0.0001, fog_2_mat_indx);
+
+	// Important: boundary2 must stay alive.
+	// So either add boundary2 to world before fog_2:
+	world->add(std::move(boundary2));
 	world->add(std::move(fog_2));
 
-
-	auto emat = std::make_unique<lambertian>(error, std::make_unique<image_texture>("earthmap.jpg"));
+	std::string earth_file_name;
+#ifdef _WIN32
+	earth_file_name = "..\\Shared\\earthmap.jpg";
+#else
+	earth_file_name = "../Shared/earthmap.jpg";
+#endif
+	auto emat = std::make_unique<lambertian>(error, std::make_unique<image_texture>(earth_file_name));
 	int emat_indx = list->push_back("earth_material", std::move(emat));
 	auto sphr4 = std::make_unique<sphere>(point3(400, 200, 400), 100, emat_indx);
 	world->add(std::move(sphr4));
 
+	auto pertext = std::make_unique<noise_texture>(0.2);
+	auto perlin_mat = std::make_unique<lambertian>(error, std::move(pertext));
+	int perlin_mat_indx = list->push_back("perlin_material", std::move(perlin_mat));
+
+	auto sphr5 = std::make_unique<sphere>(
+		point3(220, 280, 300), 80, perlin_mat_indx
+	);
+	world->add(std::move(sphr5));
+
 	std::unique_ptr<hittable_list> boxes2;
+	boxes2 = std::make_unique<hittable_list>();
 	auto white = std::make_unique<lambertian>(error, color(0.73, 0.73, 0.73));
 	int white_mat_indx = list->push_back("white_mat", std::move(white));
 	int ns = 1000;
@@ -712,7 +740,6 @@ void scene_factory::setup_final_scene()
 			std::make_unique<bvh_node>(timer,std::move(boxes2)), 15),
 		vec3(-100, 270, 395))
 	);
-
 
 }
 

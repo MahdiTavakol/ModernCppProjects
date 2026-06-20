@@ -43,6 +43,7 @@ public:
 	
 
 protected:
+	size_t print_len = 82;
 	std::string info = "";
 	bool verbose = false;
 	// shared resources of the program

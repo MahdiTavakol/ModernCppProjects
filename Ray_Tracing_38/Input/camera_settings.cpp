@@ -58,11 +58,13 @@ void camera_settings::set_mode(int mode_)
 	case FINAL_SCENE:
 		this->lookat = point3{ 278,278,0 };
 		this->vfov = 40;
-		this->samples_per_pixel = 250; // 10000
+		this->samples_per_pixel = 250;
 		this->max_depth = 4;
 		this->background = color{ 0,0,0 };
 		this->defocus_angle = 0.0;
 		this->vup = vec3{ 0,1,0 };
+	case FINAL_SCENE_DETAILED:
+		this->samples_per_pixel = 10000;
 		break;
 
 	case RANDOM_SPHERES_ANIMATED:

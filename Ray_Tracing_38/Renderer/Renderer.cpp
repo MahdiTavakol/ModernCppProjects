@@ -79,7 +79,7 @@ void renderer::write_file(output* writer_, image* img_)
 
 void renderer::print_timing_info()
 {
-	timer->print_timing_info();
+	timer->print_timing_info(print_len);
 }
 
 
