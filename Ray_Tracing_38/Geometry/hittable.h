@@ -44,6 +44,16 @@ public:
         return static_cast<size_t>(1);
     }
 
+
+    virtual double pdf_value(const point3& origin_, const vec3& direction_) const
+    {
+        return 0.0;
+    }
+
+    virtual vec3 random(const point3& origin_) const
+    {
+        return vec3{ 1,0,0 };
+    }
     
     virtual aabb bounding_box(std::string label_, bool& set_);
     virtual void add_label(std::string label_);

@@ -15,11 +15,13 @@ public:
 	scene_factory(settings* wld_settings, Logger* error_, communicator* para_, profiler* timer_);
 	void create();
 	std::unique_ptr<hittable_list> return_object();
+	std::unique_ptr<hittable_list> return_lights();
 	std::unique_ptr<material_list> return_mtl_list();
 
 protected:
 	const int mode;
 	std::unique_ptr<hittable_list> world;
+	std::unique_ptr<hittable_list> lights;
 	std::unique_ptr<material_list> list;
 	// reference to the program resources
 	communicator* para;

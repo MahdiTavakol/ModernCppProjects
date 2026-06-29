@@ -12,6 +12,7 @@
 #include <vector>
 #include <string>
 #include "../Output/Logger.h"
+#include "../Algorithms/onb.h"
 
 #include "../Input/tiny_gltf_v3.h"
 
@@ -31,8 +32,10 @@ public:
 	virtual ~material() = default;
 
 
-	virtual color emitted([[maybe_unused]] double _u, [[maybe_unused]] double _v, [[maybe_unused]] const point3& _p) const;
-	virtual void scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_) const;
+	virtual color emitted(const ray& r_in_, const hit_record& rec_,
+		double u_, double v_, const point3& p_) const;
+	virtual void scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_, double& pdf_) const;
+	virtual double scattering_pdf(const ray& r_in, const hit_record& rec_, const ray& scattered_) const;
 	virtual bool is_equal(const material& _second) const = 0;
 	virtual bool compare(material* _rhs, const double tol_) const;
 	bool operator==(const material& _second);
@@ -52,7 +55,7 @@ public:
 		const double& _Tr, const color& _Tf, const color _Ks, const double _Ni);
 
 
-	void scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_) const override;
+	void scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_, double& pdf_) const override;
 	void diffuse_scatter(const ray& r_in, const hit_record& rec, scatter_record& srec_, double& weight_) const;
 	void specular_scatter(const ray& r_in, const hit_record& rec, scatter_record& srec_, double& weight_) const;
 	void transmit_scatter(const ray& r_in, const hit_record& rec, scatter_record& srec_, double& weight_) const;
@@ -77,7 +80,8 @@ public:
 	lambertian(Logger* error_, const color& _albedo);
 	lambertian(Logger* error_, std::unique_ptr<texture> _tex);
 
-	void scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_) const override;
+	void scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_, double& pdf_) const override;
+	double scattering_pdf(const ray& r_in, const hit_record& rec_, const ray& scattered_) const override;
 	bool is_equal(const material& _second) const override;
 
 private:
@@ -90,7 +94,7 @@ public:
 	metal(Logger* error_);
 	metal(Logger *error_, const color& _albedo, double _fuzz);
 
-	void scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_) const override;
+	void scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_, double& pdf_) const override;
 
 	void return_params(color& _albedo, double& _fuzz);
 
@@ -107,7 +111,7 @@ public:
 	dielectric(Logger* error_, double _refraction_index, color attenuation_ = color(1.0, 1.0, 1.0));
 
 
-	void scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_) const override;
+	void scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_, double& pdf_) const override;
 
 	void return_params(double& _ref);
 
@@ -127,7 +131,8 @@ public:
 	diffuse_light(Logger* error_, const color& _emit);
 
 
-	color emitted(double _u, double _v, const point3& _p)  const override;
+	color emitted(const ray& r_in_, const hit_record& rec_,
+		double u_, double v_, const point3& p_) const override;
 
 	bool is_equal(const material& _second) const override;
 
@@ -143,8 +148,8 @@ public:
 
 
 
-	void scatter(const ray& _r_in, const hit_record& _rec, std::array<scatter_record, 3>& srec_) const override;
-
+	void scatter(const ray& _r_in, const hit_record& _rec, std::array<scatter_record, 3>& srec_, double& pdf_) const override;
+	double scattering_pdf(const ray& r_in, const hit_record& rec_, const ray& scattered_) const override;
 	bool is_equal(const material& _second) const override;
 
 private:

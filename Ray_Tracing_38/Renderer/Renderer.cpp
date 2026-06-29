@@ -20,10 +20,11 @@ renderer::~renderer()
 {}
 
 
-void renderer::setup(hittable_list* world_, material_list* mtls_)
+void renderer::setup(hittable_list* world_, hittable_list* lights_,  material_list* mtls_)
 {
 	world = world_;
 	mtls = mtls_;
+	lights = lights_;
 }
 
 
@@ -47,7 +48,7 @@ void renderer::render(image* img_, camera* cam_, output* writer_)
 
 	event = "Rendering";
 	timer->start_event(event);
-	cam_->render(img_,*world,*mtls);
+	cam_->render(img_,*world,*lights,*mtls);
 	timer->stop_event(event);
 
 

@@ -48,6 +48,7 @@ scene_factory::scene_factory(settings* wld_settings_, Logger* error_, communicat
 void scene_factory::create()
 {
 	world = std::make_unique<hittable_list>();
+	lights = std::make_unique<hittable_list>();
 
 	std::string event;
 	switch (mode)
@@ -214,6 +215,18 @@ std::unique_ptr<hittable_list> scene_factory::return_object()
 		this->create();
 	}
 	return std::move(world);
+}
+
+std::unique_ptr<hittable_list> scene_factory::return_lights()
+{
+	if (lights == nullptr)
+	{
+		std::string text =
+			"Warning: the lights has already been returned\nCalling the create method again!";
+		error->print_message(text, 0);
+		this->create();
+	}
+	return std::move(lights);
 }
 
 std::unique_ptr<material_list> scene_factory::return_mtl_list()
@@ -413,7 +426,7 @@ void scene_factory::setup_simple_light()
 	auto difflight = std::make_unique<diffuse_light>(error, color(4, 4, 4));
 	mat_name = "diffuse";
 	mat_indx = list->push_back(mat_name, std::move(difflight));
-	world->add(std::make_unique<quad>(point3(3, 1, -2), vec3(2, 0, 0), vec3(0, 2, 0), mat_indx));
+	lights->add(std::make_unique<quad>(point3(3, 1, -2), vec3(2, 0, 0), vec3(0, 2, 0), mat_indx));
 
 
 }
@@ -427,7 +440,7 @@ void scene_factory::setup_two_lights()
 	auto difflight = std::make_unique<diffuse_light>(error, color(4, 4, 4));
 	mat_name = "diffuse";
 	mat_indx = list->push_back(mat_name, std::move(difflight));
-	world->add(std::make_unique<sphere>(point3(0, 7, 0), 2, mat_indx));
+	lights->add(std::make_unique<sphere>(point3(0, 7, 0), 2, mat_indx));
 
 }
 
@@ -447,10 +460,11 @@ void scene_factory::setup_cornell_box()
 	double size = 556;
 	world->add(std::make_unique<quad>(point3(size, 0, 0), vec3(0, size, 0), vec3(0, 0, size), green_mat_indx));
 	world->add(std::make_unique<quad>(point3(0, 0, 0), vec3(0, size, 0), vec3(0, 0, size), red_mat_indx));
-	world->add(std::make_unique<quad>(point3(113, 554, 127), vec3(330, 0, 0), vec3(0, 0, 305), light_mat_indx));
 	world->add(std::make_unique<quad>(point3(0, size, 0), vec3(size, 0, 0), vec3(0, 0, size), white_mat_indx));
 	world->add(std::make_unique<quad>(point3(0, 0, 0), vec3(size, 0, 0), vec3(0, 0, size), white_mat_indx));
 	world->add(std::make_unique<quad>(point3(0, 0, size), vec3(size, 0, 0), vec3(0, size, 0), white_mat_indx));
+
+	lights->add(std::make_unique<quad>(point3(213, 554, 227), vec3(130, 0, 0), vec3(0, 0, 105), light_mat_indx));
 }
 
 void scene_factory::setup_boxes()
@@ -659,7 +673,7 @@ void scene_factory::setup_final_scene()
 	auto light = std::make_unique<diffuse_light>(error, color(7.0, 7.0, 7.0));
 	int light_indx = list->push_back("light", std::move(light));
 	auto qad = std::make_unique<quad>(point3(123.0, 554.0, 147.0), vec3(300.0, 0.0, 0.0), vec3(0.0, 0.0, 265.0), light_indx);
-	world->add(std::move(qad));
+	lights->add(std::move(qad));
 
 	auto center1 = point3{ 400,400,200 };
 	auto center2 = center1 + vec3{ 30.0,0.0,0.0 };
@@ -687,8 +701,8 @@ void scene_factory::setup_final_scene()
 
 	auto fog_1_mat = std::make_unique<isotropic>(error, color(0.2, 0.4, 0.9));
 	int fog_1_mat_indx = list->push_back("fog_1_material", std::move(fog_1_mat));
-	auto fog_1 = std::make_unique<constant_medium>(std::move(boundary), 0.2, fog_1_mat_indx);
-	//world->add(std::move(fog_1));
+	auto fog_1 = std::make_unique<constant_medium>(boundary_address, 0.2, fog_1_mat_indx);
+	world->add(std::move(fog_1));
 
 	auto boundary2_material = std::make_unique<dielectric>(error, 1.5);
 	int boundary2_mat_indx = list->push_back("Boundary2_mat", std::move(boundary2_material));
@@ -800,7 +814,7 @@ void scene_factory::add_diffuse_light(color& light_color_, int size_factor_)
 	auto difflight = std::make_unique<diffuse_light>(error, light_color_);
 	std::string mat_name = "diffuse";
 	int mat_indx = list->push_back(mat_name, std::move(difflight));
-	world->add(std::make_unique<sphere>(light_location, light_size, mat_indx));
+	lights->add(std::make_unique<sphere>(light_location, light_size, mat_indx));
 }
 
 void scene_factory::add_fog(double& fog_density_, color& fog_color_)

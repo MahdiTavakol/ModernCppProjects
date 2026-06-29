@@ -80,6 +80,7 @@ public:
 
     static vec3 random();
     static vec3 random(double min, double max);
+    static vec3 random_cosine_direction();
 };
 
 class vec4

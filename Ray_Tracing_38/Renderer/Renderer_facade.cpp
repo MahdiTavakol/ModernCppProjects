@@ -55,11 +55,12 @@ void renderer_facade::setup()
 		para = builder->return_comm();
 		writer = builder->return_writer();
 		world = builder->return_world();
+		lights = builder->return_lights();
 		mtl_list = builder->return_mtl_list();
 		img = builder->return_image();
 		// objects with specific setup methods
 		writer->setup(img.get());
-		rend->setup(world.get(), mtl_list.get());
+		rend->setup(world.get(),lights.get(), mtl_list.get());
 	}
 	else
 	{

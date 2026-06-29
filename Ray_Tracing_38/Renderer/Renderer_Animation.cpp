@@ -43,7 +43,7 @@ void renderer_animation::render(image* img_, camera* cam_, output* writer_)
 		error->print_message(message, msg_level);
 
 
-		cam_->render(img_,*world,*mtls);
+		cam_->render(img_,*world,*lights,*mtls);
 		writer_->reset_filename(filename);
 		writer_->setup(img_);
 

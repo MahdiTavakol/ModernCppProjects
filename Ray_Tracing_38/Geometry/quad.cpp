@@ -11,6 +11,8 @@ quad::quad(const point3& Q_, const vec3& u_, const vec3& v_,
 	D = dot(normal, Q);
 	w = n / dot(n, n);
 
+	area = n.length();
+
 	set_bounding_box();
 }
 
@@ -98,6 +100,25 @@ double quad::get_area() const {
 	auto crs = cross(u, v);
 	double area = crs.length();
 	return area;
+}
+
+double quad::pdf_value(const point3& origin_, const vec3& direction_) const
+{
+	hit_record rec;
+
+	if (!this->hit(ray(origin_, direction_), interval(0.001, infinity), rec))
+		return 0;
+
+	auto distance_squared = rec.t * rec.t * direction_.length_squared();
+	auto cosine = std::abs(dot(direction_, rec.normal) / direction_.length());
+
+	return distance_squared / (cosine * area);
+}
+
+vec3 quad::random(const point3& origin_) const
+{
+	auto p = Q + (random_double() * u) + (random_double() * v);
+	return p - origin_;
 }
 
 

@@ -15,7 +15,7 @@ public:
 		bool verbose_ = false);
 	virtual ~renderer_profiler() override;
 	virtual void print_opening_message() const override;
-	void setup(hittable_list* world_, material_list* mtls_) override;
+	void setup(hittable_list* world_, hittable_list* lights_, material_list* mtls_) override;
 	void set_resource_pointers(
 		std::vector<std::unique_ptr<profiler>>&& timers_,
 		renderer_facade_inputs* ptrs_) override;

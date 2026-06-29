@@ -32,7 +32,7 @@ public:
 		bool verbose_ = false);
 	virtual ~renderer();
 	virtual void print_opening_message() const {}
-	virtual void setup(hittable_list* world_, material_list* mtls_);
+	virtual void setup(hittable_list* world_, hittable_list* lights_, material_list* mtls_);
 	virtual void set_resource_pointers(
 		std::vector<std::unique_ptr<profiler>>&& timers_,
 		renderer_facade_inputs* ptrs_) {}
@@ -63,6 +63,7 @@ protected:
 	// we put these two as properties of
 	// the renderer class
 	hittable_list* world;
+	hittable_list* lights;
 	material_list* mtls;
 };
 

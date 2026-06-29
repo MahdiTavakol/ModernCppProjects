@@ -289,6 +289,8 @@
     <ClCompile Include="Algorithms\hit_record.cpp" />
     <ClCompile Include="Algorithms\image.cpp" />
     <ClCompile Include="Algorithms\image_async.cpp" />
+    <ClCompile Include="Algorithms\onb.cpp" />
+    <ClCompile Include="Algorithms\pdf.cpp" />
     <ClCompile Include="Algorithms\queue.cpp" />
     <ClCompile Include="Algorithms\mpiComm.cpp" />
     <ClCompile Include="Algorithms\path.cpp" />
@@ -354,6 +356,8 @@
     <ClInclude Include="Algorithms\hit_record.h" />
     <ClInclude Include="Algorithms\image.h" />
     <ClInclude Include="Algorithms\image_async.h" />
+    <ClInclude Include="Algorithms\onb.h" />
+    <ClInclude Include="Algorithms\pdf.h" />
     <ClInclude Include="Algorithms\queue.h" />
     <ClInclude Include="Algorithms\mpiComm.h" />
     <ClInclude Include="Algorithms\path.h" />

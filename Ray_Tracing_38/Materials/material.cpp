@@ -4,13 +4,19 @@ material::material(Logger* error_):
 	error{error_}
 {}
 
-color material::emitted([[maybe_unused]] double _u, [[maybe_unused]] double _v, [[maybe_unused]] const point3& _p) const
-{
+color material::emitted(
+	const ray& r_in_, const hit_record& rec_,
+	double u_, double v_, const point3& p_) const {
 	return color(0, 0, 0);
 }
 
-void material::scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_) const
+void material::scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_, double& pdf_) const
 {
+}
+
+double material::scattering_pdf(const ray& r_in, const hit_record& rec_, const ray& scattered_) const
+{
+	return 0.0;
 }
 
 bool material::compare(material* _rhs, const double tol_) const
@@ -32,7 +38,7 @@ general::general(
 }
 
 
-void general::scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_) const
+void general::scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_, double& pdf_) const
 {
 	double transparency = std::clamp(Tr, 0.0, 1.0);
 	double opacity = 1.0 - transparency;
@@ -169,14 +175,23 @@ lambertian::lambertian(Logger* error_, std::unique_ptr<texture> _tex) :
 }
 
 
-void lambertian::scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_) const
+void lambertian::scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_, double& pdf_) const
 {
-	auto scatter_direction = rec.normal + random_unit_vector();
+	onb uvw(rec.normal);
+	auto scatter_direction = uvw.transform(vec3::random_cosine_direction());
 
-	if (scatter_direction.near_zero())
-		scatter_direction = rec.normal;
-	srec_[1] = { ray(rec.p, scatter_direction, r_in.time()), tex->value(rec.u, rec.v, rec.p), 1.0, true };
+	ray scattered = ray{ rec.p, scatter_direction,r_in.time() };
+
+	srec_[1] = { scattered, tex->value(rec.u, rec.v, rec.p), 1.0, true };
 	srec_[0] = srec_[2] = { ray(rec.p, vec3(0, 0, 0), r_in.time()), color(0, 0, 0), 0.0, false };
+
+	pdf_ = dot(uvw.w(), scattered.direction()) / pi;
+}
+
+double lambertian::scattering_pdf(const ray& r_in, const hit_record& rec_, const ray& scattered_) const
+{
+	auto cos_theta = dot(rec_.normal, unit_vector(scattered_.direction()));
+	return cos_theta < 0 ? 0 : cos_theta / pi;
 }
 
 bool lambertian::is_equal(const material& _second) const {
@@ -195,7 +210,7 @@ metal::metal(Logger* error_, const color& _albedo, double _fuzz) :
 
 
 
-void metal::scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_) const
+void metal::scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_, double& pdf_) const
 {
 	vec3 reflected = reflect(r_in.direction(), rec.normal);
 	reflected = unit_vector(reflected) + fuzz * random_unit_vector();
@@ -224,7 +239,7 @@ dielectric::dielectric(Logger* error_, double _refraction_index, color attenuati
 }
 
 
-void dielectric::scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_) const
+void dielectric::scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_, double& pdf_) const
 {
 	double ri = rec.front_face ? (1.0 / refraction_index) : refraction_index;
 
@@ -271,9 +286,12 @@ diffuse_light::diffuse_light(Logger* error_, const color& _emit) :
 	material{error_},
 	tex{ std::make_unique<solid_color>(_emit) } {}
 
-color diffuse_light::emitted(double _u, double _v, const point3& _p)  const
+color diffuse_light::emitted(const ray& r_in_, const hit_record& rec_,
+	double u_, double v_, const point3& p_)  const
 {
-	return tex->value(_u, _v, _p);
+	if (!rec_.front_face)
+		return color{ 0,0,0 };
+	return tex->value(u_, v_, p_);
 }
 
 bool diffuse_light::is_equal(const material& _second) const 
@@ -292,11 +310,21 @@ isotropic::isotropic(Logger* error_, std::unique_ptr<texture>& _tex) :
 
 
 
-void isotropic::scatter(const ray& _r_in, const hit_record& _rec, std::array<scatter_record, 3>& srec_) const
+void isotropic::scatter(const ray& _r_in, const hit_record& _rec, std::array<scatter_record, 3>& srec_, double& pdf_) const
 {
-	srec_[1] = { ray(_rec.p, random_unit_vector(), _r_in.time()), tex->value(_rec.u, _rec.v, _rec.p), 1.0, true };
+	ray scattered = ray{ _rec.p, random_unit_vector(),_r_in.time()};
+	auto attenuation = tex->value(_rec.u, _rec.v, _rec.p);
+	pdf_ = 1.0 / (4.0 * pi);
+
+	srec_[1] = {scattered, attenuation, 1.0, true };
 	srec_[0] = srec_[2] = { ray(_rec.p, vec3(0, 0, 0), _r_in.time()), color(0, 0, 0), 0.0, false };
 	return;
+}
+
+
+double isotropic::scattering_pdf(const ray& r_in, const hit_record& rec_, const ray& scattered_) const
+{
+	return 1 / (4 * pi);
 }
 
 bool isotropic::is_equal(const material& _second) const

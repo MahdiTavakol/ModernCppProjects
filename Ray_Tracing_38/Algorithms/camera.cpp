@@ -4,6 +4,7 @@
 #include "../Shared/rtweekend.h"
 
 #include "camera.h"
+#include "pdf.h"
 
 camera::camera(settings* cam_setting_, const image* img_)
 {
@@ -11,7 +12,7 @@ camera::camera(settings* cam_setting_, const image* img_)
 	camera_settings* sett = dynamic_cast<camera_settings*>(cam_setting_);
 	if (!sett)
 		throw std::invalid_argument("Wrong settings object");
-	
+
 
 
 	// setting the image_width and height
@@ -32,8 +33,8 @@ void camera::setup(camera_settings* cam_setting_)
 	point3& lookat_setting = cam_setting_->get_lookat();
 	point3& vup_setting = cam_setting_->get_vup();
 	point3& background_setting = cam_setting_->get_background();
-
 	std::string background_image_name = cam_setting_->return_HDRI_name();
+	bool stratified_setting = cam_setting_->get_stratified();
 
 
 	this->samples_per_pixel = samples_per_pixel_setting;
@@ -50,14 +51,12 @@ void camera::setup(camera_settings* cam_setting_)
 	{
 		background_image = std::make_unique<HDRI_texture>(background_image_name);
 	}
+
+	stratified = stratified_setting;
 }
 
 void camera::initialize()
 {
-	pixel_samples_scale = 1.0 / samples_per_pixel;
-
-
-
 	center = lookfrom;
 
 	auto theta = degrees_to_radians(vfov);
@@ -82,9 +81,23 @@ void camera::initialize()
 	auto defocus_radius = focus_dist * std::tan(degrees_to_radians(defocus_angle / 2));
 	defocus_disk_u = u * defocus_radius;
 	defocus_disk_v = v * defocus_radius;
+
+
+
+	sqrt_spp = static_cast<int>(std::sqrt(samples_per_pixel));
+	recip_sqrt_spp = 1.0 / sqrt_spp;
+
+	if (stratified == true)
+	{
+		pixel_samples_scale = 1.0 / (sqrt_spp * sqrt_spp);
+	}
+	else
+	{
+		pixel_samples_scale = 1.0 / samples_per_pixel;
+	}
 }
 
-void camera::render(image* img_, const hittable& world_, const material_list& list_) const
+void camera::render(image* img_, const hittable& world_, const hittable& lights_, const material_list& list_) const
 {
 	// getting the color_array pointer from the image object
 	color_array* c_array = img_->array();
@@ -97,24 +110,49 @@ void camera::render(image* img_, const hittable& world_, const material_list& li
 	int width_max = widthRange[1];
 
 
-	for (int j = height_min; j < height_max; j++)
+	//  I put the if outside the loop even though the code 
+	// is repeated but inside the loop the if is not checked for 
+	// each iteration. 
+	if (stratified == true)
 	{
-		for (int i = width_min; i < width_max; i++)
+		for (int j = height_min; j < height_max; j++)
 		{
-			color pixel_color(0, 0, 0);
-			for (int sample = 0; sample < samples_per_pixel; sample++)
+			for (int i = width_min; i < width_max; i++)
 			{
-				ray r = get_ray(i, j);
-				pixel_color += ray_color(r, max_depth, world_,list_);
+				color pixel_color(0, 0, 0);
+				for (int s_j = 0; s_j < sqrt_spp; s_j++)
+				{
+					for (int s_i = 0; s_i < sqrt_spp; s_i++) {
+						ray r = get_ray(i, j, s_i, s_j);
+						pixel_color += ray_color(r, max_depth, world_,lights_,list_);
+					}
+				}
+				pixel_color = pixel_samples_scale * pixel_color;
+				color_data c_data{ pixel_color.x(),pixel_color.y(),pixel_color.z() };
+				c_array->set(i - width_min, j - height_min, c_data);
 			}
-			pixel_color = pixel_samples_scale * pixel_color;
-			color_data c_data{ pixel_color.x(),pixel_color.y(),pixel_color.z() };
-			c_array->set(i - width_min, j - height_min, c_data);
+		}
+	}
+	else {
+		for (int j = height_min; j < height_max; j++)
+		{
+			for (int i = width_min; i < width_max; i++)
+			{
+				color pixel_color(0, 0, 0);
+				for (int sample = 0; sample < samples_per_pixel; sample++)
+				{
+					ray r = get_ray(i, j);
+					pixel_color += ray_color(r, max_depth, world_,lights_, list_);
+				}
+				pixel_color = pixel_samples_scale * pixel_color;
+				color_data c_data{ pixel_color.x(),pixel_color.y(),pixel_color.z() };
+				c_array->set(i - width_min, j - height_min, c_data);
+			}
 		}
 	}
 }
 
-void camera::render_verbose(image* img_, const hittable& world_, const material_list& list_) const
+void camera::render_verbose(image* img_, const hittable& world_, const hittable& lights_, const material_list& list_) const
 {
 	// getting the color_data array from the image object
 	color_data** c_data = img_->returnColorData();
@@ -142,7 +180,7 @@ void camera::render_verbose(image* img_, const hittable& world_, const material_
 			for (int sample = 0; sample < my_samples_per_pixel; sample++)
 			{
 				ray r = get_ray(i, j);
-				pixel_color += ray_color(r, max_depth, world_, list_);
+				pixel_color += ray_color(r, max_depth, world_,lights_, list_);
 			}
 			pixel_color = pixel_samples_scale * pixel_color;
 			c_data[i][j].r = pixel_color.x();
@@ -180,18 +218,15 @@ point3 camera::defocus_disk_sample() const
 }
 
 
-color camera::ray_color(const ray& r_, int depth_, const hittable& world_, const material_list& list_) const
+color camera::ray_color(const ray& r_, int depth_, const hittable& world_, const hittable& lights_, const material_list& list_) const
 {
 	if (depth_ <= 0)
 		return color(0, 0, 0);
 
 	hit_record rec;
 
-	bool hit_any = world_.hit(r_, interval(0.001, infinity), rec);
-
-	if (!hit_any)
+	if (!world_.hit(r_, interval(0.001, infinity), rec))
 		return background_color(r_);
-
 
 	int mat_indx = rec.mat_indx;
 	material* mat = list_(mat_indx);
@@ -199,27 +234,72 @@ color camera::ray_color(const ray& r_, int depth_, const hittable& world_, const
 
 	ray scattered;
 	color attenuation;
-	color color_from_emission = mat->emitted(rec.u, rec.v, rec.p);
+	double pdf_value;
+	color color_from_emission = mat->emitted(r_, rec, rec.u, rec.v, rec.p);
+
 
 	std::array<scatter_record, 3> srec;
+	mat->scatter(r_, rec, srec,pdf_value);
 
-	mat->scatter(r_, rec, srec);
-	
 	if (!srec[0].scattered && !srec[1].scattered && !srec[2].scattered)
 		return color_from_emission;
+	
+	/*
+	auto on_light = point3{ random_double(213,343),554,random_double(227,332) };
+	auto to_light = on_light - rec.p;
+	auto distance_squared = to_light.length_squared();
+	to_light = unit_vector(to_light);
+
+
+	if (dot(to_light, rec.normal) < 0)
+		return color_from_emission;
+
+	double light_area = (343 - 213) * (332 - 227);
+	auto light_cosine = std::abs(to_light.y());
+	if (light_cosine < 1e-6)
+		return color_from_emission;
+
+	pdf_value = distance_squared / (light_cosine * light_area);
+
+
+	ray scattered_ray = ray{ rec.p, to_light, r_.time() };
+	srec[0].scattered_ray = scattered_ray;
+	srec[1].scattered_ray = scattered_ray;
+	srec[2].scattered_ray = scattered_ray;
+	*/
+
+	hittable_pdf light_pdf{ lights_, rec.p };
+	scattered = ray{ rec.p, light_pdf.generate(),r_.time() };
+	pdf_value = light_pdf.value(scattered.direction());
+	double scattering_pdf = mat->scattering_pdf(r_, rec, scattered);
+
+	
+	for (auto& s : srec)
+	{
+		s.scattered_ray = scattered;
+		s.attenuation = attenuation;
+	}
 
 	color color_from_scatter;
 
 
 	//diffusive scatter
 	if (srec[0].scattered)
-		color_from_scatter += srec[0].weight * srec[0].attenuation * (simple_direct_lighting(rec));//+ray_color(srec[0].scattered_ray, depth_ - 1, world_, list_));
+	{
+		color_from_scatter += srec[0].weight * srec[0].attenuation * (simple_direct_lighting(rec)); // +ray_color(srec[0].scattered_ray, depth_ - 1, world_, list_));
+	}
 	// specular scatter
 	if (srec[1].scattered)
-		color_from_emission += srec[1].weight * srec[1].attenuation *ray_color(srec[1].scattered_ray, depth_ - 1, world_, list_);
+	{
+		color sample_color = srec[1].weight * srec[1].attenuation * ray_color(srec[1].scattered_ray, depth_ - 1, world_, lights_, list_);
+		color_from_scatter += sample_color * scattering_pdf / pdf_value;
+	}
 	// transmit scatter
 	if (srec[2].scattered)
-		color_from_emission += srec[2].weight * srec[2].attenuation * ray_color(srec[2].scattered_ray, depth_ - 1, world_, list_);
+	{
+		color sample_color = srec[2].weight * srec[2].attenuation * ray_color(srec[2].scattered_ray, depth_ - 1, world_, lights_, list_);
+		color_from_scatter += sample_color * scattering_pdf / pdf_value;
+	}
 
 
 	return color_from_emission + color_from_scatter;
@@ -261,19 +341,25 @@ color camera::simple_direct_lighting(const hit_record& rec_) const
 
 }
 
-void camera::move_camera(point3 _lookfrom) {
-	this->lookfrom = _lookfrom;
-	initialize();
-}
-
-
-void camera::print_back_ground() const
+ray camera::get_ray(const int& i_, const int& j_, const int& s_i_, const int& s_j_) const
 {
-	std::cout << background << std::endl;
+	auto offset = sample_square_stratified(s_i_, s_j_);
+	auto pixel_sample = pixel00_loc
+		+ ((i_ + offset.x()) * pixel_delta_u)
+		+ ((j_ + offset.y()) * pixel_delta_v);
+
+	auto ray_origin = (defocus_angle <= 0) ? center : defocus_disk_sample();
+	auto ray_direction = pixel_sample - ray_origin;
+	auto ray_time = random_double();
+
+	return ray(ray_origin, ray_direction, ray_time);
 }
 
-void camera::set_range(const int& _width_min, const int& _width_max, const int& _height_min, const int& _height_max)
+vec3 camera::sample_square_stratified(const int& s_i_, const int& s_j_) const
 {
-	// I just needed that method in both the camera and camera_parallel classes
-	// so that the setup in the parallel class can have generic input of camera* type
+	auto px = ((s_i_ + random_double()) * recip_sqrt_spp) - 0.5;
+	auto py = ((s_j_ + random_double()) * recip_sqrt_spp) - 0.5;
+
+	return vec3(px, py, 0);
 }
+

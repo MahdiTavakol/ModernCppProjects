@@ -36,8 +36,8 @@ public:
 	PBR(Logger* error_, std::shared_ptr<PBR_Resources> resources_, const tg3_material prop_);
 	void init_functionals();
 	TexVec_func set_TexVecFunc(const tg3_texture_info* texture_);
-	void scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_) const override;
-	color emitted(double _u, double _v, const point3& _p)  const override;
+	void scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_, double& pdf_) const override;
+	color emitted(const ray& r_in_, const hit_record& rec_, double _u, double _v, const point3& _p)  const override;
 	bool is_equal(const material& _second) const override;
 
 

@@ -20,7 +20,7 @@ void renderer_profiler::print_opening_message() const
 
 }
 
-void renderer_profiler::setup(hittable_list* world_, material_list* mtls_)
+void renderer_profiler::setup(hittable_list* world_,hittable_list* lights_, material_list* mtls_)
 {
 	// nothing here
 }
@@ -62,11 +62,12 @@ void renderer_profiler::render(image* img_, camera* cam_, output* writer_)
 		auto para = builder->return_comm();
 		auto writer = builder->return_writer();
 		auto world = builder->return_world();
+		auto lights = builder->return_lights();
 		auto mtl_list = builder->return_mtl_list();
 		auto img = builder->return_image();
 		// objects with specific setup methods
 		writer->setup(img.get());
-		rend->setup(world.get(), mtl_list.get());
+		rend->setup(world.get(), lights.get(), mtl_list.get());
 
 
 

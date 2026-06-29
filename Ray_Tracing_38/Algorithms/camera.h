@@ -16,7 +16,6 @@
 #include "../Types/vec3.h"
 #include "../Input/settings.h"
 #include "../Input/camera_settings.h"
-#include "../Algorithms/rtw_stb_image.h"
 
 
 
@@ -25,27 +24,43 @@ class camera {
 public:
 
 	camera() = default;
-	camera(settings* cam_setting_,const image* img_);
+	camera(settings* cam_setting_, const image* img_);
 
 
 	virtual void setup(camera_settings* cam_setting_);
 
 
-	virtual void render(image* img_, const hittable& world_, const material_list& list_) const;
-	virtual void render_verbose(image* img_, const hittable& world_, const material_list& list_) const;
+	virtual void render(image* img_, const hittable& world_, const hittable& lights_, const material_list& list_) const;
+	virtual void render_verbose(image* img_, const hittable& world_, const hittable& lights_, const material_list& list_) const;
 
-	virtual void move_camera(point3 _lookfrom);
-	void print_back_ground() const;
-	virtual void set_range(const int& _width_min, const int& _width_max, const int& _height_min, const int& _height_max);
+	virtual void move_camera(point3 _lookfrom) {
+		this->lookfrom = _lookfrom;
+		initialize();
+	}
+
+
+	void print_back_ground() const
+	{
+		std::cout << background << std::endl;
+	}
+
+	virtual void set_range(const int& _width_min, const int& _width_max, const int& _height_min, const int& _height_max)
+	{
+		// I just needed that method in both the camera and camera_parallel classes
+		// so that the setup in the parallel class can have generic input of camera* type
+	}
 
 
 
 
 protected:
 
-
+	// flag 
+	bool stratified = true;
 	// primary parameters set by the class input;
 	int samples_per_pixel = 10;
+	int sqrt_spp;
+	double recip_sqrt_spp;
 	int max_depth = 10;
 	color background;
 	double vfov = 90;
@@ -75,9 +90,11 @@ protected:
 
 	// the rest of functions
 	ray get_ray(int i, int j) const;
+	ray get_ray(const int& i_, const int& j_, const int& s_i_, const int& s_j_) const;
 	static vec3 sample_square();
+	vec3 sample_square_stratified(const int& s_i_, const int& s_j_) const;
 	point3 defocus_disk_sample() const;
-	virtual color ray_color(const ray& r_, int depth_, const hittable& world_, const material_list& list_) const;
+	virtual color ray_color(const ray& r_, int depth_, const hittable& world_, const hittable& lights_, const material_list& list_) const;
 	color background_color(const ray& r_) const;
 	color simple_direct_lighting(const hit_record& rec_) const;
 

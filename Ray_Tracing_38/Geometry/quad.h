@@ -17,6 +17,8 @@ public:
 	// Since virtual is not allowed with template functions I had to have two similar definitions of is_interior.
 	virtual bool is_interior(double _a, double _b, hit_record& _rec) const;
     double get_area() const override;
+	double pdf_value(const point3& origin_, const vec3& direction_) const override;
+	vec3 random(const point3& origin_) const override;
 
 
 protected:
@@ -25,6 +27,7 @@ protected:
 	vec3 w;
 	vec3 normal;
 	double D;
+	double area;
 };
 
 std::unique_ptr<hittable_list> box(const point3& a, const point3& b, const int& mat_indx_);

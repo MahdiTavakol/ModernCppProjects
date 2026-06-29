@@ -85,7 +85,7 @@ void renderer_async::render_thread(
 			break;
 
 		profiler* thread_profiler = timer->start_thread_event("  thread rendering");
-		cam_->render(img_thread.get(), *world, *mtls);
+		cam_->render(img_thread.get(), *world,*lights, *mtls);
 		timer->stop_thread_event(thread_profiler,"  thread rendering");
 		timer->start_thread_event(thread_profiler, "  thread output");
 		wrt_thread->open_file();

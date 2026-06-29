@@ -31,6 +31,7 @@ public:
 	std::unique_ptr<camera> return_camera();
 	std::unique_ptr<output> return_writer();
 	std::unique_ptr<hittable_list> return_world();
+	std::unique_ptr<hittable_list> return_lights();
 	std::unique_ptr<material_list> return_mtl_list();
 	std::unique_ptr<image> return_image();
 	std::unique_ptr<Logger> return_error();
@@ -70,6 +71,7 @@ protected:
 	// hittable_list factory
 	std::unique_ptr<scene_factory> world_factory;
 	std::unique_ptr<hittable_list> world;
+	std::unique_ptr<hittable_list> lights;
 	// the settings map
 	std::map<std::string, int> app_set_map =
 	{

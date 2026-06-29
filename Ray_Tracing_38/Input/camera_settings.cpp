@@ -1,7 +1,8 @@
+
 #include "camera_settings.h"
 
 camera_settings::camera_settings(int mode_) :
-	settings{mode_}
+	settings{ mode_ }
 {
 	set_mode(mode_);
 	set_input_map();
@@ -48,32 +49,12 @@ void camera_settings::set_mode(int mode_)
 		this->background = color(0, 0, 0);
 		break;
 	case CORNELL_SMOKE:
-		this->lookat = point3(278, 278, 0);
+		this->background = color(0, 0, 0);
 		this->vfov = 40;
+		this->lookat = point3(278, 278, 0);
 		this->vup = vec3(0, 1, 0);
 		this->defocus_angle = 0;
-		this->background = color(0, 0, 0);
-		this->samples_per_pixel = 200;
 		break;
-	case FINAL_SCENE:
-		this->lookat = point3{ 278,278,0 };
-		this->vfov = 40;
-		this->samples_per_pixel = 250;
-		this->max_depth = 4;
-		this->background = color{ 0,0,0 };
-		this->defocus_angle = 0.0;
-		this->vup = vec3{ 0,1,0 };
-		break;
-	case FINAL_SCENE_DETAILED:
-		this->lookat = point3{ 278,278,0 };
-		this->vfov = 40;
-		this->samples_per_pixel = 10000;
-		this->max_depth = 4;
-		this->background = color{ 0,0,0 };
-		this->defocus_angle = 0.0;
-		this->vup = vec3{ 0,1,0 };
-		break;
-
 	case RANDOM_SPHERES_ANIMATED:
 		this->background = color(0.7, 0.8, 1.00);
 		// The rest of the thing
@@ -95,13 +76,13 @@ bool camera_settings::set_from_scene(hittable_list& world_)
 	// the user has set the lookat parameter
 	if (inputSet.find("-lookat") != inputSet.end())
 		return false;
-	if (mode != OBJ_MODEL && 
-		mode != OBJ_MODEL_PARALLEL && 
+	if (mode != OBJ_MODEL &&
+		mode != OBJ_MODEL_PARALLEL &&
 		mode != GLTF_MODEL)
 		return false;
 
 	bool set = false;
-	vec3 com = world_.com("main",set);
+	vec3 com = world_.com("main", set);
 
 	lookat = com;
 
@@ -111,6 +92,7 @@ bool camera_settings::set_from_scene(hittable_list& world_)
 void camera_settings::set_input_map()
 {
 	singleInputMap = {
+		{"-stratified",&stratified_string},
 		{"-samples_per_pixel",&samples_per_pixel},
 		{"-max_depth",&max_depth},
 		{"-vfov",&vfov},
@@ -183,4 +165,27 @@ void camera_settings::log_class_name(std::iostream& stream_) const
 std::string camera_settings::return_HDRI_name()
 {
 	return HDRI_name;
+}
+
+void camera_settings::extra_parse()
+{
+	std::transform(
+		stratified_string.begin(),
+		stratified_string.end(),
+		stratified_string.begin(),
+		::toupper);
+
+	if (stratified_string == "ON" || stratified_string == "TRUE")
+	{
+		stratified = true;
+	}
+	else
+	{
+		stratified = false;
+	}
+}
+
+bool camera_settings::get_stratified()
+{
+	return stratified;
 }

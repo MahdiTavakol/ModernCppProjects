@@ -101,6 +101,7 @@ factory::factory(int argc, char** argv, int mode_,
 	// building the hittable_list
 	world_factory->create();
 	world = world_factory->return_object();
+	lights = world_factory->return_lights();
 
 	// setting scene dependent settings
 	stngs->set_from_scene(*world);
@@ -177,6 +178,7 @@ factory::factory(std::vector<std::string> argv_vec, int mode_,
 
 	world_factory->create();
 	world = world_factory->return_object();
+	lights = world_factory->return_lights();
 
 
 	stngs->set_from_scene(*world);
@@ -323,6 +325,14 @@ std::unique_ptr<hittable_list> factory::return_world()
 	if (world == nullptr)
 		throw std::runtime_error("This object has already been returned!");
 	return std::move(world);
+}
+
+
+std::unique_ptr<hittable_list> factory::return_lights()
+{
+	if (lights == nullptr)
+		throw std::runtime_error("This object has already been returned!");
+	return std::move(lights);
 }
 
 std::unique_ptr<material_list> factory::return_mtl_list()

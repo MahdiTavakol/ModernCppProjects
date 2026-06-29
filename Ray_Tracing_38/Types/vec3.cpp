@@ -53,6 +53,19 @@ vec3 vec3::random(double min, double max) {
     return vec3(random_double(min, max), random_double(min, max), random_double(min, max));
 }
 
+vec3 vec3::random_cosine_direction()
+{
+    auto r1 = random_double();
+    auto r2 = random_double();
+
+    auto phi = 2 * pi * r1;
+    auto x = std::cos(phi) * std::sqrt(r2);
+    auto y = std::sin(phi) * std::sqrt(r2);
+    auto z = std::sqrt(1 - r2);
+
+    return vec3(x, y, z);
+}
+
 vec3 random_in_unit_disk() {
     while (true) {
         auto p = vec3(random_double(-1, 1), random_double(-1, 1), 0);

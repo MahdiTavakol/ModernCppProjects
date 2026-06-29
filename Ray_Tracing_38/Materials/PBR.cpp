@@ -371,7 +371,7 @@ void PBR::init_functionals()
 	}
 }
 
-void PBR::scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_) const
+void PBR::scatter(const ray& r_in, const hit_record& rec, std::array<scatter_record, 3>& srec_, double& pdf_) const
 {
 	// transmitting ray 
 	srec_[2] = { ray(rec.p, vec3(0,0,0), r_in.time()), color(0, 0, 0), 0.05,false };
@@ -425,8 +425,10 @@ void PBR::scatter(const ray& r_in, const hit_record& rec, std::array<scatter_rec
 	srec_[0] = { ray(rec.p,diffuse,r_in.time()),albedo,diffuse_weight,true };
 }
 
-color PBR::emitted(double _u, double _v, const point3& _p)  const
+color PBR::emitted(const ray& r_in_, const hit_record& rec_, double _u, double _v, const point3& _p)  const
 {
+	if (!rec_.front_face)
+		return color{ 0,0,0 };
 	color clr = emission_func(_u, _v, _p);
 	return clr;
 }
